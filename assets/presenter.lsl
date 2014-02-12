@@ -132,8 +132,9 @@ nav_slide(integer next) {
         integer res = llListFindList(textureCache, [presentationId, next]);
         // Check if texture is found in cache, only required on first usage
         if(res > -1) {
-        	if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by uuid from local cache (" + url +")");
-        	llSetTexture(llList2String(textureCache, res+2), ALL_SIDES);
+        	string texture = llList2String(textureCache, res+2);
+        	if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by uuid from local cache (" + texture +")");
+        	llSetTexture(texture, ALL_SIDES);
 
     	// Check if requested image has a valid UUID in the database
         } else if(isKey(url) == 2 && llGetSubString(url, 0, 3) != "http") {
