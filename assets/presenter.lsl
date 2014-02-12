@@ -261,8 +261,16 @@ state presentation {
     }
 
     http_response(key request_id, integer status, list metadata, string body) {
+    	// Catch errors
     	if(status != 200) {
-    		llInstantMessage(userUuid, "HTTP Request returned status: " + status);
+    		if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
+
+    		llInstantMessage(userUuid, "Request to server failed");
+    		if(request_id == http_request_user) {
+    			llInstantMessage(userUuid, "User not found");
+    		} else if(request_id == http_request_id) {
+    			llInstantMessage(userUuid, "Presentation not found");
+    		}
     		return;
     	}
 		// Loaded presentation

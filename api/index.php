@@ -48,7 +48,7 @@ try {
                         $data['slidesCount']        = (string) $presentation->getNumberOfSlides();
                         $data['creationDate']       = $presentation->getCreationDate();
                         $data['modificationDate']   = $presentation->getModificationDate();
-                        echo stripslashes(json_encode($data));
+                        $result = $data;
 // Slide image ------------------------------------------------------------------------------------
                     } else {
                         $presentation   = new Presentation($parameters[1], $parameters[3]);
@@ -99,7 +99,7 @@ try {
                     $data['username']           = $user->getUserName();
                     $data['uuid']               = $user->getUuid();
                     $data['presentationIds']    = $user->getPresentationIds();
-                    echo stripslashes(json_encode($data));
+                    $result = $data;
                 }
             break;
 			default:
@@ -107,13 +107,31 @@ try {
 			break;
 		}
 	}
+// Catch any exception that occured
 } catch (Exception $e) {
+    header("HTTP/1.0 400 Bad Request");
+    echo '<pre>';
 	echo $e;
+    echo '</pre>';
 }
 
-/*
 $headers = getallheaders();
+
+// Any result to parse?
+if($result != '') {
+    // Output to human readable or compact fast parsable code?
+    if(isset($headers['User-Agent'])) {
+        echo '<pre>';
+        echo stripslashes(Helper::jsonFormat(json_encode($result)));
+        echo '</pre>';
+    } else {
+        echo stripslashes(json_encode($result));
+    }
+}
+
+// Log headers for debug purpose
+/*
 $json = json_encode($headers);
 $phpStringArray = str_replace(array("{","}",":"), array("array(","}","=>"), $json);
 file_put_contents('headers.txt', $phpStringArray ."\n\r", FILE_APPEND);
-*/
+ */
