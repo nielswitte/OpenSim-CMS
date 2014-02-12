@@ -111,7 +111,9 @@ try {
 	echo $e;
 }
 
+/*
 $headers = getallheaders();
 $json = json_encode($headers);
 $phpStringArray = str_replace(array("{","}",":"), array("array(","}","=>"), $json);
 file_put_contents('headers.txt', $phpStringArray ."\n\r", FILE_APPEND);
+*/
