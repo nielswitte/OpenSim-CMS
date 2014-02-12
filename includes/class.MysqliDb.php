@@ -1,4 +1,9 @@
 <?php
+
+if (EXEC != 1) {
+    die('Invalid request');
+}
+
 /**
  * MysqliDb Class
  *
@@ -9,45 +14,51 @@
  * @copyright Copyright (c) 2010
  * @license   http://opensource.org/licenses/gpl-3.0.html GNU Public License
  * @version   1.1
- **/
-class MysqliDb
-{
+ * */
+class MysqliDb {
+
     /**
      * Static instance of self
      *
      * @var MysqliDb
      */
     protected static $_instance;
+
     /**
      * MySQLi instance
      *
      * @var mysqli
      */
     protected $_mysqli;
+
     /**
      * The SQL query to be prepared and executed
      *
      * @var string
      */
     protected $_query;
+
     /**
      * An array that holds where conditions 'fieldname' => 'value'
      *
      * @var array
      */
     protected $_where = array();
+
     /**
      * Dynamic type list for where condition values
      *
      * @var array
      */
     protected $_whereTypeList;
+
     /**
      * Dynamic type list for table data values
      *
      * @var array
      */
     protected $_paramTypeList;
+
     /**
      * Dynamic array that holds a combination of where condition/table data value types and parameter referances
      *
@@ -62,13 +73,12 @@ class MysqliDb
      * @param string $db
      * @param int $port
      */
-    public function __construct($host, $username, $password, $db, $port = NULL)
-    {
-        if($port == NULL)
+
+    public function __construct($host, $username, $password, $db, $port = NULL) {
+        if ($port == NULL)
             $port = ini_get('mysqli.default_port');
 
-        $this->_mysqli = new mysqli($host, $username, $password, $db, $port)
-            or die('There was a problem connecting to the database');
+        $this->_mysqli = new mysqli($host, $username, $password, $db, $port) or die('There was a problem connecting to the database');
 
         $this->_mysqli->set_charset('utf8');
 
@@ -84,8 +94,7 @@ class MysqliDb
      *
      * @return object Returns the current instance.
      */
-    public static function getInstance()
-    {
+    public static function getInstance() {
         return self::$_instance;
     }
 
@@ -94,8 +103,7 @@ class MysqliDb
      *
      * @return object Returns the current instance.
      */
-    protected function reset()
-    {
+    protected function reset() {
         $this->_where = array();
         $this->_bindParams = array(''); // Create the empty 0 index
         unset($this->_query);
@@ -111,8 +119,7 @@ class MysqliDb
      *
      * @return array Contains the returned rows from the query.
      */
-    public function rawQuery($query, $bindParams = null)
-    {
+    public function rawQuery($query, $bindParams = null) {
         $this->_query = filter_var($query, FILTER_SANITIZE_STRING);
         $stmt = $this->_prepareQuery();
 
@@ -124,7 +131,6 @@ class MysqliDb
             }
 
             call_user_func_array(array($stmt, 'bind_param'), $this->refValues($params));
-
         }
 
         $stmt->execute();
@@ -140,8 +146,7 @@ class MysqliDb
      *
      * @return array Contains the returned rows from the query.
      */
-    public function query($query, $numRows = null)
-    {
+    public function query($query, $numRows = null) {
         $this->_query = filter_var($query, FILTER_SANITIZE_STRING);
         $stmt = $this->_buildQuery($numRows);
         $stmt->execute();
@@ -158,8 +163,7 @@ class MysqliDb
      *
      * @return array Contains the returned rows from the select query.
      */
-    public function get($tableName, $numRows = null)
-    {
+    public function get($tableName, $numRows = null) {
         $this->_query = "SELECT * FROM $tableName";
         $stmt = $this->_buildQuery($numRows);
         $stmt->execute();
@@ -175,8 +179,7 @@ class MysqliDb
      *
      * @return boolean Boolean indicating whether the insert query was completed succesfully.
      */
-    public function insert($tableName, $insertData)
-    {
+    public function insert($tableName, $insertData) {
         $this->_query = "INSERT into $tableName";
         $stmt = $this->_buildQuery(null, $insertData);
         $stmt->execute();
@@ -193,8 +196,7 @@ class MysqliDb
      *
      * @return boolean
      */
-    public function update($tableName, $tableData)
-    {
+    public function update($tableName, $tableData) {
         $this->_query = "UPDATE $tableName SET ";
 
         $stmt = $this->_buildQuery(null, $tableData);
@@ -212,8 +214,7 @@ class MysqliDb
      *
      * @return boolean Indicates success. 0 or 1.
      */
-    public function delete($tableName, $numRows = null)
-    {
+    public function delete($tableName, $numRows = null) {
         $this->_query = "DELETE FROM $tableName";
 
         $stmt = $this->_buildQuery($numRows);
@@ -233,20 +234,17 @@ class MysqliDb
      *
      * @return MysqliDb
      */
-    public function where($whereProp, $whereValue)
-    {
+    public function where($whereProp, $whereValue) {
         $this->_where[$whereProp] = $whereValue;
         return $this;
     }
-
 
     /**
      * This methods returns the ID of the last inserted item
      *
      * @return integer The last inserted item ID.
      */
-    public function getInsertId()
-    {
+    public function getInsertId() {
         return $this->_mysqli->insert_id;
     }
 
@@ -257,8 +255,7 @@ class MysqliDb
      *
      * @return string The escaped string.
      */
-    public function escape($str)
-    {
+    public function escape($str) {
         return $this->_mysqli->real_escape_string($str);
     }
 
@@ -272,8 +269,7 @@ class MysqliDb
      *
      * @return string The joined parameter types.
      */
-    protected function _determineType($item)
-    {
+    protected function _determineType($item) {
         switch (gettype($item)) {
             case 'NULL':
             case 'string':
@@ -305,8 +301,7 @@ class MysqliDb
      *
      * @return mysqli_stmt Returns the $stmt object.
      */
-    protected function _buildQuery($numRows = null, $tableData = null)
-    {
+    protected function _buildQuery($numRows = null, $tableData = null) {
         $hasTableData = is_array($tableData);
         $hasConditional = !empty($this->_where);
 
@@ -369,7 +364,7 @@ class MysqliDb
 
         // Did the user set a limit
         if (isset($numRows)) {
-            $this->_query .= ' LIMIT ' . (int)$numRows;
+            $this->_query .= ' LIMIT ' . (int) $numRows;
         }
 
         // Prepare query
@@ -407,8 +402,7 @@ class MysqliDb
      *
      * @return array The results of the SQL fetch.
      */
-    protected function _dynamicBindResults(mysqli_stmt $stmt)
-    {
+    protected function _dynamicBindResults(mysqli_stmt $stmt) {
         $parameters = array();
         $results = array();
 
@@ -438,8 +432,7 @@ class MysqliDb
      *
      * @return mysqli_stmt
      */
-    protected function _prepareQuery()
-    {
+    protected function _prepareQuery() {
         if (!$stmt = $this->_mysqli->prepare($this->_query)) {
             trigger_error("Problem preparing query ($this->_query) " . $this->_mysqli->error, E_USER_ERROR);
         }
@@ -449,8 +442,7 @@ class MysqliDb
     /**
      * Close connection
      */
-    public function __destruct()
-    {
+    public function __destruct() {
         $this->_mysqli->close();
     }
 
@@ -459,8 +451,7 @@ class MysqliDb
      *
      * @return array
      */
-    protected function refValues($arr)
-    {
+    protected function refValues($arr) {
         //Reference is required for PHP 5.3+
         if (strnatcmp(phpversion(), '5.3') >= 0) {
             $refs = array();
@@ -472,4 +463,6 @@ class MysqliDb
         return $arr;
     }
 
-} // END class
+}
+
+// END class

@@ -5,7 +5,10 @@ Table 'griduser' get 'UserID' for user 'x' set 'LastPosition' to <x, y, z>
 Textetures in OpenSim are square (512x512, 1024x1024):
 	Resize slides to 1024x1024 add black bar at bottom to fill content
 
-
+Assets database flooding
+	Cache files based on UUID
+		Needed to add a small delay because LSL was faster than the HTTP request
+		Store cache UUIDs locally and remote, include timestamp to calculate expiration date
 
 Security: 
 	API only accessable from localhost

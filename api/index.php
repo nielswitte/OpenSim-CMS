@@ -13,13 +13,13 @@ try {
 		switch ($parameters[0]) {
 // Presentation handlers **************************************************************************
 			case 'presentation':
-				require_once dirname(__FILE__) .'/libs/presentation.php';
-                require_once dirname(__FILE__) .'/libs/slide.php';
+				require_once dirname(__FILE__) .'/models/presentation.php';
+                require_once dirname(__FILE__) .'/models/slide.php';
 
 				if(Presentation::validateParameters($parameters)) {
 // Presentation JSON ------------------------------------------------------------------------------
                     if(count($parameters) == 2) {
-                        $presentation = new Presentation($parameters[1], $parameters[3]);
+                        $presentation = new Presentation($parameters[1]);
 
                         $data = array();
                         $data['type']               = 'presentation';
@@ -48,7 +48,7 @@ try {
                         $data['slidesCount']        = (string) $presentation->getNumberOfSlides();
                         $data['creationDate']       = $presentation->getCreationDate();
                         $data['modificationDate']   = $presentation->getModificationDate();
-                        echo stripslashes(json_encode($data));
+                        $result = $data;
 // Slide image ------------------------------------------------------------------------------------
                     } else {
                         $presentation   = new Presentation($parameters[1], $parameters[3]);
@@ -56,12 +56,14 @@ try {
                         if(file_exists($slidePath)) {
 
                             // Run post or get requests
-                            $post = filter_input(INPUT_POST, 'uuid', FILTER_SANITIZE_SPECIAL_CHARS);
+                            $postUuid = filter_input(INPUT_POST, 'uuid', FILTER_SANITIZE_SPECIAL_CHARS);
 
                             // Update UUID of image
-                            if($post !== FALSE && $post !== NULL) {
-                                $slide = $presentation->getSlide($parameters[3]);
-                                $data = $slide->setUuid($post);
+                            if($postUuid !== FALSE && $postUuid !== NULL) {
+                                require_once dirname(__FILE__) .'/controllers/slideController.php';
+                                $slide      = $presentation->getSlide($parameters[3]);
+                                $slideCtrl  = new SlideController($slide);
+                                $data       = $slideCtrl->setUuid($postUuid);
                                 echo stripslashes(json_encode($data));
                             // Load image
                             } else {
@@ -89,17 +91,33 @@ try {
 			break;
 // User data handlers *****************************************************************************
             case "user":
-                require_once dirname(__FILE__) .'/libs/user.php';
+                require_once dirname(__FILE__) .'/models/user.php';
 
                 // Get user data
                 if(User::validateParameters($parameters)) {
-                    $user = new User($parameters[1]);
 
-                    $data = array();
-                    $data['username']           = $user->getUserName();
-                    $data['uuid']               = $user->getUuid();
-                    $data['presentationIds']    = $user->getPresentationIds();
-                    echo stripslashes(json_encode($data));
+                    // Run post or get requests
+                    $postUserName   = filter_input(INPUT_POST, 'userName', FILTER_SANITIZE_SPECIAL_CHARS);
+
+                    // Set UUID of posted username
+                    if($postUserName !== FALSE && $postUserName !== NULL) {
+                        require_once dirname(__FILE__) .'/controllers/userController.php';
+                        $userCtrl   = new UserController();
+                        $data       = $userCtrl->setUuid($postUserName, $parameters[1]);
+                        echo stripslashes(json_encode($data));
+                    // Load user information
+                    } else {
+                        $user = new User($parameters[1]);
+
+                        $data = array();
+                        $data['uuid']               = $user->getUuid();
+                        $data['userName']           = $user->getUserName();
+                        $data['firstName']          = $user->getFirstName();
+                        $data['lastName']           = $user->getLastName();
+                        $data['email']              = $user->getEmail();
+                        $data['presentationIds']    = $user->getPresentationIds();
+                        $result = $data;
+                    }
                 }
             break;
 			default:
@@ -107,11 +125,31 @@ try {
 			break;
 		}
 	}
+// Catch any exception that occured
 } catch (Exception $e) {
+    header("HTTP/1.0 400 Bad Request");
+    echo '<pre>';
 	echo $e;
+    echo '</pre>';
 }
 
 $headers = getallheaders();
+
+// Any result to parse?
+if($result != '') {
+    // Output to human readable or compact fast parsable code?
+    if(isset($headers['User-Agent'])) {
+        echo '<pre>';
+        echo stripslashes(Helper::jsonFormat(json_encode($result)));
+        echo '</pre>';
+    } else {
+        echo stripslashes(json_encode($result));
+    }
+}
+
+// Log headers for debug purpose
+/*
 $json = json_encode($headers);
 $phpStringArray = str_replace(array("{","}",":"), array("array(","}","=>"), $json);
 file_put_contents('headers.txt', $phpStringArray ."\n\r", FILE_APPEND);
+ */
