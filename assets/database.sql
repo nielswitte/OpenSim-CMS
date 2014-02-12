@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `presentations` (
   `ownerUuid` varchar(50) COLLATE utf8_bin NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_presentations_users` (`ownerUuid`),
-  CONSTRAINT `FK_presentations_users` FOREIGN KEY (`ownerUuid`) REFERENCES `users` (`uuid`)
+  CONSTRAINT `FK_presentations_users` FOREIGN KEY (`ownerUuid`) REFERENCES `users` (`uuid`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `presentation_slides` (
   `uuidUpdated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`number`,`presentationId`),
   KEY `FK_presentation_slides_presentations` (`presentationId`),
-  CONSTRAINT `FK_presentation_slides_presentations` FOREIGN KEY (`presentationId`) REFERENCES `presentations` (`id`)
+  CONSTRAINT `FK_presentation_slides_presentations` FOREIGN KEY (`presentationId`) REFERENCES `presentations` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
@@ -48,8 +48,10 @@ CREATE TABLE IF NOT EXISTS `presentation_slides` (
 CREATE TABLE IF NOT EXISTS `users` (
   `uuid` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `userName` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '0',
+  `firstName` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `lastName` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `email` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
   `password` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  `email` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '0',
   PRIMARY KEY (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
