@@ -19,7 +19,7 @@ try {
 				if(Presentation::validateParameters($parameters)) {
 // Presentation JSON ------------------------------------------------------------------------------
                     if(count($parameters) == 2) {
-                        $presentation = new Presentation($parameters[1], $parameters[3]);
+                        $presentation = new Presentation($parameters[1]);
 
                         $data = array();
                         $data['type']               = 'presentation';

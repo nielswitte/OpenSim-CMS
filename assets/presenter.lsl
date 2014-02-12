@@ -1,5 +1,5 @@
 /**
- * Makes a image presentation screen of any surface. 
+ * Makes a image presentation screen of any surface.
  * Uses JSON to retrieve presentation data from server
  *
  * @author Niels Witte
@@ -41,7 +41,7 @@ open_menu(key inputKey, string inputString, list inputList) {
     llDialog(inputKey, inputString, inputList , channel);
     llSetTimerEvent(300.0);
 }
- 
+
 close_menu() {
     llSetTimerEvent(0.0);// you can use 0 as well to save memory
     llListenRemove(gListener);
@@ -69,7 +69,7 @@ string get_json_value(string json, string search) {
     integer start = llSubStringIndex(json, search + "\"");
     // After the key is found, strip everything before the key and include the leading " and tailing " ":"
     // starts counting at 0, hence the +4 - 1 = +3)
-    if(start > -1) { 
+    if(start > -1) {
         start = (start + llStringLength(search) + 3);
        // JSON value is an array
        if(llGetSubString(json, (start-1), (start-1)) == "[") {
@@ -93,9 +93,9 @@ string get_json_value(string json, string search) {
 set_uuid_of_object(string type, integer id, key uuid) {
 	if(type == "slide") {
 		if(debug) llInstantMessage(userUuid, "[Debug] Update slide: "+ id + " to UUID:"+ uuid);
-		
+
 		string body = "uuid="+ (string)uuid;
-		http_request_set = llHTTPRequest(serverUrl +"/presentation/"+ presentationId +"/slide/"+ id +"/", [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);		
+		http_request_set = llHTTPRequest(serverUrl +"/presentation/"+ presentationId +"/slide/"+ id +"/", [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
 	}
 }
 
@@ -113,8 +113,8 @@ nav_slide(integer next) {
     // Check if slide is not out of bounds
     if(next < 0) { next = 0; }
     // Allow totalslides+1 for black
-    if(next >= totalslides) { 
-        slide = totalslides; 
+    if(next >= totalslides) {
+        slide = totalslides;
         llSetText("Presentation Ended", <0,0,1>, 1.0);
         llSetColor(ZERO_VECTOR, ALL_SIDES);
     // All fine, show slide
@@ -128,12 +128,13 @@ nav_slide(integer next) {
         // Load slide
         string url          = llList2String(slides, next);
         string params       = "width: 1024,height:1024";
-		
+
         integer res = llListFindList(textureCache, [presentationId, next]);
         // Check if texture is found in cache, only required on first usage
-        if(res > -1) {   
+        if(res > -1) {
         	if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by uuid from local cache (" + url +")");
         	llSetTexture(llList2String(textureCache, res+2), ALL_SIDES);
+
     	// Check if requested image has a valid UUID in the database
         } else if(isKey(url) == 2 && llGetSubString(url, 0, 3) != "http") {
         	if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by uuid from remote cache (" + url +")");
@@ -145,10 +146,10 @@ nav_slide(integer next) {
         	string oldtexture = llGetTexture(0);
 
         	// Load new image
-        	string texture = osSetDynamicTextureURL("", "image", url, params, 0);
-			
+        	string texture = osSetDynamicTextureURLBlend("", "image", url, params, 0, 255);
+
 			// Keep trying to fetch the new texture from object
-			while((texture = llGetTexture(0)) == oldtexture) 
+			while((texture = llGetTexture(0)) == oldtexture)
 			     llSleep(1.0);
 
 		 	// add new texture to list in format [presentation ID, slide number, texture UUID]
@@ -166,7 +167,7 @@ nav_slide(integer next) {
 default {
     state_entry() {
         // Message the surroundings
-        llSay(0, "turning on!"); 
+        llSay(0, "turning on!");
         llSetText("", <0,0,0>, 0);
         // Set color to white and remove textures
         llSetTexture(TEXTURE_BLANK, ALL_SIDES);
@@ -208,23 +209,22 @@ default {
 		}
     }
 
-    timer() {    	
+    timer() {
         close_menu();
     }
-} 
+}
 
 state presentation {
     /**
      * Listen and fetch certain commands
-     *
      */
     listen(integer channel, string name, key id, string message) {
         list commands = llParseString2List(message, " ", []);
-        
+
         // Main commands
         if(llList2String(commands, 0) == "Load") {
             media = 1;
-            // Output            
+            // Output
             llInstantMessage(userUuid, "Loading: "+ llList2String(commands, 1));
             // Sets presentation Id
             presentationId = llList2String(commands, 1);
@@ -322,7 +322,7 @@ state presentation {
         load_users_presentations();
     }
 
-    touch_start(integer totalNumber) {    	
+    touch_start(integer totalNumber) {
         // Close any open menu's
         close_menu();
 
@@ -340,7 +340,7 @@ state presentation {
         // Oopen presentations menu
         } else {
 			load_users_presentations();
-        }  
+        }
     }
 
     timer() {
