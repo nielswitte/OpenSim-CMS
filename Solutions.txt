@@ -1,0 +1,14 @@
+MySQL port 3307
+Table 'griduser' get 'UserID' for user 'x' set 'LastPosition' to <x, y, z>
+
+
+Textetures in OpenSim are square (512x512, 1024x1024):
+	Resize slides to 1024x1024 add black bar at bottom to fill content
+
+
+
+Security: 
+	API only accessable from localhost
+	Add User UUID as an API-key
+
+
