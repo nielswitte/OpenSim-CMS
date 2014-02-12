@@ -1,4 +1,8 @@
 <?php
+if(EXEC != 1) {
+	die('Invalid request');
+}
+
 /**
  * Description of class
  *
