@@ -23,7 +23,7 @@
     // PHP Settings
     date_default_timezone_set("Europe/Amsterdam");                              // see: http://www.php.net/manual/en/timezones.php
 
-    require_once dirname(__FILE__) .'/includes/class.MysqliDB.php';             // MySQL class
+    require_once dirname(__FILE__) .'/includes/class.MysqliDb.php';             // MySQL class
     require_once dirname(__FILE__) .'/includes/class.Helper.php';               // Additional helper functions
     require_once dirname(__FILE__) .'/includes/class.OpenSimRPC.php';           // Creates calls for the remote admin functions of OpenSim
 
