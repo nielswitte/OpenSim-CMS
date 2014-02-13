@@ -5,11 +5,12 @@ OpenSim-CMS API
 
 To retrieve a specific presentation use the following command and replace the id with the number of the
 presentation you want to get.
-
-`/api/presentation/<ID>`
+ ```
+/api/presentation/<ID>
 
 Example of output:
-`{
+```json
+{
     "type": "presentation",
     "title": "Test Presentatie",
     "presentationId": "1",
@@ -53,4 +54,4 @@ Example of output:
     "slidesCount": "4",
     "creationDate": "2014-02-13 14:21:47",
     "modificationDate": "2014-02-13 14:22:09"
-}`
+}
