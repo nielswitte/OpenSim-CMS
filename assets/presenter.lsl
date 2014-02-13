@@ -38,7 +38,7 @@ list presentationNavigationButtons 	= ["First", "Back", "Next", "Quit", "New"];
 open_menu(key inputKey, string inputString, list inputList) {
     gListener = llListen(channel, "", inputKey, "");
     // Send a dialog to that person. We'll use a fixed negative channel number for simplicity
-    //llDialog(inputKey, inputString, inputList , channel);
+    llDialog(inputKey, inputString, inputList , channel);
     llSetTimerEvent(300.0);
 }
 
