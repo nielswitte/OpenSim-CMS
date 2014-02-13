@@ -137,11 +137,11 @@ $headers = getallheaders();
 
 // Any result to parse?
 if($result != '') {
+    header('Content-Type: application/json');
+
     // Output to human readable or compact fast parsable code?
     if(isset($headers['User-Agent'])) {
-        echo '<pre>';
         echo stripslashes(Helper::jsonFormat(json_encode($result)));
-        echo '</pre>';
     } else {
         echo stripslashes(json_encode($result));
     }

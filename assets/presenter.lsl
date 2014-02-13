@@ -75,8 +75,8 @@ string get_json_value(string json, string search) {
        if(llGetSubString(json, (start-1), (start-1)) == "[") {
             string remain = llGetSubString(json, (start-1), -1);
             // Search end of value
-            integer end = llSubStringIndex(remain, "\"]");
-            result = llGetSubString(remain, 0, (end + 1));
+            integer end = llSubStringIndex(remain, "]");
+            result = llGetSubString(remain, 0, end);
         // JSON value is a string
         } else {
             string remain = llGetSubString(json, start, -1);
@@ -149,6 +149,7 @@ nav_slide(integer next) {
         	// Load new image
         	string texture = osSetDynamicTextureURLBlend("", "image", url, params, 0, 255);
 
+            if(debug) llInstantMessage(userUuid, "[Debug] Loaded slide");
 			// Keep trying to fetch the new texture from object
 			while((texture = llGetTexture(0)) == oldtexture)
 			     llSleep(1.0);
@@ -288,20 +289,27 @@ state presentation {
 	        open_menu(userUuid, presentationNavigationText, presentationNavigationButtons);
         // Loaded user's presentations
         } else if(request_id == http_request_user) {
-			string json_presentations  = get_json_value(body, "presentationIds");
-			list presentations = llParseString2List(json_presentations, ["\",\"", "\"", "[", "]"], []);
+            integer presentationCount = 0;
+			string json_presentations  = get_json_value(body, "presentationIds");            
+            // Create buttons for max 12 presentations
+            list presentationButtons;
+            if(debug) llInstantMessage(userUuid, "[Debug] Found the following presentations : "+ (string) json_presentations);
+            // List with presentations is not empty?
+            if(json_presentations != "[]") {
+			    list presentations = llParseString2List(json_presentations, ["\",\"", "\"", "[", "]"], []);
 
-			// Newest presentations first
-			presentations = llListSort(presentations, 1, FALSE);
+			    // Newest presentations first
+			    presentations = llListSort(presentations, 1, FALSE);
 
-			// Create buttons for 9 presentations
-			list presentationButtons;
-			integer x;
-			for (x = 0; x < llGetListLength(presentations) && x < 10; x++) {
-			    presentationButtons += "Load "+ llList2String(presentations, x);
-			}
-
-			open_menu(userUuid, "Loaded "+ llGetListLength(presentationButtons) +" presentation(s).\nCommand: '/"+ channel +" load <#>' can be used to load a presentation that is not listed below." , presentationButtons);
+                presentationCount  = llGetListLength(presentationButtons);
+    			integer x;
+    			for (x = 0; x < llGetListLength(presentations) && x < 13; x++) {
+    			    presentationButtons += "Load "+ llList2String(presentations, x);
+    			}			    
+            } else {
+                presentationButtons = ["Ok","Quit"];
+            }
+            open_menu(userUuid, "Found "+ presentationCount +" presentation(s).\nShowing the latest 12 presentations below.\nCommand: '/"+ channel +" Load <#>' can be used to load a presentation that is not listed." , presentationButtons);
 		// Update slide uuid
 		} else if(request_id = http_request_set) {
 			if(debug) llInstantMessage(userUuid, "[Debug] UUID set for slide "+ slide +": "+ (string) body);
