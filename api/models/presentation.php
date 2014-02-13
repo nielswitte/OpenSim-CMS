@@ -121,8 +121,9 @@ class Presentation implements SimpleModel {
         }
 
         $slide = FALSE;
-        if(isset($this->slides[$number])) {
-            $slide = $this->slides[$number];
+        // Slide exists? (array starts counting at 0)
+        if(isset($this->slides[($number-1)])) {
+            $slide = $this->slides[($number-1)];
         } else {
             throw new Exception("Slide does not exist", 6);
         }

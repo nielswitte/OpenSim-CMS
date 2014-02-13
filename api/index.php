@@ -53,6 +53,7 @@ try {
                     } else {
                         $presentation   = new Presentation($parameters[1], $parameters[3]);
                         $slidePath      = $presentation->getPath() . DS . $presentation->getCurrentSlide() .'.jpg';
+
                         if(file_exists($slidePath)) {
 
                             // Run post or get requests
