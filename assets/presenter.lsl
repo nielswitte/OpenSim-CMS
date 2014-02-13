@@ -7,7 +7,7 @@
  * @version 0.2
  */
 // Config values
-string serverUrl = "http://127.0.0.1:62535/CMS/api";
+string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
 integer debug = 1;				// Enables showing debuggin comments
 
 // Some general parameters
@@ -20,7 +20,7 @@ integer media = 0;            	// Media type [0 = off, 1 = presentation]
 // Presentation stuff
 string presentationId;        	// The Id of the presentation
 string presentationTitle;    	// Title of the presentation
-integer slide = 0;            	// Slide number (starts at 0)
+integer slide = 1;            	// Slide number (starts at 1)
 integer totalslides = 0;    	// Total numnber of slides
 list slides;                	// List with all slides
 list textureCache;				// Cache the textures to only require loading once
@@ -55,41 +55,6 @@ integer isKey(key in) {//by: Strife Onizuka
     return (in == NULL_KEY);  // key is valid AND equal to NULL_KEY (return 1 or TRUE), or is not valid (return 0 or FALSE)
 }
 
-/**
- * Searches JSON string for value of given key
- * Make sure all JSON values are strings or arrays (surrounded by "")
- *
- * @param string json - json string to search in
- * @param string search - key to search for
- * @returns string - Null on error
- */
-string get_json_value(string json, string search) {
-    string result;
-    // Search for key
-    integer start = llSubStringIndex(json, search + "\"");
-    // After the key is found, strip everything before the key and include the leading " and tailing " ":"
-    // starts counting at 0, hence the +4 - 1 = +3)
-    if(start > -1) {
-        start = (start + llStringLength(search) + 3);
-       // JSON value is an array
-       if(llGetSubString(json, (start-1), (start-1)) == "[") {
-            string remain = llGetSubString(json, (start-1), -1);
-            // Search end of value
-            integer end = llSubStringIndex(remain, "]");
-            result = llGetSubString(remain, 0, end);
-        // JSON value is a string
-        } else {
-            string remain = llGetSubString(json, start, -1);
-            // Search end of value
-            integer end = llSubStringIndex(remain, "\"");
-            result = llGetSubString(remain, 0, (end - 1));
-        }
-    } else {
-        result = "Null";
-    }
-    return result;
-}
-
 set_uuid_of_object(string type, integer id, key uuid) {
 	if(type == "slide") {
 		if(debug) llInstantMessage(userUuid, "[Debug] Update slide: "+ id + " to UUID:"+ uuid);
@@ -111,9 +76,9 @@ load_users_presentations() {
 nav_slide(integer next) {
 
     // Check if slide is not out of bounds
-    if(next < 0) { next = 0; }
+    if(next < 1) { next = 1; }
     // Allow totalslides+1 for black
-    if(next >= totalslides) {
+    if(next > totalslides) {
         slide = totalslides;
         llSetText("Presentation Ended", <0,0,1>, 1.0);
         llSetColor(ZERO_VECTOR, ALL_SIDES);
@@ -126,7 +91,7 @@ nav_slide(integer next) {
         llSetTexture(TEXTURE_BLANK, ALL_SIDES);
         llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
         // Load slide
-        string url          = llList2String(slides, next);
+        string url          = llList2String(slides, next-1);
         string params       = "width: 1024,height:1024";
 
         integer res = llListFindList(textureCache, [presentationId, next]);
@@ -161,7 +126,7 @@ nav_slide(integer next) {
         	set_uuid_of_object("slide",  slide, texture);
         }
 
-        llSetText("Slide "+ (slide + 1) +" of "+ totalslides, <0,0,1>, 1.0);
+        llSetText("Slide "+ (slide) +" of "+ totalslides, <0,0,1>, 1.0);
     }
 }
 
@@ -253,7 +218,7 @@ state presentation {
                 open_menu(userUuid, presentationNavigationText, presentationNavigationButtons);
             // First Slide
             } else if(llList2String(commands, 0) == "First") {
-                nav_slide(0);
+                nav_slide(1);
                 open_menu(userUuid, presentationNavigationText, presentationNavigationButtons);
             // Invalid command
             } else {
@@ -275,22 +240,26 @@ state presentation {
     		}
     		return;
     	}
+
 		// Loaded presentation
         if (request_id == http_request_id) {
-	        string json_slides  = get_json_value(body, "openSim");
-	        slides              = llParseString2List(json_slides, ["\",\"", "\"", "[", "]"], []);
-	        totalslides         = (integer)get_json_value(body, "slidesCount");
-	        presentationTitle   = get_json_value(body, "title");
+            key json_body      = JsonCreateStore(body);	       
+            key json_slides    = JsonGetJson(json_body, "openSim");
+            
+            slides             = llParseString2List(json_slides, ["\",\"", "\"", "[", "]"], []);
+	        totalslides        = (integer)JsonGetValue(json_body, "slidesCount");
+            presentationTitle  = JsonGetValue(json_body, "title");
 	        // Show loaded message
 	        llInstantMessage(userUuid, "Loaded presentation: "+ presentationTitle);
 	        // loads the first slide
-	        nav_slide(0);
+	        nav_slide(1);
 	        // Open navigation dialog
 	        open_menu(userUuid, presentationNavigationText, presentationNavigationButtons);
         // Loaded user's presentations
         } else if(request_id == http_request_user) {
-            integer presentationCount = 0;
-			string json_presentations  = get_json_value(body, "presentationIds");            
+            key json_body               = JsonCreateStore(body);
+            integer presentationCount   = 0;
+			string json_presentations   = JsonGetJson(json_body, "presentationIds");            
             // Create buttons for max 12 presentations
             list presentationButtons;
             if(debug) llInstantMessage(userUuid, "[Debug] Found the following presentations : "+ (string) json_presentations);
