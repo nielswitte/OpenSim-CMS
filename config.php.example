@@ -1,29 +1,33 @@
 <?php
-    define('EXEC', 					'1');                                   // Simple check if file is accessed correctly
+    define('EXEC',                      '1');                                   // Simple check if file is accessed correctly
     // Server settings
-    define('SERVER_PROTOCOL',       'http');                                // use HTTP or HTTPS
-    define('SERVER_ADDRESS',        'localhost');                           // server address, can also be an IP
-    define('SERVER_PORT',           62535);                                 // server port
-    define('SERVER_ROOT',           '/CMS');                                // server root directory
+    define('SERVER_PROTOCOL',           'http');                                // use HTTP or HTTPS
+    define('SERVER_ADDRESS',            'localhost');                           // server address, can also be an IP
+    define('SERVER_PORT',               62535);                                 // server port
+    define('SERVER_ROOT',               '/CMS');                                // server root directory
 
     // OpenSim settings
-    define('OS_ASSET_CACHE_EXPIRES','48 hours');                            // needs to be the same as the OpenSim cache expiration time (used by strtotime)
-
+    define('OS_ASSET_CACHE_EXPIRES',    '48 hours');                            // needs to be the same as the OpenSim cache expiration time (used by strtotime)    define('OS_ASSET_CACHE_EXPIRES',    '48 hours');                            // needs to be the same as the OpenSim cache expiration time (used by strtotime)
+    define('OS_REMOTE_ADMIN_URI',       'http://127.0.0.1');                    // Remote admin URI (Be sure to enable Remote Admin in OpenSim.ini)
+    define('OS_REMOTE_ADMIN_PORT',      '');                                    // Port used by OpenSim for remote admin
+    define('OS_REMOTE_ADMIN_PASSWORD',  '');                                    // OpenSim remote admin password
     // Files settings
-	define('FILES_LOCATION', 		'C:\\Soas\\www\\storage');              // Absolute path to storage directory
-	define('DS', 					'\\');                                  // Directory separator
-	define('PRESENTATIONS', 		'presentations');                       // Presentations folder name
+	define('FILES_LOCATION',            'C:\\Soas\\www\\storage');              // Absolute path to storage directory
+	define('DS',                        '\\');                                  // Directory separator
+	define('PRESENTATIONS',             'presentations');                       // Presentations folder name
 
     // Image settings
-	define('IMAGE_WIDTH',			1024);                                  // Texture width in OpenSim, used to resize presentations
-	define('IMAGE_HEIGHT',			1024);                                  // Texture height in OpenSim, used to resize presentations
+	define('IMAGE_WIDTH',               1024);                                  // Texture width in OpenSim, used to resize presentations
+	define('IMAGE_HEIGHT',              1024);                                  // Texture height in OpenSim, used to resize presentations
 
     // PHP Settings
-    date_default_timezone_set("Europe/Amsterdam");                          // see: http://www.php.net/manual/en/timezones.php
+    date_default_timezone_set("Europe/Amsterdam");                              // see: http://www.php.net/manual/en/timezones.php
 
-    require_once dirname(__FILE__) .'/includes/class.MysqliDB.php';         // MySQL class
-    require_once dirname(__FILE__) .'/includes/class.Helper.php';           // Additional helper functions
+    require_once dirname(__FILE__) .'/includes/class.MysqliDB.php';             // MySQL class
+    require_once dirname(__FILE__) .'/includes/class.Helper.php';               // Additional helper functions
+    require_once dirname(__FILE__) .'/includes/class.OpenSimRPC.php';           // Creates calls for the remote admin functions of OpenSim
 
-    $db = new Mysqlidb('localhost', 'root', '', 'cms', 3307);               // Connect to MySQL database
-    Helper::setDB($db);                                                     // Save database to static class to be accessed by the rest of the program
+    // MySQL settings
+    $db = new Mysqlidb('localhost', 'root', '', 'cms', 3307);                   // Connect to MySQL database
+    Helper::setDB($db);                                                         // Save database to static class to be accessed by the rest of the program
 
