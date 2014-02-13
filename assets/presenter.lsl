@@ -289,8 +289,9 @@ state presentation {
 	        open_menu(userUuid, presentationNavigationText, presentationNavigationButtons);
         // Loaded user's presentations
         } else if(request_id == http_request_user) {
+            integer presentationCount = 0;
 			string json_presentations  = get_json_value(body, "presentationIds");            
-            // Create buttons for 9 presentations
+            // Create buttons for max 12 presentations
             list presentationButtons;
             if(debug) llInstantMessage(userUuid, "[Debug] Found the following presentations : "+ (string) json_presentations);
             // List with presentations is not empty?
@@ -300,14 +301,15 @@ state presentation {
 			    // Newest presentations first
 			    presentations = llListSort(presentations, 1, FALSE);
 
+                presentationCount  = llGetListLength(presentationButtons);
     			integer x;
-    			for (x = 0; x < llGetListLength(presentations) && x < 10; x++) {
+    			for (x = 0; x < llGetListLength(presentations) && x < 13; x++) {
     			    presentationButtons += "Load "+ llList2String(presentations, x);
     			}			    
             } else {
                 presentationButtons = ["Ok","Quit"];
             }
-            open_menu(userUuid, "Loaded "+ llGetListLength(presentationButtons) +" presentation(s).\nCommand: '/"+ channel +" Load <#>' can be used to load a presentation that is not listed below." , presentationButtons);
+            open_menu(userUuid, "Found "+ presentationCount +" presentation(s).\nShowing the latest 12 presentations below.\nCommand: '/"+ channel +" Load <#>' can be used to load a presentation that is not listed." , presentationButtons);
 		// Update slide uuid
 		} else if(request_id = http_request_set) {
 			if(debug) llInstantMessage(userUuid, "[Debug] UUID set for slide "+ slide +": "+ (string) body);
