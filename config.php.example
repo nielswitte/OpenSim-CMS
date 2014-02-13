@@ -28,6 +28,6 @@
     require_once dirname(__FILE__) .'/includes/class.OpenSimRPC.php';           // Creates calls for the remote admin functions of OpenSim
 
     // MySQL settings
-    $db = new Mysqlidb('localhost', 'root', '', 'cms', 3307);                   // Connect to MySQL database
+    $db = new Mysqlidb('localhost', 'root', '', 'OpenSim-CMS', 3306);           // Connect to MySQL database
     Helper::setDB($db);                                                         // Save database to static class to be accessed by the rest of the program
 

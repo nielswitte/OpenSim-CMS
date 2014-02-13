@@ -11,8 +11,8 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
 -- Databasestructuur van cms wordt geschreven
-CREATE DATABASE IF NOT EXISTS `cms` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_bin */;
-USE `cms`;
+CREATE DATABASE IF NOT EXISTS `OpenSim-CMS` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_bin */;
+USE `OpenSim-CMS`;
 
 
 -- Structuur van  tabel cms.presentations wordt geschreven

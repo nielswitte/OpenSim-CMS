@@ -142,9 +142,9 @@ if($result != '') {
 
     // Output to human readable or compact fast parsable code?
     if(isset($headers['User-Agent'])) {
-        echo stripslashes(Helper::jsonFormat(json_encode($result)));
+        echo json_encode($result, JSON_PRETTY_PRINT);
     } else {
-        echo stripslashes(json_encode($result));
+        echo json_encode($result);
     }
 }
 
