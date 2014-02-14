@@ -12,6 +12,38 @@ clone this repository in your www directory. For example: `/var/www/`.
 Copy `config.php.example` and rename it to `config.php`. Change the values in `config.php` to the values for your installation and setup your database
 by importing the `database.sql` file in the assets directory.
 
+OpenSim needs to be configured with the following settings:
+
+For loading dynamic textures:
+```
+[XEngine]
+    AllowOSFunctions = true
+```
+
+Enable JSON support:
+
+```
+[XEngine]
+    AllowMODFunctions = true
+[JsonStore]
+    Enabled = true
+```
+
+For RemoteAdmin functions:
+
+```
+[RemoteAdmin]
+    enabled = true
+    port = 9000
+    access_password = "<ACCESS PASSWORD HERE>"
+    access_ip_addresses = 127.0.0.1
+    enabled_methods = all
+```
+
+In addition it is recommended to use MySQL as a database server for OpenSim. See http://opensimulator.org/wiki/Database_Settings#MySQL_Walkthrough for instructions
+on how to set things up.
+
+
 @todo will be extended later
 
 ## Credits
