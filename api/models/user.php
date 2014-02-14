@@ -22,7 +22,7 @@ class User implements SimpleModel {
     /**
      * Construct a new User with the given UUID
      *
-     * @param String $userUUID
+     * @param string $userUUID
      */
     public function __construct($userUUID) {
         $this->uuid = $userUUID;
@@ -67,7 +67,7 @@ class User implements SimpleModel {
     /**
      * Returns the user's UUID
      *
-     * @return String
+     * @return string
      */
     public function getUuid() {
         return $this->uuid;
@@ -76,7 +76,7 @@ class User implements SimpleModel {
     /**
      * Returns the user's user name
      *
-     * @return String
+     * @return string
      */
     public function getUserName() {
         return $this->userName;
@@ -85,7 +85,7 @@ class User implements SimpleModel {
     /**
      * Returns the user's first name
      *
-     * @return String
+     * @return string
      */
     public function getFirstName() {
         return $this->firstName;
@@ -94,7 +94,7 @@ class User implements SimpleModel {
     /**
      * Returns the user's last name
      *
-     * @return String
+     * @return string
      */
     public function getLastName() {
         return $this->lastName;
@@ -103,7 +103,7 @@ class User implements SimpleModel {
     /**
      * Returns the user's email address
      *
-     * @return String
+     * @return string
      */
     public function getEmail() {
         return $this->email;
@@ -112,7 +112,7 @@ class User implements SimpleModel {
     /**
      * Returns an array with presentation IDs of the user
      *
-     * @return Array
+     * @return array
      */
     public function getPresentationIds() {
         return $this->presentationIds;
@@ -121,9 +121,9 @@ class User implements SimpleModel {
 	/**
 	 * Function to validate parameters array
 	 *
-	 * @param Array $parameters
+	 * @param array $parameters
 	 *
-	 * @return Boolean true when all checks passed
+	 * @return boolean - true when all checks passed
 	 */
     public static function validateParameters($parameters) {
         if(count($parameters) == 2) {

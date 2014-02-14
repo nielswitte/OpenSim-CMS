@@ -24,8 +24,8 @@ class Presentation implements SimpleModel {
     /**
      * Constructs a new presentation with the given id and optional the given slide
      *
-     * @param Integer $id - ID of this presentation
-     * @param Integer $slide [optional] - slide to show
+     * @param integer $id - ID of this presentation
+     * @param integer $slide [optional] - slide to show
      */
 	public function __construct($id, $slide = 0) {
 		$this->presentationId = $id;
@@ -56,7 +56,7 @@ class Presentation implements SimpleModel {
     /**
      * Returns the title from this presentation
      *
-     * @return String
+     * @return string
      */
     public function getTitle() {
         return $this->title;
@@ -65,7 +65,7 @@ class Presentation implements SimpleModel {
     /**
      * Returns the ID of this presentation
      *
-     * @return Integer
+     * @return integer
      */
 	public function getPresentationId() {
 		return $this->presentationId;
@@ -74,7 +74,7 @@ class Presentation implements SimpleModel {
     /**
      * Returns the slide number, starts at 0
      *
-     * @return Integer
+     * @return integer
      */
 	public function getCurrentSlide() {
 		return $this->currentSlide;
@@ -83,7 +83,7 @@ class Presentation implements SimpleModel {
     /**
      * Get the UUID of the owner of this presentation
      *
-     * @return String
+     * @return string
      */
     public function getOwnerUuid() {
         return $this->ownerUuid;
@@ -92,7 +92,7 @@ class Presentation implements SimpleModel {
     /**
      * Returns an array with slides of this presentation
      *
-     * @return Array
+     * @return array
      */
     public function getSlides() {
         if(empty($this->slides)) {
@@ -111,8 +111,8 @@ class Presentation implements SimpleModel {
     /**
      * Get the slide with the given number
      *
-     * @param Integer $number
-     * @return Slide
+     * @param integer $number
+     * @return slide
      * @throws Exception
      */
     public function getSlide($number) {
@@ -133,7 +133,7 @@ class Presentation implements SimpleModel {
     /**
      * Returns the local path to the presentation's folder
      *
-     * @return String
+     * @return string
      */
     public function getPath() {
         return FILES_LOCATION . DS . PRESENTATIONS . DS . $this->presentationId;
@@ -144,7 +144,7 @@ class Presentation implements SimpleModel {
      * This can be extended by adding: 'slide/x/'
      * to retrieve slide number x
      *
-     * @return String
+     * @return string
      */
     public function getApiUrl() {
         return SERVER_PROTOCOL .'://'. SERVER_ADDRESS .':'.SERVER_PORT . SERVER_ROOT .'/api/presentation/'. $this->getPresentationId() .'/';
@@ -153,7 +153,7 @@ class Presentation implements SimpleModel {
     /**
      * Counts the number of slides
      *
-     * @return Integer
+     * @return integer
      */
     public function getNumberOfSlides() {
         if(empty($this->slides)) {
@@ -165,7 +165,7 @@ class Presentation implements SimpleModel {
     /**
      * Returns the creation date of this presentation
      *
-     * @return String yyyy-mm-dd hh:mm:ss
+     * @return string yyyy-mm-dd hh:mm:ss
      */
     public function getCreationDate() {
         return $this->creationDate;
@@ -174,7 +174,7 @@ class Presentation implements SimpleModel {
     /**
      * Returns the modification date of this presentation
      *
-     * @return String yyyy-mm-dd hh:mm:ss
+     * @return string yyyy-mm-dd hh:mm:ss
      */
     public function getModificationDate() {
         return $this->modificationDate;
@@ -183,8 +183,8 @@ class Presentation implements SimpleModel {
 	/**
 	 * Function to validate parameters array
 	 *
-	 * @param Array $parameters
-	 * @return Boolean true when all checks passed
+	 * @param array $parameters
+	 * @return boolean true when all checks passed
      * @throws Exception
 	 */
 	public static function validateParameters($parameters) {

@@ -14,8 +14,8 @@ class Helper {
     /**
      * Validates the UUID v4 string provided
      *
-     * @param String $uuid
-     * @return Boolean
+     * @param string $uuid
+     * @return boolean
      */
     public static function isValidUuid($uuid) {
         $matches = array();
@@ -45,13 +45,10 @@ class Helper {
      * Helper function to parse PUT requests
      * @source: https://stackoverflow.com/questions/5483851/manually-parse-raw-http-data-with-php/5488449#5488449
      *
-     * @param Array $a_data
-     * @return Array
+     * @param string $input
+     * @return array
      */
-    public static function parsePutRequest(&$a_data) {
-        // read incoming data
-        $input = file_get_contents('php://input');
-
+    public static function parsePutRequest($input) {
         // grab multipart boundary from content type header
         preg_match('/boundary=(.*)$/', $_SERVER['CONTENT_TYPE'], $matches);
         $boundary = $matches[1];

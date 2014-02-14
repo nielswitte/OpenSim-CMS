@@ -19,9 +19,9 @@ class OpenSimRPC {
      * Creates a new OpenSim Remote PC instance
      * Default values are from config.php
      *
-     * @param String $uri - http://opensim.server.address [default: OS_REMOTE_ADMIN_URI]
-     * @param type $port - Remote Admin port [default: OS_REMOTE_ADMIN_PORT]
-     * @param type $password - Remote Admin password [default: OS_REMOTE_ADMIN_PASSWORD]
+     * @param string $uri - http://opensim.server.address [default: OS_REMOTE_ADMIN_URI]
+     * @param integer $port - Remote Admin port [default: OS_REMOTE_ADMIN_PORT]
+     * @param string $password - Remote Admin password [default: OS_REMOTE_ADMIN_PASSWORD]
      */
     public function __construct($uri = OS_REMOTE_ADMIN_URI, $port = OS_REMOTE_ADMIN_PORT, $password = OS_REMOTE_ADMIN_PASSWORD) {
         $this->serverUri = $uri;
@@ -32,8 +32,8 @@ class OpenSimRPC {
     /**
      * Makes remote call with given command and paramters
      *
-     * @param String $command - The name of the function to execute
-     * @param Array $parameters - Array with parameters for the function
+     * @param string $command - The name of the function to execute
+     * @param array $parameters - Array with parameters for the function
      * @return XML
      */
     public function call($command, $parameters) {

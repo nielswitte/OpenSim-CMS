@@ -7,6 +7,8 @@ $result = '';
 try {
 	// Input
 	$get    = filter_input(INPUT_GET, '_url', FILTER_SANITIZE_SPECIAL_CHARS);
+    $put    = $_SERVER['REQUEST_METHOD'] === "PUT" ? TRUE : FALSE;
+    $post   = $_SERVER['REQUEST_METHOD'] === "POST" ? TRUE : FALSE;
 
 	if($get !== FALSE && $get != '') {
 		$parameters = explode('/', trim($get, '/'));
@@ -90,9 +92,23 @@ try {
             case "user":
                 require_once dirname(__FILE__) .'/models/user.php';
 
-                // Get user data
-                if(User::validateParameters($parameters)) {
+                // Create a user
+                if($put) {
+                    require_once dirname(__FILE__) .'/controllers/userController.php';
+                    $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
+                    $parsedUserData = (Helper::parsePutRequest($putUserData));
+                    // Check if the parameters are valid for creating a user
+                    if(UserController::validateParametersCreate($parsedUserData)) {
+                        $userCtrl       = new UserController();
+                        // Do request and fetch result
+                        $data           = $userCtrl->createUser($parsedUserData['firstName'], $parsedUserData['lastName'], $parsedUserData['email'], $parsedUserData['password'], $parsedUserData['startRegionX'], $parsedUserData['startRegionY']);
+                        // Do something with data?
 
+                        // Set result
+                        $result = $data;
+                    }
+                // Get data of specific user
+                } elseif(User::validateParameters($parameters)) {
                     // Run post or get requests
                     $postUserName   = filter_input(INPUT_POST, 'userName', FILTER_SANITIZE_SPECIAL_CHARS);
 

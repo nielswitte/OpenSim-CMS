@@ -18,9 +18,9 @@ interface SimpleModel {
     /**
 	 * Function to validate parameters array
 	 *
-	 * @param Array $parameters
+	 * @param array $parameters
 	 *
-	 * @return Boolean true when all checks passed
+	 * @return boolean true when all checks passed
 	 */
     static function validateParameters($parameters);
 }

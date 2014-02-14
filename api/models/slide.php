@@ -19,10 +19,10 @@ class Slide {
     /**
      * Constructs a new slide with the given parameters
      *
-     * @param Integer $number
-     * @param String $path
-     * @param String $uuid
-     * @param String $uuidUpdated (format: yyyy-mm-dd hh:mm:ss)
+     * @param integer $number
+     * @param string $path
+     * @param string $uuid
+     * @param string $uuidUpdated (format: yyyy-mm-dd hh:mm:ss)
      */
     public function __construct($number, $path, $uuid = '0', $uuidUpdated = '0') {
         $this->number       = $number;
@@ -34,7 +34,7 @@ class Slide {
     /**
      * Returns the slide number
      *
-     * @return Integer
+     * @return integer
      */
     public function getNumber() {
         return $this->number;
@@ -43,7 +43,7 @@ class Slide {
     /**
      * Returns the UUID of the given slide
      *
-     * @return String
+     * @return string
      */
     public function getUuid() {
         return $this->uuid;
@@ -52,7 +52,7 @@ class Slide {
     /**
      * Returns the UUID updated datetime
      *
-     * @return String
+     * @return string
      */
     public function getUuidUpdated() {
         return $this->uuidUpdated;
@@ -61,7 +61,7 @@ class Slide {
     /**
      * Checks if the UUID is expired based on the OS_ASSET_CACHE_EXPIRES value from the config
      *
-     * @return Boolean - True when expired
+     * @return boolean - True when expired
      */
     public function isUuidExpired() {
         return !(strtotime($this->getUuidUpdated()) > strtotime('-'. OS_ASSET_CACHE_EXPIRES)) ? 1 : 0;
@@ -70,7 +70,7 @@ class Slide {
     /**
      * Returns the local filesystem path to the slide
      *
-     * @return String
+     * @return string
      */
     public function getPath() {
         return $this->getPath() . DS . $this->number .'.jpg';

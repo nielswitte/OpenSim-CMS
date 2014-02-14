@@ -25,8 +25,8 @@ class SlideController {
     /**
      * Updates the UUID of the slide to the given value
      *
-     * @param String $uuid
-     * @return Boolean
+     * @param string $uuid
+     * @return boolean
      * @throws Exception
      */
     public function setUuid($uuid) {
