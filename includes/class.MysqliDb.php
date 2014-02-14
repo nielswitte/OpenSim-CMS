@@ -314,7 +314,7 @@ class MysqliDb {
                 if ($pos !== false) {
                     foreach ($tableData as $prop => $value) {
                         // determines what data type the item is, for binding purposes.
-                        $this->_paramTypeList .= $this->_determineType($value);
+                        @$this->_paramTypeList .= $this->_determineType($value);
 
                         // prepares the reset of the SQL query.
                         $this->_query .= ($prop . ' = ?, ');
