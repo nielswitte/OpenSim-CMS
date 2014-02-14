@@ -313,7 +313,7 @@ state presentation {
                     slides += [(key) JsonGetValue(json_slides, "{"+ x +"}.{uuid}")];
                 // Use URL
                 } else {
-                    slides += [JsonGetValue(json_slides, "{"+ x +"}.{url}")];
+                    slides += [JsonGetValue(json_slides, "{"+ x +"}.{image}")];
                 }
             }
 

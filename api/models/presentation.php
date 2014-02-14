@@ -188,37 +188,32 @@ class Presentation implements SimpleModel {
      * @throws Exception
 	 */
 	public static function validateParameters($parameters) {
-        // Slide image
-		if(count($parameters) == 4) {
-            // Check number of parameters and if presentation id is a number
-			if(is_numeric($parameters[1]) && $parameters[1] > 0) {
-                // Check if parameter slide is given
-				if($parameters[2] == 'slide') {
-                    // Check if slide is represented by a number
-					if(is_numeric($parameters[3]) && $parameters[3] >= 0) {
-						return true;
-					} else {
-						throw new Exception("Expects parameter two to be integer, string given", 4);
-					}
-				} else {
-					throw new Exception("Expects parameter three to be (string) 'slide', '". htmlentities($parameter[2]) ."' given", 3);
-				}
-			} else {
-				throw new Exception("Expects parameter two to be integer, string given", 2);
-			}
-        // Presentation data
-		} elseif(count($parameters) == 2) {
-            // Check number of parameters and if presentation id is a number
-            if(is_numeric($parameters[1]) && $parameters[1] > 0) {
-                return true;
-			} else {
-				throw new Exception("Expects parameter two to be integer, string given", 2);
-			}
-
+        $result         = FALSE;
+        $parameterCount = count($parameters);
+        // Check number of parameters for: Presentations details, slide details or image
+        if($parameterCount != 2 && $parameterCount != 4 && $parameterCount != 5) {
+            throw new Exception("Invalid number of parameters", 1);
+        // Presentation ID is a number?
+        } elseif(!is_numeric($parameters[1]) || $parameters[1] <= 0) {
+            throw new Exception("Expects parameter two to be integer and above 0, string given or wrong number", 2);
+        // When more than 2 parameters, parameter 3 should be 'slide'
+        } elseif(($parameterCount == 4 || $parameterCount == 5) && $parameters[2] != 'slide') {
+            throw new Exception("Expects parameter three to be (string) 'slide', '". htmlentities($parameters[2]) ."' given", 3);
+        // Slide number has to be a number and above 0
+        } elseif($parameterCount == 4 && (!is_numeric($parameters[3]) || $parameters[3] <= 0)) {
+            throw new Exception("Expects parameter four to be integer and above 0, string given or wrong number", 4);
+        // Stop here when only 4 parameters are given
+        } elseif($parameterCount == 4) {
+            $result = TRUE;
+        // Check the fifth parameter if present
+        } elseif(count($parameters) == 5 && $parameters[4] != 'image') {
+            throw new Exception("Expects parameter five to be (string) 'image', '". htmlentities($parameters[2]) ."' given", 5);
+        // Passed all checks
         } else {
-			throw new Exception("Invalid number of parameters", 1);
-		}
-		return false;
+            $result = TRUE;
+        }
+
+		return $result;
 	}
 }
 
