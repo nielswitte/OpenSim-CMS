@@ -77,7 +77,15 @@ Content-Disposition: form-data; name="startRegionY"
 This request will return a JSON message with the result. It contains two or three elements.
 1) success, a boolean wheter or not the request was processed successful. 2) Optional, only used when
 the request is not successful. 3) the UUID of the newly created user, which is filled with zeros on
-failure. Example of a failure is illustrated below:
+failure. Two examples of output are listed below, first a successful request,
+second a failure because the user's first and lastname were already used.
+
+```json
+{
+    "success": true,
+    "avatar_uuid": "44172f17-b7a8-4b30-a42e-9699b563789b"
+}
+```
 
 ```json
 {
