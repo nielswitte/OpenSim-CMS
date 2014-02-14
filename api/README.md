@@ -42,7 +42,7 @@ userName=<USERNAME>
 ### Create a new user
 
 To create a new user the following API url can be used with a PUT request.
-The data is example data from a WebKit PUT request
+The data is example data from a WebKit PUT request (without the headers)
 
 ```http
 PUT /api/user/ HTTP/1.1
