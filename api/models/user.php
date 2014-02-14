@@ -48,7 +48,7 @@ class User implements SimpleModel {
         $presentationIds = array();
         if(!empty($presentations)) {
             foreach($presentations as $presentation) {
-                $presentationIds[] = (string) $presentation['id'];
+                $presentationIds[] = $presentation['id'];
             }
         }
 

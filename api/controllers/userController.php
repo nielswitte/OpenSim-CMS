@@ -52,4 +52,24 @@ class UserController {
         }
         return $results;
     }
+
+
+    /**
+     * Creates a new user with the given parameters
+     *
+     * @param String $firstName
+     * @param String $lastName
+     * @param String $email
+     * @param String $password
+     * @param Integer $start_region_x
+     * @param Integer $start_region_y
+     * @return Boolean
+     */
+    public function createUser($firstName, $lastName, $email, $password, $start_region_x = 128, $start_region_y = 128) {
+        if ($firstName) {
+            throw new Exception("Not implemented yet", 4);
+        }
+
+        return true;
+    }
 }

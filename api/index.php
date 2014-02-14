@@ -28,24 +28,20 @@ try {
                         $data['ownerUuid']          = $presentation->getOwnerUuid();
                         $slides     = array();
                         $openSim    = array();
+                        $x          = 1;
                         foreach($presentation->getSlides() as $slide) {
-                            $slides[] = array(
-                                            'number'        => (string) $slide->getNumber(),
+                            $slides[$x] = array(
+                                            'number'        => $slide->getNumber(),
+                                            'url'           => $presentation->getApiUrl() .'slide/'.  $slide->getNumber() .'/',
                                             'uuid'          => $slide->getUuid(),
                                             'uuidUpdated'   => $slide->getUuidUpdated(),
-                                            'uuidExpired'   => (string) $slide->isUuidExpired(),
-                                            'url'           => $presentation->getApiUrl() .'slide/'.  $slide->getNumber() .'/'
+                                            'uuidExpired'   => $slide->isUuidExpired()
                                     );
-                            if(Helper::isValidUuid($slide->getUuid()) && !$slide->isUuidExpired()) {
-                                $openSim[] = $slide->getUuid();
-                            } else {
-                                $openSim[] = $presentation->getApiUrl() .'slide/'.  $slide->getNumber() .'/';
-                            }
+                            $x++;
                         }
 
                         $data['slides']             = $slides;
-                        $data['openSim']            = $openSim;
-                        $data['slidesCount']        = (string) $presentation->getNumberOfSlides();
+                        $data['slidesCount']        = $presentation->getNumberOfSlides();
                         $data['creationDate']       = $presentation->getCreationDate();
                         $data['modificationDate']   = $presentation->getModificationDate();
                         $result = $data;
@@ -53,6 +49,7 @@ try {
                     } else {
                         $presentation   = new Presentation($parameters[1], $parameters[3]);
                         $slidePath      = $presentation->getPath() . DS . $presentation->getCurrentSlide() .'.jpg';
+
                         if(file_exists($slidePath)) {
 
                             // Run post or get requests
@@ -141,9 +138,9 @@ if($result != '') {
 
     // Output to human readable or compact fast parsable code?
     if(isset($headers['User-Agent'])) {
-        echo stripslashes(Helper::jsonFormat(json_encode($result)));
+        echo json_encode($result, JSON_PRETTY_PRINT);
     } else {
-        echo stripslashes(json_encode($result));
+        echo json_encode($result);
     }
 }
 

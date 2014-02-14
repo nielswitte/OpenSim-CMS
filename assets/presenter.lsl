@@ -1,14 +1,23 @@
 /**
  * Makes a image presentation screen of any surface.
- * Uses JSON to retrieve presentation data from server
+ * Uses JSON to retrieve presentation data from server and store it
+ * in a temporary cache
+ *
+ * Do not forget to enable the following settings in your OpenSim configuration
+ * For loading dynamic textures and enable JSON support:
+ *	[XEngine]
+ *      AllowOSFunctions = true
+ *		AllowMODFunctions = true
+ *	[JsonStore]
+ *      Enabled = true
  *
  * @author Niels Witte
- * @date Febraury 11th, 2014
+ * @date February 11th, 2014
  * @version 0.2
  */
 // Config values
-string serverUrl = "http://127.0.0.1:62535/CMS/api";
-integer debug = 1;				// Enables showing debuggin comments
+string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
+integer debug = 1;				// Enables showing debugging comments
 
 // Some general parameters
 integer mListener;				// The main listener
@@ -17,11 +26,12 @@ key userUuid;                	// The toucher's UUID
 key objectUuid;                	// The object's UUID
 integer channel = 7;        	// The channel to be used
 integer media = 0;            	// Media type [0 = off, 1 = presentation]
+
 // Presentation stuff
 string presentationId;        	// The Id of the presentation
 string presentationTitle;    	// Title of the presentation
-integer slide = 0;            	// Slide number (starts at 0)
-integer totalslides = 0;    	// Total numnber of slides
+integer slide = 1;            	// Slide number (starts at 1)
+integer totalslides = 0;    	// Total number of slides
 list slides;                	// List with all slides
 list textureCache;				// Cache the textures to only require loading once
 
@@ -29,12 +39,20 @@ list textureCache;				// Cache the textures to only require loading once
 key http_request_id;        	// HTTP Request for loading presentation
 key http_request_user;			// HTTP Request for loading user data
 key http_request_set;			// HTTP Request to set UUID of object for future use
+
 // Menu's
 string mainNavigationText			= "What type of content do you want to use?";
-list mainNavigationButtons			= ["Presentation", "Video"];
-string presentationNavigationText 	= "Slideshow navigation";
+list mainNavigationButtons			= ["Presentation", "Video", "Quit"];
+string presentationNavigationText 	= "Slide show navigation";
 list presentationNavigationButtons 	= ["First", "Back", "Next", "Quit", "New"];
 
+/**
+ * Opens a dialog in OpenSim for the given user with a text message and a list of buttons
+ *
+ * @param key userUuid - UUID of the user to display this dialog to
+ * @param string inputString - Text to display in the dialog
+ * @param list inputList - List with buttons to display
+ */
 open_menu(key inputKey, string inputString, list inputList) {
     gListener = llListen(channel, "", inputKey, "");
     // Send a dialog to that person. We'll use a fixed negative channel number for simplicity
@@ -42,13 +60,20 @@ open_menu(key inputKey, string inputString, list inputList) {
     llSetTimerEvent(300.0);
 }
 
+/**
+ * Closes the menu and removes the listener to save memory
+ */
 close_menu() {
     llSetTimerEvent(0.0);// you can use 0 as well to save memory
     llListenRemove(gListener);
+    llListenRemove(mListener);
 }
 
 /**
- * Function to validate keys
+ * Function to validate a key
+ *
+ * @param key in - Key to validate
+ * @return boolean - 1 if valid key and NULL_KEY 2 if valid and not NULL_KEY, else 0
  */
 integer isKey(key in) {//by: Strife Onizuka
     if(in) return 2;          // key is valid AND not equal NULL_KEY; the distinction is important in some cases (return value of 2 is still evaluated as unary boolean TRUE)
@@ -56,40 +81,12 @@ integer isKey(key in) {//by: Strife Onizuka
 }
 
 /**
- * Searches JSON string for value of given key
- * Make sure all JSON values are strings or arrays (surrounded by "")
+ * Sets the UUID of the given element
  *
- * @param string json - json string to search in
- * @param string search - key to search for
- * @returns string - Null on error
+ * @param string type - [slide]
+ * @param integer id - number of the element, for example slide number
+ * @param key uuid - the element's UUID
  */
-string get_json_value(string json, string search) {
-    string result;
-    // Search for key
-    integer start = llSubStringIndex(json, search + "\"");
-    // After the key is found, strip everything before the key and include the leading " and tailing " ":"
-    // starts counting at 0, hence the +4 - 1 = +3)
-    if(start > -1) {
-        start = (start + llStringLength(search) + 3);
-       // JSON value is an array
-       if(llGetSubString(json, (start-1), (start-1)) == "[") {
-            string remain = llGetSubString(json, (start-1), -1);
-            // Search end of value
-            integer end = llSubStringIndex(remain, "]");
-            result = llGetSubString(remain, 0, end);
-        // JSON value is a string
-        } else {
-            string remain = llGetSubString(json, start, -1);
-            // Search end of value
-            integer end = llSubStringIndex(remain, "\"");
-            result = llGetSubString(remain, 0, (end - 1));
-        }
-    } else {
-        result = "Null";
-    }
-    return result;
-}
-
 set_uuid_of_object(string type, integer id, key uuid) {
 	if(type == "slide") {
 		if(debug) llInstantMessage(userUuid, "[Debug] Update slide: "+ id + " to UUID:"+ uuid);
@@ -99,6 +96,9 @@ set_uuid_of_object(string type, integer id, key uuid) {
 	}
 }
 
+/**
+ * Load the user's information and with it the user's presentations
+ */
 load_users_presentations() {
 	llInstantMessage(userUuid, "Searching for your presentations... Please be patient");
 	http_request_user = llHTTPRequest(serverUrl +"/user/"+ userUuid +"/", [], "");
@@ -111,9 +111,9 @@ load_users_presentations() {
 nav_slide(integer next) {
 
     // Check if slide is not out of bounds
-    if(next < 0) { next = 0; }
+    if(next < 1) { next = 1; }
     // Allow totalslides+1 for black
-    if(next >= totalslides) {
+    if(next > totalslides) {
         slide = totalslides;
         llSetText("Presentation Ended", <0,0,1>, 1.0);
         llSetColor(ZERO_VECTOR, ALL_SIDES);
@@ -133,12 +133,12 @@ nav_slide(integer next) {
         // Check if texture is found in cache, only required on first usage
         if(res > -1) {
         	string texture = llList2String(textureCache, res+2);
-        	if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by uuid from local cache (" + texture +")");
+        	if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by local uuid from cache (" + texture +")");
         	llSetTexture(texture, ALL_SIDES);
 
     	// Check if requested image has a valid UUID in the database
         } else if(isKey(url) == 2 && llGetSubString(url, 0, 3) != "http") {
-        	if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by uuid from remote cache (" + url +")");
+        	if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by remote uuid from cache (" + url +")");
         	llSetTexture(url, ALL_SIDES);
     	// Load texture from remote server
         } else {
@@ -161,12 +161,17 @@ nav_slide(integer next) {
         	set_uuid_of_object("slide",  slide, texture);
         }
 
-        llSetText("Slide "+ (slide + 1) +" of "+ totalslides, <0,0,1>, 1.0);
+        llSetText("Slide "+ (slide) +" of "+ totalslides, <0,0,1>, 1.0);
     }
 }
 
-
+/**
+ * The default state, when the object is turned on, but no type of content is selected
+ */
 default {
+    /**
+     * Actions performed when entering the default state
+     */
     state_entry() {
         // Message the surroundings
         llSay(0, "turning on!");
@@ -176,6 +181,9 @@ default {
         llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
     }
 
+    /**
+     * Actions performed when user touches the object
+     */
     touch_start(integer totalNumber) {
         // Close any open menu's
         close_menu();
@@ -195,7 +203,6 @@ default {
 
     /**
      * Listen and fetch certain commands
-     *
      */
     listen(integer channel, string name, key id, string message) {
     	list commands = llParseString2List(message, " ", []);
@@ -206,16 +213,28 @@ default {
 			llInstantMessage(userUuid, "Entering video mode");
 		} else if(llList2String(commands, 0) == "UUID") {
 			llInstantMessage(userUuid, "Object's UUID is: "+ objectUuid);
+        // Shutdown
+        } else if(llList2String(commands, 0) == "Quit") {
+            media = 0;
+            // Close any open menu's
+            close_menu();
+            state off;
 		} else {
 
 		}
     }
 
+    /**
+     * Actions performed when timer is finished
+     */
     timer() {
         close_menu();
     }
 }
 
+/**
+ * State of the object when presentation mode is selected
+ */
 state presentation {
     /**
      * Listen and fetch certain commands
@@ -253,7 +272,7 @@ state presentation {
                 open_menu(userUuid, presentationNavigationText, presentationNavigationButtons);
             // First Slide
             } else if(llList2String(commands, 0) == "First") {
-                nav_slide(0);
+                nav_slide(1);
                 open_menu(userUuid, presentationNavigationText, presentationNavigationButtons);
             // Invalid command
             } else {
@@ -262,6 +281,9 @@ state presentation {
         }
     }
 
+    /**
+     * Actions to be taken when a HTTP request gets a response
+     */
     http_response(key request_id, integer status, list metadata, string body) {
     	// Catch errors
     	if(status != 200) {
@@ -275,22 +297,42 @@ state presentation {
     		}
     		return;
     	}
+
 		// Loaded presentation
         if (request_id == http_request_id) {
-	        string json_slides  = get_json_value(body, "openSim");
-	        slides              = llParseString2List(json_slides, ["\",\"", "\"", "[", "]"], []);
-	        totalslides         = (integer)get_json_value(body, "slidesCount");
-	        presentationTitle   = get_json_value(body, "title");
+            // Parse the returned body to JSON
+            key json_body       = JsonCreateStore(body);
+            string slides_body  = JsonGetJson(json_body, "slides");
+            // Parse the slides section
+            key json_slides     = JsonCreateStore(slides_body);
+            integer x;
+            integer length      = (integer) JsonGetValue(json_body, "slidesCount");
+            // Get from each slide the URL or the UUID
+            for (x = 0; x <= length; x++) {
+                // UUID set and not expired?
+                if(JsonGetValue(json_slides, "{"+ x +"}.{uuid}") != "0" && JsonGetValue(json_slides, "{"+ x +"}.{uuidExpired}") == "0") {
+                    slides += [(key) JsonGetValue(json_slides, "{"+ x +"}.{uuid}")];
+                // Use URL
+                } else {
+                    slides += [JsonGetValue(json_slides, "{"+ x +"}.{url}")];
+                }
+            }
+
+            // Count the slides
+	        totalslides        = (integer)JsonGetValue(json_body, "slidesCount");
+            // Get presentation title
+            presentationTitle  = JsonGetValue(json_body, "title");
 	        // Show loaded message
 	        llInstantMessage(userUuid, "Loaded presentation: "+ presentationTitle);
 	        // loads the first slide
-	        nav_slide(0);
+	        nav_slide(1);
 	        // Open navigation dialog
 	        open_menu(userUuid, presentationNavigationText, presentationNavigationButtons);
         // Loaded user's presentations
         } else if(request_id == http_request_user) {
-            integer presentationCount = 0;
-			string json_presentations  = get_json_value(body, "presentationIds");            
+            key json_body               = JsonCreateStore(body);
+            integer presentationCount   = 0;
+			string json_presentations   = JsonGetJson(json_body, "presentationIds");
             // Create buttons for max 12 presentations
             list presentationButtons;
             if(debug) llInstantMessage(userUuid, "[Debug] Found the following presentations : "+ (string) json_presentations);
@@ -305,7 +347,7 @@ state presentation {
     			integer x;
     			for (x = 0; x < llGetListLength(presentations) && x < 13; x++) {
     			    presentationButtons += "Load "+ llList2String(presentations, x);
-    			}			    
+    			}
             } else {
                 presentationButtons = ["Ok","Quit"];
             }
@@ -318,6 +360,9 @@ state presentation {
         }
     }
 
+    /**
+     * Initial actions when entering the presentation state
+     */
     state_entry() {
         // Close any open menu's
         close_menu();
@@ -331,6 +376,9 @@ state presentation {
         load_users_presentations();
     }
 
+    /**
+     * Actions performed when a user touches the object
+     */
     touch_start(integer totalNumber) {
         // Close any open menu's
         close_menu();
@@ -352,13 +400,21 @@ state presentation {
         }
     }
 
+    /**
+     * Actions performed when timer is finished
+     */
     timer() {
         close_menu();
     }
 }
 
-// Turn screen off
+/**
+ * State when object is turned off
+ */
 state off {
+    /**
+     * Actions performed when entering the off state
+     */
     state_entry() {
         llSetText("", <0,0,0>, 0);
         llSay(0, "turning off!");
@@ -373,6 +429,10 @@ state off {
         llListenRemove(mListener);
     }
 
+    /**
+     * Actions performed when user touches the object
+     * Turn it on!
+     */
     touch_start(integer totalNumber) {
         state default;
     }
