@@ -327,7 +327,7 @@ class MysqliDb {
             $this->_query .= ' WHERE ';
             foreach ($this->_where as $column => $value) {
                 // Determines what data type the where column is, for binding purposes.
-                $this->_whereTypeList .= $this->_determineType($value);
+                @$this->_whereTypeList .= $this->_determineType($value);
 
                 // Prepares the reset of the SQL query.
                 $this->_query .= ($column . ' = ? AND ');
