@@ -28,24 +28,20 @@ try {
                         $data['ownerUuid']          = $presentation->getOwnerUuid();
                         $slides     = array();
                         $openSim    = array();
+                        $x          = 1;
                         foreach($presentation->getSlides() as $slide) {
-                            $slides[] = array(
-                                            'number'        => (string) $slide->getNumber(),
+                            $slides[$x] = array(
+                                            'number'        => $slide->getNumber(),
+                                            'url'           => $presentation->getApiUrl() .'slide/'.  $slide->getNumber() .'/',
                                             'uuid'          => $slide->getUuid(),
                                             'uuidUpdated'   => $slide->getUuidUpdated(),
-                                            'uuidExpired'   => (string) $slide->isUuidExpired(),
-                                            'url'           => $presentation->getApiUrl() .'slide/'.  $slide->getNumber() .'/'
+                                            'uuidExpired'   => $slide->isUuidExpired()
                                     );
-                            if(Helper::isValidUuid($slide->getUuid()) && !$slide->isUuidExpired()) {
-                                $openSim[] = $slide->getUuid();
-                            } else {
-                                $openSim[] = $presentation->getApiUrl() .'slide/'.  $slide->getNumber() .'/';
-                            }
+                            $x++;
                         }
 
                         $data['slides']             = $slides;
-                        $data['openSim']            = $openSim;
-                        $data['slidesCount']        = (string) $presentation->getNumberOfSlides();
+                        $data['slidesCount']        = $presentation->getNumberOfSlides();
                         $data['creationDate']       = $presentation->getCreationDate();
                         $data['modificationDate']   = $presentation->getModificationDate();
                         $result = $data;
