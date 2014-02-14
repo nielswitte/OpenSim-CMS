@@ -33,7 +33,7 @@ To match an UUID of a user to the user in the CMS the following command can be u
 Some form of authentication will be added later on. By sending a POST request to the server with the CMS
 username as parameter and the UUID of the user in OpenSim.
 
-```
+```http
 POST /api/user/<UUID>/
 
 userName=<USERNAME>
@@ -44,7 +44,7 @@ userName=<USERNAME>
 To create a new user the following API url can be used with a PUT request.
 The data is example data from a WebKit PUT request
 
-```
+```http
 PUT /api/user/
 
 ------WebKitFormBoundaryDLxtrbcYE4nDTSu1
@@ -92,7 +92,7 @@ failure. Example of a failure is illustrated below:
 To retrieve a specific presentation use the following command and replace the id with the number of the
 presentation you want to get. The trailing / is optional.
 
-```
+```http
 GET /api/presentation/<ID>/
 ```
 
@@ -127,7 +127,7 @@ This is done by using the POST function for a single slide (see below).
 
 The given URL will provide a jpg of the slide resized and centered at 1024x1024 with a black background.
 
-```
+```http
 GET /api/presentation/<ID>/slide/<SLIDE #>/
 ```
 
@@ -135,7 +135,7 @@ When an slide has been processed by OpenSim an UUID is generated for the texture
 the slide to speed up future use. The cache periode is set in the `OpenSim.ini` configuration and needs to be
 matched by the `OS_ASSET_CACHE_EXPIRES` value in `config.php`.
 
-```
+```http
 POST /api/presentation/<ID>/slide/<SLIDE #>/
 
 uuid=<UUID>

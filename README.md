@@ -15,14 +15,14 @@ by importing the `database.sql` file in the assets directory.
 OpenSim needs to be configured with the following settings:
 
 For loading dynamic textures:
-```
+```ini
 [XEngine]
     AllowOSFunctions = true
 ```
 
 Enable JSON support:
 
-```
+```ini
 [XEngine]
     AllowMODFunctions = true
 [JsonStore]
@@ -31,7 +31,7 @@ Enable JSON support:
 
 For RemoteAdmin functions:
 
-```
+```ini
 [RemoteAdmin]
     enabled = true
     port = 9000
