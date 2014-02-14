@@ -27,6 +27,8 @@ Example of output
 }
 ```
 
+### Update a user's UUID
+
 To match an UUID of a user to the user in the CMS the following command can be used.
 Some form of authentication will be added later on. By sending a POST request to the server with the CMS
 username as parameter and the UUID of the user in OpenSim.
@@ -35,6 +37,54 @@ username as parameter and the UUID of the user in OpenSim.
 POST /api/user/<UUID>/
 
 userName=<USERNAME>
+```
+
+### Create a new user
+
+To create a new user the following API url can be used with a PUT request.
+The data is example data from a WebKit PUT request
+
+```
+PUT /api/user/
+
+------WebKitFormBoundaryDLxtrbcYE4nDTSu1
+Content-Disposition: form-data; name="firstName"
+
+<FirstName>
+------WebKitFormBoundaryDLxtrbcYE4nDTSu1
+Content-Disposition: form-data; name="lastName"
+
+<LastName>
+------WebKitFormBoundaryDLxtrbcYE4nDTSu1
+Content-Disposition: form-data; name="password"
+
+<UserPassword>
+------WebKitFormBoundaryDLxtrbcYE4nDTSu1
+Content-Disposition: form-data; name="email"
+
+<User@Email.Address>
+------WebKitFormBoundaryDLxtrbcYE4nDTSu1
+Content-Disposition: form-data; name="startRegionX"
+
+<StartX>
+------WebKitFormBoundaryDLxtrbcYE4nDTSu1
+Content-Disposition: form-data; name="startRegionY"
+
+<StartY>
+------WebKitFormBoundaryDLxtrbcYE4nDTSu1--
+```
+
+This request will return a JSON message with the result. It contains two or three elements.
+1) success, a boolean wheter or not the request was processed successful. 2) Optional, only used when
+the request is not successful. 3) the UUID of the newly created user, which is filled with zeros on
+failure. Example of a failure is illustrated below:
+
+```json
+{
+    "success": false,
+    "error": "failed to create new user <FirstName> <LastName>",
+    "avatar_uuid": "00000000-0000-0000-0000-000000000000"
+}
 ```
 
 ## Presentation
