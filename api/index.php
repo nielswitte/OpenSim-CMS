@@ -7,6 +7,8 @@ $result = '';
 try {
 	// Input
 	$get    = filter_input(INPUT_GET, '_url', FILTER_SANITIZE_SPECIAL_CHARS);
+    $put    = $_SERVER['REQUEST_METHOD'] === "PUT" ? TRUE : FALSE;
+    $post   = $_SERVER['REQUEST_METHOD'] === "POST" ? TRUE : FALSE;
 
 	if($get !== FALSE && $get != '') {
 		$parameters = explode('/', trim($get, '/'));
@@ -32,7 +34,7 @@ try {
                         foreach($presentation->getSlides() as $slide) {
                             $slides[$x] = array(
                                             'number'        => $slide->getNumber(),
-                                            'url'           => $presentation->getApiUrl() .'slide/'.  $slide->getNumber() .'/',
+                                            'image'         => $presentation->getApiUrl() .'slide/'.  $slide->getNumber() .'/image/',
                                             'uuid'          => $slide->getUuid(),
                                             'uuidUpdated'   => $slide->getUuidUpdated(),
                                             'uuidExpired'   => $slide->isUuidExpired()
@@ -45,41 +47,55 @@ try {
                         $data['creationDate']       = $presentation->getCreationDate();
                         $data['modificationDate']   = $presentation->getModificationDate();
                         $result = $data;
+// Slide details ----------------------------------------------------------------------------------
+                    } elseif(count($parameters) == 4) {
+                        // Run post or get requests
+                        $postUuid = filter_input(INPUT_POST, 'uuid', FILTER_SANITIZE_SPECIAL_CHARS);
+
+                        // Get presentation and slide details
+                        $presentation   = new Presentation($parameters[1]);
+                        $slide          = $presentation->getSlide($parameters[3]);
+
+                        // Update UUID of image
+                        if($postUuid !== FALSE && $postUuid !== NULL) {
+                            require_once dirname(__FILE__) .'/controllers/slideController.php';
+                            $slide      = $presentation->getSlide($parameters[3]);
+                            $slideCtrl  = new SlideController($slide);
+                            $data       = $slideCtrl->setUuid($postUuid);
+                            $result     = $data;
+                        } else {
+                            $data           = array(
+                                                'number'        => $slide->getNumber(),
+                                                'image'         => $presentation->getApiUrl() .'slide/'.  $slide->getNumber() .'/image/',
+                                                'uuid'          => $slide->getUuid(),
+                                                'uuidUpdated'   => $slide->getUuidUpdated(),
+                                                'uuidExpired'   => $slide->isUuidExpired()
+                                            );
+                            $result = $data;
+                        }
 // Slide image ------------------------------------------------------------------------------------
-                    } else {
+                    } elseif(count($parameters) == 5 && $parameters[4] == 'image') {
+                        // Get presentation and slide details
                         $presentation   = new Presentation($parameters[1], $parameters[3]);
                         $slidePath      = $presentation->getPath() . DS . $presentation->getCurrentSlide() .'.jpg';
 
+                        // Show image if exists
                         if(file_exists($slidePath)) {
-
-                            // Run post or get requests
-                            $postUuid = filter_input(INPUT_POST, 'uuid', FILTER_SANITIZE_SPECIAL_CHARS);
-
-                            // Update UUID of image
-                            if($postUuid !== FALSE && $postUuid !== NULL) {
-                                require_once dirname(__FILE__) .'/controllers/slideController.php';
-                                $slide      = $presentation->getSlide($parameters[3]);
-                                $slideCtrl  = new SlideController($slide);
-                                $data       = $slideCtrl->setUuid($postUuid);
-                                echo stripslashes(json_encode($data));
-                            // Load image
-                            } else {
-                                require_once dirname(__FILE__) .'/../includes/class.Images.php';
-                                $resize = new Image($slidePath);
-                                // resize when needed
-                                if($resize->getWidth() > IMAGE_WIDTH || $resize->getHeight() > IMAGE_HEIGHT) {
-                                    $resize->resize(1024,1024,'fit');
-                                    $resize->save($presentation->getSlideId(), FILES_LOCATION . DS . PRESENTATIONS . DS . $presentation->getPresentationId(), 'jpg');
-                                }
-                                unset($resize);
-
-                                // Fill remaining of image with black
-                                $image = new Image(FILES_LOCATION . DS . PRESENTATIONS . DS .'background.jpg');
-                                $image->addWatermark($slidePath);
-                                $image->writeWatermark(100, 0, 0, 'c', 'c');
-                                $image->resize(1024,1024,'fit');
-                                $image->display();
+                            require_once dirname(__FILE__) .'/../includes/class.Images.php';
+                            $resize = new Image($slidePath);
+                            // resize when needed
+                            if($resize->getWidth() > IMAGE_WIDTH || $resize->getHeight() > IMAGE_HEIGHT) {
+                                $resize->resize(1024,1024,'fit');
+                                $resize->save($presentation->getSlideId(), FILES_LOCATION . DS . PRESENTATIONS . DS . $presentation->getPresentationId(), 'jpg');
                             }
+                            unset($resize);
+
+                            // Fill remaining of image with black
+                            $image = new Image(FILES_LOCATION . DS . PRESENTATIONS . DS .'background.jpg');
+                            $image->addWatermark($slidePath);
+                            $image->writeWatermark(100, 0, 0, 'c', 'c');
+                            $image->resize(1024,1024,'fit');
+                            $image->display();
                         } else {
                             throw new Exception("Requested slide does not exists", 5);
                         }
@@ -90,9 +106,23 @@ try {
             case "user":
                 require_once dirname(__FILE__) .'/models/user.php';
 
-                // Get user data
-                if(User::validateParameters($parameters)) {
+                // Create a user
+                if($put) {
+                    require_once dirname(__FILE__) .'/controllers/userController.php';
+                    $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
+                    $parsedUserData = (Helper::parsePutRequest($putUserData));
+                    // Check if the parameters are valid for creating a user
+                    if(UserController::validateParametersCreate($parsedUserData)) {
+                        $userCtrl       = new UserController();
+                        // Do request and fetch result
+                        $data           = $userCtrl->createUser($parsedUserData['firstName'], $parsedUserData['lastName'], $parsedUserData['email'], $parsedUserData['password'], $parsedUserData['startRegionX'], $parsedUserData['startRegionY']);
+                        // Do something with data?
 
+                        // Set result
+                        $result = $data;
+                    }
+                // Get data of specific user
+                } elseif(User::validateParameters($parameters)) {
                     // Run post or get requests
                     $postUserName   = filter_input(INPUT_POST, 'userName', FILTER_SANITIZE_SPECIAL_CHARS);
 

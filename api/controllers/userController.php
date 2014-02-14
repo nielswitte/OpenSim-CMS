@@ -13,16 +13,21 @@ if(EXEC != 1) {
 class UserController {
     private $user;
 
-    public function __construct($user = NULL) {
+    /**
+     * Constructs a new controller for the given user
+     *
+     * @param User $user
+     */
+    public function __construct(User $user = NULL) {
         $this->user = $user;
     }
 
     /**
      * Sets the user's UUID and matches it to the username
      *
-     * @param String $username - User name to match
-     * @param String $uuid - UUID to use
-     * @return Boolean
+     * @param string $username - User name to match
+     * @param string $uuid - UUID to use
+     * @return boolean
      * @throws Exception
      */
     public function setUuid($username, $uuid) {
@@ -57,19 +62,57 @@ class UserController {
     /**
      * Creates a new user with the given parameters
      *
-     * @param String $firstName
-     * @param String $lastName
-     * @param String $email
-     * @param String $password
-     * @param Integer $start_region_x
-     * @param Integer $start_region_y
-     * @return Boolean
+     * @param string $firstName
+     * @param string $lastName
+     * @param string $email
+     * @param string $password
+     * @param integer $start_region_x
+     * @param integer $start_region_y
+     * @return boolean
      */
     public function createUser($firstName, $lastName, $email, $password, $start_region_x = 128, $start_region_y = 128) {
-        if ($firstName) {
-            throw new Exception("Not implemented yet", 4);
-        }
+        $raXML = new OpenSimRPC();
+        $parameters = array(
+            'password'          => OS_REMOTE_ADMIN_PASSWORD,
+            'user_firstname'    => $firstName,
+            'user_lastname'     => $lastName,
+            'user_password'     => $password,
+            'user_email'        => $email,
+            'start_region_x'    => $start_region_x,
+            'start_region_y'    => $start_region_y
+        );
 
-        return true;
+        $result = $raXML->call('admin_create_user', $parameters);
+
+        return $result;
+    }
+
+    /**
+     * Checks if the given parameters are valid for a good request
+     *
+     * @param array $parameters
+     * @return boolean
+     * @throws Exception
+     */
+    public static function validateParametersCreate($parameters) {
+        $result = FALSE;
+        if(count($parameters) != 6) {
+            throw new Exception("Invalid number of parameters", 4);
+        } elseif(!isset($parameters['firstName'])) {
+            throw new Exception("Missing parameter firstName", 5);
+        } elseif(!isset($parameters['lastName'])) {
+            throw new Exception("Missing parameter lastName", 6);
+        } elseif(!isset($parameters['password'])) {
+            throw new Exception("Missing parameter password", 7);
+        } elseif(!isset($parameters['email'])) {
+            throw new Exception("Missing parameter email", 8);
+        } elseif(!isset($parameters['startRegionX'])) {
+            throw new Exception("Missing parameter startRegionX", 9);
+        } elseif(!isset($parameters['startRegionY'])) {
+            throw new Exception("Missing parameter startRegionY", 10);
+        } else {
+            $result = TRUE;
+        }
+        return $result;
     }
 }

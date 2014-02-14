@@ -13,7 +13,7 @@
  *
  * @author Niels Witte
  * @date February 11th, 2014
- * @version 0.2
+ * @version 0.3
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
@@ -246,7 +246,7 @@ state presentation {
         if(llList2String(commands, 0) == "Load") {
             media = 1;
             // Output
-            llInstantMessage(userUuid, "Loading: "+ llList2String(commands, 1));
+            if(debug) llInstantMessage(userUuid, "[Debug] Loading presentation: "+ llList2String(commands, 1));
             // Sets presentation Id
             presentationId = llList2String(commands, 1);
             // Loads JSON from server
@@ -288,8 +288,7 @@ state presentation {
     	// Catch errors
     	if(status != 200) {
     		if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
-
-    		llInstantMessage(userUuid, "Request to server failed");
+            // Send a more specific and meaningful response to the user
     		if(request_id == http_request_user) {
     			llInstantMessage(userUuid, "User not found");
     		} else if(request_id == http_request_id) {
@@ -314,7 +313,7 @@ state presentation {
                     slides += [(key) JsonGetValue(json_slides, "{"+ x +"}.{uuid}")];
                 // Use URL
                 } else {
-                    slides += [JsonGetValue(json_slides, "{"+ x +"}.{url}")];
+                    slides += [JsonGetValue(json_slides, "{"+ x +"}.{image}")];
                 }
             }
 
@@ -343,18 +342,25 @@ state presentation {
 			    // Newest presentations first
 			    presentations = llListSort(presentations, 1, FALSE);
 
-                presentationCount  = llGetListLength(presentationButtons);
+                // Count presentations
+                presentationCount = llGetListLength(presentations);
+
+                // Create buttons for presentations
     			integer x;
-    			for (x = 0; x < llGetListLength(presentations) && x < 13; x++) {
+    			for (x = 0; x < presentationCount && x < 13; x++) {
     			    presentationButtons += "Load "+ llList2String(presentations, x);
     			}
+            // List with presentations is empty
             } else {
+                presentationCount = 0;
                 presentationButtons = ["Ok","Quit"];
             }
-            open_menu(userUuid, "Found "+ presentationCount +" presentation(s).\nShowing the latest 12 presentations below.\nCommand: '/"+ channel +" Load <#>' can be used to load a presentation that is not listed." , presentationButtons);
+            // Open presentation selection menu
+            open_menu(userUuid, "Found "+ presentationCount +" presentation(s).\nShowing only the latest 12 presentations below.\nCommand: '/"+ channel +" Load <#>' can be used to load a presentation that is not listed." , presentationButtons);
 		// Update slide uuid
 		} else if(request_id = http_request_set) {
 			if(debug) llInstantMessage(userUuid, "[Debug] UUID set for slide "+ slide +": "+ (string) body);
+        // HTTP response which isn't requested?
         } else {
         	return;
         }

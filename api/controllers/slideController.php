@@ -13,15 +13,20 @@ if(EXEC != 1) {
 class SlideController {
     private $slide;
 
-    public function __construct($slide) {
+    /**
+     * Constructs a new controller for the given slide
+     *
+     * @param Slide $slide
+     */
+    public function __construct(Slide $slide) {
         $this->slide = $slide;
     }
 
     /**
      * Updates the UUID of the slide to the given value
      *
-     * @param String $uuid
-     * @return Boolean
+     * @param string $uuid
+     * @return boolean
      * @throws Exception
      */
     public function setUuid($uuid) {
