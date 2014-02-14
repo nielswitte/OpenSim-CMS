@@ -13,7 +13,12 @@ if(EXEC != 1) {
 class SlideController {
     private $slide;
 
-    public function __construct($slide) {
+    /**
+     * Constructs a new controller for the given slide
+     *
+     * @param Slide $slide
+     */
+    public function __construct(Slide $slide) {
         $this->slide = $slide;
     }
 
