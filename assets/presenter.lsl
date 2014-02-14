@@ -42,7 +42,7 @@ key http_request_set;			// HTTP Request to set UUID of object for future use
 
 // Menu's
 string mainNavigationText			= "What type of content do you want to use?";
-list mainNavigationButtons			= ["Presentation", "Video"];
+list mainNavigationButtons			= ["Presentation", "Video", "Quit"];
 string presentationNavigationText 	= "Slide show navigation";
 list presentationNavigationButtons 	= ["First", "Back", "Next", "Quit", "New"];
 
@@ -66,6 +66,7 @@ open_menu(key inputKey, string inputString, list inputList) {
 close_menu() {
     llSetTimerEvent(0.0);// you can use 0 as well to save memory
     llListenRemove(gListener);
+    llListenRemove(mListener);
 }
 
 /**
@@ -125,19 +126,19 @@ nav_slide(integer next) {
         llSetTexture(TEXTURE_BLANK, ALL_SIDES);
         llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
         // Load slide
-        string url          = llList2String(slides, next-1);
+        string url          = llList2String(slides, next);
         string params       = "width: 1024,height:1024";
 
         integer res = llListFindList(textureCache, [presentationId, next]);
         // Check if texture is found in cache, only required on first usage
         if(res > -1) {
         	string texture = llList2String(textureCache, res+2);
-        	if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by uuid from local cache (" + texture +")");
+        	if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by local uuid from cache (" + texture +")");
         	llSetTexture(texture, ALL_SIDES);
 
     	// Check if requested image has a valid UUID in the database
         } else if(isKey(url) == 2 && llGetSubString(url, 0, 3) != "http") {
-        	if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by uuid from remote cache (" + url +")");
+        	if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by remote uuid from cache (" + url +")");
         	llSetTexture(url, ALL_SIDES);
     	// Load texture from remote server
         } else {
@@ -212,6 +213,12 @@ default {
 			llInstantMessage(userUuid, "Entering video mode");
 		} else if(llList2String(commands, 0) == "UUID") {
 			llInstantMessage(userUuid, "Object's UUID is: "+ objectUuid);
+        // Shutdown
+        } else if(llList2String(commands, 0) == "Quit") {
+            media = 0;
+            // Close any open menu's
+            close_menu();
+            state off;
 		} else {
 
 		}
@@ -293,11 +300,27 @@ state presentation {
 
 		// Loaded presentation
         if (request_id == http_request_id) {
-            key json_body      = JsonCreateStore(body);
-            key json_slides    = JsonGetJson(json_body, "openSim");
+            // Parse the returned body to JSON
+            key json_body       = JsonCreateStore(body);
+            string slides_body  = JsonGetJson(json_body, "slides");
+            // Parse the slides section
+            key json_slides     = JsonCreateStore(slides_body);
+            integer x;
+            integer length      = (integer) JsonGetValue(json_body, "slidesCount");
+            // Get from each slide the URL or the UUID
+            for (x = 0; x <= length; x++) {
+                // UUID set and not expired?
+                if(JsonGetValue(json_slides, "{"+ x +"}.{uuid}") != "0" && JsonGetValue(json_slides, "{"+ x +"}.{uuidExpired}") == "0") {
+                    slides += [(key) JsonGetValue(json_slides, "{"+ x +"}.{uuid}")];
+                // Use URL
+                } else {
+                    slides += [JsonGetValue(json_slides, "{"+ x +"}.{url}")];
+                }
+            }
 
-            slides             = llParseString2List(json_slides, ["\",\"", "\"", "[", "]"], []);
+            // Count the slides
 	        totalslides        = (integer)JsonGetValue(json_body, "slidesCount");
+            // Get presentation title
             presentationTitle  = JsonGetValue(json_body, "title");
 	        // Show loaded message
 	        llInstantMessage(userUuid, "Loaded presentation: "+ presentationTitle);
@@ -338,7 +361,7 @@ state presentation {
     }
 
     /**
-     * Initial actions when entering the state
+     * Initial actions when entering the presentation state
      */
     state_entry() {
         // Close any open menu's
