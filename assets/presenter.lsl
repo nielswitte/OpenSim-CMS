@@ -1,14 +1,23 @@
 /**
  * Makes a image presentation screen of any surface.
- * Uses JSON to retrieve presentation data from server
+ * Uses JSON to retrieve presentation data from server and store it
+ * in a temporary cache
+ *
+ * Do not forget to enable the following settings in your OpenSim configuration
+ * For loading dynamic textures and enable JSON support:
+ *	[XEngine]
+ *      AllowOSFunctions = true
+ *		AllowMODFunctions = true
+ *	[JsonStore]
+ *      Enabled = true
  *
  * @author Niels Witte
- * @date Febraury 11th, 2014
+ * @date February 11th, 2014
  * @version 0.2
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
-integer debug = 1;				// Enables showing debuggin comments
+integer debug = 1;				// Enables showing debugging comments
 
 // Some general parameters
 integer mListener;				// The main listener
@@ -17,11 +26,12 @@ key userUuid;                	// The toucher's UUID
 key objectUuid;                	// The object's UUID
 integer channel = 7;        	// The channel to be used
 integer media = 0;            	// Media type [0 = off, 1 = presentation]
+
 // Presentation stuff
 string presentationId;        	// The Id of the presentation
 string presentationTitle;    	// Title of the presentation
 integer slide = 1;            	// Slide number (starts at 1)
-integer totalslides = 0;    	// Total numnber of slides
+integer totalslides = 0;    	// Total number of slides
 list slides;                	// List with all slides
 list textureCache;				// Cache the textures to only require loading once
 
@@ -29,12 +39,20 @@ list textureCache;				// Cache the textures to only require loading once
 key http_request_id;        	// HTTP Request for loading presentation
 key http_request_user;			// HTTP Request for loading user data
 key http_request_set;			// HTTP Request to set UUID of object for future use
+
 // Menu's
 string mainNavigationText			= "What type of content do you want to use?";
 list mainNavigationButtons			= ["Presentation", "Video"];
-string presentationNavigationText 	= "Slideshow navigation";
+string presentationNavigationText 	= "Slide show navigation";
 list presentationNavigationButtons 	= ["First", "Back", "Next", "Quit", "New"];
 
+/**
+ * Opens a dialog in OpenSim for the given user with a text message and a list of buttons
+ *
+ * @param key userUuid - UUID of the user to display this dialog to
+ * @param string inputString - Text to display in the dialog
+ * @param list inputList - List with buttons to display
+ */
 open_menu(key inputKey, string inputString, list inputList) {
     gListener = llListen(channel, "", inputKey, "");
     // Send a dialog to that person. We'll use a fixed negative channel number for simplicity
@@ -42,19 +60,32 @@ open_menu(key inputKey, string inputString, list inputList) {
     llSetTimerEvent(300.0);
 }
 
+/**
+ * Closes the menu and removes the listener to save memory
+ */
 close_menu() {
     llSetTimerEvent(0.0);// you can use 0 as well to save memory
     llListenRemove(gListener);
 }
 
 /**
- * Function to validate keys
+ * Function to validate a key
+ *
+ * @param key in - Key to validate
+ * @return boolean - 1 if valid key and NULL_KEY 2 if valid and not NULL_KEY, else 0
  */
 integer isKey(key in) {//by: Strife Onizuka
     if(in) return 2;          // key is valid AND not equal NULL_KEY; the distinction is important in some cases (return value of 2 is still evaluated as unary boolean TRUE)
     return (in == NULL_KEY);  // key is valid AND equal to NULL_KEY (return 1 or TRUE), or is not valid (return 0 or FALSE)
 }
 
+/**
+ * Sets the UUID of the given element
+ *
+ * @param string type - [slide]
+ * @param integer id - number of the element, for example slide number
+ * @param key uuid - the element's UUID
+ */
 set_uuid_of_object(string type, integer id, key uuid) {
 	if(type == "slide") {
 		if(debug) llInstantMessage(userUuid, "[Debug] Update slide: "+ id + " to UUID:"+ uuid);
@@ -64,6 +95,9 @@ set_uuid_of_object(string type, integer id, key uuid) {
 	}
 }
 
+/**
+ * Load the user's information and with it the user's presentations
+ */
 load_users_presentations() {
 	llInstantMessage(userUuid, "Searching for your presentations... Please be patient");
 	http_request_user = llHTTPRequest(serverUrl +"/user/"+ userUuid +"/", [], "");
@@ -130,8 +164,13 @@ nav_slide(integer next) {
     }
 }
 
-
+/**
+ * The default state, when the object is turned on, but no type of content is selected
+ */
 default {
+    /**
+     * Actions performed when entering the default state
+     */
     state_entry() {
         // Message the surroundings
         llSay(0, "turning on!");
@@ -141,6 +180,9 @@ default {
         llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
     }
 
+    /**
+     * Actions performed when user touches the object
+     */
     touch_start(integer totalNumber) {
         // Close any open menu's
         close_menu();
@@ -160,7 +202,6 @@ default {
 
     /**
      * Listen and fetch certain commands
-     *
      */
     listen(integer channel, string name, key id, string message) {
     	list commands = llParseString2List(message, " ", []);
@@ -176,11 +217,17 @@ default {
 		}
     }
 
+    /**
+     * Actions performed when timer is finished
+     */
     timer() {
         close_menu();
     }
 }
 
+/**
+ * State of the object when presentation mode is selected
+ */
 state presentation {
     /**
      * Listen and fetch certain commands
@@ -227,6 +274,9 @@ state presentation {
         }
     }
 
+    /**
+     * Actions to be taken when a HTTP request gets a response
+     */
     http_response(key request_id, integer status, list metadata, string body) {
     	// Catch errors
     	if(status != 200) {
@@ -243,9 +293,9 @@ state presentation {
 
 		// Loaded presentation
         if (request_id == http_request_id) {
-            key json_body      = JsonCreateStore(body);	       
+            key json_body      = JsonCreateStore(body);
             key json_slides    = JsonGetJson(json_body, "openSim");
-            
+
             slides             = llParseString2List(json_slides, ["\",\"", "\"", "[", "]"], []);
 	        totalslides        = (integer)JsonGetValue(json_body, "slidesCount");
             presentationTitle  = JsonGetValue(json_body, "title");
@@ -259,7 +309,7 @@ state presentation {
         } else if(request_id == http_request_user) {
             key json_body               = JsonCreateStore(body);
             integer presentationCount   = 0;
-			string json_presentations   = JsonGetJson(json_body, "presentationIds");            
+			string json_presentations   = JsonGetJson(json_body, "presentationIds");
             // Create buttons for max 12 presentations
             list presentationButtons;
             if(debug) llInstantMessage(userUuid, "[Debug] Found the following presentations : "+ (string) json_presentations);
@@ -274,7 +324,7 @@ state presentation {
     			integer x;
     			for (x = 0; x < llGetListLength(presentations) && x < 13; x++) {
     			    presentationButtons += "Load "+ llList2String(presentations, x);
-    			}			    
+    			}
             } else {
                 presentationButtons = ["Ok","Quit"];
             }
@@ -287,6 +337,9 @@ state presentation {
         }
     }
 
+    /**
+     * Initial actions when entering the state
+     */
     state_entry() {
         // Close any open menu's
         close_menu();
@@ -300,6 +353,9 @@ state presentation {
         load_users_presentations();
     }
 
+    /**
+     * Actions performed when a user touches the object
+     */
     touch_start(integer totalNumber) {
         // Close any open menu's
         close_menu();
@@ -321,13 +377,21 @@ state presentation {
         }
     }
 
+    /**
+     * Actions performed when timer is finished
+     */
     timer() {
         close_menu();
     }
 }
 
-// Turn screen off
+/**
+ * State when object is turned off
+ */
 state off {
+    /**
+     * Actions performed when entering the off state
+     */
     state_entry() {
         llSetText("", <0,0,0>, 0);
         llSay(0, "turning off!");
@@ -342,6 +406,10 @@ state off {
         llListenRemove(mListener);
     }
 
+    /**
+     * Actions performed when user touches the object
+     * Turn it on!
+     */
     touch_start(integer totalNumber) {
         state default;
     }
