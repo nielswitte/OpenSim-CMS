@@ -5,27 +5,48 @@ The OpenSim-CMS communicates with OpenSim objects through an JSON-API, based on 
 ## Users
 
 User information can be accessed by using, the UUID of the user is based on the user's UUID in OpenSim:
+
 ```
 GET /api/user/<UUID>/
 ```
 
-To match an UUID of a user to the user in the CMS the following command can be used. 
-Some form of authentication will be added later on. By sending a POST request to the server with the CMS username as parameter and the UUID of the user in OpenSim.  
+Example of output
+
+```json
+{
+    "uuid": "0a1811f4-7174-4e42-8bb5-26ef78335407",
+    "userName": "testuser",
+    "firstName": "Test",
+    "lastName": "User",
+    "email": "testuser@email.com",
+    "presentationIds": [
+        "1",
+        "5",
+        "8"
+    ]
+}
+```
+
+To match an UUID of a user to the user in the CMS the following command can be used.
+Some form of authentication will be added later on. By sending a POST request to the server with the CMS username as parameter and the UUID of the user in OpenSim.
 
 ```
 POST /api/user/<UUID>/
 
 userName=<USERNAME>
-````
+```
 
 ## Presentations
 
 To retrieve a specific presentation use the following command and replace the id with the number of the
 presentation you want to get. The trailing / is optional.
+
 ```
 GET /api/presentation/<ID>/
-````
-Example of output when request is succesful:
+```
+
+Example of output when request is successful:
+
 ```json
 {
     "type": "presentation",
@@ -38,11 +59,11 @@ Example of output when request is succesful:
             "uuid": "1be74003-2d7c-4dbd-87c2-a1c95e0864e6",
             "uuidUpdated": "2014-02-13 14:55:27",
             "uuidExpired": "0",
-            "url": "http:\/\/localhost:80\/OpenSim-CMS\/api\/presentation\/1\/slide\/1\/"
+            "url": "http://localhost:80/OpenSim-CMS/api/presentation/1/slide/1/"
         },
-        
+
         (...)
-        
+
     ],
     "openSim": [
         "1be74003-2d7c-4dbd-87c2-a1c95e0864e6",
@@ -59,9 +80,9 @@ Example of output when request is succesful:
 The included openSim section will give an URL when the slide isn't matched to a UUID or the UUID is expired.
 The given URL will provide a jpg of the slide resized and centered at 1024x1024 with a black background.
 
-```
+```url
 GET /api/presentation/<ID>/slide/<SLIDE #>/
-````
+```
 
 When an slide has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with the slide to speed up future use. The cache periode is set in the `OpenSim.ini` configuration and needs to be matched by the `OS_ASSET_CACHE_EXPIRES` value in `config.php`.
 
@@ -69,4 +90,4 @@ When an slide has been processed by OpenSim an UUID is generated for the texture
 POST /api/presentation/<ID>/slide/<SLIDE #>/
 
 uuid=<UUID>
-````
+```
