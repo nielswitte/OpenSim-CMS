@@ -288,8 +288,7 @@ state presentation {
     	// Catch errors
     	if(status != 200) {
     		if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
-
-    		llInstantMessage(userUuid, "Request to server failed");
+            // Send a more specific and meaningful response to the user
     		if(request_id == http_request_user) {
     			llInstantMessage(userUuid, "User not found");
     		} else if(request_id == http_request_id) {
