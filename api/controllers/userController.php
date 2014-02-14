@@ -13,7 +13,12 @@ if(EXEC != 1) {
 class UserController {
     private $user;
 
-    public function __construct($user = NULL) {
+    /**
+     * Constructs a new controller for the given user
+     * 
+     * @param User $user
+     */
+    public function __construct(User $user = NULL) {
         $this->user = $user;
     }
 
@@ -66,10 +71,18 @@ class UserController {
      * @return Boolean
      */
     public function createUser($firstName, $lastName, $email, $password, $start_region_x = 128, $start_region_y = 128) {
-        if ($firstName) {
-            throw new Exception("Not implemented yet", 4);
-        }
+        $raXML = new OpenSimRPC();
+        $parameters = array(
+            'user_firstname'    => $firstName,
+            'user_lastname'     => $lastName,
+            'user_password'     => $password,
+            'user_email'        => $email,
+            'start_region_x'    => $start_region_x,
+            'start_region_y'    => $start_region_y
+        );
 
-        return true;
+        $result = $raXML->call(OS_REMOTE_ADMIN_PASSWORD, $parameters);
+
+        return $result;
     }
 }

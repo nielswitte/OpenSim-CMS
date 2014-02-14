@@ -48,6 +48,7 @@ class OpenSimRPC {
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
         $result = curl_exec($ch);
         curl_close($ch);
+
         return xmlrpc_decode($result);
     }
 
