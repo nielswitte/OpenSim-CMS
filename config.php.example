@@ -3,17 +3,17 @@
     // Server settings
     define('SERVER_PROTOCOL',           'http');                                // use HTTP or HTTPS
     define('SERVER_ADDRESS',            'localhost');                           // server address, can also be an IP
-    define('SERVER_PORT',               62535);                                 // server port
+    define('SERVER_PORT',               80);                                    // server port
     define('SERVER_ROOT',               '/CMS');                                // server root directory
 
     // OpenSim settings
-    define('OS_ASSET_CACHE_EXPIRES',    '48 hours');                            // needs to be the same as the OpenSim cache expiration time (used by strtotime)    define('OS_ASSET_CACHE_EXPIRES',    '48 hours');                            // needs to be the same as the OpenSim cache expiration time (used by strtotime)
-    define('OS_REMOTE_ADMIN_URL',       'http://127.0.0.1');                    // Remote admin URI (Be sure to enable Remote Admin in OpenSim.ini)
+    define('OS_ASSET_CACHE_EXPIRES',    '48 hours');                            // needs to be the same as the OpenSim cache expiration time (used by strtotime)
+    define('OS_REMOTE_ADMIN_URL',       'http://127.0.0.1');                    // Remote admin URL (Be sure to enable Remote Admin in OpenSim.ini)
     define('OS_REMOTE_ADMIN_PORT',      '');                                    // Port used by OpenSim for remote admin
     define('OS_REMOTE_ADMIN_PASSWORD',  '');                                    // OpenSim remote admin password
     define('OS_SERVER_URL',             'http://127.0.0.1:9000');               // Full URL to the OpenSim server
     define('OS_DEFAULT_REGION',         '');                                    // Name of the default OpenSim Region to use
-    define('OS_DEFAULT_REGION_UUID',    '');                                    // Region UUID
+    define('OS_DEFAULT_REGION_UUID',    '');                                    // Default region's UUID
 
     // Files settings
 	define('FILES_LOCATION',            'C:\\Soas\\www\\storage');              // Absolute path to storage directory
