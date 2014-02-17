@@ -41,9 +41,9 @@ POST /api/user/<UUID>/ HTTP/1.1
 userName=<USERNAME>
 ```
 
-### Create a new user
+### Create a new avatar
 
-To create a new user the following API url can be used with a PUT request.
+To create a new avatar the following API url can be used with a PUT request.
 The data is example data from a WebKit PUT request (without the headers)
 
 ```http
