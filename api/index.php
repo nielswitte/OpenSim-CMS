@@ -145,7 +145,7 @@ try {
                     if($postUserName !== FALSE && $postUserName !== NULL) {
                         $userCtrl   = new UserController();
                         $data       = $userCtrl->setUuid($postUserName, $parameters[1]);
-                        echo stripslashes(json_encode($data));
+                        $result     = $data;
                     // Load user information
                     } else {
                         $user = new User($parameters[1]);
@@ -157,6 +157,14 @@ try {
                         $data['lastName']           = $user->getLastName();
                         $data['email']              = $user->getEmail();
                         $data['presentationIds']    = $user->getPresentationIds();
+
+                        // Extra information
+                        if(OS_DB_ENABLED) {
+                            $data['online']             = $user->getOnline();
+                            $data['lastLogin']          = $user->getLastLogin();
+                            $data['lastPosition']       = $user->getLastPosition();
+                            $data['lastRegionUuid']     = $user->getLastRegionUuid();
+                        }
                         $result = $data;
                     }
                 }
@@ -168,16 +176,30 @@ try {
             break;
 // Region information *****************************************************************************
             case 'region':
-                // Get the default region information
-                if(isset($parameters[1]) && $parameters[1] == 'image') {
-                    header('Content-Type: image/jpeg');
-                    echo file_get_contents(OS_SERVER_URL .'/index.php?method=regionImage'. str_replace('-', '', OS_DEFAULT_REGION_UUID));
-                } else {
-                    $data['image']          = OS_SERVER_URL .'/index.php?method=regionImage'. str_replace('-', '', OS_DEFAULT_REGION_UUID);
-                    $data['uuid']           = OS_DEFAULT_REGION_UUID;
-                    $data['totalUsers']     = 0 .' (NOT IMPLEMENTED)';
-                    $data['usersOnline']    = 0 .' (NOT IMPLEMENTED)';
-                    $result = $data;
+                require_once dirname(__FILE__) .'/../models/region.php';
+                require_once dirname(__FILE__) .'/../controllers/regionController.php';
+                if(Region::validateParameters($parameters)) {
+                    $region     = new Region($parameters[1]);
+                    $regionCtrl = new regionController($region);
+
+                    // Get the default region information
+                    if(isset($parameters[2]) && $parameters[2] == 'image') {
+                        header('Content-Type: image/jpeg');
+                        echo file_get_contents(OS_SERVER_URL .'/index.php?method=regionImage'. str_replace('-', '', $parameters[1]));
+                    } else {
+                        $region->getInfoFromDatabase();
+                        $data['uuid']           = $region->getUuid();
+                        $data['name']           = $region->getName();
+                        $data['image']          = $region->getApiUrl() .'image/';
+                        $data['serverStatus']   = $region->getOnlineStatus() ? 1 : 0;
+
+                        // Additional information
+                        if(OS_DB_ENABLED) {
+                            $data['totalUsers']     = $region->getTotalUsers();
+                            $data['activeUsers']    = $region->getActiveUsers();
+                        }
+                        $result = $data;
+                    }
                 }
             break;
 			default:

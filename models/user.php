@@ -18,6 +18,10 @@ class User implements SimpleModel {
     private $firstName, $lastName;
     private $email;
     private $presentationIds;
+    private $online = FALSE;
+    private $lastPosition = '<0,0,0>';
+    private $lastLogin = 0;
+    private $lastRegionUuid = 0;
 
     /**
      * Construct a new User with the given UUID
@@ -59,6 +63,19 @@ class User implements SimpleModel {
             $this->lastName         = $user[0]['lastName'];
             $this->email            = $user[0]['email'];
             $this->presentationIds  = $presentationIds;
+
+            if(OS_DB_ENABLED) {
+                $osdb = Helper::getOSDB();
+                // Get user's additional information
+                $osdb->where("UserID", $osdb->escape($this->getUuid()));
+                $results = $osdb->get("GridUser", 1);
+
+                $this->online           = $results[0]['Online'];
+                $this->lastLogin        = $results[0]['Login'];
+                $this->lastPosition     = $results[0]['LastPosition'];
+                $this->lastRegionUuid   = $results[0]['LastRegionID'];
+
+            }
         } else {
             throw new Exception("User not found", 3);
         }
@@ -116,6 +133,42 @@ class User implements SimpleModel {
      */
     public function getPresentationIds() {
         return $this->presentationIds;
+    }
+
+    /**
+     * Returns the user's online status
+     *
+     * @return integer
+     */
+    public function getOnline() {
+        return $this->online == 'True' ? 1 : 0;
+    }
+
+    /**
+     * Returns the user's last login datetime
+     *
+     * @return string
+     */
+    public function getLastLogin() {
+        return $this->lastLogin > 0 ? date('Y-m-d H:i:s', $this->lastLogin) : 0;
+    }
+
+    /**
+     * Returns the user's last position as <x,y,z>
+     *
+     * @return string
+     */
+    public function getLastPosition() {
+        return $this->lastPosition;
+    }
+
+    /**
+     * Returns the region UUID of the last position
+     *
+     * @return string
+     */
+    public function getLastRegionUuid() {
+        return $this->lastRegionUuid;
     }
 
 	/**

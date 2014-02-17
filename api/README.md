@@ -29,6 +29,18 @@ Example of output
 }
 ```
 
+When OpenSim uses a MySQL database and the CMS is configered correctly, the following additional information is available
+when requesting a user. This is only shown when `OS_DB_ENABLED = TRUE`.
+
+```json
+{
+    "online": 1,
+    "lastLogin": "2014-02-17 13:39:28",
+    "lastPosition": "<123.6372, 124.9078, 26.18366>",
+    "lastRegionUuid": "72efcc78-2b1a-4571-8704-fea352998c0c"
+}
+```
+
 ### Update a user's UUID
 
 To match an UUID of a user to the user in the CMS the following command can be used.
@@ -200,3 +212,30 @@ uuid=<UUID>
 | Parameter         | Type      | Description                   |
 |-------------------|-----------|-------------------------------|
 | uuid              | string    | UUID of the slide to be saved |
+
+## Region
+To retrieve information about a region the following API can be used.
+
+```http
+GET /api/region/<REGION UUID>/ HTTP/1.1
+```
+This will return some basic information about the region, such as the name and a thumbnail.
+Most of the information is only available if OpenSim and the webserver run on the same device
+or if the MySQL database of OpenSim accepts remote connections.
+
+```json
+{
+    "uuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
+    "name": "The Grid",
+    "image": "http:\/\/localhost:80\/OpenSim-CMS\/api\/72efcc78-2b1a-4571-8704-fea352998c0c\/image\/",
+    "serverStatus": 1
+}
+```
+
+When `OS_DB_ENABLED` is `TRUE`, the following additional information is shown:
+```json
+{
+    "totalUsers": 2,
+    "activeUsers": 1
+}
+```
