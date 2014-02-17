@@ -114,7 +114,7 @@ nav_slide(integer next) {
     if(next < 1) { next = 1; }
     // Allow totalslides+1 for black
     if(next > totalslides) {
-        slide = totalslides;
+        slide = totalslides + 1;
         llSetText("Presentation Ended", <0,0,1>, 1.0);
         llSetColor(ZERO_VECTOR, ALL_SIDES);
     // All fine, show slide
@@ -307,13 +307,15 @@ state presentation {
             integer x;
             integer length      = (integer) JsonGetValue(json_body, "slidesCount");
             // Get from each slide the URL or the UUID
-            for (x = 0; x <= length; x++) {
+            for (x = 1; x <= length; x++) {
                 // UUID set and not expired?
                 if(JsonGetValue(json_slides, "{"+ x +"}.{uuid}") != "0" && JsonGetValue(json_slides, "{"+ x +"}.{uuidExpired}") == "0") {
                     slides += [(key) JsonGetValue(json_slides, "{"+ x +"}.{uuid}")];
+                    if(debug) llInstantMessage(userUuid, "[Debug] use UUID for slide: "+ x);
                 // Use URL
                 } else {
                     slides += [JsonGetValue(json_slides, "{"+ x +"}.{image}")];
+                    if(debug) llInstantMessage(userUuid, "[Debug] use URL for slide: "+ x);
                 }
             }
 
