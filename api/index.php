@@ -15,8 +15,8 @@ try {
 		switch ($parameters[0]) {
 // Presentation handlers **************************************************************************
 			case 'presentation':
-				require_once dirname(__FILE__) .'/models/presentation.php';
-                require_once dirname(__FILE__) .'/models/slide.php';
+				require_once dirname(__FILE__) .'/../models/presentation.php';
+                require_once dirname(__FILE__) .'/../models/slide.php';
 
 				if(Presentation::validateParameters($parameters)) {
 // Presentation JSON ------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ try {
 
                         // Update UUID of image
                         if($postUuid !== FALSE && $postUuid !== NULL) {
-                            require_once dirname(__FILE__) .'/controllers/slideController.php';
+                            require_once dirname(__FILE__) .'/../controllers/slideController.php';
                             $slide      = $presentation->getSlide($parameters[3]);
                             $slideCtrl  = new SlideController($slide);
                             $data       = $slideCtrl->setUuid($postUuid);
@@ -104,8 +104,8 @@ try {
 			break;
 // User data handlers *****************************************************************************
             case "user":
-                require_once dirname(__FILE__) .'/models/user.php';
-                require_once dirname(__FILE__) .'/controllers/userController.php';
+                require_once dirname(__FILE__) .'/../models/user.php';
+                require_once dirname(__FILE__) .'/../controllers/userController.php';
 
                 // Create a user
                 if($put) {
