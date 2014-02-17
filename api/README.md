@@ -217,7 +217,7 @@ uuid=<UUID>
 To retrieve information about a region the following API can be used.
 
 ```http
-GET /api/region/<REGION UUID>/ HTTP/1.1
+GET /api/region/<REGION-UUID>/ HTTP/1.1
 ```
 This will return some basic information about the region, such as the name and a thumbnail.
 Most of the information is only available if OpenSim and the webserver run on the same device
