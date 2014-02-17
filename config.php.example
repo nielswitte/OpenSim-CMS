@@ -8,9 +8,10 @@
 
     // OpenSim settings
     define('OS_ASSET_CACHE_EXPIRES',    '48 hours');                            // needs to be the same as the OpenSim cache expiration time (used by strtotime)    define('OS_ASSET_CACHE_EXPIRES',    '48 hours');                            // needs to be the same as the OpenSim cache expiration time (used by strtotime)
-    define('OS_REMOTE_ADMIN_URI',       'http://127.0.0.1');                    // Remote admin URI (Be sure to enable Remote Admin in OpenSim.ini)
+    define('OS_REMOTE_ADMIN_URL',       'http://127.0.0.1');                    // Remote admin URI (Be sure to enable Remote Admin in OpenSim.ini)
     define('OS_REMOTE_ADMIN_PORT',      '');                                    // Port used by OpenSim for remote admin
     define('OS_REMOTE_ADMIN_PASSWORD',  '');                                    // OpenSim remote admin password
+    define('OS_SERVER_URL',             'http://127.0.0.1:9000');               // Full URL to the OpenSim server
     define('OS_DEFAULT_REGION',         '');                                    // Name of the default OpenSim Region to use
     define('OS_DEFAULT_REGION_UUID',    '');                                    // Region UUID
 

@@ -66,15 +66,17 @@ Content-Disposition: form-data; name="email"
 
 <User@Email.Address>
 ------WebKitFormBoundaryDLxtrbcYE4nDTSu1
-Content-Disposition: form-data; name="startRegionX"
-
-<StartX>
-------WebKitFormBoundaryDLxtrbcYE4nDTSu1
-Content-Disposition: form-data; name="startRegionY"
-
-<StartY>
-------WebKitFormBoundaryDLxtrbcYE4nDTSu1--
 ```
+The parameters that can be used are the following:
+
+| Parameter         | Type      | Description                                                   |
+|-------------------|-----------|---------------------------------------------------------------|
+| firstName         | string    | agent's first name                                            |
+| lastName          | string    | agent's last name                                             |
+| email             | string    | agent's email address                                         |
+| password          | string    | agent's password (plain text)                                 |
+| startRegionX      | integer   | [Optional] X-coordinate of the start region (default: 0)      |
+| startRegionY      | integer   | [Optional] Y-coordinate of the start region (default: 0)      |
 
 This request will return a JSON message with the result. It contains two or three elements.
 1) success, a boolean wheter or not the request was processed successful. 2) Optional, only used when
@@ -127,7 +129,7 @@ this will return on success:
 }
 ```
 
-and on failure it will provide an error message, for example when the agent's uuid is not found:
+and on failure it will provide an error message, for example when the agent's uuid is not found or the user is offline:
 
 ```json
 {

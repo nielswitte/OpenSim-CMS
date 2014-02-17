@@ -166,10 +166,19 @@ try {
 
 
             break;
-// World map **************************************************************************************
-            case 'map':
-                $data['map']        = 'http://valentina.no-ip.info:9000/index.php?method=regionImage72efcc782b1a45718704fea352998c0c';
-                
+// Region information *****************************************************************************
+            case 'region':
+                // Get the default region information
+                if(isset($parameters[1]) && $parameters[1] == 'image') {
+                    header('Content-Type: image/jpeg');
+                    echo file_get_contents(OS_SERVER_URL .'/index.php?method=regionImage'. str_replace('-', '', OS_DEFAULT_REGION_UUID));
+                } else {
+                    $data['image']          = OS_SERVER_URL .'/index.php?method=regionImage'. str_replace('-', '', OS_DEFAULT_REGION_UUID);
+                    $data['uuid']           = OS_DEFAULT_REGION_UUID;
+                    $data['totalUsers']     = 0 .' (NOT IMPLEMENTED)';
+                    $data['usersOnline']    = 0 .' (NOT IMPLEMENTED)';
+                    $result = $data;
+                }
             break;
 			default:
 				// Other scenario
