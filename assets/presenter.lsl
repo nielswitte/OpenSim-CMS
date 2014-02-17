@@ -126,7 +126,7 @@ nav_slide(integer next) {
         llSetTexture(TEXTURE_BLANK, ALL_SIDES);
         llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
         // Load slide
-        string url          = llList2String(slides, next);
+        string url          = llList2String(slides, next-1);
         string params       = "width: 1024,height:1024";
 
         integer res = llListFindList(textureCache, [presentationId, next]);
@@ -308,14 +308,18 @@ state presentation {
             integer length      = (integer) JsonGetValue(json_body, "slidesCount");
             // Get from each slide the URL or the UUID
             for (x = 1; x <= length; x++) {
+                string slideUuid        = JsonGetValue(json_slides, "{"+ x +"}.{uuid}");
+                string slideUrl         = JsonGetValue(json_slides, "{"+ x +"}.{image}");
+                string slideExpired     = JsonGetValue(json_slides, "{"+ x +"}.{uuidExpired}");
+
                 // UUID set and not expired?
-                if(JsonGetValue(json_slides, "{"+ x +"}.{uuid}") != "0" && JsonGetValue(json_slides, "{"+ x +"}.{uuidExpired}") == "0") {
-                    slides += [(key) JsonGetValue(json_slides, "{"+ x +"}.{uuid}")];
-                    if(debug) llInstantMessage(userUuid, "[Debug] use UUID for slide: "+ x);
+                if(slideUuid != "0" && slideExpired == "0") {
+                    slides += [(key) slideUuid];
+                    if(debug) llInstantMessage(userUuid, "[Debug] use UUID ("+ slideUuid +") for slide: "+ x);
                 // Use URL
                 } else {
-                    slides += [JsonGetValue(json_slides, "{"+ x +"}.{image}")];
-                    if(debug) llInstantMessage(userUuid, "[Debug] use URL for slide: "+ x);
+                    slides += [slideUrl];
+                    if(debug) llInstantMessage(userUuid, "[Debug] use URL ("+ slideUrl +") for slide: "+ x);
                 }
             }
 
