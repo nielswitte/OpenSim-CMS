@@ -4,12 +4,15 @@ if(EXEC != 1) {
 }
 
 /**
- * Description of class
+ * Helper class to support the CMS and API
  *
- * @author Niels
+ * @author Niels Witte
+ * @version 0.1
+ * @date February 12th, 2014
  */
 class Helper {
     private static $db;
+    private static $osdb;
 
     /**
      * Validates the UUID v4 string provided
@@ -39,6 +42,25 @@ class Helper {
      */
     public static function getDB() {
         return self::$db;
+    }
+
+
+    /**
+     * Sets the database for OpenSim to use so it can be retrieved by other components
+     *
+     * @param MysqlDb $db
+     */
+    public static function setOSDB($db){
+        self::$osdb = $db;
+    }
+
+    /**
+     * Retuns the database class for OpenSim
+     *
+     * @return MysqlDb
+     */
+    public static function getOSDB() {
+        return self::$osdb;
     }
 
     /**
