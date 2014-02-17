@@ -105,22 +105,37 @@ try {
 // User data handlers *****************************************************************************
             case "user":
                 require_once dirname(__FILE__) .'/models/user.php';
+                require_once dirname(__FILE__) .'/controllers/userController.php';
 
                 // Create a user
                 if($put) {
-                    require_once dirname(__FILE__) .'/controllers/userController.php';
                     $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
                     $parsedUserData = (Helper::parsePutRequest($putUserData));
                     // Check if the parameters are valid for creating a user
                     if(UserController::validateParametersCreate($parsedUserData)) {
                         $userCtrl       = new UserController();
                         // Do request and fetch result
-                        $data           = $userCtrl->createUser($parsedUserData['firstName'], $parsedUserData['lastName'], $parsedUserData['email'], $parsedUserData['password'], $parsedUserData['startRegionX'], $parsedUserData['startRegionY']);
+                        $data = $userCtrl->createUser($parsedUserData);
+
+                        // Set result
+                        $result = $data;
+                    }
+                // Update the user
+                } elseif($post) {
+                    $postData = filter_input_array(INPUT_POST, FILTER_SANITIZE_SPECIAL_CHARS);
+
+                    // Teleport a user
+                    if(isset($parameters[1]) && $parameters[1] == 'teleport' && UserController::validateParametersTeleport($postData)) {
+                        $userCtrl       = new UserController();
+                        // Do request and fetch result
+
+                        $data           = $userCtrl->teleportUser($postData);
                         // Do something with data?
 
                         // Set result
                         $result = $data;
                     }
+
                 // Get data of specific user
                 } elseif(User::validateParameters($parameters)) {
                     // Run post or get requests
@@ -128,7 +143,6 @@ try {
 
                     // Set UUID of posted username
                     if($postUserName !== FALSE && $postUserName !== NULL) {
-                        require_once dirname(__FILE__) .'/controllers/userController.php';
                         $userCtrl   = new UserController();
                         $data       = $userCtrl->setUuid($postUserName, $parameters[1]);
                         echo stripslashes(json_encode($data));
@@ -147,6 +161,16 @@ try {
                     }
                 }
             break;
+// Video data handlers ****************************************************************************
+            case 'video':
+
+
+            break;
+// World map **************************************************************************************
+            case 'map':
+                $data['map']        = 'http://valentina.no-ip.info:9000/index.php?method=regionImage72efcc782b1a45718704fea352998c0c';
+                
+            break;
 			default:
 				// Other scenario
 			break;
@@ -154,7 +178,7 @@ try {
 	}
 // Catch any exception that occured
 } catch (Exception $e) {
-    header("HTTP/1.0 400 Bad Request");
+    header("HTTP/1.1 400 Bad Request");
     echo '<pre>';
 	echo $e;
     echo '</pre>';

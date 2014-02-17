@@ -11,6 +11,9 @@
     define('OS_REMOTE_ADMIN_URI',       'http://127.0.0.1');                    // Remote admin URI (Be sure to enable Remote Admin in OpenSim.ini)
     define('OS_REMOTE_ADMIN_PORT',      '');                                    // Port used by OpenSim for remote admin
     define('OS_REMOTE_ADMIN_PASSWORD',  '');                                    // OpenSim remote admin password
+    define('OS_DEFAULT_REGION',         '');                                    // Name of the default OpenSim Region to use
+    define('OS_DEFAULT_REGION_UUID',    '');                                    // Region UUID
+
     // Files settings
 	define('FILES_LOCATION',            'C:\\Soas\\www\\storage');              // Absolute path to storage directory
 	define('DS',                        '\\');                                  // Directory separator

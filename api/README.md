@@ -1,6 +1,8 @@
 OpenSim-CMS API
 ===============
 The OpenSim-CMS communicates with OpenSim objects through an JSON-API, based on REST.
+For valid requests the `HTTP/1.1 200 OK` is used, for failures an exception is thrown by
+the system and displayed as output with a `HTTP/1.1 400 Bad Request` header.
 
 ## User
 
@@ -95,6 +97,45 @@ second a failure because the user's first and lastname were already used.
 }
 ```
 
+### Teleport a user to a location
+To teleport a user you need at least the UUID of the user.
+All other parameters are optional and listed in the table below.
+
+```http
+POST /api/user/teleport/ HTTP/1.1
+
+agentUuid=<UUID>
+```
+| Parameter         | Type      | Description                                                   |
+|-------------------|-----------|---------------------------------------------------------------|
+| agentUuid         | string    | UUID of the agent                                             |
+| regionName        | string    | [Optional] The name of the region (default from config.php)   |
+| firstName         | string    | [Optional] agent's first name                                 |
+| lastName          | string    | [Optional] agent's last name                                  |
+| posX              | float     | [Optional] X-coordinate to teleport to (default: 128)         |
+| posY              | float     | [Optional] Y-coordinate to teleport to (default: 128)         |
+| posX              | float     | [Optional] Z-coordinate to teleport to (default: 25)          |
+| lookatX           | float     | [Optional] X-coordinate to look at (default: 0)               |
+| lookatY           | float     | [Optional] Y-coordinate to look at (default: 0)               |
+| lookatZ           | float     | [Optional] Z-coordinate to look at (default: 0)               |
+
+this will return on success:
+
+```json
+{
+    "success": true
+}
+```
+
+and on failure it will provide an error message, for example when the agent's uuid is not found:
+
+```json
+{
+    "success": false,
+    "error": "No agent with agent_id 44172f17-b7a8-4b30-a42e-9698b563789b found in this simulator"
+}
+```
+
 ## Presentation
 
 To retrieve a specific presentation use the following command and replace the id with the number of the
@@ -109,23 +150,23 @@ Example of output when request is successful:
 ```json
 {
     "type": "presentation",
-    "title": "Test Presentatie",
+    "title": "Test presentation title",
     "presentationId": "1",
     "ownerUuid": "3fedbbf8-465c-499c-9c2d-3fba9ed61701",
     "slides": {
         "1": {
-            "number": "1",
+            "number": 1,
             "image": "http://localhost:80/OpenSim-CMS/api/presentation/1/slide/1/image/",
             "uuid": "1be74003-2d7c-4dbd-87c2-a1c95e0864e6",
             "uuidUpdated": "2014-02-13 14:55:27",
-            "uuidExpired": "0"
+            "uuidExpired": 0
         },
         "2": {
             (...)
         },
         (...)
     },
-    "slidesCount": "14",
+    "slidesCount": 14,
     "creationDate": "2014-02-13 14:21:47",
     "modificationDate": "2014-02-13 14:22:09"
 }
@@ -154,3 +195,6 @@ POST /api/presentation/<ID>/slide/<SLIDE#>/ HTTP/1.1
 
 uuid=<UUID>
 ```
+| Parameter         | Type      | Description                   |
+|-------------------|-----------|-------------------------------|
+| uuid              | string    | UUID of the slide to be saved |
