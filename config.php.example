@@ -1,4 +1,6 @@
 <?php
+    error_reporting(E_ALL);
+
     define('EXEC',                      '1');                                   // Simple check if file is accessed correctly
     // Server settings
     define('SERVER_PROTOCOL',           'http');                                // use HTTP or HTTPS
