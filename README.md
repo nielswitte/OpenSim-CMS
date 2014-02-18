@@ -48,5 +48,5 @@ on how to set things up.
 
 ## Credits
 Kudos to those who created the packages and classes which are used by this program.
- * Ajillion for PHP-MySQLi-Database-Class (https://github.com/ajillion/PHP-MySQLi-Database-Class)
+ * Ajillion and Avbdr for PHP-MySQLi-Database-Class (https://github.com/avbdr/PHP-MySQLi-Database-Class/)
  * Sprain for class.Images.php (https://github.com/sprain/class.Images.php)
