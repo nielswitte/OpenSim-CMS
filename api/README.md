@@ -175,14 +175,14 @@ and on failure it will provide an error message, for example when the agent's uu
 A list with presentations can be requested by using the following GET request.
 
 ```http
-GET /api/presentations/
+GET /api/presentations/ HTTP/1.1
 ```
 
 This will return the first 50 presentations. To request the next 50, add the offset as a parameter.
 The following example will return the presentations from 51 to 100.
 
 ```http
-GET /api/presentations/50/
+GET /api/presentations/50/ HTTP/1.1
 ```
 
 Example of the output will be similar to the request of a single presentation, only in a list form.
