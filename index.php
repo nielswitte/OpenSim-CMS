@@ -1,1 +1,2 @@
-<?php echo 'Hello World, 1+1=' . (1+2); ?>
+<?php
+echo 'Hello World, welcome to this API and CMS for OpenSim.';

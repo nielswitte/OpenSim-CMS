@@ -19,11 +19,11 @@ class OpenSimRPC {
      * Creates a new OpenSim Remote PC instance
      * Default values are from config.php
      *
-     * @param string $uri - http://opensim.server.address [default: OS_REMOTE_ADMIN_URI]
+     * @param string $uri - http://opensim.server.address [default: OS_REMOTE_ADMIN_URL]
      * @param integer $port - Remote Admin port [default: OS_REMOTE_ADMIN_PORT]
      * @param string $password - Remote Admin password [default: OS_REMOTE_ADMIN_PASSWORD]
      */
-    public function __construct($uri = OS_REMOTE_ADMIN_URI, $port = OS_REMOTE_ADMIN_PORT, $password = OS_REMOTE_ADMIN_PASSWORD) {
+    public function __construct($uri = OS_REMOTE_ADMIN_URL, $port = OS_REMOTE_ADMIN_PORT, $password = OS_REMOTE_ADMIN_PASSWORD) {
         $this->serverUri = $uri;
         $this->serverPort = $port;
         $this->password = $password;

@@ -17,7 +17,7 @@
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
-integer debug = 1;				// Enables showing debugging comments
+integer debug = 0;				// Enables showing debugging comments
 
 // Some general parameters
 integer mListener;				// The main listener
@@ -92,7 +92,7 @@ set_uuid_of_object(string type, integer id, key uuid) {
 		if(debug) llInstantMessage(userUuid, "[Debug] Update slide: "+ id + " to UUID:"+ uuid);
 
 		string body = "uuid="+ (string)uuid;
-		http_request_set = llHTTPRequest(serverUrl +"/presentation/"+ presentationId +"/slide/"+ id +"/", [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
+		http_request_set = llHTTPRequest(serverUrl +"/presentation/"+ presentationId +"/slide/"+ id +"/", [HTTP_METHOD, "PUT", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
 	}
 }
 
@@ -114,7 +114,7 @@ nav_slide(integer next) {
     if(next < 1) { next = 1; }
     // Allow totalslides+1 for black
     if(next > totalslides) {
-        slide = totalslides;
+        slide = totalslides + 1;
         llSetText("Presentation Ended", <0,0,1>, 1.0);
         llSetColor(ZERO_VECTOR, ALL_SIDES);
     // All fine, show slide
@@ -126,7 +126,7 @@ nav_slide(integer next) {
         llSetTexture(TEXTURE_BLANK, ALL_SIDES);
         llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
         // Load slide
-        string url          = llList2String(slides, next);
+        string url          = llList2String(slides, next-1);
         string params       = "width: 1024,height:1024";
 
         integer res = llListFindList(textureCache, [presentationId, next]);
@@ -307,13 +307,19 @@ state presentation {
             integer x;
             integer length      = (integer) JsonGetValue(json_body, "slidesCount");
             // Get from each slide the URL or the UUID
-            for (x = 0; x <= length; x++) {
+            for (x = 1; x <= length; x++) {
+                string slideUuid        = JsonGetValue(json_slides, "{"+ x +"}.{uuid}");
+                string slideUrl         = JsonGetValue(json_slides, "{"+ x +"}.{image}");
+                string slideExpired     = JsonGetValue(json_slides, "{"+ x +"}.{uuidExpired}");
+
                 // UUID set and not expired?
-                if(JsonGetValue(json_slides, "{"+ x +"}.{uuid}") != "0" && JsonGetValue(json_slides, "{"+ x +"}.{uuidExpired}") == "0") {
-                    slides += [(key) JsonGetValue(json_slides, "{"+ x +"}.{uuid}")];
+                if(slideUuid != "0" && slideExpired == "0") {
+                    slides += [(key) slideUuid];
+                    if(debug) llInstantMessage(userUuid, "[Debug] use UUID ("+ slideUuid +") for slide: "+ x);
                 // Use URL
                 } else {
-                    slides += [JsonGetValue(json_slides, "{"+ x +"}.{image}")];
+                    slides += [slideUrl];
+                    if(debug) llInstantMessage(userUuid, "[Debug] use URL ("+ slideUrl +") for slide: "+ x);
                 }
             }
 

@@ -19,18 +19,25 @@ class Presentation implements SimpleModel {
     private $title;
     private $creationDate;
     private $modificationDate;
-    private $ownerUuid;
+    private $ownerId;
 
     /**
      * Constructs a new presentation with the given id and optional the given slide
      *
      * @param integer $id - ID of this presentation
-     * @param integer $slide [optional] - slide to show
+     * @param integer $slide - [optional] Slide to show
+     * @param string $title - [optional] Title of presentation
+     * @param integer $ownerId - [optional] ID of the owner
+     * @param datetime $creationDate - [optional] Creation date time, yyyy-mm-dd hh:mm:ss
+     * @param datetime $modificationDate [optional] - Date of last modification, yyyy-mm-dd hh:mm:ss
      */
-	public function __construct($id, $slide = 0) {
-		$this->presentationId = $id;
-		$this->currentSlide = $slide;
-        $this->getInfoFromDatabase();
+	public function __construct($id, $slide = 0, $title = '', $ownerId = '', $creationDate = '', $modificationDate = '') {
+		$this->presentationId   = $id;
+		$this->currentSlide     = $slide;
+        $this->title            = $title;
+        $this->creationDate     = $creationDate;
+        $this->modificationDate = $modificationDate;
+        $this->ownerId          = $ownerId;
 	}
 
     /**
@@ -41,13 +48,13 @@ class Presentation implements SimpleModel {
     public function getInfoFromDatabase() {
         $db = Helper::getDB();
         $db->where('id', (int) $this->getPresentationId());
-        $results = $db->get('presentations', 1);
+        $results = $db->getOne('presentations');
 
         if(!empty($results)) {
-            $this->title            = $results[0]['title'];
-            $this->creationDate     = $results[0]['creationDate'];
-            $this->modificationDate = $results[0]['modificationDate'];
-            $this->ownerUuid          = $results[0]['ownerUuid'];
+            $this->title            = $results['title'];
+            $this->creationDate     = $results['creationDate'];
+            $this->modificationDate = $results['modificationDate'];
+            $this->ownerId          = $results['ownerId'];
         } else {
             throw new Exception("Presentation not found", 5);
         }
@@ -85,8 +92,8 @@ class Presentation implements SimpleModel {
      *
      * @return string
      */
-    public function getOwnerUuid() {
-        return $this->ownerUuid;
+    public function getOwnerId() {
+        return $this->ownerId;
     }
 
     /**
@@ -97,8 +104,9 @@ class Presentation implements SimpleModel {
     public function getSlides() {
         if(empty($this->slides)) {
             $db = Helper::getDB();
-            $params = array($this->getPresentationId(), 'number');
-            $results = $db->rawQuery("SELECT * FROM presentation_slides WHERE presentationId = ? ORDER BY ? ASC", $params);
+            $db->where('presentationId', $this->getPresentationId());
+            $db->orderBy('number', 'asc');
+            $results = $db->get('presentation_slides');
 
             foreach($results as $result) {
                 $this->slides[] = new Slide($result['number'], $this->getPath(). DS . $result['number'] .'.jpg', $result['uuid'], $result['uuidUpdated']);
@@ -179,42 +187,4 @@ class Presentation implements SimpleModel {
     public function getModificationDate() {
         return $this->modificationDate;
     }
-
-	/**
-	 * Function to validate parameters array
-	 *
-	 * @param array $parameters
-	 * @return boolean true when all checks passed
-     * @throws Exception
-	 */
-	public static function validateParameters($parameters) {
-        $result         = FALSE;
-        $parameterCount = count($parameters);
-        // Check number of parameters for: Presentations details, slide details or image
-        if($parameterCount != 2 && $parameterCount != 4 && $parameterCount != 5) {
-            throw new Exception("Invalid number of parameters", 1);
-        // Presentation ID is a number?
-        } elseif(!is_numeric($parameters[1]) || $parameters[1] <= 0) {
-            throw new Exception("Expects parameter two to be integer and above 0, string given or wrong number", 2);
-        // When more than 2 parameters, parameter 3 should be 'slide'
-        } elseif(($parameterCount == 4 || $parameterCount == 5) && $parameters[2] != 'slide') {
-            throw new Exception("Expects parameter three to be (string) 'slide', '". htmlentities($parameters[2]) ."' given", 3);
-        // Slide number has to be a number and above 0
-        } elseif($parameterCount == 4 && (!is_numeric($parameters[3]) || $parameters[3] <= 0)) {
-            throw new Exception("Expects parameter four to be integer and above 0, string given or wrong number", 4);
-        // Stop here when only 4 parameters are given
-        } elseif($parameterCount == 4) {
-            $result = TRUE;
-        // Check the fifth parameter if present
-        } elseif(count($parameters) == 5 && $parameters[4] != 'image') {
-            throw new Exception("Expects parameter five to be (string) 'image', '". htmlentities($parameters[2]) ."' given", 5);
-        // Passed all checks
-        } else {
-            $result = TRUE;
-        }
-
-		return $result;
-	}
 }
-
-

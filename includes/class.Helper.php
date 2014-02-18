@@ -4,12 +4,15 @@ if(EXEC != 1) {
 }
 
 /**
- * Description of class
+ * Helper class to support the CMS and API
  *
- * @author Niels
+ * @author Niels Witte
+ * @version 0.1
+ * @date February 12th, 2014
  */
 class Helper {
     private static $db;
+    private static $osdb;
 
     /**
      * Validates the UUID v4 string provided
@@ -41,6 +44,25 @@ class Helper {
         return self::$db;
     }
 
+
+    /**
+     * Sets the database for OpenSim to use so it can be retrieved by other components
+     *
+     * @param MysqlDb $db
+     */
+    public static function setOSDB($db){
+        self::$osdb = $db;
+    }
+
+    /**
+     * Retuns the database class for OpenSim
+     *
+     * @return MysqlDb
+     */
+    public static function getOSDB() {
+        return self::$osdb;
+    }
+
     /**
      * Helper function to parse PUT requests
      * @source: https://stackoverflow.com/questions/5483851/manually-parse-raw-http-data-with-php/5488449#5488449
@@ -51,31 +73,36 @@ class Helper {
     public static function parsePutRequest($input) {
         // grab multipart boundary from content type header
         preg_match('/boundary=(.*)$/', $_SERVER['CONTENT_TYPE'], $matches);
-        $boundary = $matches[1];
+        // Is multipart form?
+        if(isset($matches[1])) {
+            $boundary = $matches[1];
 
-        // split content by boundary and get rid of last -- element
-        $a_blocks = preg_split("/-+$boundary/", $input);
-        array_pop($a_blocks);
+            // split content by boundary and get rid of last -- element
+            $a_blocks = preg_split("/-+$boundary/", $input);
+            array_pop($a_blocks);
 
-        // loop data blocks
-        foreach ($a_blocks as $id => $block) {
-            if (empty($block))
-                continue;
+            // loop data blocks
+            foreach ($a_blocks as $id => $block) {
+                if (empty($block))
+                    continue;
 
-            // you'll have to var_dump $block to understand this and maybe replace \n or \r with a visibile char
-            // parse uploaded files
-            if (strpos($block, 'application/octet-stream') !== FALSE) {
-                // match "name", then everything after "stream" (optional) except for prepending newlines
-                preg_match("/name=\"([^\"]*)\".*stream[\n|\r]+([^\n\r].*)?$/s", $block, $matches);
+                // you'll have to var_dump $block to understand this and maybe replace \n or \r with a visibile char
+                // parse uploaded files
+                if (strpos($block, 'application/octet-stream') !== FALSE) {
+                    // match "name", then everything after "stream" (optional) except for prepending newlines
+                    preg_match("/name=\"([^\"]*)\".*stream[\n|\r]+([^\n\r].*)?$/s", $block, $matches);
+                }
+                // parse all other fields
+                else {
+                    // match "name" and optional value in between newline sequences
+                    preg_match('/name=\"([^\"]*)\"[\n|\r]+([^\n\r].*)?\r$/s', $block, $matches);
+                }
+                $a_data[$matches[1]] = $matches[2];
             }
-            // parse all other fields
-            else {
-                // match "name" and optional value in between newline sequences
-                preg_match('/name=\"([^\"]*)\"[\n|\r]+([^\n\r].*)?\r$/s', $block, $matches);
-            }
-            $a_data[$matches[1]] = $matches[2];
+        // Try to parse as key value pairs
+        } else {
+            parse_str($input, $a_data);
         }
         return $a_data;
     }
-
 }
