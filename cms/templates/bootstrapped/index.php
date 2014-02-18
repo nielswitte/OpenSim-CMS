@@ -30,8 +30,9 @@ $pages  = explode('/', trim($path, '/'));
         <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/jquery-2.1.0.min.js" type="text/javascript"></script>
         <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/jquery.rest.js" type="text/javascript"></script>
         <script type="text/javascript">
+            var client;
             jQuery(document).ready(function($){
-                var client = new $.RestClient('/OpenSim-CMS/api/', {
+                client = new $.RestClient('/OpenSim-CMS/api/', {
                     cache: 5,
                     cachableMethods: ["GET"]
                 });
