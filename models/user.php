@@ -27,12 +27,12 @@ class User implements SimpleModel {
     /**
      * Construct a new User with the given UUID
      *
-     * @param string $userUUID
+     * @param integer $id - [Optional] The ID of the user
+     * @param string $userUUID - [Optional] the user's UUID
      */
-    public function __construct($userUUID) {
+    public function __construct($id = 0, $userUUID = '') {
+        $this->id   = $id;
         $this->uuid = $userUUID;
-
-        $this->getInfoFromDatabase();
     }
 
     /**
@@ -43,7 +43,12 @@ class User implements SimpleModel {
     public function getInfoFromDatabase() {
         $db = Helper::getDB();
         // Get user information
-        $db->where("Uuid", $db->escape($this->getUuid()));
+        if($this->getId() > 0) {
+            $db->where("id", $db->escape($this->getId()));
+        }
+        if($this->getUuid() != '') {
+            $db->where("Uuid", $db->escape($this->getUuid()));
+        }
         $user = $db->getOne("users");
         // Get user's presentations
         $db->where("ownerId", $db->escape($user['id']));
@@ -60,6 +65,7 @@ class User implements SimpleModel {
         // Results!
         if(!empty($user)) {
             $this->id               = $user['id'];
+            $this->uuid             = $user['uuid'];
             $this->userName         = $user['userName'];
             $this->firstName        = $user['firstName'];
             $this->lastName         = $user['lastName'];

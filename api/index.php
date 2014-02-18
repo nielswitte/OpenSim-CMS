@@ -1,6 +1,4 @@
 <?php
-error_reporting(E_ALL);
-
 require_once dirname(__FILE__) .'/../config.php';
 require_once dirname(__FILE__) .'/api.php';
 
@@ -20,12 +18,14 @@ try {
 
     // List with URL selectors and the corresponding functions to be used for each request type
     $selectors = array(
-        "/presentations\/?$/"                                => array("GET"  => "getPresentations"),        // Get list with presentations
-        "/presentations\/(\d+)\/?$/"                         => array("GET"  => "getPresentations"),        // Get list with presentations with an offset
+        "/presentations\/?$/"                                => array("GET"  => "getPresentations"),        // Get list with 50 presentations
+        "/presentations\/(\d+)\/?$/"                         => array("GET"  => "getPresentations"),        // Get list with 50 presentations starting at the given offset
         "/presentation\/(\d+)\/?$/"                          => array("GET"  => "getPresentationById"),     // Select specific presentation
         "/presentation\/(\d+)\/slide\/(\d+)\/?$/"            => array("GET"  => "getSlideById",             // Get slide from presentation
                                                                       "PUT"  => "updateSlideUuid"),         // Update slide UUID for given slide of presentation
         "/presentation\/(\d+)\/slide\/(\d+)\/image\/?$/"     => array("GET"  => "getSlideImageById"),       // Get only the image of a given presentation slide
+        "/users\/([a-zA-Z0-9-_]{3,}+)\/?$/"                  => array("GET"  => "getUsersByUserName"),      // Gets a list of all users with usernames matching the search of atleast 3 characters
+        "/user\/(\d+)\/?$/"                                  => array("GET"  => "getUserById"),             // Get a user by ID
         "/user\/([a-z0-9-]{36})\/?$/"                        => array("GET"  => "getUserByUuid"),           // Get a user by UUID
         "/user\/([a-z0-9-]{36})\/teleport\/?$/"              => array("PUT"  => "teleportUserByUuid"),      // Teleports a user
         "/user\/([a-z0-9-]{36})\/uuid\/?$/"                  => array("PUT"  => "updateUserUuid"),          // Update the UUID of a user to match an avatar

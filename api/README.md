@@ -5,17 +5,22 @@ For valid requests the `HTTP/1.1 200 OK` is used, for failures an exception is t
 the system and displayed as output with a `HTTP/1.1 400 Bad Request` header.
 
 ## User
-
 User information can be accessed by using, the UUID of the user is based on the user's UUID in OpenSim:
 
 ```http
 GET /api/user/<UUID>/ HTTP/1.1
+```
+Or request an user by its ID:
+
+```http
+GET /api/user/<ID>/ HTTP/1.1
 ```
 
 Example of output
 
 ```json
 {
+    "id": 1,
     "uuid": "0a1811f4-7174-4e42-8bb5-26ef78335407",
     "userName": "testuser",
     "firstName": "Test",
@@ -41,8 +46,43 @@ when requesting a user. This is only shown when `OS_DB_ENABLED = TRUE`.
 }
 ```
 
-### Update a user's UUID
+### Search for users by userName
+To search for a specific user by his or her username, the following API can be used.
+Atleast 3 chars are required.
 
+```http
+GET /api/user/<SEARCH>/ HTTP/1.1
+```
+
+The result is similar to the request by UUID, but displayed as a list ordered by username.
+
+```json
+{
+    "1": {
+        "id": 1,
+        "uuid": "0a1811f4-7174-4e42-8bb5-26ef78335407",
+        "userName": "testuser",
+        "firstName": "Test",
+        "lastName": "User",
+        "email": "testuser@email.com",
+        "presentationIds": [
+            "1",
+            "5",
+            "8"
+        ],
+        "online": 1,
+        "lastLogin": "2014-02-17 13:39:28",
+        "lastPosition": "<123.6372, 124.9078, 26.18366>",
+        "lastRegionUuid": "72efcc78-2b1a-4571-8704-fea352998c0c"
+    },
+    "2": { (...) },
+    "3": { (...) },
+    (...)
+}
+
+```
+
+### Update a user's UUID
 To match an UUID of a user to the user in the CMS the following command can be used.
 Some form of authentication will be added later on. By sending a PUT request to the server with the CMS
 username as parameter and use the UUID of the user in OpenSim as URL parameter.
@@ -56,7 +96,6 @@ PUT /api/user/<UUID>/ HTTP/1.1
 | UserName          | String    | The username of the user in the CMS                           |
 
 ### Create a new avatar
-
 To create a new avatar the following API url can be used with a POST request.
 
 ```http
@@ -133,7 +172,6 @@ and on failure it will provide an error message, for example when the agent's uu
 ```
 
 ## Presentations
-
 A list with presentations can be requested by using the following GET request.
 
 ```http
@@ -155,7 +193,7 @@ Example of the output will be similar to the request of a single presentation, o
         "type": "presentation",
         "title": "Test presentation title",
         "presentationId": "1",
-        "ownerUuid": "3fedbbf8-465c-499c-9c2d-3fba9ed61701",
+        "ownerId": 1,
         "slides": {
             "1": {
                 "number": 1,
@@ -173,14 +211,13 @@ Example of the output will be similar to the request of a single presentation, o
         "creationDate": "2014-02-13 14:21:47",
         "modificationDate": "2014-02-13 14:22:09"
     },
-    "2" { (...) },
-    "3" { (...) },
+    "2": { (...) },
+    "3": { (...) },
     (...)
 }
 ```
 
 ### Specific presentation
-
 To retrieve a specific presentation use the following command and replace the id with the number of the
 presentation you want to get. The trailing / is optional.
 
@@ -195,7 +232,7 @@ Example of output when request is successful:
     "type": "presentation",
     "title": "Test presentation title",
     "presentationId": "1",
-    "ownerUuid": "3fedbbf8-465c-499c-9c2d-3fba9ed61701",
+    "ownerId": 1,
     "slides": {
         "1": {
             "number": 1,
@@ -271,7 +308,6 @@ When `OS_DB_ENABLED` is `TRUE`, the following additional information is shown:
 ```
 
 ### Region image
-
 A small map preview can be opened by using the following API request
 
 ```http

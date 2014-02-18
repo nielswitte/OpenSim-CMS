@@ -164,14 +164,57 @@ class API {
     }
 
     /**
+     * Searches the database for the given (partial) username and returns a list with users
+     *
+     * @param array $args
+     * @return array
+     */
+    public static function getUsersByUserName($args) {
+        $db             = Helper::getDB();
+        $params         = array("%". $args[1] ."%");
+        $results        = $db->rawQuery('SELECT * FROM users WHERE userName LIKE ? ORDER BY userName ASC', $params);
+        $data           = array();
+        $count          = 0;
+        foreach($results as $result) {
+            $count++;
+            $user           = new User($result['id'], $result['uuid']);
+            $user->getInfoFromDatabase();
+            $data[$count]   = self::getUserData($user);
+        }
+        return $data;
+    }
+
+    /**
+     * Get the details of an user by its ID
+     *
+     * @param array $args
+     * @return array
+     */
+    public static function getUserById($args) {
+        $user = new User($args[1]);
+        $user->getInfoFromDatabase();
+        return self::getUserData($user);
+    }
+
+    /**
      * Get the details of an user by its UUID
      *
      * @param array $args
      * @return array
      */
     public static function getUserByUuid($args) {
-        $user = new User($args[1]);
+        $user = new User(0, $args[1]);
+        $user->getInfoFromDatabase();
+        return self::getUserData($user);
+    }
 
+    /**
+     * Formats the user data to a nice array
+     *
+     * @param User $user
+     * @return array
+     */
+    private static function getUserData(User $user) {
         $data = array();
         $data['id']                 = $user->getId();
         $data['uuid']               = $user->getUuid();
