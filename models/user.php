@@ -170,24 +170,4 @@ class User implements SimpleModel {
     public function getLastRegionUuid() {
         return $this->lastRegionUuid;
     }
-
-	/**
-	 * Function to validate parameters array
-	 *
-	 * @param array $parameters
-	 *
-	 * @return boolean - true when all checks passed
-	 */
-    public static function validateParameters($parameters) {
-        if(count($parameters) == 2) {
-            if(Helper::isValidUuid($parameters[1])) {
-                return true;
-            } else {
-                throw new Exception("Paramater two expected to be UUID", 2);
-            }
-        } else {
-            throw new Exception("Invalid number of parameters", 1);
-        }
-        return false;
-    }
 }

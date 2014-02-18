@@ -116,13 +116,10 @@ To teleport a user you need at least the UUID of the user.
 All other parameters are optional and listed in the table below.
 
 ```http
-POST /api/user/teleport/ HTTP/1.1
-
-agentUuid=<UUID>
+POST /api/user/<UUID>/teleport/ HTTP/1.1
 ```
 | Parameter         | Type      | Description                                                   |
 |-------------------|-----------|---------------------------------------------------------------|
-| agentUuid         | string    | UUID of the agent                                             |
 | regionName        | string    | [Optional] The name of the region (default from config.php)   |
 | firstName         | string    | [Optional] agent's first name                                 |
 | lastName          | string    | [Optional] agent's last name                                  |
@@ -239,3 +236,10 @@ When `OS_DB_ENABLED` is `TRUE`, the following additional information is shown:
     "activeUsers": 1
 }
 ```
+
+### Region image
+A small map preview can be opened by using the following API request
+```http
+GET /api/region/<REGION-UUID>/image/ HTTP/1.1
+```
+This will return a 256x256 JPEG preview of the region map.

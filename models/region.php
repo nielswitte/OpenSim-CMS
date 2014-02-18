@@ -54,6 +54,11 @@ class Region implements SimpleModel {
     public function getInfoFromDatabase() {
         $raXML  = new OpenSimRPC();
         $result = $raXML->call('admin_region_query', array('region_id' => $this->getUuid()));
+
+        if(isset($result['error'])) {
+            throw new Exception($result['error'], 3);
+        }
+
         $this->setOnlineStatus($result['success']);
 
         // Additional actions when MySQL database is accessable
@@ -118,26 +123,4 @@ class Region implements SimpleModel {
     public function getTotalUsers() {
         return $this->totalUsers;
     }
-
-    /**
-     * Validates the parameters for a region request
-     *
-     * @param array $parameters
-     * @return boolean
-     * @throws Exception
-     */
-    public static function validateParameters($parameters) {
-        $result = FALSE;
-        if(!isset($parameters[1]) || !Helper::isValidUuid($parameters[1])) {
-            throw new Exception('Expects parameter one to be UUID', 1);
-        } elseif(isset($parameters[2]) && $parameters[2] != 'image') {
-            throw new Exception('Expects parameter two to be image', 2);
-        } else {
-            $result = TRUE;
-        }
-
-        return $result;
-    }
-
 }
-

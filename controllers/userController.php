@@ -60,7 +60,7 @@ class UserController {
 
 
     /**
-     * Creates a new user with the given parameters
+     * Creates a new avatar with the given parameters
      * Make sure Remote PC is enabled in OpenSim and the method admin_create_user is allowed
      *
      * @param array $parameters - Array with parameters used to create the user
@@ -72,7 +72,7 @@ class UserController {
      *              * integer $start_region_y - [Optional] region y coordinate, default 0
      * @return xml
      */
-    public function createUser($parameters) {
+    public function createAvatar($parameters) {
         $raXML = new OpenSimRPC();
         $parameters = array(
             'password'          => OS_REMOTE_ADMIN_PASSWORD,

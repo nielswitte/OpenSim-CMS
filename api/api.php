@@ -1,0 +1,245 @@
+<?php
+if(EXEC != 1) {
+	die('Invalid request');
+}
+
+// Include all model classes
+require_once dirname(__FILE__) .'/../models/presentation.php';
+require_once dirname(__FILE__) .'/../models/region.php';
+require_once dirname(__FILE__) .'/../controllers/regionController.php';
+require_once dirname(__FILE__) .'/../models/slide.php';
+require_once dirname(__FILE__) .'/../controllers/slideController.php';
+require_once dirname(__FILE__) .'/../models/user.php';
+require_once dirname(__FILE__) .'/../controllers/userController.php';
+
+/**
+ * This class is hosts all API calls and matches them to the corresponding model/controller functions
+ *
+ * @author Niels Witte
+ * @version 0.1
+ * @date February 18th, 2014
+ */
+class API {
+    /**
+     * Get presentation details for the given presentation
+     *
+     * @param array $args
+     * @return array
+     */
+    public static function getPresentationById($args) {
+        $presentation = new Presentation($args[1]);
+
+        $data = array();
+        $data['type']               = 'presentation';
+        $data['title']              = $presentation->getTitle();
+        $data['presentationId']     = $presentation->getPresentationId();
+        $data['ownerUuid']          = $presentation->getOwnerUuid();
+        $slides     = array();
+        $x          = 1;
+        foreach($presentation->getSlides() as $slide) {
+            $slides[$x] = array(
+                            'number'        => $slide->getNumber(),
+                            'image'         => $presentation->getApiUrl() .'slide/'.  $slide->getNumber() .'/image/',
+                            'uuid'          => $slide->getUuid(),
+                            'uuidUpdated'   => $slide->getUuidUpdated(),
+                            'uuidExpired'   => $slide->isUuidExpired()
+                    );
+            $x++;
+        }
+
+        $data['slides']             = $slides;
+        $data['slidesCount']        = $presentation->getNumberOfSlides();
+        $data['creationDate']       = $presentation->getCreationDate();
+        $data['modificationDate']   = $presentation->getModificationDate();
+
+        return $data;
+    }
+
+    /**
+     * Get slide details for the given slide
+     *
+     * @param array $args
+     * @return array
+     */
+    public static function getSlideById($args) {
+        $presentation   = new Presentation($args[1]);
+        $slide          = $presentation->getSlide($args[2]);
+
+        $data           = array(
+                                'number'        => $slide->getNumber(),
+                                'image'         => $presentation->getApiUrl() .'slide/'.  $slide->getNumber() .'/image/',
+                                'uuid'          => $slide->getUuid(),
+                                'uuidUpdated'   => $slide->getUuidUpdated(),
+                                'uuidExpired'   => $slide->isUuidExpired()
+                            );
+        return $data;
+    }
+
+    /**
+     * Get slide image for the given slide
+     *
+     * @param array $args
+     * @throws Exception
+     */
+    public static function getSlideImageById($args) {
+        // Get presentation and slide details
+        $presentation   = new Presentation($args[1], $args[2]);
+        $slidePath      = $presentation->getPath() . DS . $presentation->getCurrentSlide() .'.jpg';
+
+        // Show image if exists
+        if(file_exists($slidePath)) {
+            require_once dirname(__FILE__) .'/../includes/class.Images.php';
+            $resize = new Image($slidePath);
+            // resize when needed
+            if($resize->getWidth() > IMAGE_WIDTH || $resize->getHeight() > IMAGE_HEIGHT) {
+                $resize->resize(1024,1024,'fit');
+                $resize->save($presentation->getSlideId(), FILES_LOCATION . DS . PRESENTATIONS . DS . $presentation->getPresentationId(), 'jpg');
+            }
+            unset($resize);
+
+            // Fill remaining of image with black
+            $image = new Image(FILES_LOCATION . DS . PRESENTATIONS . DS .'background.jpg');
+            $image->addWatermark($slidePath);
+            $image->writeWatermark(100, 0, 0, 'c', 'c');
+            $image->resize(1024,1024,'fit');
+            $image->display();
+        } else {
+            throw new Exception("Requested slide does not exists", 5);
+        }
+    }
+
+    /**
+     * Updates the slide with the given UUID
+     *
+     * @param array $args
+     * @return boolean
+     */
+    public static function updateSlideUuid($args) {
+        $postUuid       = filter_input(INPUT_POST, 'uuid', FILTER_SANITIZE_SPECIAL_CHARS);
+        // Get presentation and slide details
+        $presentation   = new Presentation($args[1]);
+        $slide          = $presentation->getSlide($args[2]);
+        // Update
+        $slideCtrl      = new SlideController($slide);
+        $data           = $slideCtrl->setUuid($postUuid);
+
+        return $data;
+    }
+
+    /**
+     * Get the details of an user by its UUID
+     *
+     * @param array $args
+     * @return array
+     */
+    public static function getUserByUuid($args) {
+        $user = new User($args[1]);
+
+        $data = array();
+        $data['uuid']               = $user->getUuid();
+        $data['userName']           = $user->getUserName();
+        $data['firstName']          = $user->getFirstName();
+        $data['lastName']           = $user->getLastName();
+        $data['email']              = $user->getEmail();
+        $data['presentationIds']    = $user->getPresentationIds();
+
+        // Extra information
+        if(OS_DB_ENABLED) {
+            $data['online']             = $user->getOnline();
+            $data['lastLogin']          = $user->getLastLogin();
+            $data['lastPosition']       = $user->getLastPosition();
+            $data['lastRegionUuid']     = $user->getLastRegionUuid();
+        }
+        return $data;
+    }
+
+    /**
+     * Updates the UUID of the given user
+     *
+     * @param array $args
+     * @return boolean
+     */
+    public static function updateUserUuid($args) {
+        $postUserName   = filter_input(INPUT_POST, 'userName', FILTER_SANITIZE_SPECIAL_CHARS);
+        $userCtrl       = new UserController();
+        $data           = $userCtrl->setUuid($postUserName, $args[1]);
+        return $data;
+    }
+
+    /**
+     * Teleport the user to given location
+     *
+     * @param array $args
+     * @return array
+     */
+    public static function teleportUserByUuid($args) {
+        $postData               = filter_input_array(INPUT_POST, FILTER_SANITIZE_SPECIAL_CHARS);
+        // use UUID from GET request
+        $postData['agentUuid']  = $args[1];
+        $result                 = '';
+        // Teleport a user
+        if(UserController::validateParametersTeleport($postData)) {
+            $userCtrl           = new UserController();
+            // Do request and fetch result
+            $data               = $userCtrl->teleportUser($postData);
+            // Set result
+            $result = $data;
+        }
+        return $result;
+    }
+
+    /**
+     * Create an avatar with the given PUT information
+     *
+     * @param array $args
+     * @return array
+     */
+    public static function createAvatar($args) {
+        $result         = '';
+        $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
+        $parsedUserData = (Helper::parsePutRequest($putUserData));
+        // Check if the parameters are valid for creating a user
+        if(UserController::validateParametersCreate($parsedUserData)) {
+            $userCtrl       = new UserController();
+            // Do request and fetch result
+            $data = $userCtrl->createAvatar($parsedUserData);
+
+            // Set result
+            $result = $data;
+        }
+        return $result;
+    }
+
+    /**
+     * Gets information about the region
+     *
+     * @param array $args
+     * @return array
+     */
+    public static function getRegionByUuid($args) {
+        $region     = new Region($args[1]);
+
+        $region->getInfoFromDatabase();
+        $data['uuid']           = $region->getUuid();
+        $data['name']           = $region->getName();
+        $data['image']          = $region->getApiUrl() .'image/';
+        $data['serverStatus']   = $region->getOnlineStatus() ? 1 : 0;
+
+        // Additional information
+        if(OS_DB_ENABLED) {
+            $data['totalUsers']     = $region->getTotalUsers();
+            $data['activeUsers']    = $region->getActiveUsers();
+        }
+        return $data;
+    }
+
+    /**
+     * Shows the region image map as JPEG
+     *
+     * @param array $args
+     */
+    public static function getRegionImageByUuid($args) {
+        header('Content-Type: image/jpeg');
+        echo file_get_contents(OS_SERVER_URL .'/index.php?method=regionImage'. str_replace('-', '', $args[1]));
+    }
+}
