@@ -28,8 +28,8 @@ class Presentation implements SimpleModel {
      * @param integer $slide [optional] - slide to show
      */
 	public function __construct($id, $slide = 0) {
-		$this->presentationId = $id;
-		$this->currentSlide = $slide;
+		$this->presentationId   = $id;
+		$this->currentSlide     = $slide;
         $this->getInfoFromDatabase();
 	}
 
@@ -47,7 +47,7 @@ class Presentation implements SimpleModel {
             $this->title            = $results[0]['title'];
             $this->creationDate     = $results[0]['creationDate'];
             $this->modificationDate = $results[0]['modificationDate'];
-            $this->ownerUuid          = $results[0]['ownerUuid'];
+            $this->ownerUuid        = $results[0]['ownerUuid'];
         } else {
             throw new Exception("Presentation not found", 5);
         }
@@ -97,8 +97,9 @@ class Presentation implements SimpleModel {
     public function getSlides() {
         if(empty($this->slides)) {
             $db = Helper::getDB();
-            $params = array($this->getPresentationId(), 'number');
-            $results = $db->rawQuery("SELECT * FROM presentation_slides WHERE presentationId = ? ORDER BY ? ASC", $params);
+            $db->where('presentationId', $this->getPresentationId());
+            $db->orderBy('number', 'asc');
+            $results = $db->get('presentation_slides');
 
             foreach($results as $result) {
                 $this->slides[] = new Slide($result['number'], $this->getPath(). DS . $result['number'] .'.jpg', $result['uuid'], $result['uuidUpdated']);

@@ -58,7 +58,7 @@ class Region implements SimpleModel {
 
         // Additional actions when MySQL database is accessable
         if(OS_DB_ENABLED && $this->getOnlineStatus()) {
-            $osdb               = Helper::getOSDB();
+            $osdb = Helper::getOSDB();
             // Get user's presentations
             $osdb->where("LastRegionID", $osdb->escape($this->getUuid()));
             $results = $osdb->get("GridUser");
@@ -98,7 +98,7 @@ class Region implements SimpleModel {
      * @return string
      */
     public function getApiUrl() {
-        return SERVER_PROTOCOL .'://'. SERVER_ADDRESS .':'.SERVER_PORT . SERVER_ROOT .'/api/'. $this->uuid .'/';
+        return SERVER_PROTOCOL .'://'. SERVER_ADDRESS .':'.SERVER_PORT . SERVER_ROOT .'/api/region/'. $this->uuid .'/';
     }
 
     /**
