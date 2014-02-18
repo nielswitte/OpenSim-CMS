@@ -17,7 +17,7 @@
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
-integer debug = 1;				// Enables showing debugging comments
+integer debug = 0;				// Enables showing debugging comments
 
 // Some general parameters
 integer mListener;				// The main listener
