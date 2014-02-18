@@ -132,7 +132,54 @@ and on failure it will provide an error message, for example when the agent's uu
 }
 ```
 
-## Presentation
+## Presentations
+
+A list with presentations can be requested by using the following GET request.
+
+```http
+GET /api/presentations/
+```
+
+This will return the first 50 presentations. To request the next 50, add the offset as a parameter.
+The following example will return the presentations from 51 to 100.
+
+```http
+GET /api/presentations/50/
+```
+
+Example of the output will be similar to the request of a single presentation, only in a list form.
+
+```json
+{
+    "1": {
+        "type": "presentation",
+        "title": "Test presentation title",
+        "presentationId": "1",
+        "ownerUuid": "3fedbbf8-465c-499c-9c2d-3fba9ed61701",
+        "slides": {
+            "1": {
+                "number": 1,
+                "image": "http://localhost:80/OpenSim-CMS/api/presentation/1/slide/1/image/",
+                "uuid": "1be74003-2d7c-4dbd-87c2-a1c95e0864e6",
+                "uuidUpdated": "2014-02-13 14:55:27",
+                "uuidExpired": 0
+            },
+            "2": {
+                (...)
+            },
+            (...)
+        },
+        "slidesCount": 14,
+        "creationDate": "2014-02-13 14:21:47",
+        "modificationDate": "2014-02-13 14:22:09"
+    },
+    "2" { (...) },
+    "3" { (...) },
+    (...)
+}
+```
+
+### Specific presentation
 
 To retrieve a specific presentation use the following command and replace the id with the number of the
 presentation you want to get. The trailing / is optional.
@@ -209,7 +256,7 @@ or if the MySQL database of OpenSim accepts remote connections.
 {
     "uuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
     "name": "The Grid",
-    "image": "http:\/\/localhost:80\/OpenSim-CMS\/api\/72efcc78-2b1a-4571-8704-fea352998c0c\/image\/",
+    "image": "http://localhost:80/OpenSim-CMS/api/72efcc78-2b1a-4571-8704-fea352998c0c/image/",
     "serverStatus": 1
 }
 ```

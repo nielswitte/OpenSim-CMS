@@ -16,10 +16,34 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  * This class is hosts all API calls and matches them to the corresponding model/controller functions
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date February 18th, 2014
  */
 class API {
+    /**
+     * Gets a list of presentations starting at the given argument offset
+     *
+     * @param array $args
+     * @return array
+     */
+    public static function getPresentations($args) {
+        $db             = Helper::getDB();
+        // Offset parameter given?
+        $args[1]        = isset($args[1]) ? $args[1] : 0;
+        // Get 50 presentations from the given offset
+        $params         = array($args[1], 50);
+        $resutls        = $db->rawQuery("SELECT * FROM presentations ORDER BY creationDate DESC LIMIT ?, ?", $params);
+        // Process results
+        $data           = array();
+        $x              = 1;
+        foreach($resutls as $result) {
+            $presentation = new Presentation($result['id'], 0, $result['title'], $result['ownerUuid'], $result['creationDate'], $result['modificationDate']);
+            $data[$x]     = self::getPresentationData($presentation);
+            $x++;
+        }
+        return $data;
+    }
+
     /**
      * Get presentation details for the given presentation
      *
@@ -28,7 +52,17 @@ class API {
      */
     public static function getPresentationById($args) {
         $presentation = new Presentation($args[1]);
+        $presentation->getInfoFromDatabase();
+        return self::getPresentationData($presentation);
+    }
 
+    /**
+     * Format the presentation data to the desired format
+     *
+     * @param Presentation $presentation
+     * @return array
+     */
+    private static function getPresentationData(Presentation $presentation) {
         $data = array();
         $data['type']               = 'presentation';
         $data['title']              = $presentation->getTitle();

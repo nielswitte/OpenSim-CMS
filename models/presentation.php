@@ -25,12 +25,19 @@ class Presentation implements SimpleModel {
      * Constructs a new presentation with the given id and optional the given slide
      *
      * @param integer $id - ID of this presentation
-     * @param integer $slide [optional] - slide to show
+     * @param integer $slide - [optional] Slide to show
+     * @param string $title - [optional] Title of presentation
+     * @param string $ownerUuid - [optional] UUID of the owner
+     * @param datetime $creationDate - [optional] Creation date time, yyyy-mm-dd hh:mm:ss
+     * @param datetime $modificationDate [optional] - Date of last modification, yyyy-mm-dd hh:mm:ss
      */
-	public function __construct($id, $slide = 0) {
+	public function __construct($id, $slide = 0, $title = '', $ownerUuid = '', $creationDate = '', $modificationDate = '') {
 		$this->presentationId   = $id;
 		$this->currentSlide     = $slide;
-        $this->getInfoFromDatabase();
+        $this->title            = $title;
+        $this->creationDate     = $creationDate;
+        $this->modificationDate = $modificationDate;
+        $this->ownerUuid        = $ownerUuid;
 	}
 
     /**
