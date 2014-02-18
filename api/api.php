@@ -115,7 +115,10 @@ class API {
      * @return boolean
      */
     public static function updateSlideUuid($args) {
-        $postUuid       = filter_input(INPUT_POST, 'uuid', FILTER_SANITIZE_SPECIAL_CHARS);
+        $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
+        $parsedPutData  = (Helper::parsePutRequest($putUserData));
+        $postUuid       = isset($parsedPutData['uuid']) ? $parsedPutData['uuid'] : '';
+
         // Get presentation and slide details
         $presentation   = new Presentation($args[1]);
         $slide          = $presentation->getSlide($args[2]);
@@ -160,9 +163,12 @@ class API {
      * @return boolean
      */
     public static function updateUserUuid($args) {
-        $postUserName   = filter_input(INPUT_POST, 'userName', FILTER_SANITIZE_SPECIAL_CHARS);
+        $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
+        $parsedPutData  = (Helper::parsePutRequest($putUserData));
+        $userName       = isset($parsedPutData['userName']) ? $parsedPutData['userName'] : '';
+
         $userCtrl       = new UserController();
-        $data           = $userCtrl->setUuid($postUserName, $args[1]);
+        $data           = $userCtrl->setUuid($userName, $args[1]);
         return $data;
     }
 
@@ -173,15 +179,17 @@ class API {
      * @return array
      */
     public static function teleportUserByUuid($args) {
-        $postData               = filter_input_array(INPUT_POST, FILTER_SANITIZE_SPECIAL_CHARS);
+        $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
+        $parsedPutData  = (Helper::parsePutRequest($putUserData));
+
         // use UUID from GET request
-        $postData['agentUuid']  = $args[1];
+        $parsedPutData['agentUuid']  = $args[1];
         $result                 = '';
         // Teleport a user
-        if(UserController::validateParametersTeleport($postData)) {
+        if(UserController::validateParametersTeleport($parsedPutData)) {
             $userCtrl           = new UserController();
             // Do request and fetch result
-            $data               = $userCtrl->teleportUser($postData);
+            $data               = $userCtrl->teleportUser($parsedPutData);
             // Set result
             $result = $data;
         }
@@ -196,13 +204,13 @@ class API {
      */
     public static function createAvatar($args) {
         $result         = '';
-        $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
-        $parsedUserData = (Helper::parsePutRequest($putUserData));
+        $userData       = filter_input_array(INPUT_POST, FILTER_SANITIZE_ENCODED);
+
         // Check if the parameters are valid for creating a user
-        if(UserController::validateParametersCreate($parsedUserData)) {
+        if(UserController::validateParametersCreate($userData)) {
             $userCtrl       = new UserController();
             // Do request and fetch result
-            $data = $userCtrl->createAvatar($parsedUserData);
+            $data = $userCtrl->createAvatar($userData);
 
             // Set result
             $result = $data;

@@ -14,12 +14,12 @@ try {
     $selectors = array(
         "/presentation\/(\d+)\/slide\/(\d+)\/image\/?$/"     => array("GET"  => "getSlideImageById"),
         "/presentation\/(\d+)\/slide\/(\d+)\/?$/"            => array("GET"  => "getSlideById",
-                                                                     "POST" => "updateSlideUuid"),
+                                                                      "PUT"  => "updateSlideUuid"),
         "/presentation\/(\d+)\/?$/"                          => array("GET"  => "getPresentationById"),
         "/user\/([a-z0-9-]{36})\/?$/"                        => array("GET"  => "getUserByUuid"),
-        "/user\/([a-z0-9-]{36})\/teleport\/?$/"              => array("POST" => "teleportUserByUuid"),
-        "/user\/([a-z0-9-]{36})\/uuid\/?$/"                  => array("POST" => "updateUserUuid"),
-        "/user\/avatar\/?$/"                                 => array("PUT"  => "createAvatar"),
+        "/user\/([a-z0-9-]{36})\/teleport\/?$/"              => array("PUT"  => "teleportUserByUuid"),
+        "/user\/([a-z0-9-]{36})\/uuid\/?$/"                  => array("PUT"  => "updateUserUuid"),
+        "/user\/avatar\/?$/"                                 => array("POST" => "createAvatar"),
         "/region\/([a-z0-9-]{36})\/?$/"                      => array("GET"  => "getRegionByUuid"),
         "/region\/([a-z0-9-]{36})\/image\/?$/"               => array("GET"  => "getRegionImageByUuid"),
     );
