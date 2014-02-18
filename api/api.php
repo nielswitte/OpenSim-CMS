@@ -37,7 +37,7 @@ class API {
         $data           = array();
         $x              = 1;
         foreach($resutls as $result) {
-            $presentation = new Presentation($result['id'], 0, $result['title'], $result['ownerUuid'], $result['creationDate'], $result['modificationDate']);
+            $presentation = new Presentation($result['id'], 0, $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate']);
             $data[$x]     = self::getPresentationData($presentation);
             $x++;
         }
@@ -67,7 +67,7 @@ class API {
         $data['type']               = 'presentation';
         $data['title']              = $presentation->getTitle();
         $data['presentationId']     = $presentation->getPresentationId();
-        $data['ownerUuid']          = $presentation->getOwnerUuid();
+        $data['ownerId']            = $presentation->getOwnerId();
         $slides     = array();
         $x          = 1;
         foreach($presentation->getSlides() as $slide) {
@@ -173,6 +173,7 @@ class API {
         $user = new User($args[1]);
 
         $data = array();
+        $data['id']                 = $user->getId();
         $data['uuid']               = $user->getUuid();
         $data['userName']           = $user->getUserName();
         $data['firstName']          = $user->getFirstName();

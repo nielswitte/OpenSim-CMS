@@ -13,6 +13,7 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * @date February 10th, 2014
  */
 class User implements SimpleModel {
+    private $id;
     private $uuid;
     private $userName;
     private $firstName, $lastName;
@@ -43,9 +44,9 @@ class User implements SimpleModel {
         $db = Helper::getDB();
         // Get user information
         $db->where("Uuid", $db->escape($this->getUuid()));
-        $user = $db->get("users", 1);
+        $user = $db->getOne("users");
         // Get user's presentations
-        $db->where("ownerUuid", $db->escape($this->getUuid()));
+        $db->where("ownerId", $db->escape($user['id']));
         $presentations = $db->get("presentations");
 
         // Convert presentation Ids to array
@@ -58,27 +59,37 @@ class User implements SimpleModel {
 
         // Results!
         if(!empty($user)) {
-            $this->userName         = $user[0]['userName'];
-            $this->firstName        = $user[0]['firstName'];
-            $this->lastName         = $user[0]['lastName'];
-            $this->email            = $user[0]['email'];
+            $this->id               = $user['id'];
+            $this->userName         = $user['userName'];
+            $this->firstName        = $user['firstName'];
+            $this->lastName         = $user['lastName'];
+            $this->email            = $user['email'];
             $this->presentationIds  = $presentationIds;
 
             if(OS_DB_ENABLED) {
                 $osdb = Helper::getOSDB();
                 // Get user's additional information
                 $osdb->where("UserID", $osdb->escape($this->getUuid()));
-                $results = $osdb->get("GridUser", 1);
+                $results = $osdb->getOne("GridUser");
 
-                $this->online           = $results[0]['Online'];
-                $this->lastLogin        = $results[0]['Login'];
-                $this->lastPosition     = $results[0]['LastPosition'];
-                $this->lastRegionUuid   = $results[0]['LastRegionID'];
+                $this->online           = $results['Online'];
+                $this->lastLogin        = $results['Login'];
+                $this->lastPosition     = $results['LastPosition'];
+                $this->lastRegionUuid   = $results['LastRegionID'];
 
             }
         } else {
             throw new Exception("User not found", 3);
         }
+    }
+
+    /**
+     * Returns the user's ID
+     *
+     * @return integer
+     */
+    public function getId() {
+        return $this->id;
     }
 
     /**

@@ -19,7 +19,7 @@ class Presentation implements SimpleModel {
     private $title;
     private $creationDate;
     private $modificationDate;
-    private $ownerUuid;
+    private $ownerId;
 
     /**
      * Constructs a new presentation with the given id and optional the given slide
@@ -27,17 +27,17 @@ class Presentation implements SimpleModel {
      * @param integer $id - ID of this presentation
      * @param integer $slide - [optional] Slide to show
      * @param string $title - [optional] Title of presentation
-     * @param string $ownerUuid - [optional] UUID of the owner
+     * @param integer $ownerId - [optional] ID of the owner
      * @param datetime $creationDate - [optional] Creation date time, yyyy-mm-dd hh:mm:ss
      * @param datetime $modificationDate [optional] - Date of last modification, yyyy-mm-dd hh:mm:ss
      */
-	public function __construct($id, $slide = 0, $title = '', $ownerUuid = '', $creationDate = '', $modificationDate = '') {
+	public function __construct($id, $slide = 0, $title = '', $ownerId = '', $creationDate = '', $modificationDate = '') {
 		$this->presentationId   = $id;
 		$this->currentSlide     = $slide;
         $this->title            = $title;
         $this->creationDate     = $creationDate;
         $this->modificationDate = $modificationDate;
-        $this->ownerUuid        = $ownerUuid;
+        $this->ownerId          = $ownerId;
 	}
 
     /**
@@ -48,13 +48,13 @@ class Presentation implements SimpleModel {
     public function getInfoFromDatabase() {
         $db = Helper::getDB();
         $db->where('id', (int) $this->getPresentationId());
-        $results = $db->get('presentations', 1);
+        $results = $db->getOne('presentations');
 
         if(!empty($results)) {
-            $this->title            = $results[0]['title'];
-            $this->creationDate     = $results[0]['creationDate'];
-            $this->modificationDate = $results[0]['modificationDate'];
-            $this->ownerUuid        = $results[0]['ownerUuid'];
+            $this->title            = $results['title'];
+            $this->creationDate     = $results['creationDate'];
+            $this->modificationDate = $results['modificationDate'];
+            $this->ownerId          = $results['ownerId'];
         } else {
             throw new Exception("Presentation not found", 5);
         }
@@ -92,8 +92,8 @@ class Presentation implements SimpleModel {
      *
      * @return string
      */
-    public function getOwnerUuid() {
-        return $this->ownerUuid;
+    public function getOwnerId() {
+        return $this->ownerId;
     }
 
     /**
