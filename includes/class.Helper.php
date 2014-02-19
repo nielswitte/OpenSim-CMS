@@ -65,7 +65,7 @@ class Helper {
 
     /**
      * Hashes the given string
-     * 
+     *
      * @param string $string
      * @return string
      */
@@ -73,7 +73,20 @@ class Helper {
         return password_hash($string, PASSWORD_DEFAULT);
     }
 
-
+    /**
+     * Generates an unique token
+     * 
+     * @param integer $length - [Optional] The length of the token to be generated
+     * @return string
+     */
+    public static function generateToken($length = 16) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, strlen($characters) - 1)];
+        }
+        return $randomString;
+    }
 
     /**
      * Helper function to parse PUT requests

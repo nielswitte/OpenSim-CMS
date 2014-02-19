@@ -33,7 +33,7 @@ class API {
         $password               = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_ENCODED);
         $ip                     = filter_input(INPUT_POST, 'ip', FILTER_SANITIZE_ENCODED);
         $data                   = array();
-        $data['token']          = uniqid("", true);
+        $data['token']          = Helper::generateToken(48);
         $data['ip']             = $ip !== FALSE ? $ip : $_SERVER['REMOTE_ADDR'];
         $data['expires']        = date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES));
 
