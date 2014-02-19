@@ -29,7 +29,7 @@ class Presentation implements SimpleModel {
      * @param string $title - [optional] Title of presentation
      * @param integer $ownerId - [optional] ID of the owner
      * @param datetime $creationDate - [optional] Creation date time, yyyy-mm-dd hh:mm:ss
-     * @param datetime $modificationDate [optional] - Date of last modification, yyyy-mm-dd hh:mm:ss
+     * @param datetime $modificationDate - [optional] Date of last modification, yyyy-mm-dd hh:mm:ss
      */
 	public function __construct($id, $slide = 0, $title = '', $ownerId = '', $creationDate = '', $modificationDate = '') {
 		$this->presentationId   = $id;
@@ -48,13 +48,13 @@ class Presentation implements SimpleModel {
     public function getInfoFromDatabase() {
         $db = Helper::getDB();
         $db->where('id', (int) $this->getPresentationId());
-        $results = $db->getOne('presentations');
+        $results = $db->get('presentations', 1);
 
         if(!empty($results)) {
-            $this->title            = $results['title'];
-            $this->creationDate     = $results['creationDate'];
-            $this->modificationDate = $results['modificationDate'];
-            $this->ownerId          = $results['ownerId'];
+            $this->title            = $results[0]['title'];
+            $this->creationDate     = $results[0]['creationDate'];
+            $this->modificationDate = $results[0]['modificationDate'];
+            $this->ownerId          = $results[0]['ownerId'];
         } else {
             throw new Exception("Presentation not found", 5);
         }

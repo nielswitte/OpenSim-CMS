@@ -13,16 +13,19 @@
  *
  * @author Niels Witte
  * @date February 11th, 2014
- * @version 0.3
+ * @version 0.4
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
 integer debug = 0;				// Enables showing debugging comments
+string APIUserName = "OpenSim"; // API user name to be used
+string APIPassword = "OpenSim"; // API password
 
 // Some general parameters
+string APIToken;                // The token to be used for the API
 integer mListener;				// The main listener
 integer gListener;             	// The navigation listener
-key userUuid;                	// The toucher's UUID
+key userUuid = NULL_KEY;        // The toucher's UUID (default the owner))
 key objectUuid;                	// The object's UUID
 integer channel = 7;        	// The channel to be used
 integer media = 0;            	// Media type [0 = off, 1 = presentation]
@@ -36,6 +39,7 @@ list slides;                	// List with all slides
 list textureCache;				// Cache the textures to only require loading once
 
 // HTTP stuff
+key http_request_api_token;     // HTTP Request for fetching API token
 key http_request_id;        	// HTTP Request for loading presentation
 key http_request_user;			// HTTP Request for loading user data
 key http_request_set;			// HTTP Request to set UUID of object for future use
@@ -92,8 +96,17 @@ set_uuid_of_object(string type, integer id, key uuid) {
 		if(debug) llInstantMessage(userUuid, "[Debug] Update slide: "+ id + " to UUID:"+ uuid);
 
 		string body = "uuid="+ (string)uuid;
-		http_request_set = llHTTPRequest(serverUrl +"/presentation/"+ presentationId +"/slide/"+ id +"/", [HTTP_METHOD, "PUT", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
+		http_request_set = llHTTPRequest(serverUrl +"/presentation/"+ presentationId +"/slide/"+ id +"/?token="+ APIToken, [HTTP_METHOD, "PUT", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
 	}
+}
+
+/**
+ * Requesting a new API token for this session
+ */
+request_api_token() {
+    if(debug) llInstantMessage(userUuid, "[Debug] Requesting new API token");
+    string body = "username="+ APIUserName +"&password="+ APIPassword;
+	http_request_api_token = llHTTPRequest(serverUrl +"/auth/user/", [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
 }
 
 /**
@@ -101,7 +114,7 @@ set_uuid_of_object(string type, integer id, key uuid) {
  */
 load_users_presentations() {
 	llInstantMessage(userUuid, "Searching for your presentations... Please be patient");
-	http_request_user = llHTTPRequest(serverUrl +"/user/"+ userUuid +"/", [], "");
+	http_request_user = llHTTPRequest(serverUrl +"/user/"+ userUuid +"/?token="+ APIToken, [], "");
 }
 
 /**
@@ -119,12 +132,15 @@ nav_slide(integer next) {
         llSetColor(ZERO_VECTOR, ALL_SIDES);
     // All fine, show slide
     } else {
+        // Remove black screen when returning to presentation
+        if(slide == (totalslides+1) && next < slide) {
+            // Remove black screen
+            llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
+        }
+
     	// Update slide number
     	slide = next;
 
-        // Remove previous
-        llSetTexture(TEXTURE_BLANK, ALL_SIDES);
-        llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
         // Load slide
         string url          = llList2String(slides, next-1);
         string params       = "width: 1024,height:1024";
@@ -135,19 +151,22 @@ nav_slide(integer next) {
         	string texture = llList2String(textureCache, res+2);
         	if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by local uuid from cache (" + texture +")");
         	llSetTexture(texture, ALL_SIDES);
-
     	// Check if requested image has a valid UUID in the database
         } else if(isKey(url) == 2 && llGetSubString(url, 0, 3) != "http") {
         	if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by remote uuid from cache (" + url +")");
         	llSetTexture(url, ALL_SIDES);
     	// Load texture from remote server
         } else {
+            // Remove previous texture
+            llSetTexture(TEXTURE_BLANK, ALL_SIDES);
+            llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
+
         	if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by url (" + url +")");
         	// Previous texture
         	string oldtexture = llGetTexture(0);
 
         	// Load new image
-        	string texture = osSetDynamicTextureURLBlend("", "image", url, params, 0, 255);
+        	string texture = osSetDynamicTextureURLBlend("", "image", url +"?token="+ APIToken, params, 0, 255);
 
             if(debug) llInstantMessage(userUuid, "[Debug] Loaded slide");
 			// Keep trying to fetch the new texture from object
@@ -179,6 +198,8 @@ default {
         // Set color to white and remove textures
         llSetTexture(TEXTURE_BLANK, ALL_SIDES);
         llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
+        // Get new API token
+        request_api_token();
     }
 
     /**
@@ -199,6 +220,30 @@ default {
         mListener = llListen(channel,"", userUuid,"");
         // Open main menu
         open_menu(userUuid, mainNavigationText, mainNavigationButtons);
+    }
+
+    /**
+     * Actions to be taken when a HTTP request gets a response
+     */
+    http_response(key request_id, integer status, list metadata, string body) {
+        // Catch errors
+    	if(status != 200) {
+    		if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
+            // Send a more specific and meaningful response to the user
+    		if(request_id == http_request_api_token) {
+    			llInstantMessage(userUuid, "Invalid username/password combination used.");
+    		}
+    		return;
+    	}
+
+		// Loaded presentation
+        if(request_id == http_request_api_token) {
+            // Parse the returned body to JSON
+            if(debug) llInstantMessage(userUuid, "[Debug] Received API token");
+            key json_body   = JsonCreateStore(body);
+            APIToken        = JsonGetValue(json_body, "token");
+            if(debug) llInstantMessage(userUuid, "[Debug] Storing API token: "+ APIToken);
+        }
     }
 
     /**
@@ -250,7 +295,7 @@ state presentation {
             // Sets presentation Id
             presentationId = llList2String(commands, 1);
             // Loads JSON from server
-            http_request_id = llHTTPRequest(serverUrl +"/presentation/"+ presentationId +"/", [], "");
+            http_request_id = llHTTPRequest(serverUrl +"/presentation/"+ presentationId +"/?token="+ APIToken, [], "");
         // Shutdown
         } else if(llList2String(commands, 0) == "Quit") {
             media = 0;
@@ -288,17 +333,23 @@ state presentation {
     	// Catch errors
     	if(status != 200) {
     		if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
-            // Send a more specific and meaningful response to the user
-    		if(request_id == http_request_user) {
-    			llInstantMessage(userUuid, "User not found");
-    		} else if(request_id == http_request_id) {
-    			llInstantMessage(userUuid, "Presentation not found");
-    		}
+
+            // API key expired
+            if(status == 401) {
+                llInstantMessage(userUuid, "The API key expired, turn the presenter off and on again: ");
+            } else {
+                // Send a more specific and meaningful response to the user
+                if(request_id == http_request_user) {
+                    llInstantMessage(userUuid, "User not found");
+                } else if(request_id == http_request_id) {
+                    llInstantMessage(userUuid, "Presentation not found");
+                }
+            }
     		return;
     	}
 
 		// Loaded presentation
-        if (request_id == http_request_id) {
+        if(request_id == http_request_id) {
             // Parse the returned body to JSON
             key json_body       = JsonCreateStore(body);
             string slides_body  = JsonGetJson(json_body, "slides");

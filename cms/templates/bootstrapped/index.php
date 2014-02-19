@@ -3,8 +3,31 @@ if (EXEC != 1) {
     die('Invalid request');
 }
 
-$path   = filter_input(INPUT_GET, '_url', FILTER_SANITIZE_SPECIAL_CHARS);
-$pages  = explode('/', trim($path, '/'));
+// Content pages
+$contentPages = array(
+    // List with additional header code, which is loaded before any HTML output is done
+    // Body code is included as the main body of this page
+    'presentation'  => array('header' => '',                    'body'=> 'presentation.php'),
+    'presentations' => array('header' => '',                    'body'=> 'presentations.php'),
+    'signout'       => array('header' => 'signout.php',         'body'=> 'signout.php')
+);
+
+// Get request parameters
+$requestPath    = filter_input(INPUT_GET, '_url', FILTER_SANITIZE_SPECIAL_CHARS);
+$pagesRequest   = explode('/', trim($requestPath, '/'));
+$pageRequest    = htmlentities($pagesRequest[0]);
+
+// Show page content
+$content = 'default.php';
+$header  = '';
+if(isset($pageRequest) && array_key_exists($pageRequest, $contentPages)){
+    $content = $contentPages[$pageRequest]['body'];
+    $header  = $contentPages[$pageRequest]['header'];
+}
+
+if($header != '') {
+    include dirname(__FILE__) .'/html/head/'. $header;
+}
 
 ?>
 <!DOCTYPE html>
@@ -13,10 +36,12 @@ $pages  = explode('/', trim($path, '/'));
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>OpenSim-CMS <?php echo ($pages[0] != '' ? ' - '. ucfirst($pages[0]) : ''); ?></title>
+        <title>OpenSim-CMS <?php echo ($pageRequest != '' ? ' - '. ucfirst($pageRequest) : ''); ?></title>
 
         <!-- Bootstrap CSS -->
         <link href="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+        <link href="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/css/select2.css" rel="stylesheet" type="text/css">
+        <link href="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/css/select2-bootstrap.css" rel="stylesheet" type="text/css">
         <link href="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/less/main.less" rel="stylesheet/less" type="text/css">
 
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -27,14 +52,22 @@ $pages  = explode('/', trim($path, '/'));
         <![endif]-->
 
         <!-- Important JS files that need to be loaded before body -->
-        <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/jquery-2.1.0.min.js" type="text/javascript"></script>
-        <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/jquery.rest.js" type="text/javascript"></script>
+        <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/libs/jquery-2.1.0.min.js" type="text/javascript"></script>
+        <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/libs/jquery.rest.js" type="text/javascript"></script>
         <script type="text/javascript">
+            var client;
+            var api_token = "<?php echo isset($_SESSION['AccessToken']) ? $_SESSION['AccessToken'] : ''; ?>";
+            var base_url = "<?php echo SERVER_ROOT; ?>";
+            var pages = [ <?php foreach($pagesRequest as $page) { echo '"'. $page .'",'; } ?> ];
+
             jQuery(document).ready(function($){
-                var client = new $.RestClient('/OpenSim-CMS/api/', {
-                    cache: 5,
-                    cachableMethods: ["GET"]
+                client = new $.RestClient('/OpenSim-CMS/api/', {
+                    cache: 10
                 });
+
+                client.add('presentations');
+                client.add('presentation');
+                client.add('user');
             });
         </script>
     </head>
@@ -53,33 +86,32 @@ $pages  = explode('/', trim($path, '/'));
                 </div>
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-                        <li class="<?php echo (in_array($pages[0], array('presentations', 'presentation')) ? 'active' : ''); ?>"><a href="<?php echo SERVER_ROOT; ?>/cms/presentations/">Presentations</a></li>
+<?php if(isset($_SESSION['AccessToken'])) { ?>
+                        <li class="<?php echo (in_array($pageRequest, array('presentations', 'presentation')) ? 'active' : ''); ?>"><a href="<?php echo SERVER_ROOT; ?>/cms/presentations/">Presentations</a></li>
+<?php } ?>
                     </ul>
+                    <?php include dirname(__FILE__) .'/html/userinfo.php'; ?>
                 </div><!--/.nav-collapse -->
             </div>
         </div>
 
         <!-- Content -->
         <div class="container">
-<?php
-    switch ($pages[0]) {
-        case 'presentations':
-            include dirname(__FILE__) . '/html/presentations.php';
-        break;
-        case 'presentation':
-            include dirname(__FILE__) . '/html/presentation.php';
-        break;
-        default:
-
-        break;
-    }
-?>          <hr>
+            <div id="alerts"></div>
+            <?php include dirname(__FILE__) .'/html/body/'. $content; ?>
+            <hr>
             <footer class="footer">
                 <p>&copy; OpenSim-CMS 2014</p>
             </footer>
         </div>
         <!-- Additional JS files -->
-        <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/bootstrap.min.js" type="text/javascript"></script>
-        <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/less-1.6.3.min.js" type="text/javascript"></script>
+        <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/libs/bootstrap.min.js" type="text/javascript"></script>
+        <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/libs/select2-3.4.5.min.js" type="text/javascript"></script>
+        <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/libs/less-1.6.3.min.js" type="text/javascript"></script>
+        <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/main.js" type="text/javascript"></script>
+<?php if(file_exists(dirname(__FILE__) . '/js/'. $pageRequest .'.js')) { ?>
+        <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/<?php echo $pageRequest; ?>.js" type="text/javascript"></script>
+<?php } ?>
+        <script
     </body>
 </html>

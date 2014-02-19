@@ -3,10 +3,12 @@
 
     define('EXEC',                      '1');                                   // Simple check if file is accessed correctly
     // Server settings
+    define('SERVER_DEBUG',              TRUE);                                  // Show debugging output
     define('SERVER_PROTOCOL',           'http');                                // use HTTP or HTTPS
     define('SERVER_ADDRESS',            'localhost');                           // server address, can also be an IP
     define('SERVER_PORT',               80);                                    // server port
     define('SERVER_ROOT',               '/CMS');                                // server root directory
+    define('SERVER_API_TOKEN_EXPIRES',  '30 minutes');                          // Time a token is valid after last usage (used by strototime)
     $DB_USERNAME                        = '';                                   // Database username
     $DB_PASSWORD                        = '';                                   // Database password
     $DB_NAME                            = '';                                   // Database name
@@ -18,7 +20,8 @@
     define('OS_REMOTE_ADMIN_URL',       'http://127.0.0.1');                    // Remote admin URL (Be sure to enable Remote Admin in OpenSim.ini)
     define('OS_REMOTE_ADMIN_PORT',      '');                                    // Port used by OpenSim for remote admin
     define('OS_REMOTE_ADMIN_PASSWORD',  '');                                    // OpenSim remote admin password
-    define('OS_SERVER_URL',             'http://127.0.0.1:9000');               // Full URL to the OpenSim server
+    define('OS_SERVER_IP',              '127.0.0.1');                           // IP of the OpenSim server
+    define('OS_SERVER_PORT',            '9000');                                // Port of the OpenSim server
     define('OS_DEFAULT_REGION',         '');                                    // Name of the default OpenSim Region to use
     define('OS_DEFAULT_REGION_UUID',    '');                                    // Default region's UUID
     define('OS_DB_ENABLED',              FALSE);                                // Use OpenSim MySQL database for extra functionality

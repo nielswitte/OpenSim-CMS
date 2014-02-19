@@ -16,10 +16,49 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  * This class is hosts all API calls and matches them to the corresponding model/controller functions
  *
  * @author Niels Witte
- * @version 0.2
+ * @version 0.3
  * @date February 18th, 2014
  */
 class API {
+    /**
+     * Authenticates the user based on the given post data
+     *
+     * @throws Exception
+     * @returns array
+     */
+    public static function authUser($args) {
+        $headers                = getallheaders();
+        $db                     = Helper::getDB();
+        $userName               = filter_input(INPUT_POST, 'userName', FILTER_SANITIZE_ENCODED);
+        $password               = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_ENCODED);
+        $ip                     = filter_input(INPUT_POST, 'ip', FILTER_SANITIZE_ENCODED);
+        $data                   = array();
+        $data['token']          = uniqid("", true);
+        $data['ip']             = $ip !== FALSE ? $ip : $_SERVER['REMOTE_ADDR'];
+        $data['expires']        = date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES));
+
+        // Request from OpenSim? Add this additional check because of the access rights of OpenSim
+        if(isset($headers['HTTP_X_SECONDLIFE_SHARD']) && $_SERVER['REMOTE_ADDR'] == OS_SERVER_IP) {
+            $userId             = -1;
+        } else {
+            $userId             = 0;
+        }
+        $user           = new User($userId, 0, $userName);
+        $user->getInfoFromDatabase();
+        $userCtrl       = new UserController($user);
+        $validRequest   = $userCtrl->checkPassword($password);
+        $data['userId'] = $user->getId();
+        if(!$validRequest) {
+            throw new Exception("Invalid username/password combination used", 1);
+        }
+
+        if($validRequest) {
+            $db->insert('tokens', $data);
+        }
+
+        return $data;
+    }
+
     /**
      * Gets a list of presentations starting at the given argument offset
      *

@@ -50,3 +50,4 @@ on how to set things up.
 Kudos to those who created the packages and classes which are used by this program.
  * Ajillion and Avbdr for PHP-MySQLi-Database-Class (https://github.com/avbdr/PHP-MySQLi-Database-Class/)
  * Sprain for class.Images.php (https://github.com/sprain/class.Images.php)
+ * Jpillora for jQuery.rest (https://github.com/jpillora/jquery.rest)
