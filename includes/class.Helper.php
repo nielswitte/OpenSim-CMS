@@ -64,6 +64,18 @@ class Helper {
     }
 
     /**
+     * Hashes the given string
+     * 
+     * @param string $string
+     * @return string
+     */
+    public static function Hash($string) {
+        return password_hash($string, PASSWORD_DEFAULT);
+    }
+
+
+
+    /**
      * Helper function to parse PUT requests
      * @source: https://stackoverflow.com/questions/5483851/manually-parse-raw-http-data-with-php/5488449#5488449
      *

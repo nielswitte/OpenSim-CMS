@@ -194,4 +194,39 @@ class UserController {
         }
         return $result;
     }
+
+    /**
+     * Checks to see if the password matches the stored hash for this user
+     *
+     * @param string $password - The unhashed password
+     * @return boolean
+     */
+    public function checkPassword($password) {
+        $db = Helper::getDB();
+        $db->where('id', $this->user->getId());
+        $result = $db->getOne('users');
+
+        // Got a result?
+        if(isset($result['password'])) {
+            $hash = $result['password'];
+        } else {
+            $hash = '';
+        }
+
+        return password_verify($password, $hash);
+    }
+
+    /**
+     * Updates the password and hash it for this user
+     *
+     * @param type $hash - The unhashed password
+     * @return boolean
+     */
+    public function setPassword($password) {
+        $hash   = Helper::Hash($password);
+        $db     = Helper::getDB();
+        $db->where('id', $this->user->getId());
+        $result = $db->update('users', array('password' => $hash));
+        return $result;
+    }
 }

@@ -1,5 +1,6 @@
 <?php
 require_once dirname(__FILE__) .'/../config.php';
+require_once dirname(__FILE__) .'/auth.php';
 require_once dirname(__FILE__) .'/api.php';
 
 /**
@@ -14,25 +15,32 @@ $result = '';
 // Try to parse the requested URL and paramters to a function of the API
 try {
 	// Input
-	$get    = filter_input(INPUT_GET, '_url', FILTER_SANITIZE_SPECIAL_CHARS);
+	$get        = filter_input(INPUT_GET, '_url', FILTER_SANITIZE_SPECIAL_CHARS);
+    $token      = filter_input(INPUT_GET, 'token', FILTER_SANITIZE_SPECIAL_CHARS);
+    $selectors  = array();
+    $authorized = Auth::validate($token);
 
     // List with URL selectors and the corresponding functions to be used for each request type
-    $selectors = array(
-        "/presentations\/?$/"                                => array("GET"  => "getPresentations"),        // Get list with 50 presentations
-        "/presentations\/(\d+)\/?$/"                         => array("GET"  => "getPresentations"),        // Get list with 50 presentations starting at the given offset
-        "/presentation\/(\d+)\/?$/"                          => array("GET"  => "getPresentationById"),     // Select specific presentation
-        "/presentation\/(\d+)\/slide\/(\d+)\/?$/"            => array("GET"  => "getSlideById",             // Get slide from presentation
-                                                                      "PUT"  => "updateSlideUuid"),         // Update slide UUID for given slide of presentation
-        "/presentation\/(\d+)\/slide\/(\d+)\/image\/?$/"     => array("GET"  => "getSlideImageById"),       // Get only the image of a given presentation slide
-        "/users\/([a-zA-Z0-9-_]{3,}+)\/?$/"                  => array("GET"  => "getUsersByUserName"),      // Gets a list of all users with usernames matching the search of atleast 3 characters
-        "/user\/(\d+)\/?$/"                                  => array("GET"  => "getUserById"),             // Get a user by ID
-        "/user\/([a-z0-9-]{36})\/?$/"                        => array("GET"  => "getUserByUuid"),           // Get a user by UUID
-        "/user\/([a-z0-9-]{36})\/teleport\/?$/"              => array("PUT"  => "teleportUserByUuid"),      // Teleports a user
-        "/user\/([a-z0-9-]{36})\/uuid\/?$/"                  => array("PUT"  => "updateUserUuid"),          // Update the UUID of a user to match an avatar
-        "/user\/avatar\/?$/"                                 => array("POST" => "createAvatar"),            // Create an avatar
-        "/region\/([a-z0-9-]{36})\/?$/"                      => array("GET"  => "getRegionByUuid"),         // Get information about the given region
-        "/region\/([a-z0-9-]{36})\/image\/?$/"               => array("GET"  => "getRegionImageByUuid"),    // Get the map of the region
-    );
+    // Authorized selectors (require token)
+    if($authorized) {
+        $selectors["/presentations\/?$/"]                               = array("GET"  => "getPresentations");        // Get list with 50 presentations
+        $selectors["/presentations\/(\d+)\/?$/"]                        = array("GET"  => "getPresentations");        // Get list with 50 presentations starting at the given offset
+        $selectors["/presentation\/(\d+)\/?$/"]                         = array("GET"  => "getPresentationById");     // Select specific presentation
+        $selectors["/presentation\/(\d+)\/slide\/(\d+)\/?$/"]           = array("GET"  => "getSlideById",             // Get slide from presentation
+                                                                                "PUT"  => "updateSlideUuid");         // Update slide UUID for given slide of presentation
+        $selectors["/presentation\/(\d+)\/slide\/(\d+)\/image\/?$/"]    = array("GET"  => "getSlideImageById");       // Get only the image of a given presentation slide
+        $selectors["/users\/([a-zA-Z0-9-_]{3,}+)\/?$/"]                 = array("GET"  => "getUsersByUserName");      // Gets a list of all users with usernames matching the search of atleast 3 characters
+        $selectors["/user\/(\d+)\/?$/"]                                 = array("GET"  => "getUserById");             // Get a user by ID
+        $selectors["/user\/([a-z0-9-]{36})\/?$/"]                       = array("GET"  => "getUserByUuid");           // Get a user by UUID
+        $selectors["/user\/([a-z0-9-]{36})\/teleport\/?$/"]             = array("PUT"  => "teleportUserByUuid");      // Teleports a user
+        $selectors["/user\/([a-z0-9-]{36})\/uuid\/?$/"]                 = array("PUT"  => "updateUserUuid");          // Update the UUID of a user to match an avatar
+        $selectors["/user\/avatar\/?$/"]                                = array("POST" => "createAvatar");            // Create an avatar
+        $selectors["/region\/([a-z0-9-]{36})\/?$/"]                     = array("GET"  => "getRegionByUuid");         // Get information about the given region
+        $selectors["/region\/([a-z0-9-]{36})\/image\/?$/"]              = array("GET"  => "getRegionImageByUuid");    // Get the map of the region
+    // Public selectors
+    } else {
+        $selectors["/auth\/user\/?$/"]                                  = array("POST" => "authUser");                // Authenticate the given user
+    }
 
     $ok = FALSE;
     // Search for match
@@ -53,7 +61,9 @@ try {
 
 // Catch any exception that occured
 } catch (Exception $e) {
-    header("HTTP/1.1 400 Bad Request");
+    if($authorized) {
+        header("HTTP/1.1 400 Bad Request");
+    }
     echo '<pre>';
 	echo $e;
     echo '</pre>';
