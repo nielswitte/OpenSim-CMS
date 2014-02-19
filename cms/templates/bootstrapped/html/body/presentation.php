@@ -6,9 +6,6 @@ if (EXEC != 1) {
 <div class="page-header">
     <h1>Presentation <small></small></h1>
 </div>
-<?php
-if (isset($pages[1]) && is_numeric($pages[1])) {
-?>
 <form class="form-horizontal" role="form" id="presentationForm">
     <div class="form-group">
         <label for="inputId" class="col-sm-2 control-label">ID</label>
@@ -31,8 +28,7 @@ if (isset($pages[1]) && is_numeric($pages[1])) {
     <div class="form-group">
         <label for="inputOwner" class="col-sm-2 control-label">Owner ID</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="inputOwner" placeholder="Owner ID">
-            @todo: make select2 with ajax search
+            <input type="hidden" class="form-control" id="inputOwner" placeholder="Owner ID">
         </div>
     </div>
     <div class="form-group">
@@ -54,49 +50,3 @@ if (isset($pages[1]) && is_numeric($pages[1])) {
         </div>
     </div>
 </form>
-
-
-
-<script type="text/javascript">
-    jQuery(document).ready(function($) {
-        var client = new $.RestClient('/OpenSim-CMS/api/', {
-            cache: 5,
-            cachableMethods: ["GET"]
-        });
-
-        client.add('user');
-
-        client.add('presentation');
-        client.presentation.read(<?php echo $pages[1]; ?>).done(function(data) {
-            $('div.page-header h1 small').text(data.title);
-            $('#inputId').val(data.presentationId);
-            $('#inputType').val(data.type);
-            $('#inputTitle').val(data.title);
-
-            $('#inputId').val(data.presentationId);
-
-            client.user.read(data.ownerId).done(function(user) {
-                $('#inputOwner').val(data.ownerId +' - '+ user.userName);
-            }).fail(function() {
-                $('#inputOwner').val('Unknown');
-            });
-
-            $('#inputSlidesCount').val(data.slidesCount);
-            $('#inputCreationDate').val(data.creationDate);
-            $('#inputModificationDate').val(data.modificationDate);
-
-        }).fail(function() {
-            alert('request failed');
-        });
-    });
-</script>
-<?php
-} else {
-?>
-<div class="alert alert-danger">
-    <strong>Error!</strong><br>
-    Something went wrong when loading this page. Did you manually enter this URL?
-    If so, check the URL and its parameters, and try again.
-</div>
-<?php
-}
