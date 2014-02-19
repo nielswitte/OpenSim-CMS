@@ -43,4 +43,15 @@ class Auth {
 
         return $result[0]['count'] == 1 ? TRUE : FALSE;
     }
+
+    /**
+     * Removes all expired tokens from the database
+     *
+     * @return boolean
+     */
+    public static function removeExpiredTokens() {
+        $db = Helper::getDB();
+        $db->where('expires', array('<' => date('Y-m-d H:i:s')));
+        return $db->delete('tokens');
+    }
 }

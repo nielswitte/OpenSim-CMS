@@ -11,6 +11,9 @@ require_once dirname(__FILE__) .'/api.php';
  * @date February 10th, 2014
  */
 
+// Remove expired tokens
+Auth::removeExpiredTokens();
+
 $result = '';
 // Try to parse the requested URL and paramters to a function of the API
 try {
@@ -22,48 +25,50 @@ try {
 
     // List with URL selectors and the corresponding functions to be used for each request type
     // Authorized selectors (require token)
-    if($authorized) {
-        $selectors["/presentations\/?$/"]                               = array("GET"  => "getPresentations");        // Get list with 50 presentations
-        $selectors["/presentations\/(\d+)\/?$/"]                        = array("GET"  => "getPresentations");        // Get list with 50 presentations starting at the given offset
-        $selectors["/presentation\/(\d+)\/?$/"]                         = array("GET"  => "getPresentationById");     // Select specific presentation
-        $selectors["/presentation\/(\d+)\/slide\/(\d+)\/?$/"]           = array("GET"  => "getSlideById",             // Get slide from presentation
-                                                                                "PUT"  => "updateSlideUuid");         // Update slide UUID for given slide of presentation
-        $selectors["/presentation\/(\d+)\/slide\/(\d+)\/image\/?$/"]    = array("GET"  => "getSlideImageById");       // Get only the image of a given presentation slide
-        $selectors["/users\/([a-zA-Z0-9-_]{3,}+)\/?$/"]                 = array("GET"  => "getUsersByUserName");      // Gets a list of all users with usernames matching the search of atleast 3 characters
-        $selectors["/user\/(\d+)\/?$/"]                                 = array("GET"  => "getUserById");             // Get a user by ID
-        $selectors["/user\/([a-z0-9-]{36})\/?$/"]                       = array("GET"  => "getUserByUuid");           // Get a user by UUID
-        $selectors["/user\/([a-z0-9-]{36})\/teleport\/?$/"]             = array("PUT"  => "teleportUserByUuid");      // Teleports a user
-        $selectors["/user\/([a-z0-9-]{36})\/uuid\/?$/"]                 = array("PUT"  => "updateUserUuid");          // Update the UUID of a user to match an avatar
-        $selectors["/user\/avatar\/?$/"]                                = array("POST" => "createAvatar");            // Create an avatar
-        $selectors["/region\/([a-z0-9-]{36})\/?$/"]                     = array("GET"  => "getRegionByUuid");         // Get information about the given region
-        $selectors["/region\/([a-z0-9-]{36})\/image\/?$/"]              = array("GET"  => "getRegionImageByUuid");    // Get the map of the region
+    $selectors["/presentations\/?$/"]                               = array("AUTH" => TRUE, "GET"  => "getPresentations");        // Get list with 50 presentations
+    $selectors["/presentations\/(\d+)\/?$/"]                        = array("AUTH" => TRUE, "GET"  => "getPresentations");        // Get list with 50 presentations starting at the given offset
+    $selectors["/presentation\/(\d+)\/?$/"]                         = array("AUTH" => TRUE, "GET"  => "getPresentationById");     // Select specific presentation
+    $selectors["/presentation\/(\d+)\/slide\/(\d+)\/?$/"]           = array("AUTH" => TRUE, "GET"  => "getSlideById",             // Get slide from presentation
+                                                                                            "PUT"  => "updateSlideUuid");         // Update slide UUID for given slide of presentation
+    $selectors["/presentation\/(\d+)\/slide\/(\d+)\/image\/?$/"]    = array("AUTH" => TRUE, "GET"  => "getSlideImageById");       // Get only the image of a given presentation slide
+    $selectors["/users\/([a-zA-Z0-9-_]{3,}+)\/?$/"]                 = array("AUTH" => TRUE, "GET"  => "getUsersByUserName");      // Gets a list of all users with usernames matching the search of atleast 3 characters
+    $selectors["/user\/(\d+)\/?$/"]                                 = array("AUTH" => TRUE, "GET"  => "getUserById");             // Get a user by ID
+    $selectors["/user\/([a-z0-9-]{36})\/?$/"]                       = array("AUTH" => TRUE, "GET"  => "getUserByUuid");           // Get a user by UUID
+    $selectors["/user\/([a-z0-9-]{36})\/teleport\/?$/"]             = array("AUTH" => TRUE, "PUT"  => "teleportUserByUuid");      // Teleports a user
+    $selectors["/user\/([a-z0-9-]{36})\/uuid\/?$/"]                 = array("AUTH" => TRUE, "PUT"  => "updateUserUuid");          // Update the UUID of a user to match an avatar
+    $selectors["/user\/avatar\/?$/"]                                = array("AUTH" => TRUE, "POST" => "createAvatar");            // Create an avatar
+    $selectors["/region\/([a-z0-9-]{36})\/?$/"]                     = array("AUTH" => TRUE, "GET"  => "getRegionByUuid");         // Get information about the given region
+    $selectors["/region\/([a-z0-9-]{36})\/image\/?$/"]              = array("AUTH" => TRUE, "GET"  => "getRegionImageByUuid");    // Get the map of the region
     // Public selectors
-    } else {
-        $selectors["/auth\/user\/?$/"]                                  = array("POST" => "authUser");                // Authenticate the given user
-    }
+
+    $selectors["/auth\/user\/?$/"]                                  = array("AUTH" => FALSE, "POST" => "authUser");                // Authenticate the given user
+
 
     $ok = FALSE;
     // Search for match
     foreach ($selectors as $regex => $funcs) {
+        // Method found for this URL?
         if (preg_match($regex, $get, $args)) {
+            $ok = TRUE;
             $method = $_SERVER['REQUEST_METHOD'];
-            if (isset($funcs[$method])) {
+            // Has access to this method?
+            if (isset($funcs[$method]) && ($authorized >= $funcs['AUTH'])) {
                 $result = API::$funcs[$method]($args);
-                $ok = TRUE;
+            } else {
+                header("HTTP/1.1 401 Unauthorized");
+                throw new Exception("Unauthorized to access this API URL");
             }
          }
     }
 
-    // No matching function found?
+    // Bad request
     if(!$ok) {
+        header("HTTP/1.1 400 Bad Request");
         throw new Exception("Invalid API URL used", 1);
     }
 
 // Catch any exception that occured
 } catch (Exception $e) {
-    if($authorized) {
-        header("HTTP/1.1 400 Bad Request");
-    }
 	$result["Exception"]    = $e->getMessage();
     if(SERVER_DEBUG) {
         $result["Code"]     = $e->getCode();
