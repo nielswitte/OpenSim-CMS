@@ -2,7 +2,9 @@ OpenSim-CMS API
 ===============
 The OpenSim-CMS communicates with OpenSim objects through an JSON-API, based on REST.
 For valid requests the `HTTP/1.1 200 OK` is used, for failures an exception is thrown by
-the system and displayed as output with a `HTTP/1.1 400 Bad Request` header.
+the system and displayed as output with a `HTTP/1.1 400 Bad Request` header. For most functions
+the user needs to be authorized, if the user is not authorized but should be, a `HTTP/1.1 401 Unauthorized`
+header is used.
 
 ## Authorization
 Before the API can be used, an user needs to authorize himself. This can be done by using the following API:
@@ -31,9 +33,10 @@ This request will return, on succes the following JSON:
 }
 ```
 
-The validity of the token depends on the config settings. The user OpenSim with user ID -1 can only accessed from the
-IP set in the config which is used by OpenSim. In addition the `HTTP_X_SECONDLIFE_SHARD` header needs to be set, which
-is done by default by OpenSim.
+The validity of the token depends on the config settings and is extended everytime the token is used.
+The user OpenSim with user ID -1 can only accessed from the IP set in the config which is used by OpenSim.
+In addition the `HTTP_X_SECONDLIFE_SHARD` header needs to be set to access this user, this is done by default
+for OpenSim.
 
 ## User
 User information can be accessed by using, the UUID of the user is based on the user's UUID in OpenSim:
@@ -79,7 +82,7 @@ when requesting a user. This is only shown when `OS_DB_ENABLED = TRUE`.
 
 ### Search for users by userName
 To search for a specific user by his or her username, the following API can be used.
-Atleast 3 chars are required.
+Atleast 3 characters are required.
 
 ```http
 GET /api/user/<SEARCH>/ HTTP/1.1
@@ -345,3 +348,29 @@ A small map preview can be opened by using the following API request
 GET /api/region/<REGION-UUID>/image/ HTTP/1.1
 ```
 This will return a 256x256 JPEG preview of the region map.
+
+## Error messages
+When the config value `SERVER_DEBUG` is set to `FALSE`, bad and unauthorized requests will provide,
+beside the corresponding HTTP header, an exception message in JSON. For example the following message
+is displayed when attempting to access a protected function without a valid API token.
+
+```json
+{
+    "Exception": "Unauthorized to access this API URL"
+}
+```
+
+When `SERVER_DEBUG` is set to `TRUE`, additional information will be displayed. Including the
+file, line and stack trace of the error. It is recommended to disable debugging for public API servers.
+
+```json
+{
+    "Exception": "Unauthorized to access this API URL",
+    "Code": 0,
+    "File": "/OpenSim-CMS/api/index.php",
+    "Line": 62,
+    "Trace": [
+
+    ]
+}
+```
