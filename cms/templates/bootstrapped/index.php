@@ -7,9 +7,10 @@ if (EXEC != 1) {
 $contentPages = array(
     // List with additional header code, which is loaded before any HTML output is done
     // Body code is included as the main body of this page
-    'presentation'  => array('header' => '',                    'body'=> 'presentation.php'),
-    'presentations' => array('header' => '',                    'body'=> 'presentations.php'),
-    'signout'       => array('header' => 'signout.php',         'body'=> 'signout.php')
+    'presentation'  => array('header' => '',                    'body' => 'presentation.php'),
+    'presentations' => array('header' => '',                    'body' => 'presentations.php'),
+    'signout'       => array('header' => 'signout.php',         'body' => 'signout.php'),
+    'signin'        => array('header' => 'signin.php',          'body' => 'signin.php')
 );
 
 // Get request parameters
