@@ -21,7 +21,10 @@ try {
 	$get        = filter_input(INPUT_GET, '_url', FILTER_SANITIZE_SPECIAL_CHARS);
     $token      = filter_input(INPUT_GET, 'token', FILTER_SANITIZE_SPECIAL_CHARS);
     $selectors  = array();
-    $authorized = Auth::validate($token);
+
+    $auth       = new Auth();
+    $auth->setToken($token);
+    $authorized = $auth->validate();
 
     // List with URL selectors and the corresponding functions to be used for each request type
     // Authorized selectors (require token)
@@ -91,3 +94,12 @@ if($result != '') {
         echo json_encode($result);
     }
 }
+
+/*
+$data = json_encode($_SERVER, JSON_PRETTY_PRINT);
+foreach($headers as $header => $value) {
+    $data .= $header .': '. $value ."\n";
+}
+file_put_contents('headers.txt', $data);
+
+ */

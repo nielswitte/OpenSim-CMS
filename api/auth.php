@@ -8,35 +8,74 @@
  * @date February 19th, 2014
  */
 class Auth {
+    private $token = '';
+    private $ip;
+    private $timestamp;
+    private $userId;
+    private $user;
+
+    /**
+     * Constructs a new Auth instance
+     */
+    public function __construct() {
+        $this->ip           = $_SERVER['REMOTE_ADDR'];
+        $this->timestamp    = date('Y-m-d H:i:s');
+    }
+
+    /**
+     * Sets the token to be used in this class
+     *
+     * @param string $token
+     */
+    public function setToken($token) {
+        $this->token = $token;
+    }
 
     /**
      * Checks if the user is allowed to use the API
      * All users of the protected functions require a token
      *
-     * @param type $token
      * @return boolean
      */
-    public static function validate($token) {
+    public function validate() {
         $token = filter_input(INPUT_GET, 'token', FILTER_SANITIZE_ENCODED);
-        $result = self::checkToken($token);
+        $result = self::checkToken($this->token);
 
+        return $result;
+    }
+
+    /**
+     * Tries to create the user class from the given data
+     * Only possible when the token has been validated successful!
+     *
+     * @return UserLoggedIn or boolean when false
+     */
+    public function getUser() {
+        $result = FALSE;
+        if(isset($this->userId)) {
+            if(!isset($this->user)) {
+                $this->user = new UserLoggedIn($this->userId);
+                $this->user->getInfoFromDB();
+            }
+            $result = $this->user;
+        }
         return $result;
     }
 
     /**
      * Validates the given token and updates its expiration time
      *
-     * @param string $token
      * @return boolean
      */
-    private static function checkToken($token) {
+    private function checkToken() {
         $db = Helper::getDB();
-        $params = array($token, $_SERVER['REMOTE_ADDR'], date('Y-m-d H:i:s'));
-        $result = $db->rawQuery('SELECT COUNT(*) AS count FROM tokens WHERE token = ? AND ip = ? AND expires >= ? LIMIT 1', $params);
+        $params = array($this->token, $this->ip, $this->timestamp);
+        $result = $db->rawQuery('SELECT COUNT(*) AS count, userId FROM tokens WHERE token = ? AND ip = ? AND expires >= ? LIMIT 1', $params);
 
         // Extend token expiration time
         if($result[0]['count'] == 1) {
-            $db->where('token', $db->escape($token));
+            $this->userId = $result[0]['userId'];
+            $db->where('token', $db->escape($this->token));
             $data['expires']    = date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES));
             $db->update('tokens', $data);
         }

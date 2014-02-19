@@ -31,9 +31,10 @@ class API {
         $db                     = Helper::getDB();
         $userName               = filter_input(INPUT_POST, 'userName', FILTER_SANITIZE_ENCODED);
         $password               = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_ENCODED);
+        $ip                     = filter_input(INPUT_POST, 'ip', FILTER_SANITIZE_ENCODED);
         $data                   = array();
         $data['token']          = uniqid("", true);
-        $data['ip']             = $_SERVER['REMOTE_ADDR'];
+        $data['ip']             = $ip !== FALSE ? $ip : $_SERVER['REMOTE_ADDR'];
         $data['expires']        = date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES));
 
         // Request from OpenSim? Add this additional check because of the access rights of OpenSim

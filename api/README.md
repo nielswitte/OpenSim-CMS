@@ -15,8 +15,12 @@ POST /api/auth/user/ HTTP/1.1
 |-------------------|-----------|---------------------------------------------------------------|
 | UserName          | String    | The username of the user in the CMS                           |
 | password          | String    | The corresponding password of the user in the CMS             |
+| ip                | String    | [Optional] The IP address to assign this token to             |
 
-This will return, on succes the following JSON:
+The optional parameter ip, can be used to assign a token to a machine that can not perform the auth request
+by itself, for example if the CMS is running on localhost, the token is for the user of the CMS, not the CMS.
+
+This request will return, on succes the following JSON:
 
 ```json
 {
