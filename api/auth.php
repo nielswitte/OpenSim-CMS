@@ -1,15 +1,11 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- * Description of auth
+ * This class is used to check authorization tokens
  *
- * @author Niels
+ * @author Niels Witte
+ * @version 0.1
+ * @date February 19th, 2014
  */
 class Auth {
 
@@ -36,7 +32,7 @@ class Auth {
     private static function checkToken($token) {
         $db = Helper::getDB();
         $params = array($token, $_SERVER['REMOTE_ADDR'], date('Y-m-d H:i:s'));
-        $result = $db->rawQuery('SELECT userId, COUNT(*) AS count FROM tokens WHERE token = ? AND ip = ? AND expires >= ? LIMIT 1', $params);
+        $result = $db->rawQuery('SELECT COUNT(*) AS count FROM tokens WHERE token = ? AND ip = ? AND expires >= ? LIMIT 1', $params);
 
         // Extend token expiration time
         if($result[0]['count'] == 1) {

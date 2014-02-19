@@ -16,7 +16,7 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  * This class is hosts all API calls and matches them to the corresponding model/controller functions
  *
  * @author Niels Witte
- * @version 0.2
+ * @version 0.3
  * @date February 18th, 2014
  */
 class API {

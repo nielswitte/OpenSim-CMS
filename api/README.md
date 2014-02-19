@@ -4,6 +4,33 @@ The OpenSim-CMS communicates with OpenSim objects through an JSON-API, based on 
 For valid requests the `HTTP/1.1 200 OK` is used, for failures an exception is thrown by
 the system and displayed as output with a `HTTP/1.1 400 Bad Request` header.
 
+## Authorization
+Before the API can be used, an user needs to authorize himself. This can be done by using the following API:
+
+```http
+POST /api/auth/user/ HTTP/1.1
+```
+
+| Parameter         | Type      | Description                                                   |
+|-------------------|-----------|---------------------------------------------------------------|
+| UserName          | String    | The username of the user in the CMS                           |
+| password          | String    | The corresponding password of the user in the CMS             |
+
+This will return, on succes the following JSON:
+
+```json
+{
+    "token": "53048c5375b1d2.66536292",
+    "ip": "192.168.1.102",
+    "expires": "2014-02-19 12:19:55",
+    "userId": 1
+}
+```
+
+The validity of the token depends on the config settings. The user OpenSim with user ID -1 can only accessed from the
+IP set in the config which is used by OpenSim. In addition the `HTTP_X_SECONDLIFE_SHARD` header needs to be set, which
+is done by default by OpenSim.
+
 ## User
 User information can be accessed by using, the UUID of the user is based on the user's UUID in OpenSim:
 

@@ -81,7 +81,7 @@ class User implements SimpleModel {
             $this->presentationIds  = $presentationIds;
 
             // Get additional information if possible
-            if(OS_DB_ENABLED && $this->getUuid() != 0) {
+            if(OS_DB_ENABLED && Helper::isValidUuid($this->getUuid())) {
                 $osdb = Helper::getOSDB();
                 $osdb->where("UserID", $osdb->escape($this->getUuid()));
                 $results = $osdb->getOne("GridUser");

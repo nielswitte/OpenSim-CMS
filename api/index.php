@@ -64,9 +64,13 @@ try {
     if($authorized) {
         header("HTTP/1.1 400 Bad Request");
     }
-    echo '<pre>';
-	echo $e;
-    echo '</pre>';
+	$result["Exception"]    = $e->getMessage();
+    if(SERVER_DEBUG) {
+        $result["Code"]     = $e->getCode();
+        $result["File"]     = $e->getFile();
+        $result["Line"]     = $e->getLine();
+        $result["Trace"]    = $e->getTrace();
+    }
 }
 
 $headers = getallheaders();
