@@ -21,6 +21,7 @@
     define('OS_REMOTE_ADMIN_PORT',      '');                                    // Port used by OpenSim for remote admin
     define('OS_REMOTE_ADMIN_PASSWORD',  '');                                    // OpenSim remote admin password
     define('OS_SERVER_IP',              '127.0.0.1');                           // IP of the OpenSim server
+    define('OS_SERVER_PROTOCOL',        'http');                                // Protocol of the server to be used (http or https)
     define('OS_SERVER_PORT',            '9000');                                // Port of the OpenSim server
     define('OS_DEFAULT_REGION',         '');                                    // Name of the default OpenSim Region to use
     define('OS_DEFAULT_REGION_UUID',    '');                                    // Default region's UUID

@@ -16,17 +16,78 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  * This class is hosts all API calls and matches them to the corresponding model/controller functions
  *
  * @author Niels Witte
- * @version 0.3
+ * @version 0.4
  * @date February 18th, 2014
  */
 class API {
+    private $routes = array();
+
+    /**
+     * Creates a new API with optional a list of routes
+     *
+     * @param array $routes
+     */
+    public function __construct($routes = array()) {
+        $this->routes = $routes;
+    }
+
+    /**
+     * Adds the given regex/function pair to the list of routes
+     *
+     * @param string $regex - Regular expression to match the route
+     * @param string $function - Name of the function to execute
+     * @param string $method - [Optional] Define if the function is accessed by GET, POST, PUT or DELETE (Default: GET)
+     * @param boolean $auth - [Optional] Is authorization required for this function? (Default: FALSE)
+     */
+    public function addRoute($regex, $function, $method = 'GET', $auth = FALSE) {
+        $this->routes[$regex][$method]['AUTH']      = $auth;
+        $this->routes[$regex][$method]['FUNCTION']  = $function;
+    }
+
+   /**
+     * Checks if the given url can be matched to a function
+     *
+     * @param string $url - URL to check
+     * @param boolean $authorized - [Optional] Is the user authorized
+     * @return mixed - The result of the function if a match is found, FALSE when no match found
+     * @throws Exception
+     */
+    public function getRoute($url, $authorized = FALSE) {
+        $result = FALSE;
+        // Search for match
+        foreach ($this->routes as $regex => $funcs) {
+            // Method found for this URL?
+            if (preg_match($regex, $url, $args)) {
+                $method = $_SERVER['REQUEST_METHOD'];
+                // Has access to this method?
+                if (isset($funcs[$method]) && ($authorized >= $funcs[$method]['AUTH'])) {
+                    $result = API::$funcs[$method]['FUNCTION']($args);
+                } else {
+                    $result = TRUE;
+                    header("HTTP/1.1 401 Unauthorized");
+                    throw new Exception("Unauthorized to access this API URL");
+                }
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Returns an array with all routes
+     *
+     * @return array
+     */
+    public function getRoutes() {
+        return $this->routes;
+    }
+
     /**
      * Authenticates the user based on the given post data
      *
      * @throws Exception
      * @returns array
      */
-    public static function authUser($args) {
+    public function authUser($args) {
         $headers                = getallheaders();
         $db                     = Helper::getDB();
         $userName               = filter_input(INPUT_POST, 'userName', FILTER_SANITIZE_ENCODED);
@@ -65,7 +126,7 @@ class API {
      * @param array $args
      * @return array
      */
-    public static function getPresentations($args) {
+    public function getPresentations($args) {
         $db             = Helper::getDB();
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
@@ -89,7 +150,7 @@ class API {
      * @param array $args
      * @return array
      */
-    public static function getPresentationById($args) {
+    public function getPresentationById($args) {
         $presentation = new Presentation($args[1]);
         $presentation->getInfoFromDatabase();
         return self::getPresentationData($presentation);
@@ -101,7 +162,7 @@ class API {
      * @param Presentation $presentation
      * @return array
      */
-    private static function getPresentationData(Presentation $presentation) {
+    private function getPresentationData(Presentation $presentation) {
         $data = array();
         $data['type']               = 'presentation';
         $data['title']              = $presentation->getTitle();
@@ -134,7 +195,7 @@ class API {
      * @param array $args
      * @return array
      */
-    public static function getSlideById($args) {
+    public function getSlideById($args) {
         $presentation   = new Presentation($args[1]);
         $slide          = $presentation->getSlide($args[2]);
 
@@ -154,7 +215,7 @@ class API {
      * @param array $args
      * @throws Exception
      */
-    public static function getSlideImageById($args) {
+    public function getSlideImageById($args) {
         // Get presentation and slide details
         $presentation   = new Presentation($args[1], $args[2]);
         $slidePath      = $presentation->getPath() . DS . $presentation->getCurrentSlide() .'.jpg';
@@ -187,7 +248,7 @@ class API {
      * @param array $args
      * @return boolean
      */
-    public static function updateSlideUuid($args) {
+    public function updateSlideUuid($args) {
         $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
         $parsedPutData  = (Helper::parsePutRequest($putUserData));
         $postUuid       = isset($parsedPutData['uuid']) ? $parsedPutData['uuid'] : '';
@@ -208,7 +269,7 @@ class API {
      * @param array $args
      * @return array
      */
-    public static function getUsersByUserName($args) {
+    public function getUsersByUserName($args) {
         $db             = Helper::getDB();
         $params         = array("%". $args[1] ."%");
         $results        = $db->rawQuery('SELECT * FROM users WHERE userName LIKE ? ORDER BY userName ASC', $params);
@@ -229,7 +290,7 @@ class API {
      * @param array $args
      * @return array
      */
-    public static function getUserById($args) {
+    public function getUserById($args) {
         $user = new User($args[1]);
         $user->getInfoFromDatabase();
         return self::getUserData($user);
@@ -241,7 +302,7 @@ class API {
      * @param array $args
      * @return array
      */
-    public static function getUserByUuid($args) {
+    public function getUserByUuid($args) {
         $user = new User(0, $args[1]);
         $user->getInfoFromDatabase();
         return self::getUserData($user);
@@ -253,7 +314,7 @@ class API {
      * @param User $user
      * @return array
      */
-    private static function getUserData(User $user) {
+    private function getUserData(User $user) {
         $data = array();
         $data['id']                 = $user->getId();
         $data['uuid']               = $user->getUuid();
@@ -279,7 +340,7 @@ class API {
      * @param array $args
      * @return boolean
      */
-    public static function updateUserUuid($args) {
+    public function updateUserUuid($args) {
         $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
         $parsedPutData  = (Helper::parsePutRequest($putUserData));
         $userName       = isset($parsedPutData['userName']) ? $parsedPutData['userName'] : '';
@@ -295,7 +356,7 @@ class API {
      * @param array $args
      * @return array
      */
-    public static function teleportUserByUuid($args) {
+    public function teleportUserByUuid($args) {
         $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
         $parsedPutData  = (Helper::parsePutRequest($putUserData));
 
@@ -319,7 +380,7 @@ class API {
      * @param array $args
      * @return array
      */
-    public static function createAvatar($args) {
+    public function createAvatar($args) {
         $result         = '';
         $userData       = filter_input_array(INPUT_POST, FILTER_SANITIZE_ENCODED);
 
@@ -341,7 +402,7 @@ class API {
      * @param array $args
      * @return array
      */
-    public static function getRegionByUuid($args) {
+    public function getRegionByUuid($args) {
         $region     = new Region($args[1]);
 
         $region->getInfoFromDatabase();
@@ -363,8 +424,8 @@ class API {
      *
      * @param array $args
      */
-    public static function getRegionImageByUuid($args) {
+    public function getRegionImageByUuid($args) {
         header('Content-Type: image/jpeg');
-        echo file_get_contents(OS_SERVER_URL .'/index.php?method=regionImage'. str_replace('-', '', $args[1]));
+        echo file_get_contents(OS_SERVER_PROTOCOL .'://'. OS_SERVER_IP .':'. OS_SERVER_PORT .'/index.php?method=regionImage'. str_replace('-', '', $args[1]));
     }
 }
