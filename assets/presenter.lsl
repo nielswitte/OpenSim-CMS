@@ -13,13 +13,14 @@
  *
  * @author Niels Witte
  * @date February 11th, 2014
- * @version 0.4
+ * @version 0.5
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
 integer debug = 0;              // Enables showing debugging comments
 string APIUserName = "OpenSim"; // API user name to be used
 string APIPassword = "OpenSim"; // API password
+integer serverId = 1;           // The ID of this server in OpenSim-CMS
 
 // Some general parameters
 string APIToken;                // The token to be used for the API
@@ -95,7 +96,7 @@ set_uuid_of_object(string type, integer id, key uuid) {
     if(type == "slide") {
         if(debug) llInstantMessage(userUuid, "[Debug] Update slide: "+ id + " to UUID:"+ uuid);
 
-        string body = "uuid="+ (string)uuid;
+        string body = "uuid="+ (string)uuid +"&gridId="+ (string)serverId;
         http_request_set = llHTTPRequest(serverUrl +"/presentation/"+ presentationId +"/slide/"+ id +"/?token="+ APIToken, [HTTP_METHOD, "PUT", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
     }
 }
@@ -114,7 +115,7 @@ request_api_token() {
  */
 load_users_presentations() {
     llInstantMessage(userUuid, "Searching for your presentations... Please be patient");
-    http_request_user = llHTTPRequest(serverUrl +"/user/"+ userUuid +"/?token="+ APIToken, [], "");
+    http_request_user = llHTTPRequest(serverUrl +"/grid/"+ serverId +"/avatar/"+ userUuid +"/?token="+ APIToken, [], "");
 }
 
 /**
@@ -359,12 +360,12 @@ state presentation {
             integer length      = (integer) JsonGetValue(json_body, "slidesCount");
             // Get from each slide the URL or the UUID
             for (x = 1; x <= length; x++) {
-                string slideUuid        = JsonGetValue(json_slides, "{"+ x +"}.{uuid}");
+                string slideUuid        = JsonGetValue(json_slides, "{"+ x +"}.{cache}.{"+ serverId +"}{uuid}");
                 string slideUrl         = JsonGetValue(json_slides, "{"+ x +"}.{image}");
-                string slideExpired     = JsonGetValue(json_slides, "{"+ x +"}.{uuidExpired}");
+                string slideExpired     = JsonGetValue(json_slides, "{"+ x +"}.{cache}.{"+ serverId +"}.{isExpired}");
 
                 // UUID set and not expired?
-                if(slideUuid != "0" && slideExpired == "0") {
+                if(slideUuid != "" && slideExpired == "0") {
                     slides += [(key) slideUuid];
                     if(debug) llInstantMessage(userUuid, "[Debug] use UUID ("+ slideUuid +") for slide: "+ x);
                 // Use URL
@@ -483,7 +484,7 @@ state off {
         llSay(0, "turning off!");
 
         // Clear cache
-        list empty;
+        list empty = [];
         textureCache = empty;
         // Set color to black
         llSetColor(ZERO_VECTOR, ALL_SIDES);

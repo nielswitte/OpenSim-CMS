@@ -44,25 +44,6 @@ class Helper {
         return self::$db;
     }
 
-
-    /**
-     * Sets the database for OpenSim to use so it can be retrieved by other components
-     *
-     * @param MysqlDb $db
-     */
-    public static function setOSDB($db){
-        self::$osdb = $db;
-    }
-
-    /**
-     * Retuns the database class for OpenSim
-     *
-     * @return MysqlDb
-     */
-    public static function getOSDB() {
-        return self::$osdb;
-    }
-
     /**
      * Hashes the given string
      *
@@ -75,7 +56,7 @@ class Helper {
 
     /**
      * Generates an unique token
-     * 
+     *
      * @param integer $length - [Optional] The length of the token to be generated
      * @return string
      */

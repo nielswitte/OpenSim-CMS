@@ -38,12 +38,13 @@ try {
     $api->addRoute("/presentation\/(\d+)\/slide\/(\d+)\/image\/?$/",    "getSlideImageById",    "GET",  TRUE);  // Get only the image of a given presentation slide
     $api->addRoute("/users\/([a-zA-Z0-9-_]{3,}+)\/?$/",                 "getUsersByUserName",   "GET",  TRUE);  // Gets a list of all users with usernames matching the search of atleast 3 characters
     $api->addRoute("/user\/(\d+)\/?$/",                                 "getUserById",          "GET",  TRUE);  // Get a user by ID
-    $api->addRoute("/user\/([a-z0-9-]{36})\/?$/",                       "getUserByUuid",        "GET",  TRUE);  // Get a user by UUID
-    $api->addRoute("/user\/([a-z0-9-]{36})\/teleport\/?$/",             "teleportUserByUuid",   "PUT",  TRUE);  // Teleports a user
-    $api->addRoute("/user\/([a-z0-9-]{36})\/uuid\/?$/",                 "updateUserUuid",       "PUT",  TRUE);  // Update the UUID of a user to match an avatar
+    $api->addRoute("/user\/([a-z0-9-]{36})\/teleport\/?$/",             "teleportAvatarByUuid", "PUT",  TRUE);  // Teleports a user
     $api->addRoute("/user\/avatar\/?$/",                                "createAvatar",         "POST", TRUE);  // Create an avatar
-    $api->addRoute("/region\/([a-z0-9-]{36})\/?$/",                     "getRegionByUuid",      "GET",  TRUE);  // Get information about the given region
-    $api->addRoute("/region\/([a-z0-9-]{36})\/image\/?$/",              "getRegionImageByUuid", "GET",  TRUE);  // Get the map of the region
+    $api->addRoute("/grid\/(\d+)\/?$/",                                 "getGridById",          "GET",  TRUE);  // Get grid information by ID
+    $api->addRoute("/grid\/(\d+)\/region\/([a-z0-9-]{36})\/?$/",        "getRegionByUuid",      "GET",  TRUE);  // Get information about the given region
+    $api->addRoute("/grid\/(\d+)\/region\/([a-z0-9-]{36})\/image\/?$/", "getRegionImageByUuid", "GET",  TRUE);  // Get the map of the region
+    $api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "getUserByAvatar",      "GET",  TRUE);  // Gets an user by the avatar of this grid
+    $api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "matchAvatarToUser",    "PUT",  TRUE);  // Update the UUID of a user to match an avatar
 
     // Public selectors
     $api->addRoute("/auth\/user\/?$/",                                  "authUser",             "POST", FALSE); // Authenticate the given user
@@ -87,5 +88,4 @@ foreach($headers as $header => $value) {
     $data .= $header .': '. $value ."\n";
 }
 file_put_contents('headers.txt', $data);
-
- */
+*/

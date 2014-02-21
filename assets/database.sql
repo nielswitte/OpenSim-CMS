@@ -1,7 +1,7 @@
 -- --------------------------------------------------------
--- Host:                         127.0.0.1
--- Server versie:                5.5.8 - MySQL Community Server (GPL)
--- Server OS:                    Win32
+-- Host:                         localhost
+-- Server versie:                5.5.35-0ubuntu0.13.10.2 - (Ubuntu)
+-- Server OS:                    debian-linux-gnu
 -- HeidiSQL Versie:              8.3.0.4694
 -- --------------------------------------------------------
 
@@ -10,49 +10,209 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
--- Databasestructuur van cms wordt geschreven
-CREATE DATABASE IF NOT EXISTS `OpenSim-CMS` /*!40100 DEFAULT CHARACTER SET utf8 COLLATE utf8_bin */;
-USE `OpenSim-CMS`;
+-- Structuur van  tabel OpenSim-CMS.avatars wordt geschreven
+CREATE TABLE IF NOT EXISTS `avatars` (
+  `userId` int(11) NOT NULL DEFAULT '0',
+  `gridId` int(11) NOT NULL DEFAULT '0',
+  `uuid` varchar(36) COLLATE utf8_bin NOT NULL DEFAULT '',
+  PRIMARY KEY (`gridId`,`uuid`),
+  KEY `FK_avatars_users` (`userId`),
+  CONSTRAINT `FK_avatars_grids` FOREIGN KEY (`gridId`) REFERENCES `grids` (`id`),
+  CONSTRAINT `FK_avatars_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel cms.presentations wordt geschreven
-CREATE TABLE IF NOT EXISTS `presentations` (
+-- Structuur van  tabel OpenSim-CMS.cached_assets wordt geschreven
+CREATE TABLE IF NOT EXISTS `cached_assets` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `gridId` int(11) NOT NULL,
+  `uuid` varchar(50) COLLATE utf8_bin DEFAULT NULL,
+  `uuidExpires` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`,`gridId`),
+  KEY `FK_cached_assets_grids` (`gridId`),
+  CONSTRAINT `FK_cached_assets_grids` FOREIGN KEY (`gridId`) REFERENCES `grids` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.documents wordt geschreven
+CREATE TABLE IF NOT EXISTS `documents` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `title` varchar(255) COLLATE utf8_bin NOT NULL,
   `creationDate` timestamp NULL DEFAULT NULL,
   `modificationDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `ownerUuid` varchar(50) COLLATE utf8_bin NOT NULL,
+  `ownerId` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `FK_presentations_users` (`ownerUuid`),
-  CONSTRAINT `FK_presentations_users` FOREIGN KEY (`ownerUuid`) REFERENCES `users` (`uuid`) ON UPDATE CASCADE
+  KEY `FK_presentations_users` (`ownerId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel cms.presentation_slides wordt geschreven
-CREATE TABLE IF NOT EXISTS `presentation_slides` (
+-- Structuur van  tabel OpenSim-CMS.document_slides wordt geschreven
+CREATE TABLE IF NOT EXISTS `document_slides` (
   `number` int(11) NOT NULL AUTO_INCREMENT,
-  `presentationId` int(11) NOT NULL DEFAULT '0',
-  `uuid` varchar(50) COLLATE utf8_bin DEFAULT '0',
-  `uuidUpdated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`number`,`presentationId`),
-  KEY `FK_presentation_slides_presentations` (`presentationId`),
-  CONSTRAINT `FK_presentation_slides_presentations` FOREIGN KEY (`presentationId`) REFERENCES `presentations` (`id`) ON UPDATE CASCADE
+  `documentId` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`number`,`documentId`),
+  KEY `FK_presentation_slides_presentations` (`documentId`),
+  CONSTRAINT `FK_document_slides_documents` FOREIGN KEY (`documentId`) REFERENCES `documents` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel cms.users wordt geschreven
+-- Structuur van  tabel OpenSim-CMS.document_slides_cache wordt geschreven
+CREATE TABLE IF NOT EXISTS `document_slides_cache` (
+  `slideId` int(11) NOT NULL AUTO_INCREMENT,
+  `cacheId` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`slideId`,`cacheId`),
+  KEY `FK_document_slides_cache_cached_assets` (`cacheId`),
+  CONSTRAINT `FK_document_slides_cache_cached_assets` FOREIGN KEY (`cacheId`) REFERENCES `cached_assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_document_slides_cache_document_slides` FOREIGN KEY (`slideId`) REFERENCES `document_slides` (`number`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.grids wordt geschreven
+CREATE TABLE IF NOT EXISTS `grids` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `osProtocol` varchar(10) COLLATE utf8_bin DEFAULT 'http',
+  `osIp` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `osPort` int(11) unsigned DEFAULT NULL,
+  `raUrl` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `raPort` int(11) unsigned DEFAULT NULL,
+  `raPassword` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `dbUrl` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `dbPort` int(11) unsigned DEFAULT NULL,
+  `dbUserName` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `dbPassword` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `dbName` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `cacheTime` varchar(50) COLLATE utf8_bin DEFAULT NULL,
+  `defaultRegionUuid` varchar(50) COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_grids_grid_regions` (`defaultRegionUuid`),
+  CONSTRAINT `FK_grids_grid_regions` FOREIGN KEY (`defaultRegionUuid`) REFERENCES `grid_regions` (`uuid`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.grid_regions wordt geschreven
+CREATE TABLE IF NOT EXISTS `grid_regions` (
+  `gridId` int(11) NOT NULL,
+  `uuid` varchar(36) COLLATE utf8_bin NOT NULL,
+  `name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`uuid`,`gridId`),
+  KEY `FK_grid_regions_grids` (`gridId`),
+  CONSTRAINT `FK_grid_regions_grids` FOREIGN KEY (`gridId`) REFERENCES `grids` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.meetings wordt geschreven
+CREATE TABLE IF NOT EXISTS `meetings` (
+  `id` int(11) NOT NULL,
+  `userId` int(11) DEFAULT NULL,
+  `startDate` datetime DEFAULT NULL,
+  `endDate` datetime DEFAULT NULL,
+  `roomId` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_meetings_users` (`userId`),
+  KEY `FK_meetings_meeting_rooms` (`roomId`),
+  CONSTRAINT `FK_meetings_meeting_rooms` FOREIGN KEY (`roomId`) REFERENCES `meeting_rooms` (`id`),
+  CONSTRAINT `FK_meetings_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.meeting_agenda_items wordt geschreven
+CREATE TABLE IF NOT EXISTS `meeting_agenda_items` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `meetingId` int(11) DEFAULT NULL,
+  `order` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_meeting_agenda_items_meetings` (`meetingId`),
+  CONSTRAINT `FK_meeting_agenda_items_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.meeting_documents wordt geschreven
+CREATE TABLE IF NOT EXISTS `meeting_documents` (
+  `meetingId` int(11) NOT NULL,
+  `documentId` int(11) NOT NULL,
+  `agendaId` int(11) NOT NULL,
+  PRIMARY KEY (`meetingId`,`documentId`,`agendaId`),
+  KEY `FK__documents` (`documentId`),
+  KEY `FK__meeting_agenda_items` (`agendaId`),
+  CONSTRAINT `FK__documents` FOREIGN KEY (`documentId`) REFERENCES `documents` (`id`),
+  CONSTRAINT `FK__meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`),
+  CONSTRAINT `FK__meeting_agenda_items` FOREIGN KEY (`agendaId`) REFERENCES `meeting_agenda_items` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.meeting_participants wordt geschreven
+CREATE TABLE IF NOT EXISTS `meeting_participants` (
+  `meetingId` int(11) NOT NULL,
+  `userId` int(11) NOT NULL,
+  PRIMARY KEY (`meetingId`,`userId`),
+  KEY `FK_meeting_participants_users` (`userId`),
+  CONSTRAINT `FK_meeting_participants_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`),
+  CONSTRAINT `FK_meeting_participants_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.meeting_rooms wordt geschreven
+CREATE TABLE IF NOT EXISTS `meeting_rooms` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `regionUuid` varchar(36) COLLATE utf8_bin DEFAULT NULL,
+  `description` text COLLATE utf8_bin,
+  PRIMARY KEY (`id`),
+  KEY `FK_meeting_rooms_grid_regions` (`regionUuid`),
+  CONSTRAINT `FK_meeting_rooms_grid_regions` FOREIGN KEY (`regionUuid`) REFERENCES `grid_regions` (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.tokens wordt geschreven
+CREATE TABLE IF NOT EXISTS `tokens` (
+  `token` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '',
+  `userId` int(11) DEFAULT NULL,
+  `ip` varchar(64) COLLATE utf8_bin DEFAULT NULL,
+  `expires` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`token`),
+  KEY `userId` (`userId`),
+  CONSTRAINT `FK_tokens_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.users wordt geschreven
 CREATE TABLE IF NOT EXISTS `users` (
-  `uuid` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '0',
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `userName` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `firstName` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '',
   `lastName` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '',
   `email` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
   `password` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  PRIMARY KEY (`uuid`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`),
+  UNIQUE KEY `userName` (`userName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
