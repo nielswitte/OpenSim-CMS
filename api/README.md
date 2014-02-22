@@ -38,13 +38,13 @@ The user OpenSim with user ID -1 can only accessed from the IP set in the config
 In addition the `HTTP_X_SECONDLIFE_SHARD` header needs to be set to access this user, this is done by default
 for OpenSim.
 
-## User
-User information can be accessed by using, the UUID of the user is based on the user's UUID in OpenSim:
+## Users
+User information can be accessed by using, the UUID of the user's avatar in OpenSim on the given Grid:
 
 ```http
-GET /api/user/<UUID>/ HTTP/1.1
+GET /api/grid/<GRID-ID>/avatar/<UUID>/ HTTP/1.1
 ```
-Or request an user by its ID:
+Or request an user by its ID in the CMS:
 
 ```http
 GET /api/user/<ID>/ HTTP/1.1
@@ -55,7 +55,6 @@ Example of output
 ```json
 {
     "id": 1,
-    "uuid": "0a1811f4-7174-4e42-8bb5-26ef78335407",
     "userName": "testuser",
     "firstName": "Test",
     "lastName": "User",
@@ -64,12 +63,21 @@ Example of output
         "1",
         "5",
         "8"
-    ]
+    ],
+    "avatars": {
+        "1": {
+            "uuid": "0a1811f4-7174-4e42-8bb5-26ef78335407",
+            "gridId": 1,
+            "gridName": "OpenSim-CMS' test grid"
+        },
+        "2": { (...) },
+        "3": { (...) }
+    }
 }
 ```
 
 When OpenSim uses a MySQL database and the CMS is configered correctly, the following additional information is available
-when requesting a user. This is only shown when `OS_DB_ENABLED = TRUE`.
+about the avatars of the user. For each avatar the following information is shown below `gridName`:
 
 ```json
 {
@@ -94,7 +102,6 @@ The result is similar to the request by UUID, but displayed as a list ordered by
 {
     "1": {
         "id": 1,
-        "uuid": "0a1811f4-7174-4e42-8bb5-26ef78335407",
         "userName": "testuser",
         "firstName": "Test",
         "lastName": "User",
@@ -104,10 +111,15 @@ The result is similar to the request by UUID, but displayed as a list ordered by
             "5",
             "8"
         ],
-        "online": 1,
-        "lastLogin": "2014-02-17 13:39:28",
-        "lastPosition": "<123.6372, 124.9078, 26.18366>",
-        "lastRegionUuid": "72efcc78-2b1a-4571-8704-fea352998c0c"
+        "avatars": {
+            "1": {
+                "uuid": "0a1811f4-7174-4e42-8bb5-26ef78335407",
+                "gridId": 1,
+                "gridName": "OpenSim-CMS' test grid"
+            },
+            "2": { (...) },
+            "3": { (...) }
+        }
     },
     "2": { (...) },
     "3": { (...) },
@@ -122,7 +134,7 @@ Some form of authentication will be added later on. By sending a PUT request to 
 username as parameter and use the UUID of the user in OpenSim as URL parameter.
 
 ```http
-PUT /api/user/<UUID>/ HTTP/1.1
+PUT /api/grid/<GRID-ID>/avatar/<UUID>/ HTTP/1.1
 ```
 
 | Parameter         | Type      | Description                                                   |
@@ -140,6 +152,7 @@ The parameters that can be used are the following:
 
 | Parameter         | Type      | Description                                                   |
 |-------------------|-----------|---------------------------------------------------------------|
+| gridId            | integer   | the id to place the avatar on                                 |
 | firstName         | string    | agent's first name                                            |
 | lastName          | string    | agent's last name                                             |
 | email             | string    | agent's email address                                         |
@@ -173,12 +186,12 @@ To teleport a user you need at least the UUID of the user.
 All other parameters are optional and listed in the table below.
 
 ```http
-PUT /api/user/<UUID>/teleport/ HTTP/1.1
+PUT /api/grid/<GRID-ID>/avatar/<UUID>/teleport/ HTTP/1.1
 ```
 
 | Parameter         | Type      | Description                                                   |
 |-------------------|-----------|---------------------------------------------------------------|
-| regionName        | string    | [Optional] The name of the region (default from config.php)   |
+| regionName        | string    | [Optional] The name of the region (default from the region)   |
 | firstName         | string    | [Optional] agent's first name                                 |
 | lastName          | string    | [Optional] agent's last name                                  |
 | posX              | float     | [Optional] X-coordinate to teleport to (default: 128)         |
@@ -269,12 +282,18 @@ Example of output when request is successful:
     "ownerId": 1,
     "slides": {
         "1": {
-            "number": 1,
-            "image": "http://localhost:80/OpenSim-CMS/api/presentation/1/slide/1/image/",
-            "uuid": "1be74003-2d7c-4dbd-87c2-a1c95e0864e6",
-            "uuidUpdated": "2014-02-13 14:55:27",
-            "uuidExpired": 0
-        },
+                "number": 1,
+                "image": "http:\/\/localhost:80\/OpenSim-CMS\/api\/presentation\/1\/slide\/1\/image\/",
+                "cache": {
+                    "1": {
+                        "uuid": "90591103-6982-4eed-9b31-291f7077194a",
+                        "expires": "2014-02-23 14:29:25",
+                        "isExpired": 0
+                    },
+                    "2": { (...) },
+                    (...)
+                }
+            },
         "2": {
             (...)
         },
@@ -285,7 +304,9 @@ Example of output when request is successful:
     "modificationDate": "2014-02-13 14:22:09"
 }
 ```
-The UUID is matched to the UUID generated by OpenSim when the slide is accessed, to enable caching of textures.
+The cache section of a slide uses the UUID which is matched to the UUID generated by OpenSim when the slide is accessed.
+By saving the UUID caching of textures is enabled and OpenSim does not neet to request the image from the server everytime it is used.
+The cache is done on a grid base, the index of the case refers to the Grid ID.
 This is done by using the PUT function for a single slide (see below).
 
 The slide details for just one specific slide can be accessed through:
@@ -308,15 +329,51 @@ matched by the `OS_ASSET_CACHE_EXPIRES` value in `config.php`.
 PUT /api/presentation/<ID>/slide/<SLIDE#>/ HTTP/1.1
 ```
 
-| Parameter         | Type      | Description                   |
-|-------------------|-----------|-------------------------------|
-| uuid              | string    | UUID of the slide to be saved |
+| Parameter         | Type      | Description                                     |
+|-------------------|-----------|-------------------------------------------------|
+| uuid              | string    | UUID of the slide to be saved                   |
+| gridId            | integer   | The ID of the grid, as used in the CMS database |
 
-## Region
+## Grid
+Information about a Grid can be retrieved by using:
+```http
+GET /api/grid/<GRID-ID>/ HTTP/1.1
+```
+
+This will return a summary of the grid and regions, excluding the passwords.
+
+```json
+{
+    "openSim": {
+        "protocol": "http",
+        "ip": "127.0.0.1",
+        "port": 9000
+    },
+    "remoteAdmin": {
+        "url": "http://127.0.0.1",
+        "port": 9001
+    },
+    "cacheTime": "48 hours",
+    "regions": {
+        "72efcc78-2b1a-4571-8704-fea352998c0c": {
+            "uuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
+            "name": "The Grid",
+            "image": "http://localhost:80/OpenSim-CMS/api/grid/1/region/72efcc78-2b1a-4571-8704-fea352998c0c/image/"
+        },
+        "(...)": {
+            (...)
+        }
+    }
+}
+
+```
+
+
+### Regions
 To retrieve information about a region the following API can be used.
 
 ```http
-GET /api/region/<REGION-UUID>/ HTTP/1.1
+GET /api/grid/<GRID-ID>/region/<REGION-UUID>/ HTTP/1.1
 ```
 
 This will return some basic information about the region, such as the name and a thumbnail.
@@ -327,7 +384,7 @@ or if the MySQL database of OpenSim accepts remote connections.
 {
     "uuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
     "name": "The Grid",
-    "image": "http://localhost:80/OpenSim-CMS/api/72efcc78-2b1a-4571-8704-fea352998c0c/image/",
+    "image": "http://localhost:80/OpenSim-CMS/api/grid/1/region/72efcc78-2b1a-4571-8704-fea352998c0c/image/",
     "serverStatus": 1
 }
 ```

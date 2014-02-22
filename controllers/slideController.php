@@ -25,28 +25,35 @@ class SlideController {
     /**
      * Updates the UUID of the slide to the given value
      *
-     * @param string $uuid
+     * @param string $uuid - The UUID of the slide
+     * @param Grid $grid - The grid the texture is used on
      * @return boolean
      * @throws Exception
      */
-    public function setUuid($uuid) {
+    public function setUuid($uuid, Grid $grid) {
         $results = FALSE;
         if(Helper::isValidUuid($uuid)) {
             $db = Helper::getDB();
-            $updateData = array(
+            $cacheData = array(
+                'gridId'        => $db->escape($grid->getId()),
                 'uuid'          => $db->escape($uuid),
-                'uuidUpdated'   => date('Y-m-d H:i:s')
+                'uuidExpires'   => date('Y-m-d H:i:s', strtotime('+'. $grid->getCacheTime()))
             );
-            $db->where('number', $this->slide->getNumber());
 
-            $results = $db->update('presentation_slides', $updateData);
+            $cacheId = $db->insert('cached_assets', $cacheData);
+            $cacheSlideData = array(
+                'slideId'       => $db->escape($this->slide->getNumber()),
+                'cacheId'       => $cacheId
+            );
+            $results = $db->insert('document_slides_cache', $cacheSlideData);
+
         } else {
             throw new Exception("Invalid UUID provided", 2);
         }
 
-        if(!$results) {
+        if($results === FALSE) {
             throw new Exception("Updating UUID failed", 1);
         }
-        return $results;
+        return $results !== FALSE;
     }
 }

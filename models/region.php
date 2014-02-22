@@ -8,12 +8,13 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class represents a region
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date February 17th, 2014
  */
 class Region implements SimpleModel {
     private $name;
     private $uuid;
+    private $grid;
     private $online = FALSE;
     private $activeUsers = 0;
     private $totalUsers = 0;
@@ -22,12 +23,22 @@ class Region implements SimpleModel {
      * Creates a new region with the given name and uuid
      *
      * @param string $uuid - Region UUID
+     * @param Grid $gird - The grid where this region is part of
      */
-    public function __construct($uuid) {
+    public function __construct($uuid, Grid $grid) {
         $this->uuid = $uuid;
+        $this->grid = $grid;
 
-        // @todo: implement a function to get the name when using grid mode
-        $this->name = OS_DEFAULT_REGION;
+        // Always get information about this region from the server
+        $this->getInfoFromDatabase();
+    }
+
+    /**
+     * Sets the region's name
+     * @param string $name
+     */
+    public function setName($name) {
+        $this->name = $name;
     }
 
     /**
@@ -52,18 +63,21 @@ class Region implements SimpleModel {
      * Gets information about the region
      */
     public function getInfoFromDatabase() {
-        $raXML  = new OpenSimRPC();
+        $raXML  = new OpenSimRPC($this->grid->getRaUrl(), $this->grid->getRaPort(), $this->grid->getRaPassword());
         $result = $raXML->call('admin_region_query', array('region_id' => $this->getUuid()));
 
         if(isset($result['error'])) {
             throw new Exception($result['error'], 3);
+        } else {
+            $this->getGrid()->setOnlineStatus(TRUE);
         }
 
         $this->setOnlineStatus($result['success']);
 
+
         // Additional actions when MySQL database is accessable
-        if(OS_DB_ENABLED && $this->getOnlineStatus()) {
-            $osdb = Helper::getOSDB();
+        if($this->grid->getDbUrl() && $this->getOnlineStatus()) {
+            $osdb = new MysqliDb($this->grid->getDbUrl(), $this->grid->getDbUserName(), $this->grid->getDbPassword(), $this->grid->getDbName(), $this->grid->getDbPort());
             // Get user's presentations
             $osdb->where("LastRegionID", $osdb->escape($this->getUuid()));
             $results = $osdb->get("GridUser");
@@ -77,6 +91,15 @@ class Region implements SimpleModel {
             }
 
         }
+    }
+
+    /**
+     * Returns the grid where this region is part of
+     * 
+     * @return Grid
+     */
+    public function getGrid() {
+        return $this->grid;
     }
 
     /**
@@ -103,7 +126,7 @@ class Region implements SimpleModel {
      * @return string
      */
     public function getApiUrl() {
-        return SERVER_PROTOCOL .'://'. SERVER_ADDRESS .':'.SERVER_PORT . SERVER_ROOT .'/api/region/'. $this->uuid .'/';
+        return SERVER_PROTOCOL .'://'. SERVER_ADDRESS .':'.SERVER_PORT . SERVER_ROOT .'/api/grid/'. $this->grid->getId() .'/region/'. $this->uuid .'/';
     }
 
     /**

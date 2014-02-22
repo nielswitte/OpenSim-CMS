@@ -14,26 +14,20 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  */
 class User implements SimpleModel {
     private $id;
-    private $uuid;
     private $userName;
     private $firstName, $lastName;
     private $email;
-    private $presentationIds;
-    private $online = FALSE;
-    private $lastPosition = '<0,0,0>';
-    private $lastLogin = 0;
-    private $lastRegionUuid = 0;
+    private $presentationIds = array();
+    private $avatars = array();
 
     /**
      * Construct a new User with the given UUID
      *
      * @param integer $id - [Optional] The ID of the user
-     * @param string $userUUID - [Optional] the user's UUID
      * @param string $userName - [Optional] the user's user name
      */
-    public function __construct($id = 0, $userUUID = 0, $userName = '') {
+    public function __construct($id = 0, $userName = '') {
         $this->id       = $id;
-        $this->uuid     = $userUUID;
         $this->userName = $userName;
     }
 
@@ -46,51 +40,43 @@ class User implements SimpleModel {
         $db = Helper::getDB();
         // Get user information
         if($this->getId() != 0) {
-            $db->where("id", $db->escape($this->getId()));
-        }
-        if(Helper::isValidUuid($this->getUuid())) {
-            $db->where("uuid", $db->escape($this->getUuid()));
+            $db->where('id', $db->escape($this->getId()));
         }
         if($this->getUserName() != '') {
-            $db->where("userName", $db->escape($this->getUserName()));
+            $db->where('userName', $db->escape($this->getUserName()));
         }
-
-        $user = $db->getOne("users");
+        $user = $db->get('users', 1);
 
         // Results!
-        if(!empty($user)) {
-            $this->id               = $user['id'];
-            $this->uuid             = $user['uuid'];
-            $this->userName         = $user['userName'];
-            $this->firstName        = $user['firstName'];
-            $this->lastName         = $user['lastName'];
-            $this->email            = $user['email'];
+        if(isset($user[0])) {
+            $this->id               = $user[0]['id'];
+            $this->userName         = $user[0]['userName'];
+            $this->firstName        = $user[0]['firstName'];
+            $this->lastName         = $user[0]['lastName'];
+            $this->email            = $user[0]['email'];
 
             // Get user's presentations
-            $db->where("ownerId", $db->escape($user['id']));
-            $presentations = $db->get("presentations");
+            $db->where("ownerId", $this->getId());
+            $db->where('type', 'presentation');
+            $presentations = $db->get("documents");
 
             // Convert presentation Ids to array
-            $presentationIds = array();
             if(!empty($presentations)) {
                 foreach($presentations as $presentation) {
-                    $presentationIds[] = $presentation['id'];
+                    $this->presentationIds[] = $presentation['id'];
                 }
             }
 
-            $this->presentationIds  = $presentationIds;
-
-            // Get additional information if possible
-            if(OS_DB_ENABLED && Helper::isValidUuid($this->getUuid())) {
-                $osdb = Helper::getOSDB();
-                $osdb->where("UserID", $osdb->escape($this->getUuid()));
-                $results = $osdb->getOne("GridUser");
-                if(!empty($results)) {
-                    $this->online           = $results['Online'];
-                    $this->lastLogin        = $results['Login'];
-                    $this->lastPosition     = $results['LastPosition'];
-                    $this->lastRegionUuid   = $results['LastRegionID'];
-                }
+            $db->where('userId', $this->getId());
+            $avatars = $db->get('avatars');
+            $i = 1;
+            foreach($avatars as $avatar) {
+                $grid = new Grid($avatar['gridId']);
+                $grid->getInfoFromDatabase();
+                $newAvatar = new Avatar($grid, $avatar['uuid']);
+                $newAvatar->getInfoFromDatabase();
+                $this->avatars[$i] = $newAvatar;
+                $i++;
             }
         } else {
             throw new Exception("User not found", 3);
@@ -104,15 +90,6 @@ class User implements SimpleModel {
      */
     public function getId() {
         return $this->id;
-    }
-
-    /**
-     * Returns the user's UUID
-     *
-     * @return string
-     */
-    public function getUuid() {
-        return $this->uuid;
     }
 
     /**
@@ -161,38 +138,11 @@ class User implements SimpleModel {
     }
 
     /**
-     * Returns the user's online status
+     * Returns a list with avatars for this user
      *
-     * @return integer
+     * @return Avatar
      */
-    public function getOnline() {
-        return $this->online == 'True' ? 1 : 0;
-    }
-
-    /**
-     * Returns the user's last login datetime
-     *
-     * @return string
-     */
-    public function getLastLogin() {
-        return $this->lastLogin > 0 ? date('Y-m-d H:i:s', $this->lastLogin) : 0;
-    }
-
-    /**
-     * Returns the user's last position as <x,y,z>
-     *
-     * @return string
-     */
-    public function getLastPosition() {
-        return $this->lastPosition;
-    }
-
-    /**
-     * Returns the region UUID of the last position
-     *
-     * @return string
-     */
-    public function getLastRegionUuid() {
-        return $this->lastRegionUuid;
+    public function getAvatars() {
+        return $this->avatars;
     }
 }

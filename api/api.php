@@ -4,6 +4,8 @@ if(EXEC != 1) {
 }
 
 // Include all model classes
+require_once dirname(__FILE__) .'/../models/avatar.php';
+require_once dirname(__FILE__) .'/../models/grid.php';
 require_once dirname(__FILE__) .'/../models/presentation.php';
 require_once dirname(__FILE__) .'/../models/region.php';
 require_once dirname(__FILE__) .'/../controllers/regionController.php';
@@ -16,34 +18,102 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  * This class is hosts all API calls and matches them to the corresponding model/controller functions
  *
  * @author Niels Witte
- * @version 0.3
+ * @version 0.4
  * @date February 18th, 2014
  */
 class API {
+    private $routes = array();
+
+    /**
+     * Creates a new API with optional a list of routes
+     *
+     * @param array $routes
+     */
+    public function __construct($routes = array()) {
+        $this->routes = $routes;
+    }
+
+    /**
+     * Adds the given regex/function pair to the list of routes
+     *
+     * @param string $regex - Regular expression to match the route
+     * @param string $function - Name of the function to execute
+     * @param string $method - [Optional] Define if the function is accessed by GET, POST, PUT or DELETE (Default: GET)
+     * @param boolean $auth - [Optional] Is authorization required for this function? (Default: FALSE)
+     */
+    public function addRoute($regex, $function, $method = 'GET', $auth = FALSE) {
+        $this->routes[$regex][$method]['AUTH']      = $auth;
+        $this->routes[$regex][$method]['FUNCTION']  = $function;
+    }
+
+   /**
+     * Checks if the given url can be matched to a function
+     *
+     * @param string $url - URL to check
+     * @param boolean $authorized - [Optional] Is the user authorized
+     * @return mixed - The result of the function if a match is found, FALSE when no match found
+     * @throws Exception
+     */
+    public function getRoute($url, $authorized = FALSE) {
+        $result = FALSE;
+        // Search for match
+        foreach ($this->routes as $regex => $funcs) {
+            // Method found for this URL?
+            if (preg_match($regex, $url, $args)) {
+                $method = $_SERVER['REQUEST_METHOD'];
+                // Has access to this method?
+                if (isset($funcs[$method]) && ($authorized >= $funcs[$method]['AUTH'])) {
+                    $result = API::$funcs[$method]['FUNCTION']($args);
+                } else {
+                    $result = TRUE;
+                    header("HTTP/1.1 401 Unauthorized");
+                    throw new Exception("Unauthorized to access this API URL");
+                }
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Returns an array with all routes
+     *
+     * @return array
+     */
+    public function getRoutes() {
+        return $this->routes;
+    }
+
     /**
      * Authenticates the user based on the given post data
      *
      * @throws Exception
      * @returns array
      */
-    public static function authUser($args) {
+    public function authUser($args) {
         $headers                = getallheaders();
         $db                     = Helper::getDB();
         $userName               = filter_input(INPUT_POST, 'userName', FILTER_SANITIZE_ENCODED);
         $password               = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_ENCODED);
         $ip                     = filter_input(INPUT_POST, 'ip', FILTER_SANITIZE_ENCODED);
-        $data                   = array();
-        $data['token']          = uniqid("", true);
-        $data['ip']             = $ip !== FALSE ? $ip : $_SERVER['REMOTE_ADDR'];
+
+        // Basic output data
+        $data['token']          = Helper::generateToken(48);
+        $data['ip']             = (($ip !== FALSE && $ip !== NULL) ? $ip : $_SERVER['REMOTE_ADDR']);
         $data['expires']        = date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES));
 
+        // Check server IP to grid list
+        $db->where('osIp', $db->escape($data['ip']));
+        $grids = $db->get('grids', 1);
+
         // Request from OpenSim? Add this additional check because of the access rights of OpenSim
-        if(isset($headers['HTTP_X_SECONDLIFE_SHARD']) && $_SERVER['REMOTE_ADDR'] == OS_SERVER_IP) {
+        if(isset($headers['HTTP_X_SECONDLIFE_SHARD']) && isset($grids[0])) {
             $userId             = -1;
-        } else {
+        } elseif($userName != "OpenSim") {
             $userId             = 0;
+        } else {
+            throw new Exception("Not allowed to login as OpenSim outside the Grid", 2);
         }
-        $user           = new User($userId, 0, $userName);
+        $user           = new User($userId, $userName);
         $user->getInfoFromDatabase();
         $userCtrl       = new UserController($user);
         $validRequest   = $userCtrl->checkPassword($password);
@@ -65,13 +135,13 @@ class API {
      * @param array $args
      * @return array
      */
-    public static function getPresentations($args) {
+    public function getPresentations($args) {
         $db             = Helper::getDB();
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 presentations from the given offset
-        $params         = array($args[1], 50);
-        $resutls        = $db->rawQuery("SELECT * FROM presentations ORDER BY creationDate DESC LIMIT ?, ?", $params);
+        $params         = array('presentation', $args[1], 50);
+        $resutls        = $db->rawQuery("SELECT * FROM documents WHERE type = ? ORDER BY creationDate DESC LIMIT ?, ?", $params);
         // Process results
         $data           = array();
         $x              = 1;
@@ -89,7 +159,7 @@ class API {
      * @param array $args
      * @return array
      */
-    public static function getPresentationById($args) {
+    public function getPresentationById($args) {
         $presentation = new Presentation($args[1]);
         $presentation->getInfoFromDatabase();
         return self::getPresentationData($presentation);
@@ -101,7 +171,7 @@ class API {
      * @param Presentation $presentation
      * @return array
      */
-    private static function getPresentationData(Presentation $presentation) {
+    private function getPresentationData(Presentation $presentation) {
         $data = array();
         $data['type']               = 'presentation';
         $data['title']              = $presentation->getTitle();
@@ -110,13 +180,7 @@ class API {
         $slides     = array();
         $x          = 1;
         foreach($presentation->getSlides() as $slide) {
-            $slides[$x] = array(
-                            'number'        => $slide->getNumber(),
-                            'image'         => $presentation->getApiUrl() .'slide/'.  $slide->getNumber() .'/image/',
-                            'uuid'          => $slide->getUuid(),
-                            'uuidUpdated'   => $slide->getUuidUpdated(),
-                            'uuidExpired'   => $slide->isUuidExpired()
-                    );
+            $slides[$x] = $this->getSlideData($presentation, $slide);
             $x++;
         }
 
@@ -129,22 +193,39 @@ class API {
     }
 
     /**
+     * Formats the data for the given slide
+     *
+     * @param Presentation $presentation
+     * @param Slide $slide
+     * @return array
+     */
+    private function getSlideData(Presentation $presentation, Slide $slide) {
+        $cachedTextures = array();
+        foreach($slide->getCache() as $cache) {
+            $cachedTextures[$cache['gridId']] = array(
+                'uuid'      => $cache['uuid'],
+                'expires'   => $cache['uuidExpires'],
+                'isExpired' => $cache['uuidExpires'] > time() ? 1 : 0
+            );
+        }
+        $data = array(
+            'number' => $slide->getNumber(),
+            'image' => $presentation->getApiUrl() . 'slide/' . $slide->getNumber() . '/image/',
+            'cache' => $cachedTextures
+        );
+        return $data;
+    }
+
+    /**
      * Get slide details for the given slide
      *
      * @param array $args
      * @return array
      */
-    public static function getSlideById($args) {
+    public function getSlideById($args) {
         $presentation   = new Presentation($args[1]);
         $slide          = $presentation->getSlide($args[2]);
-
-        $data           = array(
-                                'number'        => $slide->getNumber(),
-                                'image'         => $presentation->getApiUrl() .'slide/'.  $slide->getNumber() .'/image/',
-                                'uuid'          => $slide->getUuid(),
-                                'uuidUpdated'   => $slide->getUuidUpdated(),
-                                'uuidExpired'   => $slide->isUuidExpired()
-                            );
+        $data           = $this->getSlideData($presentation, $slide);
         return $data;
     }
 
@@ -154,7 +235,7 @@ class API {
      * @param array $args
      * @throws Exception
      */
-    public static function getSlideImageById($args) {
+    public function getSlideImageById($args) {
         // Get presentation and slide details
         $presentation   = new Presentation($args[1], $args[2]);
         $slidePath      = $presentation->getPath() . DS . $presentation->getCurrentSlide() .'.jpg';
@@ -187,17 +268,23 @@ class API {
      * @param array $args
      * @return boolean
      */
-    public static function updateSlideUuid($args) {
+    public function updateSlideUuid($args) {
         $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
         $parsedPutData  = (Helper::parsePutRequest($putUserData));
+        $gridId         = isset($parsedPutData['gridId']) ? $parsedPutData['gridId'] : '';
         $postUuid       = isset($parsedPutData['uuid']) ? $parsedPutData['uuid'] : '';
 
         // Get presentation and slide details
         $presentation   = new Presentation($args[1]);
         $slide          = $presentation->getSlide($args[2]);
+
+        // Get grid details
+        $grid           = new Grid($gridId);
+        $grid->getInfoFromDatabase();
+
         // Update
         $slideCtrl      = new SlideController($slide);
-        $data           = $slideCtrl->setUuid($postUuid);
+        $data           = $slideCtrl->setUuid($postUuid, $grid);
 
         return $data;
     }
@@ -208,7 +295,7 @@ class API {
      * @param array $args
      * @return array
      */
-    public static function getUsersByUserName($args) {
+    public function getUsersByUserName($args) {
         $db             = Helper::getDB();
         $params         = array("%". $args[1] ."%");
         $results        = $db->rawQuery('SELECT * FROM users WHERE userName LIKE ? ORDER BY userName ASC', $params);
@@ -216,7 +303,7 @@ class API {
         $count          = 0;
         foreach($results as $result) {
             $count++;
-            $user           = new User($result['id'], $result['uuid']);
+            $user           = new User($result['id']);
             $user->getInfoFromDatabase();
             $data[$count]   = self::getUserData($user);
         }
@@ -229,22 +316,38 @@ class API {
      * @param array $args
      * @return array
      */
-    public static function getUserById($args) {
+    public function getUserById($args) {
         $user = new User($args[1]);
         $user->getInfoFromDatabase();
         return self::getUserData($user);
     }
 
     /**
-     * Get the details of an user by its UUID
+     * Gets an User by its Avatar on the Grid
+     * Needs args[1] to be the Grid ID and args[2] the avatar UUID
      *
      * @param array $args
      * @return array
+     * @throws Exception
      */
-    public static function getUserByUuid($args) {
-        $user = new User(0, $args[1]);
-        $user->getInfoFromDatabase();
-        return self::getUserData($user);
+    public function getUserByAvatar($args) {
+        $data = array();
+        if(Helper::isValidUuid($args[2])) {
+            $db = Helper::getDB();
+            $db->where('uuid', $args[2]);
+            $db->where('gridId', $args[1]);
+            $avatarQuery = $db->get('avatars', 1);
+            if(isset($avatarQuery[0])) {
+                $user = new User($avatarQuery[0]['userId']);
+                $user->getInfoFromDatabase();
+                $data = $this->getUserData($user);
+            } else {
+                throw new Exception("Avatar not found on this Grid", 2);
+            }
+        } else {
+            throw new Exception("Invalid UUID provided", 1);
+        }
+        return $data;
     }
 
     /**
@@ -253,23 +356,28 @@ class API {
      * @param User $user
      * @return array
      */
-    private static function getUserData(User $user) {
-        $data = array();
+    private function getUserData(User $user) {
         $data['id']                 = $user->getId();
-        $data['uuid']               = $user->getUuid();
         $data['userName']           = $user->getUserName();
         $data['firstName']          = $user->getFirstName();
         $data['lastName']           = $user->getLastName();
         $data['email']              = $user->getEmail();
         $data['presentationIds']    = $user->getPresentationIds();
-
-        // Extra information
-        if(OS_DB_ENABLED) {
-            $data['online']             = $user->getOnline();
-            $data['lastLogin']          = $user->getLastLogin();
-            $data['lastPosition']       = $user->getLastPosition();
-            $data['lastRegionUuid']     = $user->getLastRegionUuid();
+        $avatars                    = array();
+        $x = 1;
+        foreach($user->getAvatars() as $avatar) {
+            $avatars[$x] = array(
+                'uuid'          => $avatar->getUuid(),
+                'gridId'        => $avatar->getGrid()->getId(),
+                'gridName'      => $avatar->getGrid()->getName(),
+                'online'        => $avatar->getOnline(),
+                'lastRegion'    => $avatar->getLastRegionUuid(),
+                'lastLogin'     => $avatar->getLastLogin(),
+                'lastPosition'  => $avatar->getLastPosition()
+            );
+            $x++;
         }
+        $data['avatars']            = $avatars;
         return $data;
     }
 
@@ -279,13 +387,13 @@ class API {
      * @param array $args
      * @return boolean
      */
-    public static function updateUserUuid($args) {
+    public function matchAvatarToUser($args) {
         $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
         $parsedPutData  = (Helper::parsePutRequest($putUserData));
         $userName       = isset($parsedPutData['userName']) ? $parsedPutData['userName'] : '';
 
         $userCtrl       = new UserController();
-        $data           = $userCtrl->setUuid($userName, $args[1]);
+        $data           = $userCtrl->setUuid($userName, $args[1], $args[2]);
         return $data;
     }
 
@@ -295,7 +403,7 @@ class API {
      * @param array $args
      * @return array
      */
-    public static function teleportUserByUuid($args) {
+    public function teleportAvatarByUuid($args) {
         $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
         $parsedPutData  = (Helper::parsePutRequest($putUserData));
 
@@ -319,7 +427,7 @@ class API {
      * @param array $args
      * @return array
      */
-    public static function createAvatar($args) {
+    public function createAvatar($args) {
         $result         = '';
         $userData       = filter_input_array(INPUT_POST, FILTER_SANITIZE_ENCODED);
 
@@ -336,25 +444,70 @@ class API {
     }
 
     /**
-     * Gets information about the region
+     * Gets information about a grid by its ID
      *
      * @param array $args
      * @return array
      */
-    public static function getRegionByUuid($args) {
-        $region     = new Region($args[1]);
+    public function getGridById($args) {
+        $grid       = new Grid($args[1]);
+        $grid->getInfoFromDatabase();
 
-        $region->getInfoFromDatabase();
+        $data['openSim'] = array(
+            'protocol'      => $grid->getOsProtocol(),
+            'ip'            => $grid->getOsIp(),
+            'port'          => $grid->getOSPort()
+        );
+        $data['remoteAdmin'] = array(
+            'url'           => $grid->getRaUrl(),
+            'port'          => $grid->getRaPort()
+        );
+        $data['cacheTime']  = $grid->getCacheTime();
+        foreach($grid->getRegions() as $region) {
+            $data['regions'][$region->getUuid()] = $this->getRegionData($region);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Formats the region data
+     *
+     * @param Region $region
+     * @return array
+     */
+    private function getRegionData(Region $region) {
         $data['uuid']           = $region->getUuid();
         $data['name']           = $region->getName();
         $data['image']          = $region->getApiUrl() .'image/';
         $data['serverStatus']   = $region->getOnlineStatus() ? 1 : 0;
 
         // Additional information
-        if(OS_DB_ENABLED) {
+        if($region->getOnlineStatus() !== FALSE && $region->getTotalUsers() > 0) {
             $data['totalUsers']     = $region->getTotalUsers();
             $data['activeUsers']    = $region->getActiveUsers();
         }
+
+        return $data;
+    }
+
+    /**
+     * Gets information about the region
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getRegionByUuid($args) {
+        $grid       = new Grid($args[1]);
+        $grid->getInfoFromDatabase();
+        $region     = $grid->getRegionByUuid($args[2]);
+        $data       = '';
+        if($region !== FALSE) {
+            $data = $this->getRegionData($region);
+        } else {
+            throw new Exception("Region not found", 1);
+        }
+
         return $data;
     }
 
@@ -363,8 +516,18 @@ class API {
      *
      * @param array $args
      */
-    public static function getRegionImageByUuid($args) {
-        header('Content-Type: image/jpeg');
-        echo file_get_contents(OS_SERVER_URL .'/index.php?method=regionImage'. str_replace('-', '', $args[1]));
+    public function getRegionImageByUuid($args) {
+        if(!Helper::isValidUuid($args[2])) {
+            throw new Exception("Invalid UUID used", 1);
+        } else {
+            $grid       = new Grid($args[1]);
+            $grid->getInfoFromDatabase();
+            if($grid->getRegionByUuid($args[2]) !== FALSE) {
+                header('Content-Type: image/jpeg');
+                echo file_get_contents($grid->getOsProtocol() .'://'. $grid->getOsIp() .':'. $grid->getOSPort() .'/index.php?method=regionImage'. str_replace('-', '', $args[2]));
+            } else {
+                throw new Exception("UUID isn't a region on this server", 2);
+            }
+        }
     }
 }

@@ -51,7 +51,7 @@ if(EXEC != 1) {
         <a href="#" class="dropdown-toggle" data-toggle="dropdown">Sign In<b class="caret"></b></a>
         <ul class="dropdown-menu">
             <li>
-                <form method="POST" action="<?php echo $_SERVER['REQUEST_URI']; ?>" role="form" class="form-horizontal">
+                <form method="POST" action="<?php echo SERVER_ROOT; ?>/cms/signin/" role="form" class="form-horizontal">
                     <div class="navbar-content">
                         <div class="row">
                             <div class="form-group">
@@ -77,6 +77,7 @@ if(EXEC != 1) {
                             </div>
                         </div>
                     </div>
+                    <input type="hidden" value="<?php echo $_SERVER['REQUEST_URI']; ?>" name="currentPage">
                 </form>
             </li>
         </ul>
