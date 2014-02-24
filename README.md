@@ -43,6 +43,10 @@ For RemoteAdmin functions:
 In addition it is recommended to use MySQL as a database server for OpenSim. See http://opensimulator.org/wiki/Database_Settings#MySQL_Walkthrough for instructions
 on how to set things up.
 
+## Assets
+`Presenter.lsl` allows you to show presentations in the virtual environment
+`osurl.reg` registers the `opensim://` protocol to match the Singularity Viewer. Edit the path to the viewer to match the location of your installation/
+`osurl.bat` needs to be placed in the same directory as the Singularity Viewer to pass the parameters of the URL to the viewer.
 
 @todo will be extended later
 

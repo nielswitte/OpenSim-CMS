@@ -1,0 +1,11 @@
+Windows Registry Editor Version 5.00
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\opensim]
+"(default)"="URL:opensim"
+"URL Protocol"=""
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\opensim\DefaultIcon]
+@="\"C:\\Program Files\\Singularity\\osurl.bat\""
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\opensim\shell]
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\opensim\shell\open]
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\opensim\shell\open\command]
+[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\opensim\shell\open\command]
+@="\"C:\\Program Files\\Singularity\\osurl.bat\" %1"
