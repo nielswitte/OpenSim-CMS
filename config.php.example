@@ -15,24 +15,6 @@
     $DB_ADDRESS                         = 'localhost';                          // Database host
     $DB_PORT                            = 3306;                                 // Database port
 
-    // OpenSim settings
-    define('OS_ASSET_CACHE_EXPIRES',    '48 hours');                            // needs to be the same as the OpenSim cache expiration time (used by strtotime)
-    define('OS_REMOTE_ADMIN_URL',       'http://127.0.0.1');                    // Remote admin URL (Be sure to enable Remote Admin in OpenSim.ini)
-    define('OS_REMOTE_ADMIN_PORT',      '');                                    // Port used by OpenSim for remote admin
-    define('OS_REMOTE_ADMIN_PASSWORD',  '');                                    // OpenSim remote admin password
-    define('OS_SERVER_IP',              '127.0.0.1');                           // IP of the OpenSim server
-    define('OS_SERVER_PROTOCOL',        'http');                                // Protocol of the server to be used (http or https)
-    define('OS_SERVER_PORT',            '9000');                                // Port of the OpenSim server
-    define('OS_DEFAULT_REGION',         '');                                    // Name of the default OpenSim Region to use
-    define('OS_DEFAULT_REGION_UUID',    '');                                    // Default region's UUID
-    define('OS_DB_ENABLED',              FALSE);                                // Use OpenSim MySQL database for extra functionality
-    // Only used here
-    $OS_DB_USERNAME                     = '';                                   // Username of the OpenSim database
-    $OS_DB_PASSWORD                     = '';                                   // Password of the OpenSim database
-    $OS_DB_NAME                         = '';                                   // Table of OpenSim in database
-    $OS_DB_ADDRESS                      = 'localhost';                          // Address to the OpenSim database
-    $OS_DB_PORT                         = 3306;                                 // MySQL database port
-
     // Files settings
 	define('FILES_LOCATION',            'C:\\Soas\\www\\storage');              // Absolute path to storage directory
 	define('DS',                        '\\');                                  // Directory separator
@@ -52,9 +34,3 @@
     // MySQL settings
     $db = new Mysqlidb($DB_ADDRESS, $DB_USERNAME, $DB_PASSWORD, $DB_NAME, $DB_PORT);// Connect to MySQL database
     Helper::setDB($db);                                                         // Save database to static class to be accessed by the rest of the program
-
-    // Use a MySQL database for OpenSim?
-    if(OS_DB_ENABLED) {
-        $osdb = new MysqliDb($OS_DB_ADDRESS, $OS_DB_USERNAME, $OS_DB_PASSWORD, $OS_DB_NAME, $OS_DB_PORT);
-        Helper::setOSDB($osdb);
-    }
