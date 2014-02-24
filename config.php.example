@@ -1,6 +1,4 @@
 <?php
-    error_reporting(E_ALL);
-
     define('EXEC',                      '1');                                   // Simple check if file is accessed correctly
     // Server settings
     define('SERVER_DEBUG',              TRUE);                                  // Show debugging output
@@ -34,3 +32,10 @@
     // MySQL settings
     $db = new Mysqlidb($DB_ADDRESS, $DB_USERNAME, $DB_PASSWORD, $DB_NAME, $DB_PORT);// Connect to MySQL database
     Helper::setDB($db);                                                         // Save database to static class to be accessed by the rest of the program
+
+    // Show php errors
+    if(SERVER_DEBUG) {
+        error_reporting(E_ALL);
+    } else {
+        error_reporting(0);
+    }
