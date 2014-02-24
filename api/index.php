@@ -42,7 +42,7 @@ try {
     $authApi            = new \API\Modules\Auth($api);
 
     // Match the route to a function
-    $result = $api->getRoute($get, $authorized);
+    $result             = $api->getRoute($get, $authorized);
 
     // Wrong request?
     if($result === FALSE) {
@@ -52,6 +52,8 @@ try {
 // Catch any exception that occured
 } catch (\Exception $e) {
 	$result["Exception"]    = $e->getMessage();
+    
+    // Do we want to show debug information?
     if(SERVER_DEBUG) {
         $result["Code"]     = $e->getCode();
         $result["File"]     = $e->getFile();
