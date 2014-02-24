@@ -20,15 +20,4 @@ jQuery(document).ready(function($) {
 
     // attach table filter plugin to inputs
 	$('[data-action="filter"]').filterTable();
-
-	$('.container').on('click', '.panel-heading span.filter', function(e){
-		var $this = $(this);
-        var $panel = $this.parents('.panel');
-
-		$panel.find('.panel-body').slideToggle();
-		if($this.css('display') !== 'none') {
-			$panel.find('.panel-body input').focus();
-		}
-	});
-	$('[data-toggle="tooltip"]').tooltip();
 });

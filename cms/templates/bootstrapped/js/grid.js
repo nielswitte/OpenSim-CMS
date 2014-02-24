@@ -16,7 +16,7 @@ jQuery(document).ready(function($) {
             $('#regionThumbs').append(
                 '<div class="col-sm-3 col-md-3">'+
                 '    <h3>'+ region.name +' <small>'+ (i === data.defaultRegionUuid ? 'Default region' : '') +'</h3>'+
-                '    <img src="'+ region.image +'?token='+ api_token +'" alt="'+ region.name +'" class="img-thumbnail img-responsive">'+
+                '    <img src="'+ (region.serverStatus === 1 ? region.image +'?token='+ api_token : base_url +'/cms/templates/bootstrapped/img/img-placeholder.png')  +'" alt="'+ region.name +'" class="img-thumbnail img-responsive">'+
                 '    <p><strong>Uuid:</strong> '+ region.uuid +'</p>'+
                 '    <p><strong>Status:</strong> '+ (region.serverStatus === 1 ? 'Online' : 'Offline') +'</p>'+
                 '    <p><strong>Users:</strong> '+ region.activeUsers +'/'+ region.totalUsers +'</p>'+
