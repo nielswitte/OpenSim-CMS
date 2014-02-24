@@ -1,4 +1,6 @@
 <?php
+namespace Controllers;
+
 if(EXEC != 1) {
 	die('Invalid request');
 }
@@ -16,9 +18,9 @@ class UserController {
     /**
      * Constructs a new controller for the given user
      *
-     * @param User $user
+     * @param \Models\User $user
      */
-    public function __construct(User $user = NULL) {
+    public function __construct(\Models\User $user = NULL) {
         $this->user = $user;
     }
 
@@ -29,12 +31,12 @@ class UserController {
      * @param integer $gridId - The grid where the Avatar is on
      * @param string $uuid - UUID to use
      * @return boolean
-     * @throws Exception
+     * @throws \Exception
      */
     public function setUuid($username, $gridId, $uuid) {
         $results = FALSE;
-        if(Helper::isValidUuid($uuid)) {
-            $db = Helper::getDB();
+        if(\Helper::isValidUuid($uuid)) {
+            $db = \Helper::getDB();
             // Check if UUID not in use
             $db->where('uuid', $db->escape($uuid));
             $db->where('gridId', $db->escape($gridId));
@@ -56,15 +58,15 @@ class UserController {
                 $db->where("id", $db->escape($avatars[0]['userId']));
                 $user = $db->get("users", 1);
 
-                throw new Exception("UUID already in use on this Grid, used by: ". $user[0]['userName'], 3);
+                throw new \Exception("UUID already in use on this Grid, used by: ". $user[0]['userName'], 3);
             }
         } else {
-            throw new Exception("Invalid UUID provided", 2);
+            throw new \Exception("Invalid UUID provided", 2);
         }
 
         // Something when wrong?
         if($results === FALSE) {
-            throw new Exception("Updating UUID failed, check Username and Grid ID", 1);
+            throw new \Exception("Updating UUID failed, check Username and Grid ID", 1);
         }
         return $results !== FALSE;
     }
@@ -87,11 +89,11 @@ class UserController {
     public function createAvatar($parameters) {
         // Retrieve grid information for remote admin
         $gridId = $parameters['gridId'];
-        $grid = new Grid($gridId);
+        $grid = new \Models\Grid($gridId);
         $grid->getInfoFromDatabase();
 
         // Call the Grid's remote admin
-        $raXML = new OpenSimRPC($grid->getRaUrl(), $grid->getRaPort(), $grid->getRaPassword());
+        $raXML = new \OpenSimRPC($grid->getRaUrl(), $grid->getRaPort(), $grid->getRaPassword());
         $parameters = array(
             'user_firstname'    => $parameters['firstName'],
             'user_lastname'     => $parameters['lastName'],
@@ -111,26 +113,26 @@ class UserController {
      *
      * @param array $parameters - See createUser()
      * @return boolean
-     * @throws Exception
+     * @throws \Exception
      */
     public static function validateParametersCreate($parameters) {
         $result = FALSE;
         if(count($parameters) < 5 && count($parameters) > 7) {
-            throw new Exception("Invalid number of parameters, uses 5 to 7 parameters", 4);
+            throw new \Exception("Invalid number of parameters, uses 5 to 7 parameters", 4);
         } elseif(!isset($parameters['gridId'])) {
-            throw new Exception("Missing parameter (integer) gridId", 5);
+            throw new \Exception("Missing parameter (integer) gridId", 5);
         } elseif(!isset($parameters['firstName'])) {
-            throw new Exception("Missing parameter (string) firstName", 6);
+            throw new \Exception("Missing parameter (string) firstName", 6);
         } elseif(!isset($parameters['lastName'])) {
-            throw new Exception("Missing parameter (string) lastName", 7);
+            throw new \Exception("Missing parameter (string) lastName", 7);
         } elseif(!isset($parameters['password'])) {
-            throw new Exception("Missing parameter (string) password", 8);
+            throw new \Exception("Missing parameter (string) password", 8);
         } elseif(!isset($parameters['email'])) {
-            throw new Exception("Missing parameter (string) email", 9);
+            throw new \Exception("Missing parameter (string) email", 9);
         } elseif(isset($parameters['startRegionY']) && (!isset($parameters['startRegionX']) || !is_numeric($parameters['startRegionX']))) {
-            throw new Exception("Missing parameter (integer) startRegionX", 10);
+            throw new \Exception("Missing parameter (integer) startRegionX", 10);
         } elseif(isset($parameters['startRegionX']) && (!isset($parameters['startRegionY']) || !is_numeric($parameters['startRegionY']))) {
-            throw new Exception("Missing parameter (integer) startRegionY", 11);
+            throw new \Exception("Missing parameter (integer) startRegionY", 11);
         } else {
             $result = TRUE;
         }
@@ -157,11 +159,11 @@ class UserController {
     public function teleportUser($parameters) {
         // Retrieve grid information for remote admin
         $gridId = $parameters['gridId'];
-        $grid = new Grid($gridId);
+        $grid = new \Models\Grid($gridId);
         $grid->getInfoFromDatabase();
 
         // Call the Grid's remote admin
-        $raXML = new OpenSimRPC($grid->getRaUrl(), $grid->getRaPort(), $grid->getRaPassword());
+        $raXML = new \OpenSimRPC($grid->getRaUrl(), $grid->getRaPort(), $grid->getRaPassword());
         $parameters = array(
             // Get default's region name when no region is given
             'region_name'       => (isset($parameters['regionName']) ? $parameters['regionName'] : $grid->getDefaultRegion()->getName()),
@@ -191,32 +193,32 @@ class UserController {
      *
      * @param array $parameters - List with teleport parameters, see teleportUser()
      * @return boolean
-     * @throws Exception
+     * @throws \Exception
      */
     public static function validateParametersTeleport($parameters) {
         $result = FALSE;
         if(count($parameters) < 2 && count($parameters) > 11) {
-            throw new Exception("Invalid number of parameters, uses 1 to 10 parameters", 12);
-        } elseif(!isset($parameters['agentUuid']) || !Helper::isValidUuid($parameters['agentUuid'])) {
-            throw new Exception("Missing valid UUID for parameter (string) agentUuid", 13);
+            throw new \Exception("Invalid number of parameters, uses 1 to 10 parameters", 12);
+        } elseif(!isset($parameters['agentUuid']) || !\Helper::isValidUuid($parameters['agentUuid'])) {
+            throw new \Exception("Missing valid UUID for parameter (string) agentUuid", 13);
         } elseif(isset($parameters['lastName']) && $parameters['lastName'] != '' && !isset($parameters['firstName'])) {
-            throw new Exception("Missing parameter (string) firstName", 14);
+            throw new \Exception("Missing parameter (string) firstName", 14);
         } elseif(isset($parameters['firstName']) && $parameters['firstName'] != '' && !isset($parameters['lastName'])) {
-            throw new Exception("Missing parameter (string) lastName", 15);
+            throw new \Exception("Missing parameter (string) lastName", 15);
         } elseif((isset($parameters['posY']) || isset($parameters['posZ'])) && (!isset($parameters['posX']) || !is_numeric($parameters['posX']))) {
-            throw new Exception("Missing parameter (float) posX", 16);
+            throw new \Exception("Missing parameter (float) posX", 16);
         } elseif((isset($parameters['posX']) || isset($parameters['posZ'])) && (!isset($parameters['posY']) || !is_numeric($parameters['posY']))) {
-            throw new Exception("Missing parameter (float)  posY", 17);
+            throw new \Exception("Missing parameter (float)  posY", 17);
         } elseif((isset($parameters['posX']) || isset($parameters['posY'])) && (!isset($parameters['posZ']) || !is_numeric($parameters['posZ']))) {
-            throw new Exception("Missing parameter (float)  poZ", 18);
+            throw new \Exception("Missing parameter (float)  poZ", 18);
         } elseif((isset($parameters['lookatY']) || isset($parameters['lookatZ'])) && (!isset($parameters['lookatX']) || !is_numeric($parameters['lookatX']))) {
-            throw new Exception("Missing parameter (float)  lookatX", 19);
+            throw new \Exception("Missing parameter (float)  lookatX", 19);
         } elseif((isset($parameters['lookatX']) || isset($parameters['lookatZ'])) && (!isset($parameters['lookatY']) || !is_numeric($parameters['lookatY']))) {
-            throw new Exception("Missing parameter (float)  lookatY", 20);
+            throw new \Exception("Missing parameter (float)  lookatY", 20);
         } elseif((isset($parameters['lookatX']) || isset($parameters['lookatY'])) && (!isset($parameters['lookatZ']) || !is_numeric($parameters['lookatZ']))) {
-            throw new Exception("Missing parameter (float)  lookatZ", 21);
+            throw new \Exception("Missing parameter (float)  lookatZ", 21);
         } elseif(!isset($parameters['gridId'])) {
-            throw new Exception("Missing parameter (integer) gridId", 22);
+            throw new \Exception("Missing parameter (integer) gridId", 22);
         }  else {
             $result = TRUE;
         }
@@ -230,7 +232,7 @@ class UserController {
      * @return boolean
      */
     public function checkPassword($password) {
-        $db = Helper::getDB();
+        $db = \Helper::getDB();
         $db->where('id', $this->user->getId());
         $result = $db->getOne('users');
 
@@ -247,12 +249,12 @@ class UserController {
     /**
      * Updates the password and hash it for this user
      *
-     * @param type $hash - The unhashed password
+     * @param string $hash - The unhashed password
      * @return boolean
      */
     public function setPassword($password) {
-        $hash   = Helper::Hash($password);
-        $db     = Helper::getDB();
+        $hash   = \Helper::Hash($password);
+        $db     = \Helper::getDB();
         $db->where('id', $this->user->getId());
         $result = $db->update('users', array('password' => $hash));
         return $result;

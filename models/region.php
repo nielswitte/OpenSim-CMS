@@ -1,4 +1,6 @@
 <?php
+namespace Models;
+
 if(EXEC != 1) {
 	die('Invalid request');
 }
@@ -23,9 +25,9 @@ class Region implements SimpleModel {
      * Creates a new region with the given name and uuid
      *
      * @param string $uuid - Region UUID
-     * @param Grid $gird - The grid where this region is part of
+     * @param \Models\Grid $gird - The grid where this region is part of
      */
-    public function __construct($uuid, Grid $grid) {
+    public function __construct($uuid, \Models\Grid $grid) {
         $this->uuid = $uuid;
         $this->grid = $grid;
 
@@ -63,7 +65,7 @@ class Region implements SimpleModel {
      * Gets information about the region
      */
     public function getInfoFromDatabase() {
-        $raXML  = new OpenSimRPC($this->grid->getRaUrl(), $this->grid->getRaPort(), $this->grid->getRaPassword());
+        $raXML  = new \OpenSimRPC($this->grid->getRaUrl(), $this->grid->getRaPort(), $this->grid->getRaPassword());
         $result = $raXML->call('admin_region_query', array('region_id' => $this->getUuid()));
 
         if(isset($result['error'])) {
@@ -77,7 +79,7 @@ class Region implements SimpleModel {
 
         // Additional actions when MySQL database is accessable
         if($this->grid->getDbUrl() && $this->getOnlineStatus()) {
-            $osdb = new MysqliDb($this->grid->getDbUrl(), $this->grid->getDbUserName(), $this->grid->getDbPassword(), $this->grid->getDbName(), $this->grid->getDbPort());
+            $osdb = new \MysqliDb($this->grid->getDbUrl(), $this->grid->getDbUserName(), $this->grid->getDbPassword(), $this->grid->getDbName(), $this->grid->getDbPort());
             // Get user's presentations
             $osdb->where("LastRegionID", $osdb->escape($this->getUuid()));
             $results = $osdb->get("GridUser");
@@ -95,7 +97,7 @@ class Region implements SimpleModel {
 
     /**
      * Returns the grid where this region is part of
-     * 
+     *
      * @return Grid
      */
     public function getGrid() {

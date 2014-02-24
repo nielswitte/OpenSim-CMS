@@ -1,4 +1,6 @@
 <?php
+namespace Models;
+
 if(EXEC != 1) {
 	die('Invalid request');
 }
@@ -40,7 +42,7 @@ class Slide {
      * @return array
      */
     public function getCache() {
-        $db = Helper::getDB();
+        $db = \Helper::getDB();
         $params = array($this->getNumber());
         $results = $db->rawQuery('SELECT c.* FROM cached_assets c, document_slides_cache dc WHERE dc.cacheId = c.id AND dc.slideId = ?', $params);
 
