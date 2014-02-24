@@ -40,6 +40,7 @@ try {
     $api->addRoute("/user\/(\d+)\/?$/",                                 "getUserById",          "GET",  TRUE);  // Get a user by ID
     $api->addRoute("/user\/([a-z0-9-]{36})\/teleport\/?$/",             "teleportAvatarByUuid", "PUT",  TRUE);  // Teleports a user
     $api->addRoute("/user\/avatar\/?$/",                                "createAvatar",         "POST", TRUE);  // Create an avatar
+    $api->addRoute("/grids\/?$/",                                       "getGrids",             "GET",  TRUE);  // Get a list with grids
     $api->addRoute("/grid\/(\d+)\/?$/",                                 "getGridById",          "GET",  TRUE);  // Get grid information by ID
     $api->addRoute("/grid\/(\d+)\/region\/([a-z0-9-]{36})\/?$/",        "getRegionByUuid",      "GET",  TRUE);  // Get information about the given region
     $api->addRoute("/grid\/(\d+)\/region\/([a-z0-9-]{36})\/image\/?$/", "getRegionImageByUuid", "GET",  TRUE);  // Get the map of the region

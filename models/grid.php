@@ -278,4 +278,30 @@ class Grid implements SimpleModel {
     public function getDefaultRegion() {
         return $this->getRegionByUuid($this->getDefaultRegionUuid());
     }
+
+    /**
+     * Counts the total number of users in all regions on this server
+     *
+     * @return integer
+     */
+    public function getTotalUsers() {
+        $total = 0;
+        foreach($this->getRegions() as $region) {
+            $total += $region->getTotalUsers();
+        }
+        return $total;
+    }
+
+    /**
+     * Counts the total number of active users in all regions on this server
+     *
+     * @return integer
+     */
+    public function getActiveUsers() {
+        $total = 0;
+        foreach($this->getRegions() as $region) {
+            $total += $region->getActiveUsers();
+        }
+        return $total;
+    }
 }

@@ -443,6 +443,20 @@ class API {
         return $result;
     }
 
+    public function getGrids($args) {
+        $db = Helper::getDB();
+        $db->orderBy('name', 'asc');
+        $grids  = $db->get('grids');
+        // Process al grids
+        $data   = array();
+        foreach($grids as $gridId) {
+            $grid = new Grid($gridId['id']);
+            $grid->getInfoFromDatabase();
+            $data[] = $this->getGridData($grid);
+        }
+        return $data;
+    }
+
     /**
      * Gets information about a grid by its ID
      *
@@ -453,16 +467,40 @@ class API {
         $grid       = new Grid($args[1]);
         $grid->getInfoFromDatabase();
 
+        return $this->getGridData($grid);
+    }
+
+    /**
+     * Formats the grid data
+     *
+     * @param Grid $grid
+     * @return array
+     */
+    private function getGridData(Grid $grid) {
+        $data['isOnline']           = $grid->getOnlineStatus() ? 1 : 0;
+        $data['id']                 = $grid->getId();
+        $data['name']               = $grid->getName();
+
+        // Get information about the number of users
+        if($grid->getOnlineStatus() !== FALSE) {
+            $data['totalUsers']     = $grid->getTotalUsers();
+            $data['activeUsers']    = $grid->getActiveUsers();
+        }
+        // OpenSim info
         $data['openSim'] = array(
-            'protocol'      => $grid->getOsProtocol(),
-            'ip'            => $grid->getOsIp(),
-            'port'          => $grid->getOSPort()
+            'protocol'              => $grid->getOsProtocol(),
+            'ip'                    => $grid->getOsIp(),
+            'port'                  => $grid->getOSPort()
         );
+        // Remote Admin info
         $data['remoteAdmin'] = array(
-            'url'           => $grid->getRaUrl(),
-            'port'          => $grid->getRaPort()
+            'url'                   => $grid->getRaUrl(),
+            'port'                  => $grid->getRaPort()
         );
-        $data['cacheTime']  = $grid->getCacheTime();
+        // Regions
+        $data['cacheTime']          = $grid->getCacheTime();
+        $data['defaultRegionUuid']  = $grid->getDefaultRegionUuid();
+        $data['regionCount']        = count($grid->getRegions());
         foreach($grid->getRegions() as $region) {
             $data['regions'][$region->getUuid()] = $this->getRegionData($region);
         }
