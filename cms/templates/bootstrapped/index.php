@@ -7,10 +7,12 @@ if (EXEC != 1) {
 $contentPages = array(
     // List with additional header code, which is loaded before any HTML output is done
     // Body code is included as the main body of this page
-    'presentation'  => array('header' => '',                    'body' => 'presentation.php'),
-    'presentations' => array('header' => '',                    'body' => 'presentations.php'),
-    'signout'       => array('header' => 'signout.php',         'body' => 'signout.php'),
-    'signin'        => array('header' => 'signin.php',          'body' => 'signin.php')
+    'grids'         => array('header' => '',                    'body' => 'grids.php',          'auth' => TRUE),
+    'grid'          => array('header' => '',                    'body' => 'grid.php',           'auth' => TRUE),
+    'presentations' => array('header' => '',                    'body' => 'presentations.php',  'auth' => TRUE),
+    'presentation'  => array('header' => '',                    'body' => 'presentation.php',   'auth' => TRUE),
+    'signout'       => array('header' => 'signout.php',         'body' => 'signout.php',        'auth' => FALSE),
+    'signin'        => array('header' => 'signin.php',          'body' => 'signin.php',         'auth' => FALSE)
 );
 
 // Get request parameters
@@ -18,15 +20,21 @@ $requestPath    = filter_input(INPUT_GET, '_url', FILTER_SANITIZE_SPECIAL_CHARS)
 $pagesRequest   = explode('/', trim($requestPath, '/'));
 $pageRequest    = htmlentities($pagesRequest[0]);
 
+// user is authed?
+$isAuthorized = isset($_SESSION["AccessToken"]) ? TRUE : FALSE;
+
 // Show page content
-$content = 'default.php';
-$header  = '';
 if(isset($pageRequest) && array_key_exists($pageRequest, $contentPages)){
-    $content = $contentPages[$pageRequest]['body'];
-    $header  = $contentPages[$pageRequest]['header'];
+    $content        = $contentPages[$pageRequest]['body'];
+    $header         = $contentPages[$pageRequest]['header'];
+    $authRequired   = $contentPages[$pageRequest]['auth'];
+} else {
+    $content        = 'default.php';
+    $header         = '';
+    $authRequired   = FALSE;
 }
 
-if($header != '') {
+if($header != '' && $isAuthorized >= $authRequired) {
     include dirname(__FILE__) .'/html/head/'. $header;
 }
 
@@ -66,6 +74,8 @@ if($header != '') {
                     cache: 10
                 });
 
+                client.add('grids');
+                client.add('grid');
                 client.add('presentations');
                 client.add('presentation');
                 client.add('user');
@@ -87,7 +97,8 @@ if($header != '') {
                 </div>
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-<?php if(isset($_SESSION['AccessToken'])) { ?>
+<?php if($isAuthorized) { ?>
+                        <li class="<?php echo (in_array($pageRequest, array('grids', 'grid')) ? 'active' : ''); ?>"><a href="<?php echo SERVER_ROOT; ?>/cms/grids/">Grids</a></li>
                         <li class="<?php echo (in_array($pageRequest, array('presentations', 'presentation')) ? 'active' : ''); ?>"><a href="<?php echo SERVER_ROOT; ?>/cms/presentations/">Presentations</a></li>
 <?php } ?>
                     </ul>
@@ -99,7 +110,14 @@ if($header != '') {
         <!-- Content -->
         <div class="container">
             <div id="alerts"></div>
-            <?php include dirname(__FILE__) .'/html/body/'. $content; ?>
+<?php
+// Authorization required?
+if($isAuthorized >= $authRequired) {
+    include dirname(__FILE__) .'/html/body/'. $content;
+} else {
+    include dirname(__FILE__) .'/html/body/notauthorized.php';
+}
+?>
             <hr>
             <footer class="footer">
                 <p>&copy; OpenSim-CMS 2014</p>
@@ -110,7 +128,7 @@ if($header != '') {
         <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/libs/select2-3.4.5.min.js" type="text/javascript"></script>
         <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/libs/less-1.6.3.min.js" type="text/javascript"></script>
         <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/main.js" type="text/javascript"></script>
-<?php if(file_exists(dirname(__FILE__) . '/js/'. $pageRequest .'.js')) { ?>
+<?php if(file_exists(dirname(__FILE__) . '/js/'. $pageRequest .'.js') && $isAuthorized >= $authRequired) { ?>
         <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/<?php echo $pageRequest; ?>.js" type="text/javascript"></script>
 <?php } ?>
         <script
