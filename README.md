@@ -5,7 +5,10 @@ A Content Management System (CMS) for OpenSim. Uses the 0.8 development versions
 Also includes a couple of example scripts to be used in OpenSim in the assets folder. Such as the `presenter.lsl` which enables you to access
 presentations created in the CMS.
 
-The CMS is based on the MVC pattern and uses Apache web server with PHP5.4+ and a MySQL database. The API is based on RESTful.
+This project is based on the MVC pattern and uses Apache web server with PHP5.4+ and a MySQL database. The API is RESTful and provides the basic GET, POST, PUT and DELETE functionalities.
+
+The CMS itself is build with jQuery.rest allowing it to remain separated from the Model and Controller and access only the API. The only thing the CMS shares with the other parts
+is the `config.php` file. However, this could become obsolute in the future.
 
 ## Installation
 clone this repository in your www directory. For example: `/var/www/`.
