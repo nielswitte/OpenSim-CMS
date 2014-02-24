@@ -19,6 +19,12 @@ if (EXEC != 1) {
             <input type="text" class="form-control" id="inputName" placeholder="Name">
         </div>
     </div>
+    <div class="form-group">
+        <label for="inputCache" class="col-sm-2 control-label">Cache time</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="inputCache" placeholder="Cache">
+        </div>
+    </div>
     <fieldset>
         <legend>OpenSim settings</legend>
         <div class="form-group">
@@ -53,6 +59,12 @@ if (EXEC != 1) {
             <div class="col-sm-10">
                 <input type="number" class="form-control" id="inputRaPort" placeholder="Port">
             </div>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Regions <span id="regionCount"></span></legend>
+        <div class="row" id='regionThumbs'>
+
         </div>
     </fieldset>
 </form>
