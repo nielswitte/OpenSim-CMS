@@ -1,4 +1,6 @@
 <?php
+namespace Models;
+
 if(EXEC != 1) {
 	die('Invalid request');
 }

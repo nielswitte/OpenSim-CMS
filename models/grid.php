@@ -1,4 +1,5 @@
 <?php
+namespace Models;
 
 if (EXEC != 1) {
     die('Invalid request');
@@ -44,9 +45,11 @@ class Grid implements SimpleModel {
 
     /**
      * Gets the information about the grid from the database
+     *
+     * @throws \Exception
      */
     public function getInfoFromDatabase() {
-        $db = Helper::getDB();
+        $db = \Helper::getDB();
         $db->where('id', $this->getId());
         $result = $db->get('grids', 1);
 
@@ -72,7 +75,7 @@ class Grid implements SimpleModel {
             $regions = $db->get('grid_regions');
 
             foreach($regions as $region) {
-                $newRegion = new Region($region['uuid'], $this);
+                $newRegion = new \Models\Region($region['uuid'], $this);
                 $newRegion->setName($region['name']);
                 $this->addRegion($newRegion);
             }
@@ -84,9 +87,9 @@ class Grid implements SimpleModel {
     /**
      * Saves the region to this grid's regions list
      *
-     * @param Region $region
+     * @param \Models\Region $region
      */
-    public function addRegion(Region $region) {
+    public function addRegion(\Models\Region $region) {
         $this->regions[$region->getUuid()] = $region;
     }
 
@@ -118,11 +121,12 @@ class Grid implements SimpleModel {
      * Returns the region matching the UUID or FALSE when not found
      *
      * @param string $uuid
-     * @return Region or boolean FALSE when not found
+     * @return \Models\Region or boolean FALSE when not found
+     * @throws \Exception
      */
     public function getRegionByUuid($uuid) {
-        if(!Helper::isValidUuid($uuid)) {
-            throw new Exception("Invalid UUID provided", 1);
+        if(!\Helper::isValidUuid($uuid)) {
+            throw new \Exception("Invalid UUID provided", 1);
         }
         return isset($this->regions[$uuid]) ? $this->regions[$uuid] : FALSE;
     }
@@ -273,9 +277,35 @@ class Grid implements SimpleModel {
     /**
      * Retuns the region that is default on this Grid
      *
-     * @return Region
+     * @return \Models\Region
      */
     public function getDefaultRegion() {
         return $this->getRegionByUuid($this->getDefaultRegionUuid());
+    }
+
+    /**
+     * Counts the total number of users in all regions on this server
+     *
+     * @return integer
+     */
+    public function getTotalUsers() {
+        $total = 0;
+        foreach($this->getRegions() as $region) {
+            $total += $region->getTotalUsers();
+        }
+        return $total;
+    }
+
+    /**
+     * Counts the total number of active users in all regions on this server
+     *
+     * @return integer
+     */
+    public function getActiveUsers() {
+        $total = 0;
+        foreach($this->getRegions() as $region) {
+            $total += $region->getActiveUsers();
+        }
+        return $total;
     }
 }

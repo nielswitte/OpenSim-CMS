@@ -1,4 +1,6 @@
 <?php
+namespace Controllers;
+
 if(EXEC != 1) {
 	die('Invalid request');
 }
@@ -16,9 +18,9 @@ class SlideController {
     /**
      * Constructs a new controller for the given slide
      *
-     * @param Slide $slide
+     * @param \Models\Slide $slide
      */
-    public function __construct(Slide $slide) {
+    public function __construct(\Models\Slide $slide) {
         $this->slide = $slide;
     }
 
@@ -26,14 +28,14 @@ class SlideController {
      * Updates the UUID of the slide to the given value
      *
      * @param string $uuid - The UUID of the slide
-     * @param Grid $grid - The grid the texture is used on
+     * @param \Models\Grid $grid - The grid the texture is used on
      * @return boolean
-     * @throws Exception
+     * @throws \Exception
      */
-    public function setUuid($uuid, Grid $grid) {
+    public function setUuid($uuid, \Models\Grid $grid) {
         $results = FALSE;
-        if(Helper::isValidUuid($uuid)) {
-            $db = Helper::getDB();
+        if(\Helper::isValidUuid($uuid)) {
+            $db = \Helper::getDB();
             $cacheData = array(
                 'gridId'        => $db->escape($grid->getId()),
                 'uuid'          => $db->escape($uuid),
@@ -48,11 +50,11 @@ class SlideController {
             $results = $db->insert('document_slides_cache', $cacheSlideData);
 
         } else {
-            throw new Exception("Invalid UUID provided", 2);
+            throw new \Exception("Invalid UUID provided", 2);
         }
 
         if($results === FALSE) {
-            throw new Exception("Updating UUID failed", 1);
+            throw new \Exception("Updating UUID failed", 1);
         }
         return $results !== FALSE;
     }

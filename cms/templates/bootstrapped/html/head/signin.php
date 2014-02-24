@@ -25,7 +25,11 @@ if(!isset($_SESSION['AccessToken']) && isset($postData['userName']) && isset($po
     $context    = stream_context_create($options);
     $result     = json_decode(file_get_contents($url, false, $context));
 
-    $_SESSION['AccessToken']            = $result->token;
-    $_SESSION['AccessTokenExpires']     = $result->expires;
-    $_SESSION['UserId']                 = $result->userId;
+    // Success?
+    if(isset($result->token)) {
+        $isAuthorized                       = TRUE;
+        $_SESSION['AccessToken']            = $result->token;
+        $_SESSION['AccessTokenExpires']     = $result->expires;
+        $_SESSION['UserId']                 = $result->userId;
+    }
 }

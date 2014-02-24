@@ -1,4 +1,6 @@
 <?php
+namespace Models;
+
 if(EXEC != 1) {
 	die('Invalid request');
 }
@@ -46,7 +48,7 @@ class Presentation implements SimpleModel {
      * @throws Exception
      */
     public function getInfoFromDatabase() {
-        $db = Helper::getDB();
+        $db = \Helper::getDB();
         $db->where('id', (int) $this->getPresentationId());
         $db->where('type', 'presentation');
         $results = $db->get('documents', 1);
@@ -57,7 +59,7 @@ class Presentation implements SimpleModel {
             $this->modificationDate = $results[0]['modificationDate'];
             $this->ownerId          = $results[0]['ownerId'];
         } else {
-            throw new Exception("Presentation not found", 5);
+            throw new \Exception("Presentation not found", 5);
         }
     }
 
@@ -104,7 +106,7 @@ class Presentation implements SimpleModel {
      */
     public function getSlides() {
         if(empty($this->slides)) {
-            $db = Helper::getDB();
+            $db = \Helper::getDB();
             $db->where('documentId', $this->getPresentationId());
             $db->orderBy('number', 'asc');
             $results = $db->get('document_slides');
@@ -122,7 +124,7 @@ class Presentation implements SimpleModel {
      *
      * @param integer $number
      * @return slide
-     * @throws Exception
+     * @throws \Exception
      */
     public function getSlide($number) {
         if(empty($this->slides)) {
@@ -134,7 +136,7 @@ class Presentation implements SimpleModel {
         if(isset($this->slides[($number-1)])) {
             $slide = $this->slides[($number-1)];
         } else {
-            throw new Exception("Slide does not exist", 6);
+            throw new \Exception("Slide does not exist", 6);
         }
         return $slide;
     }

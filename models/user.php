@@ -1,4 +1,6 @@
 <?php
+namespace Models;
+
 if(EXEC != 1) {
 	die('Invalid request');
 }
@@ -34,10 +36,10 @@ class User implements SimpleModel {
     /**
      * Gets data from the database
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public function getInfoFromDatabase() {
-        $db = Helper::getDB();
+        $db = \Helper::getDB();
         // Get user information
         if($this->getId() != 0) {
             $db->where('id', $db->escape($this->getId()));
@@ -71,15 +73,15 @@ class User implements SimpleModel {
             $avatars = $db->get('avatars');
             $i = 1;
             foreach($avatars as $avatar) {
-                $grid = new Grid($avatar['gridId']);
+                $grid = new \Models\Grid($avatar['gridId']);
                 $grid->getInfoFromDatabase();
-                $newAvatar = new Avatar($grid, $avatar['uuid']);
+                $newAvatar = new \Models\Avatar($grid, $avatar['uuid']);
                 $newAvatar->getInfoFromDatabase();
                 $this->avatars[$i] = $newAvatar;
                 $i++;
             }
         } else {
-            throw new Exception("User not found", 3);
+            throw new \Exception("User not found", 3);
         }
     }
 

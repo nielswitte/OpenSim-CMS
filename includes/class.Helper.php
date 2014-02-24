@@ -12,7 +12,6 @@ if(EXEC != 1) {
  */
 class Helper {
     private static $db;
-    private static $osdb;
 
     /**
      * Validates the UUID v4 string provided

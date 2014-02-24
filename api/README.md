@@ -334,7 +334,55 @@ PUT /api/presentation/<ID>/slide/<SLIDE#>/ HTTP/1.1
 | uuid              | string    | UUID of the slide to be saved                   |
 | gridId            | integer   | The ID of the grid, as used in the CMS database |
 
-## Grid
+## Grids
+For an overview of all grids and their information, the following request can be used:
+
+```http
+GET /api/grids/ HTTP/1.1
+```
+
+This will return quite a large list with data. I do not recommend using this query often
+when a lot of Grids are in the database. Use the get Grid by ID function instead for a
+specific grid when possible.
+
+```json
+{
+    "1": {
+        "isOnline": 1,
+        "id": 1,
+        "name": "Test Grid",
+        "totalUsers": 2,
+        "activeUsers": 1,
+        "openSim": {
+            "protocol": "http",
+            "ip": "127.0.0.1",
+            "port": 9000
+        },
+        "remoteAdmin": {
+            "url": "http://127.0.0.1",
+            "port": 9001
+        },
+        "cacheTime": "48 hours",
+        "defaultRegionUuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
+        "regionCount": 1,
+        "regions": {
+            "72efcc78-2b1a-4571-8704-fea352998c0c": {
+                "uuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
+                "name": "The Grid",
+                "image": "http://localhost:80/OpenSim-CMS/api/grid/1/region/72efcc78-2b1a-4571-8704-fea352998c0c/image/",
+                "serverStatus": 1,
+                "totalUsers": 2,
+                "activeUsers": 1
+            }
+        }
+    },
+    "2": { (...) },
+    "3": { (...) }
+]
+```
+
+### Get Grid by ID
+
 Information about a Grid can be retrieved by using:
 ```http
 GET /api/grid/<GRID-ID>/ HTTP/1.1
@@ -344,6 +392,11 @@ This will return a summary of the grid and regions, excluding the passwords.
 
 ```json
 {
+    "isOnline": 1,
+    "id": 1,
+    "name": "Test Grid",
+    "totalUsers": 2,
+    "activeUsers": 1,
     "openSim": {
         "protocol": "http",
         "ip": "127.0.0.1",
@@ -367,7 +420,6 @@ This will return a summary of the grid and regions, excluding the passwords.
 }
 
 ```
-
 
 ### Regions
 To retrieve information about a region the following API can be used.

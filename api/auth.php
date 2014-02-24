@@ -1,5 +1,9 @@
 <?php
+namespace API;
 
+if(EXEC != 1) {
+	die('Invalid request');
+}
 /**
  * This class is used to check authorization tokens
  *
@@ -48,13 +52,13 @@ class Auth {
      * Tries to create the user class from the given data
      * Only possible when the token has been validated successful!
      *
-     * @return UserLoggedIn or boolean when false
+     * @return \Models\UserLoggedIn or boolean when false
      */
     public function getUser() {
         $result = FALSE;
         if(isset($this->userId)) {
             if(!isset($this->user)) {
-                $this->user = new UserLoggedIn($this->userId);
+                $this->user = new \Models\UserLoggedIn($this->userId);
                 $this->user->getInfoFromDB();
             }
             $result = $this->user;
@@ -68,7 +72,7 @@ class Auth {
      * @return boolean
      */
     private function checkToken() {
-        $db = Helper::getDB();
+        $db = \Helper::getDB();
         $params = array($this->token, $this->ip, $this->timestamp);
         $result = $db->rawQuery('SELECT COUNT(*) AS count, userId FROM tokens WHERE token = ? AND ip = ? AND expires >= ? LIMIT 1', $params);
 
@@ -89,7 +93,7 @@ class Auth {
      * @return boolean
      */
     public static function removeExpiredTokens() {
-        $db = Helper::getDB();
+        $db = \Helper::getDB();
         $db->where('expires', array('<' => date('Y-m-d H:i:s')));
         return $db->delete('tokens');
     }

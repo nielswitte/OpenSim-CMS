@@ -1,4 +1,6 @@
 <?php
+namespace Controllers;
+
 if(EXEC != 1) {
 	die('Invalid request');
 }
@@ -16,9 +18,9 @@ class regionController {
     /**
      * Creates a new controller for the given region
      *
-     * @param Region $region
+     * @param \Models\Region $region
      */
-    public function __construct(Region $region) {
+    public function __construct(\Models\Region $region) {
         $this->region = $region;
     }
 }
