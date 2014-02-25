@@ -15,16 +15,16 @@ jQuery(document).ready(function($) {
         $.each(data.regions, function(i, region) {
             $('#regionThumbs').append(
                 '<div class="col-sm-3 col-md-3">'+
-                '    <h3>'+ region.name +' <small>'+ (i === data.defaultRegionUuid ? 'Default region' : '') +'</h3>'+
+                '    <h3>'+ region.name + (i === data.defaultRegionUuid ? ' <span class="glyphicon glyphicon-home" id="defaultRegion" title="Is the default region"></span>' : '') +'</h3>'+
                 '    <img src="'+ (region.serverStatus === 1 ? region.image +'?token='+ api_token : base_url +'/cms/templates/bootstrapped/img/img-placeholder.png')  +'" alt="'+ region.name +'" class="img-thumbnail img-responsive">'+
                 '    <p><strong>Uuid:</strong> '+ region.uuid +'</p>'+
-                '    <p><strong>Status:</strong> '+ (region.serverStatus === 1 ? 'Online' : 'Offline') +'</p>'+
+                '    <p><strong>Status:</strong> '+ (region.serverStatus === 1 ? '<span class="label label-success">Online</span>' : '<span class="label label-danger">Offline</span>') +'</p>'+
                 '    <p><strong>Users:</strong> '+ region.activeUsers +'/'+ region.totalUsers +'</p>'+
                 '</div>'
             );
         });
 
-
+        $('#defaultRegion').tooltip({ placement: 'top' });
     }).fail(function() {
         addAlert('danger', '<strong>Error!</strong> Did you manually entered this URL? If so, check the parameters and try again.');
     });
