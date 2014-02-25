@@ -74,6 +74,7 @@ class Meeting extends Module{
         $meeting->getInfoFromDatabase();
         $meeting->getCreator()->getInfoFromDatabase();
         $meeting->getRoom()->getInfoFromDatabase();
+        $meeting->getParticipantsFromDatabase();
 
         return $this->getMeetingData($meeting, TRUE);
     }
@@ -111,6 +112,20 @@ class Meeting extends Module{
                 ),
                 'description'   => $meeting->getRoom()->getDescription()
             );
+            
+            $i = 1;
+            $participants = array();
+            foreach($meeting->getParticipants()->getParticipants() as $user) {
+                $participants[$i] = array(
+                    'id'            => $user->getId(),
+                    'userName'      => $user->getUserName(),
+                    'firstName'     => $user->getFirstName(),
+                    'lastName'      => $user->getLastName(),
+                    'email'         => $user->getEmail()
+                );
+                $i++;
+            }
+            $data['participants'] = $participants;
         } else {
             $data['creatorId'] = $meeting->getCreator()->getId();
             $data['roomId']    = $meeting->getRoom()->getId();

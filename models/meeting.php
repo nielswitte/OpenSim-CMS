@@ -6,7 +6,7 @@ if (EXEC != 1) {
 }
 
 require_once dirname(__FILE__) . '/simpleModel.php';
-
+require_once dirname(__FILE__) . '/meetingParticipants.php';
 /**
  * This class represents a meeting
  *
@@ -20,6 +20,7 @@ class Meeting implements simpleModel {
     private $creator;
     private $startDate;
     private $endDate;
+    private $participants;
 
     /**
      * Constructs a new meeting with the given ID
@@ -55,6 +56,25 @@ class Meeting implements simpleModel {
             $this->endDate      = $meeting[0]['endDate'];
         } else {
             throw new Exception("Meeting not found", 1);
+        }
+    }
+
+    /**
+     * Gets the participants for this meeting from the database and adds them to the list
+     */
+    public function getParticipantsFromDatabase() {
+        $db             = \Helper::getDB();
+        $params         = array($db->escape($this->getId()));
+        $results        = $db->rawQuery('SELECT u.* FROM meeting_participants mp, users u WHERE mp.meetingId = ? AND mp.userId = u.id ORDER BY u.lastName ASC, u.firstName ASC', $params);
+
+        // Create a new participants list and set it to this meeting
+        $participants   = new \Models\MeetingParticipants($this);
+        $this->setParticipants($participants);
+
+        // Get the users on the list
+        foreach($results as $result) {
+            $participant    = new \Models\User($result['id'], $result['userName'], $result['email'], $result['firstName'], $result['lastName']);
+            $participants->addParticipant($participant);
         }
     }
 
@@ -101,5 +121,32 @@ class Meeting implements simpleModel {
      */
     public function getEndDate() {
         return $this->endDate;
+    }
+
+    /**
+     * Sets the list with participants
+     *
+     * @param \Models\MeetingParticipants $participants
+     */
+    public function setParticipants(\Models\MeetingParticipants $participants) {
+        $this->participants = $participants;
+    }
+
+    /**
+     * Adds the givne user to the list with participants
+     *
+     * @param \Models\User $user
+     */
+    public function addParticipant(\Models\User $user) {
+        $this->getParticipants()->addParticipant($user);
+    }
+
+    /**
+     * Returns the MeetingParticipants instance that contains the list with participants
+     *
+     * @return \Models\MeetingParticipants
+     */
+    public function getParticipants(){
+        return $this->participants;
     }
 }
