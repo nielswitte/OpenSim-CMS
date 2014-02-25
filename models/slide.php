@@ -13,18 +13,30 @@ if(EXEC != 1) {
  * @date February 12th, 2014
  */
 class Slide {
+    private $id;
     private $number;
     private $path;
 
     /**
      * Constructs a new slide with the given parameters
      *
+     * @param integer $id
      * @param integer $number
      * @param string $path
      */
-    public function __construct($number, $path) {
+    public function __construct($id, $number, $path) {
+        $this->id           = $id;
         $this->number       = $number;
         $this->path         = $path;
+    }
+
+    /**
+     * Returns the slide id
+     *
+     * @return integer
+     */
+    public function getId() {
+        return $this->id;
     }
 
     /**
@@ -43,7 +55,7 @@ class Slide {
      */
     public function getCache() {
         $db = \Helper::getDB();
-        $params = array($this->getNumber());
+        $params = array($this->getId());
         $results = $db->rawQuery('SELECT c.* FROM cached_assets c, document_slides_cache dc WHERE dc.cacheId = c.id AND dc.slideId = ?', $params);
 
         return $results;
@@ -65,6 +77,6 @@ class Slide {
      * @return string
      */
     public function getPath() {
-        return $this->getPath() . DS . $this->number .'.jpg';
+        return $this->path;
     }
 }

@@ -108,11 +108,13 @@ class Presentation implements SimpleModel {
         if(empty($this->slides)) {
             $db = \Helper::getDB();
             $db->where('documentId', $this->getPresentationId());
-            $db->orderBy('number', 'asc');
+            $db->orderBy('id', 'asc');
             $results = $db->get('document_slides');
 
+            $i = 1;
             foreach($results as $result) {
-                $this->slides[] = new Slide($result['number'], $this->getPath(). DS . $result['number'] .'.jpg');
+                $this->slides[$i] = new \Models\Slide($result['id'], $i, $this->getPath(). DS . $i .'.jpg');
+                $i++;
             }
         }
 
@@ -132,9 +134,9 @@ class Presentation implements SimpleModel {
         }
 
         $slide = FALSE;
-        // Slide exists? (array starts counting at 0)
-        if(isset($this->slides[($number-1)])) {
-            $slide = $this->slides[($number-1)];
+        // Slide exists? (array starts counting at 1)
+        if(isset($this->slides[($number)])) {
+            $slide = $this->slides[($number)];
         } else {
             throw new \Exception("Slide does not exist", 6);
         }

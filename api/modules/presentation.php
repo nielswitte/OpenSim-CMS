@@ -120,7 +120,8 @@ class Presentation extends Module{
             );
         }
         $data = array(
-            'number' => $slide->getNumber(),
+            'id'    => $slide->getId(),
+            'number'=> $slide->getNumber(),
             'image' => $presentation->getApiUrl() . 'slide/' . $slide->getNumber() . '/image/',
             'cache' => $cachedTextures
         );
