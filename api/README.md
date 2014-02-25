@@ -96,7 +96,7 @@ Atleast 3 characters are required.
 GET /api/user/<SEARCH>/ HTTP/1.1
 ```
 
-The result is similar to the request by UUID, but displayed as a list ordered by username.
+The result is similar to the request by UUID, but displayed as a list ordered by username and only the basic information.
 
 ```json
 {
@@ -105,21 +105,7 @@ The result is similar to the request by UUID, but displayed as a list ordered by
         "userName": "testuser",
         "firstName": "Test",
         "lastName": "User",
-        "email": "testuser@email.com",
-        "presentationIds": [
-            "1",
-            "5",
-            "8"
-        ],
-        "avatars": {
-            "1": {
-                "uuid": "0a1811f4-7174-4e42-8bb5-26ef78335407",
-                "gridId": 1,
-                "gridName": "OpenSim-CMS' test grid"
-            },
-            "2": { (...) },
-            "3": { (...) }
-        }
+        "email": "testuser@email.com"
     },
     "2": { (...) },
     "3": { (...) },
@@ -233,6 +219,7 @@ GET /api/presentations/50/ HTTP/1.1
 ```
 
 Example of the output will be similar to the request of a single presentation, only in a list form.
+Cache information is left out in the list view.
 
 ```json
 {
@@ -244,10 +231,7 @@ Example of the output will be similar to the request of a single presentation, o
         "slides": {
             "1": {
                 "number": 1,
-                "image": "http://localhost:80/OpenSim-CMS/api/presentation/1/slide/1/image/",
-                "uuid": "1be74003-2d7c-4dbd-87c2-a1c95e0864e6",
-                "uuidUpdated": "2014-02-13 14:55:27",
-                "uuidExpired": 0
+                "image": "http://localhost:80/OpenSim-CMS/api/presentation/1/slide/1/image/"
             },
             "2": {
                 (...)

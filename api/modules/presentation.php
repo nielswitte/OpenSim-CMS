@@ -55,11 +55,11 @@ class Presentation extends Module{
         $resutls        = $db->rawQuery("SELECT * FROM documents WHERE type = ? ORDER BY creationDate DESC LIMIT ?, ?", $params);
         // Process results
         $data           = array();
-        $x              = 1;
+        $x              = $args[1];
         foreach($resutls as $result) {
-            $presentation = new \Models\Presentation($result['id'], 0, $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate']);
-            $data[$x]     = self::getPresentationData($presentation);
             $x++;
+            $presentation = new \Models\Presentation($result['id'], 0, $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate']);
+            $data[$x]     = self::getPresentationData($presentation, FALSE);
         }
         return $data;
     }
@@ -80,9 +80,10 @@ class Presentation extends Module{
      * Format the presentation data to the desired format
      *
      * @param \Models\Presentation $presentation
+     * @param boolean $full - [Optional] Show all information about the presentation and slides
      * @return array
      */
-    private function getPresentationData(\Models\Presentation $presentation) {
+    private function getPresentationData(\Models\Presentation $presentation, $full = TRUE) {
         $data = array();
         $data['type']               = 'presentation';
         $data['title']              = $presentation->getTitle();
@@ -91,7 +92,7 @@ class Presentation extends Module{
         $slides     = array();
         $x          = 1;
         foreach($presentation->getSlides() as $slide) {
-            $slides[$x] = $this->getSlideData($presentation, $slide);
+            $slides[$x] = $this->getSlideData($presentation, $slide, $full);
             $x++;
         }
 
@@ -108,23 +109,29 @@ class Presentation extends Module{
      *
      * @param \Models\Presentation $presentation
      * @param \Models\Slide $slide
+     * @param boolean $full - [Optional] Show all information about the slide
      * @return array
      */
-    private function getSlideData(\Models\Presentation $presentation, \Models\Slide $slide) {
-        $cachedTextures = array();
-        foreach($slide->getCache() as $cache) {
-            $cachedTextures[$cache['gridId']] = array(
-                'uuid'      => $cache['uuid'],
-                'expires'   => $cache['uuidExpires'],
-                'isExpired' => $cache['uuidExpires'] > time() ? 1 : 0
-            );
-        }
+    private function getSlideData(\Models\Presentation $presentation, \Models\Slide $slide, $full = TRUE) {
         $data = array(
             'id'    => $slide->getId(),
             'number'=> $slide->getNumber(),
-            'image' => $presentation->getApiUrl() . 'slide/' . $slide->getNumber() . '/image/',
-            'cache' => $cachedTextures
+            'image' => $presentation->getApiUrl() . 'slide/' . $slide->getNumber() . '/image/'
         );
+
+        // Show additional information
+        if($full) {
+            $cachedTextures = array();
+            foreach($slide->getCache() as $cache) {
+                $cachedTextures[$cache['gridId']] = array(
+                    'uuid'      => $cache['uuid'],
+                    'expires'   => $cache['uuidExpires'],
+                    'isExpired' => $cache['uuidExpires'] > time() ? 1 : 0
+                );
+            }
+
+            $data['cache'] = $cachedTextures;
+        }
         return $data;
     }
 
