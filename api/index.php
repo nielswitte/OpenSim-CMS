@@ -6,6 +6,7 @@ require_once dirname(__FILE__) .'/auth.php';
 require_once dirname(__FILE__) .'/api.php';
 require_once dirname(__FILE__) .'/modules/auth.php';
 require_once dirname(__FILE__) .'/modules/grid.php';
+require_once dirname(__FILE__) .'/modules/meeting.php';
 require_once dirname(__FILE__) .'/modules/presentation.php';
 require_once dirname(__FILE__) .'/modules/user.php';
 
@@ -37,6 +38,7 @@ try {
 
     // Add modules
     $gridApi            = new \API\Modules\Grid($api);
+    $meetingsApi        = new \API\Modules\Meeting($api);
     $presentationApi    = new \API\Modules\Presentation($api);
     $userApi            = new \API\Modules\User($api);
     $authApi            = new \API\Modules\Auth($api);
@@ -52,7 +54,7 @@ try {
 // Catch any exception that occured
 } catch (\Exception $e) {
 	$result["Exception"]    = $e->getMessage();
-    
+
     // Do we want to show debug information?
     if(SERVER_DEBUG) {
         $result["Code"]     = $e->getCode();
