@@ -204,6 +204,28 @@ and on failure it will provide an error message, for example when the agent's uu
 }
 ```
 
+## Meetings
+
+```http
+GET /api/meetings/ HTTP/1.1
+```
+
+```http
+GET /api/meetings/<OFFSET>/ HTTP/1.1
+```
+
+```http
+GET /api/meetings/<YYYY-MM-DD>/ HTTP/1.1
+```
+
+```http
+GET /api/meetings/<YYYY-MM-DD>/calendar/ HTTP/1.1
+```
+
+```http
+GET /api/meeting/<MEETING-ID>/ HTTP/1.1
+```
+
 ## Presentations
 A list with presentations can be requested by using the following GET request.
 
