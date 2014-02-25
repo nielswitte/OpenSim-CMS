@@ -56,7 +56,7 @@ class User extends Module {
             $count++;
             $user           = new \Models\User($result['id']);
             $user->getInfoFromDatabase();
-            $data[$count]   = self::getUserData($user);
+            $data[$count]   = self::getUserData($user, FALSE);
         }
         return $data;
     }
@@ -70,7 +70,9 @@ class User extends Module {
     public function getUserById($args) {
         $user = new \Models\User($args[1]);
         $user->getInfoFromDatabase();
-        return self::getUserData($user);
+        $user->getAvatarsFromDatabase();
+        $user->getPresentationsFromDatabase();
+        return self::getUserData($user, TRUE);
     }
 
     /**
@@ -91,7 +93,9 @@ class User extends Module {
             if(isset($avatarQuery[0])) {
                 $user = new \Models\User($avatarQuery[0]['userId']);
                 $user->getInfoFromDatabase();
-                $data = $this->getUserData($user);
+                $user->getAvatarsFromDatabase();
+                $user->getPresentationsFromDatabase();
+                $data = $this->getUserData($user, TRUE);
             } else {
                 throw new \Exception("Avatar not found on this Grid", 2);
             }
@@ -105,30 +109,36 @@ class User extends Module {
      * Formats the user data to a nice array
      *
      * @param \Models\User $user
+     * @param boolean $full - [Optional] Return all user information?
      * @return array
      */
-    private function getUserData(\Models\User $user) {
+    private function getUserData(\Models\User $user, $full = TRUE) {
         $data['id']                 = $user->getId();
         $data['userName']           = $user->getUserName();
         $data['firstName']          = $user->getFirstName();
         $data['lastName']           = $user->getLastName();
         $data['email']              = $user->getEmail();
-        $data['presentationIds']    = $user->getPresentationIds();
-        $avatars                    = array();
-        $x = 1;
-        foreach($user->getAvatars() as $avatar) {
-            $avatars[$x] = array(
-                'uuid'          => $avatar->getUuid(),
-                'gridId'        => $avatar->getGrid()->getId(),
-                'gridName'      => $avatar->getGrid()->getName(),
-                'online'        => $avatar->getOnline(),
-                'lastRegion'    => $avatar->getLastRegionUuid(),
-                'lastLogin'     => $avatar->getLastLogin(),
-                'lastPosition'  => $avatar->getLastPosition()
-            );
-            $x++;
+
+        if($full) {
+            $data['presentationIds']    = $user->getPresentationIds();
         }
-        $data['avatars']            = $avatars;
+        if($full) {
+            $avatars                    = array();
+            $x = 1;
+            foreach($user->getAvatars() as $avatar) {
+                $avatars[$x] = array(
+                    'uuid'          => $avatar->getUuid(),
+                    'gridId'        => $avatar->getGrid()->getId(),
+                    'gridName'      => $avatar->getGrid()->getName(),
+                    'online'        => $avatar->getOnline(),
+                    'lastRegion'    => $avatar->getLastRegionUuid(),
+                    'lastLogin'     => $avatar->getLastLogin(),
+                    'lastPosition'  => $avatar->getLastPosition()
+                );
+                $x++;
+            }
+            $data['avatars']            = $avatars;
+        }
         return $data;
     }
 
