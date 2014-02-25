@@ -31,9 +31,11 @@ class Meeting extends Module{
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/meetings\/?$/",                      "getMeetings",     $this, "GET",  TRUE);  // Get list with 50 meetings ordered by startdate DESC
-        $this->api->addRoute("/meetings\/(\d+)\/?$/",               "getMeetings",     $this, "GET",  TRUE);  // Get list with 50 meetings ordered by startdate DESC starting at the given offset
-        $this->api->addRoute("/meeting\/(\d+)\/?$/",                "getMeetingById",  $this, "GET",  TRUE);  // Select specific meeting
+        $this->api->addRoute("/meetings\/([0-9]{4}-[0-9]{1,2}-[0-9]{1,2})\/?$/",            "getMeetingsByDate",   $this, "GET",  TRUE);  // Get all meetings that start after the given date
+        $this->api->addRoute("/meetings\/([0-9]{4}-[0-9]{1,2}-[0-9]{1,2})\/calendar\/?$/",  "getMeetingsByDate",   $this, "GET",  TRUE);  // Get all meetings that start after the given date
+        $this->api->addRoute("/meetings\/?$/",                                              "getMeetings",         $this, "GET",  TRUE);  // Get list with 50 meetings ordered by startdate DESC
+        $this->api->addRoute("/meetings\/(\d+)\/?$/",                                       "getMeetings",         $this, "GET",  TRUE);  // Get list with 50 meetings ordered by startdate DESC starting at the given offset
+        $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "getMeetingById",      $this, "GET",  TRUE);  // Select specific meeting
     }
 
     /**
@@ -48,18 +50,57 @@ class Meeting extends Module{
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 presentations from the given offset
         $params         = array($args[1], 50);
-        $resutls        = $db->rawQuery("SELECT * FROM meetings ORDER BY startDate DESC LIMIT ?, ?", $params);
+        $resutls        = $db->rawQuery("SELECT * FROM meetings m, users u WHERE u.id = m.userId ORDER BY m.startDate DESC LIMIT ?, ?", $params);
         // Process results
         $data           = array();
         $x              = $args[1];
         foreach($resutls as $result) {
-            $x++;
-            $user       = new \Models\User($result['userId']);
+            $user       = new \Models\User($result['userId'], $result['userName'], $result['email'], $result['firstName'], $result['lastName']);
             $room       = new \Models\MeetingRoom($result['roomId']);
             $meeting    = new \Models\Meeting($result['id'], $result['startDate'], $result['endDate'], $user, $room);
             $data[$x]   = $this->getMeetingData($meeting, FALSE);
             $x++;
         }
+        return $data;
+    }
+
+    /**
+     * Gets all meetings after the given date
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getMeetingsByDate($args) {
+        $db             = \Helper::getDB();
+        // Get 50 presentations from the given offset
+        $params         = array($args[1]);
+        $resutls        = $db->rawQuery("SELECT * FROM meetings m, users u WHERE u.id = m.userId AND m.startDate >= ? ORDER BY m.startDate DESC", $params);
+        // Process results
+        $data           = array();
+
+        $x              = 1;
+        foreach($resutls as $result) {
+            $user       = new \Models\User($result['userId'], $result['userName'], $result['email'], $result['firstName'], $result['lastName']);
+            $room       = new \Models\MeetingRoom($result['roomId']);
+            $meeting    = new \Models\Meeting($result['id'], $result['startDate'], $result['endDate'], $user, $room);
+            if(strpos($args[0], 'calendar') !== FALSE) {
+                // use the format for JSON Event Objects (@source: http://arshaw.com/fullcalendar/docs2/event_data/Event_Object/ )
+                $data[]   = array(
+                    'id'            => $meeting->getId(),
+                    'start'         => $meeting->getStartDate(),
+                    'end'           => $meeting->getEndDate(),
+                    'url'           => $meeting->getApiUrl(),
+                    'title'         => 'Room: '. $meeting->getRoom()->getId(),
+                    'description'   => 'Reservation made by: '. $meeting->getCreator()->getUserName()
+                );
+            } else {
+                $data[$x] = $this->getMeetingData($meeting, FALSE);
+            }
+            $x++;
+        }
+
+
+
         return $data;
     }
 
@@ -70,7 +111,7 @@ class Meeting extends Module{
      * @return array
      */
     public function getMeetingById($args) {
-        $meeting    = new \Models\Meeting($args[1]);
+        $meeting = new \Models\Meeting($args[1]);
         $meeting->getInfoFromDatabase();
         $meeting->getCreator()->getInfoFromDatabase();
         $meeting->getRoom()->getInfoFromDatabase();
@@ -90,16 +131,16 @@ class Meeting extends Module{
         $data       = array(
             'id'        => $meeting->getId(),
             'startDate' => $meeting->getStartDate(),
-            'endDate'   => $meeting->getEndDate()
-        );
-        if($full) {
-            $data['creator'] = array(
+            'endDate'   => $meeting->getEndDate(),
+            'creator'   => array(
                 'id'            => $meeting->getCreator()->getId(),
                 'userName'      => $meeting->getCreator()->getUserName(),
                 'firstName'     => $meeting->getCreator()->getFirstName(),
                 'lastName'      => $meeting->getCreator()->getLastName(),
                 'email'         => $meeting->getCreator()->getEmail()
+                )
             );
+        if($full) {
             $data['room'] = array(
                 'id'            => $meeting->getRoom()->getId(),
                 'grid'          => array(
@@ -112,7 +153,7 @@ class Meeting extends Module{
                 ),
                 'description'   => $meeting->getRoom()->getDescription()
             );
-            
+
             $i = 1;
             $participants = array();
             foreach($meeting->getParticipants()->getParticipants() as $user) {
@@ -127,8 +168,9 @@ class Meeting extends Module{
             }
             $data['participants'] = $participants;
         } else {
-            $data['creatorId'] = $meeting->getCreator()->getId();
-            $data['roomId']    = $meeting->getRoom()->getId();
+            $data['roomId']     = $meeting->getRoom()->getId();
+            // URL to full view
+            $data['url']        = $meeting->getApiUrl();
         }
 
         return $data;

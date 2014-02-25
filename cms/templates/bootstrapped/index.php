@@ -9,6 +9,7 @@ $contentPages = array(
     // Body code is included as the main body of this page
     'grids'         => array('header' => '',                    'body' => 'grids.php',          'auth' => TRUE),
     'grid'          => array('header' => '',                    'body' => 'grid.php',           'auth' => TRUE),
+    'meetings'      => array('header' => 'meetings.php',        'body' => 'meetings.php',       'auth' => TRUE),
     'presentations' => array('header' => '',                    'body' => 'presentations.php',  'auth' => TRUE),
     'presentation'  => array('header' => '',                    'body' => 'presentation.php',   'auth' => TRUE),
     'signout'       => array('header' => 'signout.php',         'body' => 'signout.php',        'auth' => FALSE),
@@ -52,6 +53,15 @@ if($header != '' && $isAuthorized >= $authRequired) {
         <link href="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/css/select2.css" rel="stylesheet" type="text/css">
         <link href="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/css/select2-bootstrap.css" rel="stylesheet" type="text/css">
         <link href="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/less/main.less" rel="stylesheet/less" type="text/css">
+<?php
+    if(isset($extraCss)) {
+        foreach($extraCss as $css) {
+?>
+        <link href="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/css/<?php echo $css; ?>" rel="stylesheet" type="text/css">
+<?php
+        }
+    }
+?>
 
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -76,11 +86,22 @@ if($header != '' && $isAuthorized >= $authRequired) {
 
                 client.add('grids');
                 client.add('grid');
+                client.add('meetings');
+                client.add('meeting');
                 client.add('presentations');
                 client.add('presentation');
                 client.add('user');
             });
         </script>
+<?php
+    if(isset($extraJs)) {
+        foreach($extraJs as $js) {
+?>
+        <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/<?php echo $js; ?>" type="text/javascript"></script>
+<?php
+        }
+    }
+?>
     </head>
     <body>
         <!-- Fixed navbar -->
@@ -99,6 +120,7 @@ if($header != '' && $isAuthorized >= $authRequired) {
                     <ul class="nav navbar-nav">
 <?php if($isAuthorized) { ?>
                         <li class="<?php echo (in_array($pageRequest, array('grids', 'grid')) ? 'active' : ''); ?>"><a href="<?php echo SERVER_ROOT; ?>/cms/grids/">Grids</a></li>
+                        <li class="<?php echo (in_array($pageRequest, array('meetings', 'meeting')) ? 'active' : ''); ?>"><a href="<?php echo SERVER_ROOT; ?>/cms/meetings/">Meetings</a></li>
                         <li class="<?php echo (in_array($pageRequest, array('presentations', 'presentation')) ? 'active' : ''); ?>"><a href="<?php echo SERVER_ROOT; ?>/cms/presentations/">Presentations</a></li>
 <?php } ?>
                     </ul>

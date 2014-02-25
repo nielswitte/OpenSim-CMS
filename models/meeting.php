@@ -45,13 +45,14 @@ class Meeting implements simpleModel {
      * @throws \Exception
      */
     public function getInfoFromDatabase() {
-        $db = \Helper::getDB();
-        $db->where('id', $db->escape($this->getId()));
-        $meeting = $db->get('meetings', 1);
+        $db         = \Helper::getDB();
+        $params     = array($db->escape($this->getId()));
+        $meeting    = $db->rawQuery('SELECT * FROM meetings m, users u WHERE m.id = ? AND m.userId = u.id LIMIT 1', $params);
+
         // Meeting found?
         if(isset($meeting[0])) {
             $this->room         = new \Models\MeetingRoom($meeting[0]['roomId']);
-            $this->creator      = new \Models\User($meeting['0']['userId']);
+            $this->creator      = new \Models\User($meeting['0']['userId'], $meeting['0']['userName'], $meeting['0']['email'], $meeting['0']['firstName'], $meeting['0']['lastName']);
             $this->startDate    = $meeting[0]['startDate'];
             $this->endDate      = $meeting[0]['endDate'];
         } else {
@@ -148,5 +149,14 @@ class Meeting implements simpleModel {
      */
     public function getParticipants(){
         return $this->participants;
+    }
+
+    /**
+     * Returns the API url to the full meeting information
+     *
+     * @return string
+     */
+    public function getApiUrl() {
+        return SERVER_PROTOCOL .'://'. SERVER_ADDRESS .':'.SERVER_PORT . SERVER_ROOT .'/api/meeting/'. $this->getId() .'/';
     }
 }
