@@ -54,21 +54,12 @@ class Slide {
      * @return array
      */
     public function getCache() {
-        $db = \Helper::getDB();
-        $params = array($this->getId());
-        $results = $db->rawQuery('SELECT c.* FROM cached_assets c, document_slides_cache dc WHERE dc.cacheId = c.id AND dc.slideId = ?', $params);
+        $db         = \Helper::getDB();
+        $params     = array($this->getId());
+        $results    = $db->rawQuery('SELECT c.* FROM cached_assets c, document_slides_cache dc WHERE dc.cacheId = c.id AND dc.slideId = ?', $params);
 
         return $results;
 
-    }
-
-    /**
-     * Checks if the UUID is expired based on the OS_ASSET_CACHE_EXPIRES value from the config
-     *
-     * @return boolean - True when expired
-     */
-    public function isUuidExpired() {
-        //return !(strtotime($this->getUuidUpdated()) > strtotime('-'. OS_ASSET_CACHE_EXPIRES)) ? 1 : 0;
     }
 
     /**
