@@ -76,6 +76,7 @@ class Grid implements SimpleModel {
 
             foreach($regions as $region) {
                 $newRegion = new \Models\Region($region['uuid'], $this);
+                $newRegion->getInfoFromDatabase();
                 $newRegion->setName($region['name']);
                 $this->addRegion($newRegion);
             }

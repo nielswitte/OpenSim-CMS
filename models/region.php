@@ -30,9 +30,6 @@ class Region implements SimpleModel {
     public function __construct($uuid, \Models\Grid $grid) {
         $this->uuid = $uuid;
         $this->grid = $grid;
-
-        // Always get information about this region from the server
-        $this->getInfoFromDatabase();
     }
 
     /**
@@ -75,7 +72,6 @@ class Region implements SimpleModel {
         }
 
         $this->setOnlineStatus($result['success']);
-
 
         // Additional actions when MySQL database is accessable
         if($this->grid->getDbUrl() && $this->getOnlineStatus()) {
