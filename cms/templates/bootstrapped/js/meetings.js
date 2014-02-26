@@ -8,11 +8,16 @@ jQuery(document).ready(function($) {
         $('#calendar').fullCalendar({
             defaultView: 'agendaWeek',
             height: 650,
+            header: {
+                left:   'title',
+                center: 'agendaDay,agendaWeek,month',
+                right:  'today prev,next'
+            },
             events: data,
             eventClick: function(event) {
                 // Create a pop over for this event
                 $(this).popover({
-                    placement: 'auto right',
+                    placement: 'auto top',
                     title: event.title,
                     content: event.description
                 });
