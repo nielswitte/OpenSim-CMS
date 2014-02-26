@@ -46,8 +46,9 @@ class Meeting implements simpleModel {
      */
     public function getInfoFromDatabase() {
         $db         = \Helper::getDB();
-        $params     = array($db->escape($this->getId()));
-        $meeting    = $db->rawQuery('SELECT * FROM meetings m, users u WHERE m.id = ? AND m.userId = u.id LIMIT 1', $params);
+        $db->join('users u', 'm.userId = u.id', 'LEFT');
+        $db->where('m.id', $db->escape($this->getId()));
+        $meeting    = $db->get('meetings m', 1);
 
         // Meeting found?
         if(isset($meeting[0])) {
@@ -64,9 +65,12 @@ class Meeting implements simpleModel {
      * Gets the participants for this meeting from the database and adds them to the list
      */
     public function getParticipantsFromDatabase() {
-        $db             = \Helper::getDB();
-        $params         = array($db->escape($this->getId()));
-        $results        = $db->rawQuery('SELECT u.* FROM meeting_participants mp, users u WHERE mp.meetingId = ? AND mp.userId = u.id ORDER BY u.lastName ASC, u.firstName ASC', $params);
+        $db         = \Helper::getDB();
+        $db->join('users u', 'm.userId = u.id', 'LEFT');
+        $db->where('m.meetingId', $db->escape($this->getId()));
+        $db->orderBy('u.lastName', 'ASC');
+        $db->orderBy('u.firstName', 'ASC');
+        $results    = $db->get('meeting_participants m');
 
         // Create a new participants list and set it to this meeting
         $participants   = new \Models\MeetingParticipants($this);

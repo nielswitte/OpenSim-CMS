@@ -7,6 +7,7 @@ require_once dirname(__FILE__) .'/api.php';
 require_once dirname(__FILE__) .'/modules/auth.php';
 require_once dirname(__FILE__) .'/modules/grid.php';
 require_once dirname(__FILE__) .'/modules/meeting.php';
+require_once dirname(__FILE__) .'/modules/meetingroom.php';
 require_once dirname(__FILE__) .'/modules/presentation.php';
 require_once dirname(__FILE__) .'/modules/user.php';
 
@@ -40,6 +41,7 @@ try {
     $gridApi            = new \API\Modules\Grid($api);
     $meetingsApi        = new \API\Modules\Meeting($api);
     $presentationApi    = new \API\Modules\Presentation($api);
+    $roomApi            = new \API\Modules\MeetingRoom($api);
     $userApi            = new \API\Modules\User($api);
     $authApi            = new \API\Modules\Auth($api);
 

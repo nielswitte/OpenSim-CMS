@@ -29,9 +29,17 @@ class Grid implements SimpleModel {
      * Constructs a new grid with the given ID
      *
      * @param integer $id
+     * @param string $name - [Optional] The grid's name
+     * @param string $osProtocol - [Optional] The protocol used by this grid for OpenSim [HTTP/HTTPS]
+     * @param string $osIp - [Optional] The IP address of the grid used by OpenSim
+     * @param integer $osPort - [Optional] The port to access the grid used by OpenSim
      */
-    public function __construct($id) {
-        $this->id = $id;
+    public function __construct($id, $name = '', $osProtocol = '', $osIp = '', $osPort = '') {
+        $this->id           = $id;
+        $this->name         = $name;
+        $this->osProtocol   = $osProtocol;
+        $this->osIp         = $osIp;
+        $this->osPort       = $osPort;
     }
 
     /**
