@@ -1,7 +1,8 @@
 jQuery(document).ready(function($) {
+    $('#loading').show();
     // Get date two weeks back (1000 miliseconds, 60 seconds, 60 minutes, 24 hours, 14 days)
     var date = new Date(new Date - (1000*60*60*24*14));
-    $('#loading').show();
+
     // Get meetings
     client.meetings.read(date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate() +'/calendar', { token: api_token }).done(function(data) {
         // Insert the events into the calendar

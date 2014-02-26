@@ -139,7 +139,18 @@ if($header != '' && $isAuthorized >= $authRequired) {
                 </div>
                 <p class="text-center">Loading... please be patient</p>
             </div>
-            <div id="alerts"></div>
+            <div id="alerts">
+<?php
+if($sessionExpired !== FALSE) {
+?>
+                <div class="alert alert-warning">
+                    <strong>Session Expired!</strong> Your session has expired, please re-authenticate yourself by logging in.
+                </div>
+<?php
+}
+?>
+
+            </div>
 <?php
 // Authorization required?
 if($isAuthorized >= $authRequired) {
