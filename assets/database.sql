@@ -71,8 +71,9 @@ CREATE TABLE IF NOT EXISTS `document_slides_cache` (
   `cacheId` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`slideId`,`cacheId`),
   KEY `FK_document_slides_cache_cached_assets` (`cacheId`),
-  CONSTRAINT `FK_document_slides_cache_document_slides` FOREIGN KEY (`slideId`) REFERENCES `document_slides` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `FK_document_slides_cache_cached_assets` FOREIGN KEY (`cacheId`) REFERENCES `cached_assets` (`id`) ON DELETE CASCADE
+  KEY `slideId` (`slideId`),
+  CONSTRAINT `FK_document_slides_cache_cached_assets` FOREIGN KEY (`cacheId`) REFERENCES `cached_assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_document_slides_cache_document_slides` FOREIGN KEY (`slideId`) REFERENCES `document_slides` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
