@@ -30,9 +30,6 @@ class Region implements SimpleModel {
     public function __construct($uuid, \Models\Grid $grid) {
         $this->uuid = $uuid;
         $this->grid = $grid;
-
-        // Always get information about this region from the server
-        $this->getInfoFromDatabase();
     }
 
     /**
@@ -70,12 +67,15 @@ class Region implements SimpleModel {
 
         if(isset($result['error'])) {
             throw new Exception($result['error'], 3);
-        } else {
-            $this->getGrid()->setOnlineStatus(TRUE);
         }
 
         $this->setOnlineStatus($result['success']);
 
+        // Updates the online status of the grid, when so far the status is offline
+        // This means that if one region responds it is online, the grid is online, however not all regions
+        if(!$this->getGrid()->getOnlineStatus()) {
+            $this->getGrid()->setOnlineStatus($result['success']);
+        }
 
         // Additional actions when MySQL database is accessable
         if($this->grid->getDbUrl() && $this->getOnlineStatus()) {

@@ -27,10 +27,16 @@ class User implements SimpleModel {
      *
      * @param integer $id - [Optional] The ID of the user
      * @param string $userName - [Optional] the user's user name
+     * @param string $email - [Optional] the user's email address
+     * @param string $firstName - [Optional] the user's first name
+     * @param string $lastName- [Optional] the user's last name
      */
-    public function __construct($id = 0, $userName = '') {
-        $this->id       = $id;
-        $this->userName = $userName;
+    public function __construct($id = 0, $userName = '', $email = '', $firstName = '', $lastName = '') {
+        $this->id           = $id;
+        $this->userName     = $userName;
+        $this->email        = $email;
+        $this->firstName    = $firstName;
+        $this->lastName     = $lastName;
     }
 
     /**
@@ -56,32 +62,45 @@ class User implements SimpleModel {
             $this->firstName        = $user[0]['firstName'];
             $this->lastName         = $user[0]['lastName'];
             $this->email            = $user[0]['email'];
-
-            // Get user's presentations
-            $db->where("ownerId", $this->getId());
-            $db->where('type', 'presentation');
-            $presentations = $db->get("documents");
-
-            // Convert presentation Ids to array
-            if(!empty($presentations)) {
-                foreach($presentations as $presentation) {
-                    $this->presentationIds[] = $presentation['id'];
-                }
-            }
-
-            $db->where('userId', $this->getId());
-            $avatars = $db->get('avatars');
-            $i = 1;
-            foreach($avatars as $avatar) {
-                $grid = new \Models\Grid($avatar['gridId']);
-                $grid->getInfoFromDatabase();
-                $newAvatar = new \Models\Avatar($grid, $avatar['uuid']);
-                $newAvatar->getInfoFromDatabase();
-                $this->avatars[$i] = $newAvatar;
-                $i++;
-            }
         } else {
             throw new \Exception("User not found", 3);
+        }
+    }
+
+    /**
+     * Gets the user's presentations from the database
+     */
+    public function getPresentationsFromDatabase() {
+        $db = \Helper::getDB();
+        // Get user's presentations
+        $db->where("ownerId", $this->getId());
+        $db->where('type', 'presentation');
+        $presentations = $db->get("documents");
+
+        // Convert presentation Ids to array
+        if(!empty($presentations)) {
+            foreach($presentations as $presentation) {
+                $this->presentationIds[] = $presentation['id'];
+            }
+        }
+    }
+
+    /**
+     * Gets the user's avatars from the database
+     */
+    public function getAvatarsFromDatabase() {
+        $db = \Helper::getDB();
+        // Get avatars
+        $db->where('userId', $this->getId());
+        $avatars = $db->get('avatars');
+        $i = 1;
+        foreach($avatars as $avatar) {
+            $grid = new \Models\Grid($avatar['gridId']);
+            $grid->getInfoFromDatabase();
+            $newAvatar = new \Models\Avatar($grid, $avatar['uuid']);
+            $newAvatar->getInfoFromDatabase();
+            $this->avatars[$i] = $newAvatar;
+            $i++;
         }
     }
 

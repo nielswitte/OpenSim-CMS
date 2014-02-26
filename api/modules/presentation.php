@@ -31,12 +31,13 @@ class Presentation extends Module{
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/presentations\/?$/",                               "getPresentations",     $this, "GET",  TRUE);  // Get list with 50 presentations
-        $this->api->addRoute("/presentations\/(\d+)\/?$/",                        "getPresentations",     $this, "GET",  TRUE);  // Get list with 50 presentations starting at the given offset
-        $this->api->addRoute("/presentation\/(\d+)\/?$/",                         "getPresentationById",  $this, "GET",  TRUE);  // Select specific presentation
-        $this->api->addRoute("/presentation\/(\d+)\/slide\/(\d+)\/?$/",           "getSlideById",         $this, "GET",  TRUE);  // Get slide from presentation
-        $this->api->addRoute("/presentation\/(\d+)\/slide\/(\d+)\/?$/",           "updateSlideUuid",      $this, "PUT",  TRUE);  // Update slide UUID for given slide of presentation
-        $this->api->addRoute("/presentation\/(\d+)\/slide\/(\d+)\/image\/?$/",    "getSlideImageById",    $this, "GET",  TRUE);  // Get only the image of a given presentation slide
+        $this->api->addRoute("/presentations\/?$/",                                     "getPresentations",         $this, "GET",  TRUE);  // Get list with 50 presentations
+        $this->api->addRoute("/presentations\/(\d+)\/?$/",                              "getPresentations",         $this, "GET",  TRUE);  // Get list with 50 presentations starting at the given offset
+        $this->api->addRoute("/presentation\/(\d+)\/?$/",                               "getPresentationById",      $this, "GET",  TRUE);  // Select specific presentation
+        $this->api->addRoute("/presentation\/(\d+)\/slide\/(\d+)\/?$/",                 "getSlideById",             $this, "GET",  TRUE);  // Get slide from presentation
+        $this->api->addRoute("/presentation\/(\d+)\/slide\/number\/(\d+)\/?$/",         "getSlideByNumber",         $this, "GET",  TRUE);  // Get slide from presentation
+        $this->api->addRoute("/presentation\/(\d+)\/slide\/number\/(\d+)\/?$/",         "updateSlideUuidByNumber",  $this, "PUT",  TRUE);  // Update slide UUID for given slide of presentation
+        $this->api->addRoute("/presentation\/(\d+)\/slide\/number\/(\d+)\/image\/?$/",  "getSlideImageByNumber",    $this, "GET",  TRUE);  // Get only the image of a given presentation slide
     }
 
 
@@ -55,11 +56,11 @@ class Presentation extends Module{
         $resutls        = $db->rawQuery("SELECT * FROM documents WHERE type = ? ORDER BY creationDate DESC LIMIT ?, ?", $params);
         // Process results
         $data           = array();
-        $x              = 1;
+        $x              = $args[1];
         foreach($resutls as $result) {
-            $presentation = new \Models\Presentation($result['id'], 0, $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate']);
-            $data[$x]     = self::getPresentationData($presentation);
             $x++;
+            $presentation = new \Models\Presentation($result['id'], 0, $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate']);
+            $data[$x]     = self::getPresentationData($presentation, FALSE);
         }
         return $data;
     }
@@ -80,9 +81,10 @@ class Presentation extends Module{
      * Format the presentation data to the desired format
      *
      * @param \Models\Presentation $presentation
+     * @param boolean $full - [Optional] Show all information about the presentation and slides
      * @return array
      */
-    private function getPresentationData(\Models\Presentation $presentation) {
+    private function getPresentationData(\Models\Presentation $presentation, $full = TRUE) {
         $data = array();
         $data['type']               = 'presentation';
         $data['title']              = $presentation->getTitle();
@@ -91,7 +93,7 @@ class Presentation extends Module{
         $slides     = array();
         $x          = 1;
         foreach($presentation->getSlides() as $slide) {
-            $slides[$x] = $this->getSlideData($presentation, $slide);
+            $slides[$x] = $this->getSlideData($presentation, $slide, $full);
             $x++;
         }
 
@@ -108,22 +110,42 @@ class Presentation extends Module{
      *
      * @param \Models\Presentation $presentation
      * @param \Models\Slide $slide
+     * @param boolean $full - [Optional] Show all information about the slide
      * @return array
      */
-    private function getSlideData(\Models\Presentation $presentation, \Models\Slide $slide) {
-        $cachedTextures = array();
-        foreach($slide->getCache() as $cache) {
-            $cachedTextures[$cache['gridId']] = array(
-                'uuid'      => $cache['uuid'],
-                'expires'   => $cache['uuidExpires'],
-                'isExpired' => $cache['uuidExpires'] > time() ? 1 : 0
-            );
-        }
+    private function getSlideData(\Models\Presentation $presentation, \Models\Slide $slide, $full = TRUE) {
         $data = array(
-            'number' => $slide->getNumber(),
-            'image' => $presentation->getApiUrl() . 'slide/' . $slide->getNumber() . '/image/',
-            'cache' => $cachedTextures
+            'id'    => $slide->getId(),
+            'number'=> $slide->getNumber(),
+            'image' => $presentation->getApiUrl() . 'slide/number/' . $slide->getNumber() . '/image/'
         );
+
+        // Show additional information
+        if($full) {
+            $cachedTextures = array();
+            foreach($slide->getCache() as $cache) {
+                $cachedTextures[$cache['gridId']] = array(
+                    'uuid'      => $cache['uuid'],
+                    'expires'   => $cache['uuidExpires'],
+                    'isExpired' => $cache['uuidExpires'] > time() ? 1 : 0
+                );
+            }
+
+            $data['cache'] = $cachedTextures;
+        }
+        return $data;
+    }
+
+    /**
+     * Get slide details for the given slide
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getSlideByNumber($args) {
+        $presentation   = new \Models\Presentation($args[1]);
+        $slide          = $presentation->getSlideByNumber($args[2]);
+        $data           = $this->getSlideData($presentation, $slide);
         return $data;
     }
 
@@ -135,7 +157,7 @@ class Presentation extends Module{
      */
     public function getSlideById($args) {
         $presentation   = new \Models\Presentation($args[1]);
-        $slide          = $presentation->getSlide($args[2]);
+        $slide          = $presentation->getSlideById($args[2]);
         $data           = $this->getSlideData($presentation, $slide);
         return $data;
     }
@@ -146,7 +168,7 @@ class Presentation extends Module{
      * @param array $args
      * @throws \Exception
      */
-    public function getSlideImageById($args) {
+    public function getSlideImageByNumber($args) {
         // Get presentation and slide details
         $presentation   = new \Models\Presentation($args[1], $args[2]);
         $slidePath      = $presentation->getPath() . DS . $presentation->getCurrentSlide() .'.jpg';
@@ -179,7 +201,7 @@ class Presentation extends Module{
      * @param array $args
      * @return boolean
      */
-    public function updateSlideUuid($args) {
+    public function updateSlideUuidByNumber($args) {
         $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
         $parsedPutData  = (\Helper::parsePutRequest($putUserData));
         $gridId         = isset($parsedPutData['gridId']) ? $parsedPutData['gridId'] : '';
@@ -187,15 +209,18 @@ class Presentation extends Module{
 
         // Get presentation and slide details
         $presentation   = new \Models\Presentation($args[1]);
-        $slide          = $presentation->getSlide($args[2]);
+        $slide          = $presentation->getSlideByNumber($args[2]);
+        if($slide !== FALSE) {
+            // Get grid details
+            $grid           = new \Models\Grid($gridId);
+            $grid->getInfoFromDatabase();
 
-        // Get grid details
-        $grid           = new \Models\Grid($gridId);
-        $grid->getInfoFromDatabase();
-
-        // Update
-        $slideCtrl      = new \Controllers\SlideController($slide);
-        $data           = $slideCtrl->setUuid($postUuid, $grid);
+            // Update
+            $slideCtrl      = new \Controllers\SlideController($slide);
+            $data           = $slideCtrl->setUuid($postUuid, $grid);
+        } else {
+            throw new \Exception('Slide does not exist', 6);
+        }
 
         return $data;
     }

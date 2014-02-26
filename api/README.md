@@ -96,7 +96,7 @@ Atleast 3 characters are required.
 GET /api/user/<SEARCH>/ HTTP/1.1
 ```
 
-The result is similar to the request by UUID, but displayed as a list ordered by username.
+The result is similar to the request by UUID, but displayed as a list ordered by username and only the basic information.
 
 ```json
 {
@@ -105,21 +105,7 @@ The result is similar to the request by UUID, but displayed as a list ordered by
         "userName": "testuser",
         "firstName": "Test",
         "lastName": "User",
-        "email": "testuser@email.com",
-        "presentationIds": [
-            "1",
-            "5",
-            "8"
-        ],
-        "avatars": {
-            "1": {
-                "uuid": "0a1811f4-7174-4e42-8bb5-26ef78335407",
-                "gridId": 1,
-                "gridName": "OpenSim-CMS' test grid"
-            },
-            "2": { (...) },
-            "3": { (...) }
-        }
+        "email": "testuser@email.com"
     },
     "2": { (...) },
     "3": { (...) },
@@ -218,6 +204,42 @@ and on failure it will provide an error message, for example when the agent's uu
 }
 ```
 
+## Meetings
+
+```http
+GET /api/meetings/ HTTP/1.1
+```
+
+```http
+GET /api/meetings/<OFFSET>/ HTTP/1.1
+```
+
+```http
+GET /api/meetings/<YYYY-MM-DD>/ HTTP/1.1
+```
+
+```http
+GET /api/meetings/<YYYY-MM-DD>/calendar/ HTTP/1.1
+```
+
+```http
+GET /api/meeting/<MEETING-ID>/ HTTP/1.1
+```
+
+## Meeting Rooms
+
+```http
+GET /api/grid/<GRID-ID>/rooms/ HTTP/1.1
+```
+
+```http
+GET /api/grid/<GRID-ID>/room/<ROOM-ID/ HTTP/1.1
+```
+
+```http
+GET /api/grid/<GRID-ID>/region/<REGION-UUID>/rooms/ HTTP/1.1
+```
+
 ## Presentations
 A list with presentations can be requested by using the following GET request.
 
@@ -233,6 +255,7 @@ GET /api/presentations/50/ HTTP/1.1
 ```
 
 Example of the output will be similar to the request of a single presentation, only in a list form.
+Cache information is left out in the list view.
 
 ```json
 {
@@ -244,10 +267,7 @@ Example of the output will be similar to the request of a single presentation, o
         "slides": {
             "1": {
                 "number": 1,
-                "image": "http://localhost:80/OpenSim-CMS/api/presentation/1/slide/1/image/",
-                "uuid": "1be74003-2d7c-4dbd-87c2-a1c95e0864e6",
-                "uuidUpdated": "2014-02-13 14:55:27",
-                "uuidExpired": 0
+                "image": "http://localhost:80/OpenSim-CMS/api/presentation/1/slide/1/image/"
             },
             "2": {
                 (...)
@@ -309,16 +329,22 @@ By saving the UUID caching of textures is enabled and OpenSim does not neet to r
 The cache is done on a grid base, the index of the case refers to the Grid ID.
 This is done by using the PUT function for a single slide (see below).
 
-The slide details for just one specific slide can be accessed through:
+The slide details for just one specific slide can be accessed through its ID:
 
 ```http
 GET /api/presentation/<ID>/slide/<SLIDE#>/ HTTP/1.1
 ```
 
+However, it is often easier to navigate based on page/slide number:
+
+```http
+GET /api/presentation/<ID>/slide/number/<SLIDE#>/ HTTP/1.1
+```
+
 The given image url will provide a jpg of the slide resized and centered at 1024x1024 with a black background.
 
 ```http
-GET /api/presentation/<ID>/slide/<SLIDE#>/image/ HTTP/1.1
+GET /api/presentation/<ID>/slide/number/<SLIDE#>/image/ HTTP/1.1
 ```
 
 When an slide has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with
@@ -326,7 +352,7 @@ the slide to speed up future use. The cache periode is set in the `OpenSim.ini` 
 matched by the `OS_ASSET_CACHE_EXPIRES` value in `config.php`.
 
 ```http
-PUT /api/presentation/<ID>/slide/<SLIDE#>/ HTTP/1.1
+PUT /api/presentation/<ID>/slide/number/<SLIDE#>/ HTTP/1.1
 ```
 
 | Parameter         | Type      | Description                                     |

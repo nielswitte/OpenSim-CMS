@@ -55,6 +55,13 @@ on how to set things up.
 
 ## Credits
 Kudos to those who created the packages and classes which are used by this program.
+
+Used in the Models/Controllers and API:
  * Ajillion and Avbdr for PHP-MySQLi-Database-Class (https://github.com/avbdr/PHP-MySQLi-Database-Class/)
  * Sprain for class.Images.php (https://github.com/sprain/class.Images.php)
+
+Used in the CMS:
  * Jpillora for jQuery.rest (https://github.com/jpillora/jquery.rest)
+ * Arshaw for Fullcalendar (https://github.com/arshaw/fullcalendar)
+ * Tobiasahlin for SpinKit (https://github.com/tobiasahlin/SpinKit)
+ * Andris9 for jStorage (https://github.com/andris9/jStorage)

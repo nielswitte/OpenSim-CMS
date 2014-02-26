@@ -40,10 +40,22 @@ if(EXEC != 1) {
 
         <script type="text/javascript">
             jQuery(document).ready(function($) {
-                client.user.read(<?php echo $_SESSION['UserId']; ?> ,{ token: api_token }).done(function(data) {
-                    $('#loginUserName').text(data.userName);
-                    $('#loginUserEmail').text(data.email);
-                });
+                // Reload local storage
+                $.jStorage.reInit();
+
+                // Username and email not locally stored?
+                if(!$.jStorage.get('userName') || !$.jStorage.get('userEmail')) {
+                    client.user.read(<?php echo $_SESSION['UserId']; ?> ,{ token: api_token }).done(function(data) {
+                        $('#loginUserName').text(data.userName);
+                        $('#loginUserEmail').text(data.email);
+                        $.jStorage.set('userName', data.userName);
+                        $.jStorage.set('userEmail', data.email);
+                    });
+                // Load from local storage
+                } else {
+                    $('#loginUserName').text($.jStorage.get('userName'));
+                    $('#loginUserEmail').text($.jStorage.get('userEmail'));
+                }
             });
         </script>
 

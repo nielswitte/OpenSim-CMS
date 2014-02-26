@@ -9,6 +9,7 @@ $contentPages = array(
     // Body code is included as the main body of this page
     'grids'         => array('header' => '',                    'body' => 'grids.php',          'auth' => TRUE),
     'grid'          => array('header' => '',                    'body' => 'grid.php',           'auth' => TRUE),
+    'meetings'      => array('header' => 'meetings.php',        'body' => 'meetings.php',       'auth' => TRUE),
     'presentations' => array('header' => '',                    'body' => 'presentations.php',  'auth' => TRUE),
     'presentation'  => array('header' => '',                    'body' => 'presentation.php',   'auth' => TRUE),
     'signout'       => array('header' => 'signout.php',         'body' => 'signout.php',        'auth' => FALSE),
@@ -52,6 +53,15 @@ if($header != '' && $isAuthorized >= $authRequired) {
         <link href="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/css/select2.css" rel="stylesheet" type="text/css">
         <link href="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/css/select2-bootstrap.css" rel="stylesheet" type="text/css">
         <link href="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/less/main.less" rel="stylesheet/less" type="text/css">
+<?php
+    if(isset($extraCss)) {
+        foreach($extraCss as $css) {
+?>
+        <link href="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/css/<?php echo $css; ?>" rel="stylesheet" type="text/css">
+<?php
+        }
+    }
+?>
 
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -63,6 +73,7 @@ if($header != '' && $isAuthorized >= $authRequired) {
         <!-- Important JS files that need to be loaded before body -->
         <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/libs/jquery-2.1.0.min.js" type="text/javascript"></script>
         <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/libs/jquery.rest.js" type="text/javascript"></script>
+        <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/libs/jstorage-0.4.8.min.js" type="text/javascript"></script>
         <script type="text/javascript">
             var client;
             var api_token = "<?php echo isset($_SESSION['AccessToken']) ? $_SESSION['AccessToken'] : ''; ?>";
@@ -76,11 +87,22 @@ if($header != '' && $isAuthorized >= $authRequired) {
 
                 client.add('grids');
                 client.add('grid');
+                client.add('meetings');
+                client.add('meeting');
                 client.add('presentations');
                 client.add('presentation');
                 client.add('user');
             });
         </script>
+<?php
+    if(isset($extraJs)) {
+        foreach($extraJs as $js) {
+?>
+        <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/<?php echo $js; ?>" type="text/javascript"></script>
+<?php
+        }
+    }
+?>
     </head>
     <body>
         <!-- Fixed navbar -->
@@ -99,6 +121,7 @@ if($header != '' && $isAuthorized >= $authRequired) {
                     <ul class="nav navbar-nav">
 <?php if($isAuthorized) { ?>
                         <li class="<?php echo (in_array($pageRequest, array('grids', 'grid')) ? 'active' : ''); ?>"><a href="<?php echo SERVER_ROOT; ?>/cms/grids/">Grids</a></li>
+                        <li class="<?php echo (in_array($pageRequest, array('meetings', 'meeting')) ? 'active' : ''); ?>"><a href="<?php echo SERVER_ROOT; ?>/cms/meetings/">Meetings</a></li>
                         <li class="<?php echo (in_array($pageRequest, array('presentations', 'presentation')) ? 'active' : ''); ?>"><a href="<?php echo SERVER_ROOT; ?>/cms/presentations/">Presentations</a></li>
 <?php } ?>
                     </ul>
@@ -109,7 +132,25 @@ if($header != '' && $isAuthorized >= $authRequired) {
 
         <!-- Content -->
         <div class="container">
-            <div id="alerts"></div>
+            <div id="loading">
+                <div class="spinner">
+                    <div class="cube1"></div>
+                    <div class="cube2"></div>
+                </div>
+                <p class="text-center">Loading... please be patient</p>
+            </div>
+            <div id="alerts">
+<?php
+if($sessionExpired !== FALSE) {
+?>
+                <div class="alert alert-warning">
+                    <strong>Session Expired!</strong> Your session has expired, please re-authenticate yourself by logging in.
+                </div>
+<?php
+}
+?>
+
+            </div>
 <?php
 // Authorization required?
 if($isAuthorized >= $authRequired) {
@@ -131,6 +172,5 @@ if($isAuthorized >= $authRequired) {
 <?php if(file_exists(dirname(__FILE__) . '/js/'. $pageRequest .'.js') && $isAuthorized >= $authRequired) { ?>
         <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/<?php echo $pageRequest; ?>.js" type="text/javascript"></script>
 <?php } ?>
-        <script
     </body>
 </html>

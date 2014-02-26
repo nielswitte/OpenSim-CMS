@@ -1,25 +1,20 @@
 jQuery(document).ready(function($) {
+    $('#loading').show();
     client.presentation.read(pages[1], { token: api_token }).done(function(data) {
         $('div.page-header h1 small').text(data.title);
         $('#inputId').val(data.presentationId);
         $('#inputType').val(data.type);
         $('#inputTitle').val(data.title);
-
         $('#inputId').val(data.presentationId);
-
-        client.user.read(data.ownerId, { token: api_token }).done(function(user) {
-            $('#inputOwner').val(data.ownerId);
-            selectInit();
-        }).fail(function() {
-            $('#inputOwner').val('Unknown');
-        });
-
+        $('#inputOwner').val(data.ownerId);
         $('#inputSlidesCount').val(data.slidesCount);
         $('#inputCreationDate').val(data.creationDate);
         $('#inputModificationDate').val(data.modificationDate);
-
+        selectInit();
+        $('#loading').hide();
     }).fail(function() {
         addAlert('danger', '<strong>Error!</strong> Did you manually entered this URL? If so, check the parameters and try again.');
+        $('#loading').hide();
     });
 
     function selectInit() {

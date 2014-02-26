@@ -13,18 +13,30 @@ if(EXEC != 1) {
  * @date February 12th, 2014
  */
 class Slide {
+    private $id;
     private $number;
     private $path;
 
     /**
      * Constructs a new slide with the given parameters
      *
+     * @param integer $id
      * @param integer $number
      * @param string $path
      */
-    public function __construct($number, $path) {
+    public function __construct($id, $number, $path) {
+        $this->id           = $id;
         $this->number       = $number;
         $this->path         = $path;
+    }
+
+    /**
+     * Returns the slide id
+     *
+     * @return integer
+     */
+    public function getId() {
+        return $this->id;
     }
 
     /**
@@ -42,21 +54,12 @@ class Slide {
      * @return array
      */
     public function getCache() {
-        $db = \Helper::getDB();
-        $params = array($this->getNumber());
-        $results = $db->rawQuery('SELECT c.* FROM cached_assets c, document_slides_cache dc WHERE dc.cacheId = c.id AND dc.slideId = ?', $params);
+        $db         = \Helper::getDB();
+        $db->join('cached_assets c', 'dc.cacheId = c.id', 'LEFT');
+        $db->where('dc.slideId', $db->escape($this->getId()));
+        $results    = $db->get('document_slides_cache dc');
 
         return $results;
-
-    }
-
-    /**
-     * Checks if the UUID is expired based on the OS_ASSET_CACHE_EXPIRES value from the config
-     *
-     * @return boolean - True when expired
-     */
-    public function isUuidExpired() {
-        //return !(strtotime($this->getUuidUpdated()) > strtotime('-'. OS_ASSET_CACHE_EXPIRES)) ? 1 : 0;
     }
 
     /**
@@ -65,6 +68,6 @@ class Slide {
      * @return string
      */
     public function getPath() {
-        return $this->getPath() . DS . $this->number .'.jpg';
+        return $this->path;
     }
 }

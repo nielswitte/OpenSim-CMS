@@ -8,6 +8,8 @@ if(EXEC != 1) {
 // Include all model classes
 require_once dirname(__FILE__) .'/../models/avatar.php';
 require_once dirname(__FILE__) .'/../models/grid.php';
+require_once dirname(__FILE__) .'/../models/meeting.php';
+require_once dirname(__FILE__) .'/../models/meetingRoom.php';
 require_once dirname(__FILE__) .'/../models/presentation.php';
 require_once dirname(__FILE__) .'/../models/region.php';
 require_once dirname(__FILE__) .'/../controllers/regionController.php';

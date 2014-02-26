@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `cached_assets` (
   `uuidExpires` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`,`gridId`),
   KEY `FK_cached_assets_grids` (`gridId`),
-  CONSTRAINT `FK_cached_assets_grids` FOREIGN KEY (`gridId`) REFERENCES `grids` (`id`)
+  CONSTRAINT `FK_cached_assets_grids` FOREIGN KEY (`gridId`) REFERENCES `grids` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
@@ -55,9 +55,9 @@ CREATE TABLE IF NOT EXISTS `documents` (
 
 -- Structuur van  tabel OpenSim-CMS.document_slides wordt geschreven
 CREATE TABLE IF NOT EXISTS `document_slides` (
-  `number` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `documentId` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`number`,`documentId`),
+  PRIMARY KEY (`id`),
   KEY `FK_presentation_slides_presentations` (`documentId`),
   CONSTRAINT `FK_document_slides_documents` FOREIGN KEY (`documentId`) REFERENCES `documents` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
@@ -71,8 +71,9 @@ CREATE TABLE IF NOT EXISTS `document_slides_cache` (
   `cacheId` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`slideId`,`cacheId`),
   KEY `FK_document_slides_cache_cached_assets` (`cacheId`),
+  KEY `slideId` (`slideId`),
   CONSTRAINT `FK_document_slides_cache_cached_assets` FOREIGN KEY (`cacheId`) REFERENCES `cached_assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_document_slides_cache_document_slides` FOREIGN KEY (`slideId`) REFERENCES `document_slides` (`number`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `FK_document_slides_cache_document_slides` FOREIGN KEY (`slideId`) REFERENCES `document_slides` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
@@ -110,7 +111,7 @@ CREATE TABLE IF NOT EXISTS `grid_regions` (
   `name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (`uuid`,`gridId`),
   KEY `FK_grid_regions_grids` (`gridId`),
-  CONSTRAINT `FK_grid_regions_grids` FOREIGN KEY (`gridId`) REFERENCES `grids` (`id`)
+  CONSTRAINT `FK_grid_regions_grids` FOREIGN KEY (`gridId`) REFERENCES `grids` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
@@ -120,8 +121,8 @@ CREATE TABLE IF NOT EXISTS `grid_regions` (
 CREATE TABLE IF NOT EXISTS `meetings` (
   `id` int(11) NOT NULL,
   `userId` int(11) DEFAULT NULL,
-  `startDate` datetime DEFAULT NULL,
-  `endDate` datetime DEFAULT NULL,
+  `startDate` timestamp NULL DEFAULT NULL,
+  `endDate` timestamp NULL DEFAULT NULL,
   `roomId` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_meetings_users` (`userId`),
@@ -137,9 +138,12 @@ CREATE TABLE IF NOT EXISTS `meetings` (
 CREATE TABLE IF NOT EXISTS `meeting_agenda_items` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `meetingId` int(11) DEFAULT NULL,
+  `parentId` int(11) DEFAULT NULL,
   `order` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_meeting_agenda_items_meetings` (`meetingId`),
+  KEY `FK_meeting_agenda_items_meeting_agenda_items` (`parentId`),
+  CONSTRAINT `FK_meeting_agenda_items_meeting_agenda_items` FOREIGN KEY (`parentId`) REFERENCES `meeting_agenda_items` (`id`),
   CONSTRAINT `FK_meeting_agenda_items_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
@@ -178,10 +182,16 @@ CREATE TABLE IF NOT EXISTS `meeting_participants` (
 -- Structuur van  tabel OpenSim-CMS.meeting_rooms wordt geschreven
 CREATE TABLE IF NOT EXISTS `meeting_rooms` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `gridId` int(11) DEFAULT NULL,
   `regionUuid` varchar(36) COLLATE utf8_bin DEFAULT NULL,
   `description` text COLLATE utf8_bin,
+  `x` float unsigned DEFAULT '0',
+  `y` float unsigned DEFAULT '0',
+  `z` float unsigned DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `FK_meeting_rooms_grid_regions` (`regionUuid`),
+  KEY `FK_meeting_rooms_grids` (`gridId`),
+  CONSTRAINT `FK_meeting_rooms_grids` FOREIGN KEY (`gridId`) REFERENCES `grid_regions` (`gridId`),
   CONSTRAINT `FK_meeting_rooms_grid_regions` FOREIGN KEY (`regionUuid`) REFERENCES `grid_regions` (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
