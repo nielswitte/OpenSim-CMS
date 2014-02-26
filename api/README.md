@@ -226,6 +226,20 @@ GET /api/meetings/<YYYY-MM-DD>/calendar/ HTTP/1.1
 GET /api/meeting/<MEETING-ID>/ HTTP/1.1
 ```
 
+## Meeting Rooms
+
+```http
+GET /api/grid/<GRID-ID>/rooms/ HTTP/1.1
+```
+
+```http
+GET /api/grid/<GRID-ID>/room/<ROOM-ID/ HTTP/1.1
+```
+
+```http
+GET /api/grid/<GRID-ID>/region/<REGION-UUID>/rooms/ HTTP/1.1
+```
+
 ## Presentations
 A list with presentations can be requested by using the following GET request.
 
@@ -315,16 +329,22 @@ By saving the UUID caching of textures is enabled and OpenSim does not neet to r
 The cache is done on a grid base, the index of the case refers to the Grid ID.
 This is done by using the PUT function for a single slide (see below).
 
-The slide details for just one specific slide can be accessed through:
+The slide details for just one specific slide can be accessed through its ID:
 
 ```http
 GET /api/presentation/<ID>/slide/<SLIDE#>/ HTTP/1.1
 ```
 
+However, it is often easier to navigate based on page/slide number:
+
+```http
+GET /api/presentation/<ID>/slide/number/<SLIDE#>/ HTTP/1.1
+```
+
 The given image url will provide a jpg of the slide resized and centered at 1024x1024 with a black background.
 
 ```http
-GET /api/presentation/<ID>/slide/<SLIDE#>/image/ HTTP/1.1
+GET /api/presentation/<ID>/slide/number/<SLIDE#>/image/ HTTP/1.1
 ```
 
 When an slide has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with
@@ -332,7 +352,7 @@ the slide to speed up future use. The cache periode is set in the `OpenSim.ini` 
 matched by the `OS_ASSET_CACHE_EXPIRES` value in `config.php`.
 
 ```http
-PUT /api/presentation/<ID>/slide/<SLIDE#>/ HTTP/1.1
+PUT /api/presentation/<ID>/slide/number/<SLIDE#>/ HTTP/1.1
 ```
 
 | Parameter         | Type      | Description                                     |

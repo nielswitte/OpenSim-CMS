@@ -58,6 +58,12 @@ class Slide {
         $params     = array($this->getId());
         $results    = $db->rawQuery('SELECT c.* FROM cached_assets c, document_slides_cache dc WHERE dc.cacheId = c.id AND dc.slideId = ?', $params);
 
+        $db         = \Helper::getDB();
+        $db->join('cached_assets c', 'dc.cacheId = c.id', 'LEFT');
+        $db->where('dc.slideId', $db->escape($this->getId()));
+        $results    = $db->get('document_slides_cache dc');
+
+
         return $results;
 
     }

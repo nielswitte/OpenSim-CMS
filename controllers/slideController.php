@@ -44,11 +44,11 @@ class SlideController {
 
             $cacheId = $db->insert('cached_assets', $cacheData);
             $cacheSlideData = array(
-                'slideId'       => $db->escape($this->slide->getNumber()),
-                'cacheId'       => $cacheId
+                'slideId'       => $db->escape($this->slide->getId()),
+                'cacheId'       => $db->escape($cacheId)
             );
-            $results = $db->insert('document_slides_cache', $cacheSlideData);
 
+            $results = $db->insert('document_slides_cache', $cacheSlideData);
         } else {
             throw new \Exception("Invalid UUID provided", 2);
         }

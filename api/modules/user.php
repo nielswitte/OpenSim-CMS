@@ -48,7 +48,7 @@ class User extends Module {
      */
     public function getUsersByUserName($args) {
         $db             = \Helper::getDB();
-        $params         = array("%". $args[1] ."%");
+        $params         = array("%". $db->escape($args[1]) ."%");
         $results        = $db->rawQuery('SELECT * FROM users WHERE userName LIKE ? ORDER BY userName ASC', $params);
         $data           = array();
         $count          = 0;

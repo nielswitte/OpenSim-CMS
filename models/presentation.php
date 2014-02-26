@@ -125,22 +125,49 @@ class Presentation implements SimpleModel {
      * Get the slide with the given number
      *
      * @param integer $number
-     * @return slide
+     * @return \Models\Slide
      * @throws \Exception
      */
-    public function getSlide($number) {
+    public function getSlideByNumber($number) {
         if(empty($this->slides)) {
             $this->getSlides();
         }
 
         $slide = FALSE;
         // Slide exists? (array starts counting at 1)
-        if(isset($this->slides[($number)])) {
-            $slide = $this->slides[($number)];
+        if(isset($this->slides[$number])) {
+            $slide = $this->slides[$number];
         } else {
             throw new \Exception("Slide does not exist", 6);
         }
         return $slide;
+    }
+
+    /**
+     * Get the slide with the given id
+     *
+     * @param integer $id
+     * @return \Models\Slide
+     * @throws \Exception
+     */
+    public function getSlideById($id) {
+        if(empty($this->slides)) {
+            $this->getSlides();
+        }
+
+        $result = FALSE;
+        // Slide exists? (array starts counting at 1)
+        if(count($this->getSlides()) > 0) {
+            foreach($this->getSlides() as $slide) {
+                if($slide->getId() == $id) {
+                    $result = $slide;
+                    break;
+                }
+            }
+        } else {
+            throw new \Exception("Slide does not exist", 6);
+        }
+        return $result;
     }
 
     /**
