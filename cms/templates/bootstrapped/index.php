@@ -136,6 +136,7 @@ if($header != '' && $isAuthorized >= $authRequired) {
                     <div class="cube1"></div>
                     <div class="cube2"></div>
                 </div>
+                <p class="text-center">Loading... please be patient</p>
             </div>
             <div id="alerts"></div>
 <?php

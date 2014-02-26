@@ -1,4 +1,5 @@
 jQuery(document).ready(function($) {
+    $('#loading').show();
     client.grids.read({ token: api_token }).done(function(data) {
         var counter = 0;
         $.each(data, function(i, item) {
@@ -13,9 +14,11 @@ jQuery(document).ready(function($) {
                     '</tr>');
             counter++;
         });
+        $('#loading').hide();
     }).fail(function(data) {
         $('#gridList tbody').append('<tr><td colspan="6">Request failed...</td></tr>');
         addAlert('danger', '<strong>Error!</strong> Failed to load the list with grids. Your API key has probably expired.');
+        $('#loading').hide();
     });
 
     // attach table filter plugin to inputs

@@ -1,4 +1,5 @@
 jQuery(document).ready(function($) {
+    $('#loading').show();
     client.grid.read(pages[1], { token: api_token }).done(function(data) {
         $('div.page-header h1 small').text(data.name);
         $('#inputId').val(data.id);
@@ -25,7 +26,9 @@ jQuery(document).ready(function($) {
         });
 
         $('#defaultRegion').tooltip({ placement: 'top' });
+        $('#loading').hide();
     }).fail(function() {
         addAlert('danger', '<strong>Error!</strong> Did you manually entered this URL? If so, check the parameters and try again.');
+        $('#loading').hide();
     });
 });
