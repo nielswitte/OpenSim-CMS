@@ -59,3 +59,4 @@ Kudos to those who created the packages and classes which are used by this progr
  * Sprain for class.Images.php (https://github.com/sprain/class.Images.php)
  * Jpillora for jQuery.rest (https://github.com/jpillora/jquery.rest)
  * Arshaw for Fullcalendar (https://github.com/arshaw/fullcalendar)
+ * Tobiasahlin for SpinKit (https://github.com/tobiasahlin/SpinKit)

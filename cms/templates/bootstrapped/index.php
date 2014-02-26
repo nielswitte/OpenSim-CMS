@@ -131,6 +131,12 @@ if($header != '' && $isAuthorized >= $authRequired) {
 
         <!-- Content -->
         <div class="container">
+            <div id="loading">
+                <div class="spinner">
+                    <div class="cube1"></div>
+                    <div class="cube2"></div>
+                </div>
+            </div>
             <div id="alerts"></div>
 <?php
 // Authorization required?
@@ -153,6 +159,5 @@ if($isAuthorized >= $authRequired) {
 <?php if(file_exists(dirname(__FILE__) . '/js/'. $pageRequest .'.js') && $isAuthorized >= $authRequired) { ?>
         <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/<?php echo $pageRequest; ?>.js" type="text/javascript"></script>
 <?php } ?>
-        <script
     </body>
 </html>
