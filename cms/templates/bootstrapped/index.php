@@ -73,6 +73,7 @@ if($header != '' && $isAuthorized >= $authRequired) {
         <!-- Important JS files that need to be loaded before body -->
         <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/libs/jquery-2.1.0.min.js" type="text/javascript"></script>
         <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/libs/jquery.rest.js" type="text/javascript"></script>
+        <script src="<?php echo SERVER_ROOT; ?>/cms/templates/bootstrapped/js/libs/jstorage-0.4.8.min.js" type="text/javascript"></script>
         <script type="text/javascript">
             var client;
             var api_token = "<?php echo isset($_SESSION['AccessToken']) ? $_SESSION['AccessToken'] : ''; ?>";
