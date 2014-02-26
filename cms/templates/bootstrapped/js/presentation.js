@@ -5,22 +5,13 @@ jQuery(document).ready(function($) {
         $('#inputId').val(data.presentationId);
         $('#inputType').val(data.type);
         $('#inputTitle').val(data.title);
-
         $('#inputId').val(data.presentationId);
-
-        client.user.read(data.ownerId, { token: api_token }).done(function(user) {
-            $('#inputOwner').val(data.ownerId);
-            selectInit();
-            $('#loading').hide();
-        }).fail(function() {
-            $('#inputOwner').val('Unknown');
-            $('#loading').hide();
-        });
-
+        $('#inputOwner').val(data.ownerId);
         $('#inputSlidesCount').val(data.slidesCount);
         $('#inputCreationDate').val(data.creationDate);
         $('#inputModificationDate').val(data.modificationDate);
-
+        selectInit();
+        $('#loading').hide();
     }).fail(function() {
         addAlert('danger', '<strong>Error!</strong> Did you manually entered this URL? If so, check the parameters and try again.');
         $('#loading').hide();
