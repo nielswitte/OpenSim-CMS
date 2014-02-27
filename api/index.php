@@ -81,9 +81,10 @@ if($result != '') {
     }
 }
 
-
+/*
 $data = json_encode($_SERVER, JSON_PRETTY_PRINT);
 foreach($headers as $header => $value) {
     $data .= $header .': '. $value ."\n";
 }
 file_put_contents('headers.txt', $data);
+*/

@@ -123,7 +123,7 @@ class Grid extends Module{
         $data['serverStatus']   = $region->getOnlineStatus() ? 1 : 0;
 
         // Additional information
-        if($region->getOnlineStatus() !== FALSE && $region->getTotalUsers() > 0) {
+        if($region->getOnlineStatus() !== FALSE && $region->getTotalUsers() >= 0) {
             $data['totalUsers']     = $region->getTotalUsers();
             $data['activeUsers']    = $region->getActiveUsers();
         }

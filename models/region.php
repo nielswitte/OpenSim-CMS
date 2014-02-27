@@ -18,8 +18,8 @@ class Region implements SimpleModel {
     private $uuid;
     private $grid;
     private $online = FALSE;
-    private $activeUsers = 0;
-    private $totalUsers = 0;
+    private $activeUsers = -1;
+    private $totalUsers = -1;
 
     /**
      * Creates a new region with the given name and uuid
@@ -80,9 +80,12 @@ class Region implements SimpleModel {
         // Additional actions when MySQL database is accessable
         if($this->grid->getDbUrl() && $this->getOnlineStatus()) {
             $osdb = new \MysqliDb($this->grid->getDbUrl(), $this->grid->getDbUsername(), $this->grid->getDbPassword(), $this->grid->getDbName(), $this->grid->getDbPort());
-            // Get user's presentations
+            // Get user's
             $osdb->where("LastRegionID", $osdb->escape($this->getUuid()));
             $results = $osdb->get("GridUser");
+
+            $this->activeUsers  = 0;
+            $this->totalUsers   = 0;
 
             // Count active and total users
             foreach($results as $result) {
