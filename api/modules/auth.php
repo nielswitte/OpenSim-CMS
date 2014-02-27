@@ -47,23 +47,40 @@ class Auth extends Module {
         $password               = filter_input(INPUT_POST, 'password', FILTER_UNSAFE_RAW);
         $ip                     = filter_input(INPUT_POST, 'ip', FILTER_SANITIZE_ENCODED);
 
+        // Default settings
+        $userId = ($username == "OpenSim" ? -1 : 0);
+        $isGrid = FALSE;
+
         // Basic output data
         $data['token']          = $db->escape(\Helper::generateToken(48));
-        $data['ip']             = $db->escape(($ip !== FALSE && $ip !== NULL) ? $ip : $_SERVER['REMOTE_ADDR']);
+        $data['ip']             = ($ip !== FALSE && $ip !== NULL) ? $ip : $_SERVER['REMOTE_ADDR'];
         $data['expires']        = $db->escape(date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES)));
 
-        // Check server IP to grid list
-        $db->where('osIp', $db->escape($data['ip']));
-        $grids = $db->get('grids', 1);
-
         // Request from OpenSim? Add this additional check because of the access rights of OpenSim
-        if(isset($headers['HTTP_X_SECONDLIFE_SHARD']) && isset($grids[0])) {
-            $userId             = -1;
-        } elseif($username != "OpenSim") {
-            $userId             = 0;
-        } else {
+        if(isset($headers["X-SecondLife-Shard"]) && $userId == -1) {
+            // Check server IP to grid list
+            $grids  = $db->get('grids');
+
+            // Check all grids
+            foreach($grids as $grid) {
+                $osIp = $grid['osIp'];
+                // Check if grid uses IP or hostname
+                if(!filter_var($osIp, FILTER_VALIDATE_IP)) {
+                    $osIp = gethostbyname($osIp);
+                }
+                // Match found? Stop!
+                if($osIp == $data['ip'] || $osIp == "127.0.0.1") {
+                    $isGrid = TRUE;
+                    break;
+                }
+            }
+        }
+
+        // Attempt to access with OpenSim from outside the Grid
+        if($userId == -1 && !$isGrid) {
             throw new \Exception("Not allowed to login as OpenSim outside the Grid", 2);
         }
+
         $user           = new \Models\User($userId, $username);
         $user->getInfoFromDatabase();
         $userCtrl       = new \Controllers\UserController($user);
@@ -74,7 +91,12 @@ class Auth extends Module {
         }
 
         if($validRequest) {
-            $db->insert('tokens', $data);
+            // Store token
+            $result = !$db->insert('tokens', $data);
+            // Query should affect one row, if not something went wrong
+            if($result != 1) {
+                throw new \Exception('Storing token at the server side failed', 3);
+            }
         }
 
         return $data;

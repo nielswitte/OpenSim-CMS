@@ -34,9 +34,9 @@ This request will return, on succes the following JSON:
 ```
 
 The validity of the token depends on the config settings and is extended everytime the token is used.
-The user OpenSim with user ID -1 can only accessed from the IP set in the config which is used by OpenSim.
-In addition the `HTTP_X_SECONDLIFE_SHARD` header needs to be set to access this user, this is done by default
-for OpenSim.
+The user OpenSim with user ID -1 can only accessed from the IP/Hostname which is used by OpenSim according
+to the grid list. In addition the `X-SecondLife-Shard` header needs to be set to access this user, this is
+done by default for OpenSim.
 
 ## Users
 User information can be accessed by using, the UUID of the user's avatar in OpenSim on the given Grid:
@@ -116,7 +116,7 @@ The result is similar to the request by UUID, but displayed as a list ordered by
 ### Create user
 
 ```http
-POST /api/user/
+POST /api/user/ HTTP/1.1
 ```
 
 | Parameter         | Type      | Description                                                       |
@@ -132,7 +132,7 @@ POST /api/user/
 ### Change password
 
 ```http
-PUT /api/user/<USER-ID>/
+PUT /api/user/<USER-ID>/ HTTP/1.1
 ```
 
 | Parameter         | Type      | Description                                                       |

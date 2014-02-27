@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `grids` (
   `raPassword` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   `dbUrl` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   `dbPort` int(11) unsigned DEFAULT NULL,
-  `dbUserName` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `dbUsername` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   `dbPassword` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   `dbName` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   `cacheTime` varchar(50) COLLATE utf8_bin DEFAULT NULL,
@@ -215,14 +215,14 @@ CREATE TABLE IF NOT EXISTS `tokens` (
 -- Structuur van  tabel OpenSim-CMS.users wordt geschreven
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `userName` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '0',
+  `username` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '0',
   `firstName` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '',
   `lastName` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '',
   `email` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
   `password` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
-  UNIQUE KEY `userName` (`userName`)
+  UNIQUE KEY `userName` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
