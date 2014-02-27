@@ -46,7 +46,7 @@ class MeetingRoom extends Module{
         $db         = \Helper::getDB();
         $db->join('grid_regions r', 'mr.regionUuid = r.uuid AND r.gridId = mr.gridId', 'LEFT');
         $db->where("mr.id", $db->escape($args[1]));
-        $columns = array(
+        $columns    = array(
             'mr.id as roomId',
             'mr.regionUuid as regionUuid',
             'mr.gridId as gridId',

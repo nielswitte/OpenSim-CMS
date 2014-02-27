@@ -29,7 +29,7 @@ jQuery(document).ready(function($) {
                 results: function(data, page) {
                     var result = [];
                     $.each(data, function(i, item) {
-                        var items = {id: i, text: item.userName};
+                        var items = {id: i, text: item.username};
                         result.push(items);
                     });
 
@@ -42,7 +42,7 @@ jQuery(document).ready(function($) {
                     $.ajax(base_url +"/api/user/"+ id +"/?token="+ api_token, {
                         dataType: "json"
                     }).done(function(data) {
-                        callback({id: data.id, text: data.userName});
+                        callback({id: data.id, text: data.username});
                     });
                 }
             }

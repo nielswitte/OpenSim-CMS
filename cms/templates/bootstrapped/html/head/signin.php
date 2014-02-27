@@ -3,13 +3,13 @@ if(EXEC != 1) {
 	die('Invalid request');
 }
 
-$postData = filter_input_array(INPUT_POST);
+$postData = filter_input_array(INPUT_POST, FILTER_UNSAFE_RAW);
 
 // No access Token present, but post information available?
-if(!isset($_SESSION['AccessToken']) && isset($postData['userName']) && isset($postData['password'])) {
-    $url = SERVER_PROTOCOL .'://'. SERVER_ADDRESS .':'. SERVER_PORT . SERVER_ROOT .'/api/auth/user/';
+if(!isset($_SESSION['AccessToken']) && isset($postData['username']) && isset($postData['password'])) {
+    $url = SERVER_PROTOCOL .'://'. SERVER_ADDRESS .':'. SERVER_PORT . SERVER_ROOT .'/api/auth/username/';
     $data = array(
-        'userName' => $postData['userName'],
+        'username' => $postData['username'],
         'password' => $postData['password'],
         'ip'       => $_SERVER['REMOTE_ADDR']
     );

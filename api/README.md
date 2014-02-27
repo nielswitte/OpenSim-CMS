@@ -10,12 +10,12 @@ header is used.
 Before the API can be used, an user needs to authorize himself. This can be done by using the following API:
 
 ```http
-POST /api/auth/user/ HTTP/1.1
+POST /api/auth/username/ HTTP/1.1
 ```
 
 | Parameter         | Type      | Description                                                   |
 |-------------------|-----------|---------------------------------------------------------------|
-| UserName          | String    | The username of the user in the CMS                           |
+| username          | String    | The username of the user in the CMS                           |
 | password          | String    | The corresponding password of the user in the CMS             |
 | ip                | String    | [Optional] The IP address to assign this token to             |
 
@@ -55,7 +55,7 @@ Example of output
 ```json
 {
     "id": 1,
-    "userName": "testuser",
+    "username": "testuser",
     "firstName": "Test",
     "lastName": "User",
     "email": "testuser@email.com",
@@ -88,7 +88,7 @@ about the avatars of the user. For each avatar the following information is show
 }
 ```
 
-### Search for users by userName
+### Search for users by username
 To search for a specific user by his or her username, the following API can be used.
 Atleast 3 characters are required.
 
@@ -102,7 +102,7 @@ The result is similar to the request by UUID, but displayed as a list ordered by
 {
     "1": {
         "id": 1,
-        "userName": "testuser",
+        "username": "testuser",
         "firstName": "Test",
         "lastName": "User",
         "email": "testuser@email.com"
@@ -113,8 +113,37 @@ The result is similar to the request by UUID, but displayed as a list ordered by
 }
 
 ```
+### Create user
 
-### Update a user's UUID
+```http
+POST /api/user/
+```
+
+| Parameter         | Type      | Description                                                       |
+|-------------------|-----------|-------------------------------------------------------------------|
+| username          | String    | The username of the new user                                      |
+| email             | String    | The email address for the new user                                |
+| firstName         | String    | The first name of the new user                                    |
+| lastName          | String    | The last name of the new user                                     |
+| password          | String    | The new user's password                                           |
+| password2         | String    | The new user's password again, to check if no typo has been made  |
+
+
+### Change password
+
+```http
+PUT /api/user/<USER-ID>/
+```
+
+| Parameter         | Type      | Description                                                       |
+|-------------------|-----------|-------------------------------------------------------------------|
+| currentPassword   | String    | The user's current password                                       |
+| password          | String    | The user's new password                                           |
+| password2         | String    | The user's new password again, to check if no typo has been made  |
+
+## Avatars
+
+### Link avatar to user
 To match an UUID of a user to the user in the CMS the following command can be used.
 Some form of authentication will be added later on. By sending a PUT request to the server with the CMS
 username as parameter and use the UUID of the user in OpenSim as URL parameter.
@@ -125,7 +154,7 @@ PUT /api/grid/<GRID-ID>/avatar/<UUID>/ HTTP/1.1
 
 | Parameter         | Type      | Description                                                   |
 |-------------------|-----------|---------------------------------------------------------------|
-| UserName          | String    | The username of the user in the CMS                           |
+| username          | String    | The username of the user in the CMS                           |
 
 ### Create a new avatar
 To create a new avatar the following API url can be used with a POST request.
@@ -491,7 +520,8 @@ is displayed when attempting to access a protected function without a valid API 
 
 ```json
 {
-    "Exception": "Unauthorized to access this API URL"
+    "success": false,
+    "error": "Unauthorized to access this API URL"
 }
 ```
 
@@ -500,7 +530,8 @@ file, line and stack trace of the error. It is recommended to disable debugging 
 
 ```json
 {
-    "Exception": "Unauthorized to access this API URL",
+    "success": false,
+    "error": "Unauthorized to access this API URL"
     "Code": 0,
     "File": "/OpenSim-CMS/api/index.php",
     "Line": 62,

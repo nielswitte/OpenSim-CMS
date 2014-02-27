@@ -39,7 +39,7 @@ class SlideController {
             $cacheData = array(
                 'gridId'        => $db->escape($grid->getId()),
                 'uuid'          => $db->escape($uuid),
-                'uuidExpires'   => date('Y-m-d H:i:s', strtotime('+'. $grid->getCacheTime()))
+                'uuidExpires'   => $db->escape(date('Y-m-d H:i:s', strtotime('+'. $grid->getCacheTime())))
             );
 
             $cacheId = $db->insert('cached_assets', $cacheData);

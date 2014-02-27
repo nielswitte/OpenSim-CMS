@@ -7,6 +7,9 @@
     define('SERVER_PORT',               80);                                    // server port
     define('SERVER_ROOT',               '/CMS');                                // server root directory
     define('SERVER_API_TOKEN_EXPIRES',  '30 minutes');                          // Time a token is valid after last usage (used by strototime)
+    define('SERVER_MIN_USERNAME_LENGTH', 6);                                    // Minimum length for the username
+    define('SERVER_MIN_PASSWORD_LENGTH', 8);                                    // Minimum length for the password
+    // DB connection settings
     $DB_USERNAME                        = '';                                   // Database username
     $DB_PASSWORD                        = '';                                   // Database password
     $DB_NAME                            = '';                                   // Database name

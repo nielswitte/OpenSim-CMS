@@ -1,4 +1,4 @@
 jQuery(document).ready(function($){
-    $.jStorage.deleteKey('userName');
+    $.jStorage.deleteKey('username');
     $.jStorage.deleteKey('userEmail');
 });

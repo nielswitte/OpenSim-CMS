@@ -19,7 +19,7 @@ class Grid implements SimpleModel {
     private $name;
     private $osProtocol, $osIp, $osPort;
     private $raUrl, $raPort, $raPassword;
-    private $dbUrl, $dbPort, $dbUserName, $dbPassword, $dbName;
+    private $dbUrl, $dbPort, $dbUsername, $dbPassword, $dbName;
     private $cachetime;
     private $regions = array();
     private $defaultRegionUuid;
@@ -58,7 +58,7 @@ class Grid implements SimpleModel {
      */
     public function getInfoFromDatabase() {
         $db = \Helper::getDB();
-        $db->where('id', $this->getId());
+        $db->where('id', $db->escape($this->getId()));
         $result = $db->get('grids', 1);
 
         // Found a result?
@@ -72,14 +72,14 @@ class Grid implements SimpleModel {
             $this->raPassword           = $result[0]['raPassword'];
             $this->dbUrl                = $result[0]['dbUrl'];
             $this->dbPort               = $result[0]['dbPort'];
-            $this->dbUserName           = $result[0]['dbUserName'];
+            $this->dbUsername           = $result[0]['dbUsername'];
             $this->dbPassword           = $result[0]['dbPassword'];
             $this->dbName               = $result[0]['dbName'];
             $this->cachetime            = $result[0]['cacheTime'];
             $this->defaultRegionUuid    = $result[0]['defaultRegionUuid'];
 
             // Add Grid's regions to list
-            $db->where('gridId', $this->getId());
+            $db->where('gridId', $db->escape($this->getId()));
             $regions = $db->get('grid_regions');
 
             foreach($regions as $region) {
@@ -235,8 +235,8 @@ class Grid implements SimpleModel {
      *
      * @return string
      */
-    public function getDbUserName() {
-        return $this->dbUserName;
+    public function getDbUsername() {
+        return $this->dbUsername;
     }
 
     /**

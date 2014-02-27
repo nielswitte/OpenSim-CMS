@@ -53,7 +53,7 @@ class Meeting implements simpleModel {
         // Meeting found?
         if(isset($meeting[0])) {
             $this->room         = new \Models\MeetingRoom($meeting[0]['roomId']);
-            $this->creator      = new \Models\User($meeting['0']['userId'], $meeting['0']['userName'], $meeting['0']['email'], $meeting['0']['firstName'], $meeting['0']['lastName']);
+            $this->creator      = new \Models\User($meeting['0']['userId'], $meeting['0']['username'], $meeting['0']['email'], $meeting['0']['firstName'], $meeting['0']['lastName']);
             $this->startDate    = $meeting[0]['startDate'];
             $this->endDate      = $meeting[0]['endDate'];
         } else {
@@ -78,7 +78,7 @@ class Meeting implements simpleModel {
 
         // Get the users on the list
         foreach($results as $result) {
-            $participant    = new \Models\User($result['id'], $result['userName'], $result['email'], $result['firstName'], $result['lastName']);
+            $participant    = new \Models\User($result['id'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
             $participants->addParticipant($participant);
         }
     }

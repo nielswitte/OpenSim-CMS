@@ -16,7 +16,7 @@ if(EXEC != 1) {
                             <p class="text-center small"><a href="#">Change Photo</a></p>
                         </div>
                         <div class="col-md-7">
-                            <span id="loginUserName">Anonymous</span>
+                            <span id="loginUsername">Anonymous</span>
                             <p class="text-muted small" id="loginUserEmail">mail@company.com</p>
                             <div class="divider"></div>
                             <a href="<?php echo SERVER_ROOT; ?>/cms/user/<?php echo $_SESSION['UserId']; ?>/" class="btn btn-primary btn-sm">View Profile</a>
@@ -44,16 +44,16 @@ if(EXEC != 1) {
                 $.jStorage.reInit();
 
                 // Username and email not locally stored?
-                if(!$.jStorage.get('userName') || !$.jStorage.get('userEmail')) {
+                if(!$.jStorage.get('username') || !$.jStorage.get('userEmail')) {
                     client.user.read(<?php echo $_SESSION['UserId']; ?> ,{ token: api_token }).done(function(data) {
-                        $('#loginUserName').text(data.userName);
+                        $('#loginUsername').text(data.username);
                         $('#loginUserEmail').text(data.email);
-                        $.jStorage.set('userName', data.userName);
+                        $.jStorage.set('username', data.username);
                         $.jStorage.set('userEmail', data.email);
                     });
                 // Load from local storage
                 } else {
-                    $('#loginUserName').text($.jStorage.get('userName'));
+                    $('#loginUsername').text($.jStorage.get('username'));
                     $('#loginUserEmail').text($.jStorage.get('userEmail'));
                 }
             });
@@ -67,9 +67,9 @@ if(EXEC != 1) {
                     <div class="navbar-content">
                         <div class="row">
                             <div class="form-group">
-                                <label for="LoginUserName" class="col-sm-4 control-label">Username</label>
+                                <label for="LoginUsername" class="col-sm-4 control-label">Username</label>
                                 <div class="col-sm-7">
-                                    <input type="text" name="userName" class="form-control" id="LoginUserName" placeholder="username">
+                                    <input type="text" name="username" class="form-control" id="LoginUsername" placeholder="username">
                                 </div>
                             </div>
                             <div class="form-group">

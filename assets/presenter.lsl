@@ -18,7 +18,7 @@
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
 integer debug = 0;              // Enables showing debugging comments
-string APIUserName = "OpenSim"; // API user name to be used
+string APIUsername = "OpenSim"; // API user name to be used
 string APIPassword = "OpenSim"; // API password
 integer serverId = 1;           // The ID of this server in OpenSim-CMS
 
@@ -106,8 +106,8 @@ set_uuid_of_object(string type, integer id, key uuid) {
  */
 request_api_token() {
     if(debug) llInstantMessage(userUuid, "[Debug] Requesting new API token");
-    string body = "username="+ APIUserName +"&password="+ APIPassword;
-    http_request_api_token = llHTTPRequest(serverUrl +"/auth/user/", [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
+    string body = "username="+ APIUsername +"&password="+ APIPassword;
+    http_request_api_token = llHTTPRequest(serverUrl +"/auth/username/", [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
 }
 
 /**

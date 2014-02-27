@@ -79,7 +79,7 @@ class Region implements SimpleModel {
 
         // Additional actions when MySQL database is accessable
         if($this->grid->getDbUrl() && $this->getOnlineStatus()) {
-            $osdb = new \MysqliDb($this->grid->getDbUrl(), $this->grid->getDbUserName(), $this->grid->getDbPassword(), $this->grid->getDbName(), $this->grid->getDbPort());
+            $osdb = new \MysqliDb($this->grid->getDbUrl(), $this->grid->getDbUsername(), $this->grid->getDbPassword(), $this->grid->getDbName(), $this->grid->getDbPort());
             // Get user's presentations
             $osdb->where("LastRegionID", $osdb->escape($this->getUuid()));
             $results = $osdb->get("GridUser");

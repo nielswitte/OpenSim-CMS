@@ -7,6 +7,7 @@ if(EXEC != 1) {
 
 // Include all model classes
 require_once dirname(__FILE__) .'/../models/avatar.php';
+require_once dirname(__FILE__) .'/../controllers/avatarController.php';
 require_once dirname(__FILE__) .'/../models/grid.php';
 require_once dirname(__FILE__) .'/../models/meeting.php';
 require_once dirname(__FILE__) .'/../models/meetingRoom.php';
@@ -70,10 +71,14 @@ class API {
                 // Has access to this method?
                 if (isset($funcs[$method]) && ($authorized >= $funcs[$method]['auth'])) {
                     $result = $funcs[$method]['module']->$funcs[$method]['function']($args);
-                } else {
+                // Method found but no access?
+                } elseif (isset($funcs[$method]) && !($authorized >= $funcs[$method]['auth'])) {
                     $result = TRUE;
                     header("HTTP/1.1 401 Unauthorized");
                     throw new \Exception("Unauthorized to access this API URL");
+                // Someting else gone wrong?
+                } else {
+                    // No match @todo find use case
                 }
             }
         }

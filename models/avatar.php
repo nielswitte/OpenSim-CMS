@@ -39,7 +39,7 @@ class Avatar implements simpleModel {
     public function getInfoFromDatabase() {
         // Get additional information if possible
         if($this->grid->getDbUrl() && $this->grid->getOnlineStatus() && \Helper::isValidUuid($this->getUuid())) {
-            $osdb = new \MysqliDb($this->grid->getDbUrl(), $this->grid->getDbUserName(), $this->grid->getDbPassword(), $this->grid->getDbName(), $this->grid->getDbPort());
+            $osdb = new \MysqliDb($this->grid->getDbUrl(), $this->grid->getDbUsername(), $this->grid->getDbPassword(), $this->grid->getDbName(), $this->grid->getDbPort());
             $osdb->where("UserID", $osdb->escape($this->getUuid()));
             $results = $osdb->getOne("GridUser");
             if(!empty($results)) {

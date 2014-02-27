@@ -49,13 +49,13 @@ class Meeting extends Module{
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 presentations from the given offset
-        $params         = array($args[1], 50);
+        $params         = array($db->escape($args[1]), 50);
         $resutls        = $db->rawQuery("SELECT * FROM meetings m, users u WHERE u.id = m.userId ORDER BY m.startDate DESC LIMIT ?, ?", $params);
         // Process results
         $data           = array();
         $x              = $args[1];
         foreach($resutls as $result) {
-            $user       = new \Models\User($result['userId'], $result['userName'], $result['email'], $result['firstName'], $result['lastName']);
+            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
             $room       = new \Models\MeetingRoom($result['roomId']);
             $meeting    = new \Models\Meeting($result['id'], $result['startDate'], $result['endDate'], $user, $room);
             $data[$x]   = $this->getMeetingData($meeting, FALSE);
@@ -73,14 +73,14 @@ class Meeting extends Module{
     public function getMeetingsByDate($args) {
         $db             = \Helper::getDB();
         // Get 50 presentations from the given offset
-        $params         = array($args[1]);
+        $params         = array($db->escape($args[1]));
         $resutls        = $db->rawQuery("SELECT * FROM meetings m, users u WHERE u.id = m.userId AND m.startDate >= ? ORDER BY m.startDate DESC", $params);
         // Process results
         $data           = array();
 
         $x              = 1;
         foreach($resutls as $result) {
-            $user       = new \Models\User($result['userId'], $result['userName'], $result['email'], $result['firstName'], $result['lastName']);
+            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
             $room       = new \Models\MeetingRoom($result['roomId']);
             $meeting    = new \Models\Meeting($result['id'], $result['startDate'], $result['endDate'], $user, $room);
             if(strpos($args[0], 'calendar') !== FALSE) {
@@ -91,7 +91,7 @@ class Meeting extends Module{
                     'end'           => $meeting->getEndDate(),
                     'url'           => $meeting->getApiUrl(),
                     'title'         => 'Room: '. $meeting->getRoom()->getId(),
-                    'description'   => 'Reservation made by: '. $meeting->getCreator()->getUserName()
+                    'description'   => 'Reservation made by: '. $meeting->getCreator()->getUsername()
                 );
             } else {
                 $data[$x] = $this->getMeetingData($meeting, FALSE);
@@ -134,7 +134,7 @@ class Meeting extends Module{
             'endDate'   => $meeting->getEndDate(),
             'creator'   => array(
                 'id'            => $meeting->getCreator()->getId(),
-                'userName'      => $meeting->getCreator()->getUserName(),
+                'username'      => $meeting->getCreator()->getUsername(),
                 'firstName'     => $meeting->getCreator()->getFirstName(),
                 'lastName'      => $meeting->getCreator()->getLastName(),
                 'email'         => $meeting->getCreator()->getEmail()
@@ -159,7 +159,7 @@ class Meeting extends Module{
             foreach($meeting->getParticipants()->getParticipants() as $user) {
                 $participants[$i] = array(
                     'id'            => $user->getId(),
-                    'userName'      => $user->getUserName(),
+                    'username'      => $user->getUsername(),
                     'firstName'     => $user->getFirstName(),
                     'lastName'      => $user->getLastName(),
                     'email'         => $user->getEmail()

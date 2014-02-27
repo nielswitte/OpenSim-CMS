@@ -52,7 +52,7 @@ class Presentation extends Module{
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 presentations from the given offset
-        $params         = array('presentation', $args[1], 50);
+        $params         = array('presentation', $db->escape($args[1]), 50);
         $resutls        = $db->rawQuery("SELECT * FROM documents WHERE type = ? ORDER BY creationDate DESC LIMIT ?, ?", $params);
         // Process results
         $data           = array();
@@ -222,6 +222,11 @@ class Presentation extends Module{
             throw new \Exception('Slide does not exist', 6);
         }
 
-        return $data;
+        // Format the result
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE),
+        );
+
+        return $result;
     }
 }

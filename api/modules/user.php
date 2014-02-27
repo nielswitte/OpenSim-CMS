@@ -31,14 +31,68 @@ class User extends Module {
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/users\/([a-zA-Z0-9-_]{3,}+)\/?$/",                 "getUsersByUserName",   $this, "GET",  TRUE);  // Gets a list of all users with usernames matching the search of atleast 3 characters
-        $this->api->addRoute("/user\/(\d+)\/?$/",                                 "getUserById",          $this, "GET",  TRUE);  // Get a user by ID
-        $this->api->addRoute("/user\/([a-z0-9-]{36})\/teleport\/?$/",             "teleportAvatarByUuid", $this, "PUT",  TRUE);  // Teleports a user
-        $this->api->addRoute("/user\/avatar\/?$/",                                "createAvatar",         $this, "POST", TRUE);  // Create an avatar
-        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "getUserByAvatar",      $this, "GET",  TRUE);  // Gets an user by the avatar of this grid
-        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "matchAvatarToUser",    $this, "PUT",  TRUE);  // Update the UUID of a user to match an avatar
+        $this->api->addRoute("/users\/([a-zA-Z0-9-_]{3,}+)\/?$/",                 "getUsersByUsername",     $this, "GET",  TRUE);  // Gets a list of all users with usernames matching the search of atleast 3 characters
+        $this->api->addRoute("/user\/?$/",                                        "createUser",             $this, "POST", TRUE);  // Create a new CMS user
+        $this->api->addRoute("/user\/(\d+)\/?$/",                                 "getUserById",            $this, "GET",  TRUE);  // Get a user by ID
+        $this->api->addRoute("/user\/(\d+)\/password\/?$/",                       "updateUserPasswordById", $this, "PUT",  TRUE);  // Updates the user's password
+        $this->api->addRoute("/user\/([a-z0-9-]{36})\/teleport\/?$/",             "teleportAvatarByUuid",   $this, "PUT",  TRUE);  // Teleports a user
+        $this->api->addRoute("/user\/avatar\/?$/",                                "createAvatar",           $this, "POST", TRUE);  // Create an avatar
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "getUserByAvatar",        $this, "GET",  TRUE);  // Gets an user by the avatar of this grid
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "matchAvatarToUser",      $this, "PUT",  TRUE);  // Update the UUID of a user to match an avatar
     }
 
+    /**
+     * Creates a new user with the given POST parameters
+     *
+     * @param array $args
+     * @return array
+     */
+    public function createUser($args) {
+        $userData               = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
+        // Overwrite these values because they may contain special chars
+        $userData['password']   = filter_input(INPUT_POST, 'password', FILTER_UNSAFE_RAW);
+        $userData['password2']  = filter_input(INPUT_POST, 'password2', FILTER_UNSAFE_RAW);
+
+        $userId         = FALSE;
+        $userCtrl       = new \Controllers\UserController();
+        // Check if the parameters are valid for creating a user
+        if($userCtrl->validateParametersCreate($userData)) {
+            $userId     = $userCtrl->createUser($userData);
+        }
+
+        // Format the result
+        $result = array(
+            'success' => ($userId !== FALSE ? TRUE : FALSE),
+            'userId' => ($userId !== FALSE ? $userId : 0)
+        );
+
+        return $result;
+    }
+
+    /**
+     * Updates the password for the given user
+     *
+     * @param array $args
+     * @return array
+     */
+    public function updateUserPasswordById($args) {
+        $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
+        $parsedPutData  = (\Helper::parsePutRequest($putUserData));
+
+        $user           = new \Models\User($args[1]);
+        $userCtrl       = new \Controllers\UserController($user);
+        $data           = FALSE;
+        if($userCtrl->validateParameterPassword($parsedPutData)) {
+            $data     = $userCtrl->setPassword($parsedPutData['password']);
+        }
+
+        // Format the result
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE)
+        );
+
+        return $result;
+    }
 
     /**
      * Searches the database for the given (partial) username and returns a list with users
@@ -46,10 +100,10 @@ class User extends Module {
      * @param array $args
      * @return array
      */
-    public function getUsersByUserName($args) {
+    public function getUsersByUsername($args) {
         $db             = \Helper::getDB();
         $params         = array("%". $db->escape($args[1]) ."%");
-        $results        = $db->rawQuery('SELECT * FROM users WHERE userName LIKE ? ORDER BY userName ASC', $params);
+        $results        = $db->rawQuery('SELECT * FROM users WHERE username LIKE ? ORDER BY username ASC', $params);
         $data           = array();
         $count          = 0;
         foreach($results as $result) {
@@ -87,8 +141,8 @@ class User extends Module {
         $data = array();
         if(\Helper::isValidUuid($args[2])) {
             $db = \Helper::getDB();
-            $db->where('uuid', $args[2]);
-            $db->where('gridId', $args[1]);
+            $db->where('uuid', $db->escape($args[2]));
+            $db->where('gridId', $db->escape($args[1]));
             $avatarQuery = $db->get('avatars', 1);
             if(isset($avatarQuery[0])) {
                 $user = new \Models\User($avatarQuery[0]['userId']);
@@ -114,7 +168,7 @@ class User extends Module {
      */
     private function getUserData(\Models\User $user, $full = TRUE) {
         $data['id']                 = $user->getId();
-        $data['userName']           = $user->getUserName();
+        $data['username']           = $user->getUsername();
         $data['firstName']          = $user->getFirstName();
         $data['lastName']           = $user->getLastName();
         $data['email']              = $user->getEmail();
@@ -146,36 +200,42 @@ class User extends Module {
      * Updates the UUID of the given user
      *
      * @param array $args
-     * @return boolean
+     * @return array
      */
     public function matchAvatarToUser($args) {
         $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
         $parsedPutData  = (\Helper::parsePutRequest($putUserData));
-        $userName       = isset($parsedPutData['userName']) ? $parsedPutData['userName'] : '';
+        $username       = isset($parsedPutData['username']) ? $parsedPutData['username'] : '';
 
         $userCtrl       = new \Controllers\UserController();
-        $data           = $userCtrl->setUuid($userName, $args[1], $args[2]);
-        return $data;
+        $data           = $userCtrl->setUuid($username, $args[1], $args[2]);
+
+        // Format the result
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE)
+        );
+
+        return $result;
     }
 
     /**
-     * Teleport the user to given location
+     * Teleport the avatar to given location
      *
      * @param array $args
      * @return array
      */
     public function teleportAvatarByUuid($args) {
-        $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
-        $parsedPutData  = (\Helper::parsePutRequest($putUserData));
+        $putAvatarData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
+        $parsedPutData  = (\Helper::parsePutRequest($putAvatarData));
 
         // use UUID from GET request
         $parsedPutData['agentUuid']  = $args[1];
         $result                 = '';
-        // Teleport a user
-        if(\Controllers\UserController::validateParametersTeleport($parsedPutData)) {
-            $userCtrl           = new \Controllers\UserController();
+        // Teleport an avatar
+        if(\Controllers\AvatarController::validateParametersTeleport($parsedPutData)) {
+            $avatarCtrl           = new \Controllers\AvatarController();
             // Do request and fetch result
-            $data               = $userCtrl->teleportUser($parsedPutData);
+            $data               = $avatarCtrl->teleportUser($parsedPutData);
             // Set result
             $result = $data;
         }
@@ -190,13 +250,13 @@ class User extends Module {
      */
     public function createAvatar($args) {
         $result         = '';
-        $userData       = filter_input_array(INPUT_POST, FILTER_SANITIZE_ENCODED);
+        $avatarData       = filter_input_array(INPUT_POST, FILTER_SANITIZE_ENCODED);
 
         // Check if the parameters are valid for creating a user
-        if(\Controllers\UserController::validateParametersCreate($userData)) {
-            $userCtrl       = new \Controllers\UserController();
+        if(\Controllers\AvatarController::validateParametersCreate($avatarData)) {
+            $avatarCtrl       = new \Controllers\AvatarController();
             // Do request and fetch result
-            $data = $userCtrl->createAvatar($userData);
+            $data = $avatarCtrl->createAvatar($userData);
 
             // Set result
             $result = $data;

@@ -55,7 +55,8 @@ try {
     }
 // Catch any exception that occured
 } catch (\Exception $e) {
-	$result["Exception"]    = $e->getMessage();
+    $result["success"]  = FALSE;
+	$result["error"]    = $e->getMessage();
 
     // Do we want to show debug information?
     if(SERVER_DEBUG) {

@@ -73,14 +73,14 @@ class Auth {
      */
     private function checkToken() {
         $db = \Helper::getDB();
-        $params = array($this->token, $this->ip, $this->timestamp);
+        $params = array($db->escape($this->token), $db->escape($this->ip), $db->escape($this->timestamp));
         $result = $db->rawQuery('SELECT COUNT(*) AS count, userId FROM tokens WHERE token = ? AND ip = ? AND expires >= ? LIMIT 1', $params);
 
         // Extend token expiration time
         if($result[0]['count'] == 1) {
             $this->userId = $result[0]['userId'];
             $db->where('token', $db->escape($this->token));
-            $data['expires']    = date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES));
+            $data['expires']    = $db->escape(date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES)));
             $db->update('tokens', $data);
         }
 

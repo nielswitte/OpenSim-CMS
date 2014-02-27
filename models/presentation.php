@@ -49,8 +49,8 @@ class Presentation implements SimpleModel {
      */
     public function getInfoFromDatabase() {
         $db = \Helper::getDB();
-        $db->where('id', (int) $this->getPresentationId());
-        $db->where('type', 'presentation');
+        $db->where('id', $db->escape((int) $this->getPresentationId()));
+        $db->where('type', $db->escape('presentation'));
         $results = $db->get('documents', 1);
 
         if(!empty($results)) {
@@ -107,7 +107,7 @@ class Presentation implements SimpleModel {
     public function getSlides() {
         if(empty($this->slides)) {
             $db = \Helper::getDB();
-            $db->where('documentId', $this->getPresentationId());
+            $db->where('documentId', $db->escape($this->getPresentationId()));
             $db->orderBy('id', 'asc');
             $results = $db->get('document_slides');
 

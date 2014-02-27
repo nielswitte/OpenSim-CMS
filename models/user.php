@@ -16,7 +16,7 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  */
 class User implements SimpleModel {
     private $id;
-    private $userName;
+    private $username;
     private $firstName, $lastName;
     private $email;
     private $presentationIds = array();
@@ -26,14 +26,14 @@ class User implements SimpleModel {
      * Construct a new User with the given UUID
      *
      * @param integer $id - [Optional] The ID of the user
-     * @param string $userName - [Optional] the user's user name
+     * @param string $username - [Optional] the user's user name
      * @param string $email - [Optional] the user's email address
      * @param string $firstName - [Optional] the user's first name
      * @param string $lastName- [Optional] the user's last name
      */
-    public function __construct($id = 0, $userName = '', $email = '', $firstName = '', $lastName = '') {
+    public function __construct($id = 0, $username = '', $email = '', $firstName = '', $lastName = '') {
         $this->id           = $id;
-        $this->userName     = $userName;
+        $this->username     = $username;
         $this->email        = $email;
         $this->firstName    = $firstName;
         $this->lastName     = $lastName;
@@ -50,15 +50,15 @@ class User implements SimpleModel {
         if($this->getId() != 0) {
             $db->where('id', $db->escape($this->getId()));
         }
-        if($this->getUserName() != '') {
-            $db->where('userName', $db->escape($this->getUserName()));
+        if($this->getUsername() != '') {
+            $db->where('username', $db->escape($this->getUsername()));
         }
         $user = $db->get('users', 1);
 
         // Results!
         if(isset($user[0])) {
             $this->id               = $user[0]['id'];
-            $this->userName         = $user[0]['userName'];
+            $this->username         = $user[0]['username'];
             $this->firstName        = $user[0]['firstName'];
             $this->lastName         = $user[0]['lastName'];
             $this->email            = $user[0]['email'];
@@ -73,8 +73,8 @@ class User implements SimpleModel {
     public function getPresentationsFromDatabase() {
         $db = \Helper::getDB();
         // Get user's presentations
-        $db->where("ownerId", $this->getId());
-        $db->where('type', 'presentation');
+        $db->where("ownerId", $db->escape($this->getId()));
+        $db->where('type', $db->escape('presentation'));
         $presentations = $db->get("documents");
 
         // Convert presentation Ids to array
@@ -91,7 +91,7 @@ class User implements SimpleModel {
     public function getAvatarsFromDatabase() {
         $db = \Helper::getDB();
         // Get avatars
-        $db->where('userId', $this->getId());
+        $db->where('userId', $db->escape($this->getId()));
         $avatars = $db->get('avatars');
         $i = 1;
         foreach($avatars as $avatar) {
@@ -118,8 +118,8 @@ class User implements SimpleModel {
      *
      * @return string
      */
-    public function getUserName() {
-        return $this->userName;
+    public function getUsername() {
+        return $this->username;
     }
 
     /**
