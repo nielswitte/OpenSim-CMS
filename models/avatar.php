@@ -21,6 +21,7 @@ class Avatar implements simpleModel {
     private $lastPosition = '<0,0,0>';
     private $lastLogin = 0;
     private $lastRegionUuid = 0;
+    private $confirmed = FALSE;
 
     /**
      * Constructs a new avatar on the given Grid and with the given UUID
@@ -49,6 +50,24 @@ class Avatar implements simpleModel {
                 $this->lastRegionUuid   = $results['LastRegionID'];
             }
         }
+    }
+
+    /**
+     * Set to true when an avatar is confirmed
+     *
+     * @param boolean $confirmed
+     */
+    public function setConfirmation($confirmed) {
+        $this->confirmed = $confirmed;
+    }
+
+    /**
+     * Returns true when the avatar is confirmed by the user
+     *
+     * @return boolean
+     */
+    public function getConfirmation() {
+        return $this->confirmed;
     }
 
     /**

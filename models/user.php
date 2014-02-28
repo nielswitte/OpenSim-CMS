@@ -98,6 +98,7 @@ class User implements SimpleModel {
             $grid = new \Models\Grid($avatar['gridId']);
             $grid->getInfoFromDatabase();
             $newAvatar = new \Models\Avatar($grid, $avatar['uuid']);
+            $newAvatar->setConfirmation($avatar['confirmed']);
             $newAvatar->getInfoFromDatabase();
             $this->avatars[$i] = $newAvatar;
             $i++;

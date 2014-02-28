@@ -184,6 +184,7 @@ class User extends Module {
                     'uuid'          => $avatar->getUuid(),
                     'gridId'        => $avatar->getGrid()->getId(),
                     'gridName'      => $avatar->getGrid()->getName(),
+                    'confirmed'     => $avatar->getConfirmation(),
                     'online'        => $avatar->getOnline(),
                     'lastRegion'    => $avatar->getLastRegionUuid(),
                     'lastLogin'     => $avatar->getLastLogin(),
