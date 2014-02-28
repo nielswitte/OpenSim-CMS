@@ -50,7 +50,7 @@ request_set_avatar(key uuid, string username) {
     if(debug) llInstantMessage(userUuid, "[Debug] Linking avatar: "+ (string) uuid + " to user: "+ username);
 
     string body = "username="+ username;
-    http_request_set = llHTTPRequest(serverUrl +"/grid/"+ serverId +"/avatar/"+ (string)uuid +"/?token="+ APIToken, [HTTP_METHOD, "PUT", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
+    http_request_set = llHTTPRequest(serverUrl +"/grid/"+ serverId +"/avatar/"+ (string)uuid +"/?token="+ APIToken, [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
 }
 
 /**

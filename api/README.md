@@ -162,25 +162,47 @@ Some form of authentication will be added later on. By sending a PUT request to 
 username as parameter and use the UUID of the user in OpenSim as URL parameter.
 
 ```http
-PUT /api/grid/<GRID-ID>/avatar/<UUID>/ HTTP/1.1
+POST /api/grid/<GRID-ID>/avatar/<UUID>/ HTTP/1.1
 ```
 
 | Parameter         | Type      | Description                                                   |
 |-------------------|-----------|---------------------------------------------------------------|
 | username          | String    | The username of the user in the CMS                           |
 
-### Create a new avatar
-To create a new avatar the following API url can be used with a POST request.
+
+### Confirm avatar
+Once an avatar is linked to a user account, it needs to be confirmed by the user. This can only be done
+by the user himself.
 
 ```http
-POST /api/user/avatar/ HTTP/1.1
+PUT /api/grid/<GRID-ID>/avatar/<UUID>/confirm/ HTTP/1.1
+```
+
+Because the token which is used for this request is matched to the userId, this will provide the additional
+required information. Therefore no parameters are needed for this request.
+
+This request will also return `"success": false` when the avatar is already confirmed.
+
+### Unlink an avatar
+This unlinks an avatar from the user. Just like confirming, this can only be performed by the useraccount associated with
+the link.
+
+```http
+DELETE /api/grid/<GRID-ID>/avatar/<UUID>/confirm/ HTTP/1.1
+```
+
+
+### Create a new avatar
+To create a new avatar on the given Grid the following API url can be used with a POST request.
+
+```http
+POST /api/grid/<GRID-ID>/avatar/ HTTP/1.1
 ```
 
 The parameters that can be used are the following:
 
 | Parameter         | Type      | Description                                                   |
 |-------------------|-----------|---------------------------------------------------------------|
-| gridId            | integer   | the id to place the avatar on                                 |
 | firstName         | string    | agent's first name                                            |
 | lastName          | string    | agent's last name                                             |
 | email             | string    | agent's email address                                         |
@@ -193,6 +215,9 @@ This request will return a JSON message with the result. It contains two or thre
 the request is not successful. 3) the UUID of the newly created user, which is filled with zeros on
 failure. Two examples of output are listed below, first a successful request,
 second a failure because the user's first and lastname were already used.
+
+*WARNING* This way of avatar creation does not support special chars in the password. The following characters
+can not be used in a password: ` ?{}<>;" '[]/\ `. This will result in not being able to login in OpenSim.
 
 ```json
 {

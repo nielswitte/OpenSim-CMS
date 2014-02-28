@@ -29,9 +29,13 @@ class Avatar implements simpleModel {
      *
      * @param \Models\Grid $grid
      * @param string $uuid
+     * @throws \Exception
      */
     public function __construct(\Models\Grid $grid, $uuid) {
         $this->grid = $grid;
+        if(!\Helper::isValidUuid($uuid)) {
+            throw new \Exception("Invalid UUID provided", 1);
+        }
         $this->uuid = $uuid;
     }
 

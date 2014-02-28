@@ -31,16 +31,18 @@ class User extends Module {
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/users\/?$/",                                       "getUsers",               $this, "GET",  TRUE);  // Gets a list of all users
-        $this->api->addRoute("/users\/(\d+)\/?$/",                                "getUsers",               $this, "GET",  TRUE);  // Gets a list of all users starting at the given offset
-        $this->api->addRoute("/users\/([a-zA-Z0-9-_]{3,}+)\/?$/",                 "getUsersByUsername",     $this, "GET",  TRUE);  // Gets a list of all users with usernames matching the search of atleast 3 characters
-        $this->api->addRoute("/user\/?$/",                                        "createUser",             $this, "POST", TRUE);  // Create a new CMS user
-        $this->api->addRoute("/user\/(\d+)\/?$/",                                 "getUserById",            $this, "GET",  TRUE);  // Get a user by ID
-        $this->api->addRoute("/user\/(\d+)\/password\/?$/",                       "updateUserPasswordById", $this, "PUT",  TRUE);  // Updates the user's password
-        $this->api->addRoute("/user\/([a-z0-9-]{36})\/teleport\/?$/",             "teleportAvatarByUuid",   $this, "PUT",  TRUE);  // Teleports a user
-        $this->api->addRoute("/user\/avatar\/?$/",                                "createAvatar",           $this, "POST", TRUE);  // Create an avatar
-        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "getUserByAvatar",        $this, "GET",  TRUE);  // Gets an user by the avatar of this grid
-        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "matchAvatarToUser",      $this, "PUT",  TRUE);  // Update the UUID of a user to match an avatar
+        $this->api->addRoute("/users\/?$/",                                       "getUsers",               $this, "GET",    TRUE);  // Gets a list of all users
+        $this->api->addRoute("/users\/(\d+)\/?$/",                                "getUsers",               $this, "GET",    TRUE);  // Gets a list of all users starting at the given offset
+        $this->api->addRoute("/users\/([a-zA-Z0-9-_]{3,}+)\/?$/",                 "getUsersByUsername",     $this, "GET",    TRUE);  // Gets a list of all users with usernames matching the search of atleast 3 characters
+        $this->api->addRoute("/user\/?$/",                                        "createUser",             $this, "POST",   TRUE);  // Create a new CMS user
+        $this->api->addRoute("/user\/(\d+)\/?$/",                                 "getUserById",            $this, "GET",    TRUE);  // Get a user by ID
+        $this->api->addRoute("/user\/(\d+)\/password\/?$/",                       "updateUserPasswordById", $this, "PUT",    TRUE);  // Updates the user's password
+        $this->api->addRoute("/user\/([a-z0-9-]{36})\/teleport\/?$/",             "teleportAvatarByUuid",   $this, "PUT",    TRUE);  // Teleports a user
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "getUserByAvatar",        $this, "GET",    TRUE);  // Gets an user by the avatar of this grid
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "linkAvatarToUser",       $this, "POST",   TRUE);  // Add this avatar to the user's avatar list
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "confirmAvatar",          $this, "PUT",    TRUE);  // Confirms the avatar for the authenticated user
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "unlinkAvatar",           $this, "DELETE", TRUE);  // Removes the avatar for the authenticated user's avatar list
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/?$/",                         "createAvatar",           $this, "POST",   TRUE);  // Create an avatar
     }
 
     /**
@@ -232,15 +234,55 @@ class User extends Module {
      * @param array $args
      * @return array
      */
-    public function matchAvatarToUser($args) {
+    public function linkAvatarToUser($args) {
         $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
         $parsedPutData  = (\Helper::parsePutRequest($putUserData));
         $username       = isset($parsedPutData['username']) ? $parsedPutData['username'] : '';
 
         $userCtrl       = new \Controllers\UserController();
-        $data           = $userCtrl->setUuid($username, $args[1], $args[2]);
+        $data           = $userCtrl->linkAvatar($username, $args[1], $args[2]);
 
         // Format the result
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE)
+        );
+
+        return $result;
+    }
+
+    /**
+     * Confirms that the given avatar UUID on the given grid is owned by the
+     * currently loggedin user
+     *
+     * @param array $args
+     * @return array
+     */
+    public function confirmAvatar($args) {
+        $user           = \API\Auth::getUser();
+        $userCtrl       = new \Controllers\UserController($user);
+        $grid           = new \Models\Grid($args[1]);
+        $avatar         = new \Models\Avatar($grid, $args[2]);
+        $data           = $userCtrl->confirmAvatar($avatar);
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE)
+        );
+
+        return $result;
+    }
+
+    /**
+     * Deletes the link between the currently loggedin user
+     * and the given avatar UUID on the given grid
+     *
+     * @param array $args
+     * @return array
+     */
+    public function unlinkAvatar($args) {
+        $user           = \API\Auth::getUser();
+        $userCtrl       = new \Controllers\UserController($user);
+        $grid           = new \Models\Grid($args[1]);
+        $avatar         = new \Models\Avatar($grid, $args[2]);
+        $data           = $userCtrl->unlinkAvatar($avatar);
         $result = array(
             'success' => ($data !== FALSE ? TRUE : FALSE)
         );
@@ -255,19 +297,19 @@ class User extends Module {
      * @return array
      */
     public function teleportAvatarByUuid($args) {
-        $putAvatarData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
+        $putAvatarData  = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
         $parsedPutData  = (\Helper::parsePutRequest($putAvatarData));
 
         // use UUID from GET request
-        $parsedPutData['agentUuid']  = $args[1];
-        $result                 = '';
+        $parsedPutData['agentUuid'] = $args[1];
+        $result                     = '';
         // Teleport an avatar
         if(\Controllers\AvatarController::validateParametersTeleport($parsedPutData)) {
-            $avatarCtrl           = new \Controllers\AvatarController();
+            $avatarCtrl             = new \Controllers\AvatarController();
             // Do request and fetch result
-            $data               = $avatarCtrl->teleportUser($parsedPutData);
+            $data                   = $avatarCtrl->teleportUser($parsedPutData);
             // Set result
-            $result = $data;
+            $result                 = $data;
         }
         return $result;
     }
@@ -279,15 +321,21 @@ class User extends Module {
      * @return array
      */
     public function createAvatar($args) {
-        $result         = '';
-        $avatarData       = filter_input_array(INPUT_POST, FILTER_SANITIZE_ENCODED);
+        $result                     = '';
+        $avatarData['email']        = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+        $avatarData['password']     = filter_input(INPUT_POST, 'password', FILTER_UNSAFE_RAW);
+        $avatarData['firstName']    = filter_input(INPUT_POST, 'firstName', FILTER_SANITIZE_STRING);
+        $avatarData['lastName']     = filter_input(INPUT_POST, 'lastName', FILTER_SANITIZE_STRING);
+        $avatarData['startRegionX'] = filter_input(INPUT_POST, 'startRegionX', FILTER_SANITIZE_NUMBER_FLOAT);
+        $avatarData['startRegionY'] = filter_input(INPUT_POST, 'startRegionY', FILTER_SANITIZE_NUMBER_FLOAT);
+        $avatarData['gridId']       = $args[1];
 
         // Check if the parameters are valid for creating a user
         if(\Controllers\AvatarController::validateParametersCreate($avatarData)) {
             $avatarCtrl       = new \Controllers\AvatarController();
             // Do request and fetch result
-            $data = $avatarCtrl->createAvatar($userData);
-
+            $data = $avatarCtrl->createAvatar($avatarData);
+            echo $avatarData['password'];
             // Set result
             $result = $data;
         }

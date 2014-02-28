@@ -89,7 +89,7 @@ class Grid implements SimpleModel {
                 $this->addRegion($newRegion);
             }
         } else {
-            throw new Exception("Grid ID does not exist", 1);
+            throw new \Exception("Grid ID does not exist", 1);
         }
     }
 

@@ -33,7 +33,7 @@ class UserController {
      * @return boolean
      * @throws \Exception
      */
-    public function setUuid($username, $gridId, $uuid) {
+    public function linkAvatar($username, $gridId, $uuid) {
         $results = FALSE;
         if(\Helper::isValidUuid($uuid)) {
             $db = \Helper::getDB();
@@ -48,12 +48,16 @@ class UserController {
                 $db->where("username", $db->escape($username));
                 $user = $db->get("users", 1);
 
-                $avatarData = array(
-                    'userId'        => $db->escape($user[0]['id']),
-                    'gridId'        => $db->escape($gridId),
-                    'uuid'          => $db->escape($uuid)
-                );
-                $results = $db->insert('avatars', $avatarData);
+                if(isset($user[0])) {
+                    $avatarData = array(
+                        'userId'        => $db->escape($user[0]['id']),
+                        'gridId'        => $db->escape($gridId),
+                        'uuid'          => $db->escape($uuid)
+                    );
+                    $results = $db->insert('avatars', $avatarData);
+                } else {
+                    throw new \Exception("Username not found", 4);
+                }
             } else {
                 $db->where("id", $db->escape($avatars[0]['userId']));
                 $user = $db->get("users", 1);
@@ -69,6 +73,43 @@ class UserController {
             throw new \Exception("Updating UUID failed, check Username and Grid ID", 1);
         }
         return $results !== FALSE;
+    }
+
+    public function unlinkAvatar(\Models\Avatar $avatar) {
+        $db         = \Helper::getDB();
+        $db->where('userId', $db->escape($this->user->getId()));
+        $db->where('uuid', $db->escape($avatar->getUuid()));
+        $db->where('gridId', $db->escape($avatar->getGrid()->getId()));
+        $result     = $db->delete('avatars');
+
+        if($result === FALSE) {
+            throw new \Exception("Given Avatar not found on the given Grid for the currently logged in User", 1);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Confirms that the given avatar uuid matches this user
+     *
+     * @param \Models\Avatar $avatar
+     * @return boolean
+     * @throws \Exception
+     */
+    public function confirmAvatar(\Models\Avatar $avatar) {
+        $db         = \Helper::getDB();
+        $db->where('userId', $db->escape($this->user->getId()));
+        $db->where('uuid', $db->escape($avatar->getUuid()));
+        $db->where('gridId', $db->escape($avatar->getGrid()->getId()));
+
+        $data       = array('confirmed' => 1);
+        $result     = $db->update('avatars', $data);
+
+        if($result === FALSE) {
+            throw new \Exception("Given unconfirmed Avatar not found on the given Grid for the currently logged in user", 1);
+        }
+
+        return $result;
     }
 
     /**
