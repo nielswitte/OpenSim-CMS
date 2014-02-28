@@ -68,8 +68,8 @@ class Meeting implements simpleModel {
         $db         = \Helper::getDB();
         $db->join('users u', 'm.userId = u.id', 'LEFT');
         $db->where('m.meetingId', $db->escape($this->getId()));
-        $db->orderBy('u.lastName', 'ASC');
-        $db->orderBy('u.firstName', 'ASC');
+        $db->orderBy('LOWER(u.lastName)', 'ASC');
+        $db->orderBy('LOWER(u.firstName)', 'ASC');
         $results    = $db->get('meeting_participants m');
 
         // Create a new participants list and set it to this meeting

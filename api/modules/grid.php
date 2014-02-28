@@ -45,7 +45,7 @@ class Grid extends Module{
      */
     public function getGrids($args) {
         $db = \Helper::getDB();
-        $db->orderBy('name', 'asc');
+        $db->orderBy('LOWER(name)', 'asc');
         $grids  = $db->get('grids');
         $i = 1;
         // Process al grids
