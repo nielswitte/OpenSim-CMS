@@ -13,7 +13,8 @@ $contentPages = array(
     'presentations' => array('header' => '',                    'body' => 'presentations.php',  'auth' => TRUE),
     'presentation'  => array('header' => '',                    'body' => 'presentation.php',   'auth' => TRUE),
     'signout'       => array('header' => 'signout.php',         'body' => 'signout.php',        'auth' => FALSE),
-    'signin'        => array('header' => 'signin.php',          'body' => 'signin.php',         'auth' => FALSE)
+    'signin'        => array('header' => 'signin.php',          'body' => 'signin.php',         'auth' => FALSE),
+    'users'         => array('header' => '',                    'body' => 'users.php',          'auth' => TRUE)
 );
 
 // Get request parameters
@@ -79,7 +80,7 @@ if($header != '' && $isAuthorized >= $authRequired) {
             var api_token = "<?php echo isset($_SESSION['AccessToken']) ? $_SESSION['AccessToken'] : ''; ?>";
             var base_url = "<?php echo SERVER_ROOT; ?>";
             var pages = [ <?php foreach($pagesRequest as $page) { echo '"'. $page .'",'; } ?> ];
-
+<?php if($isAuthorized) { ?>
             jQuery(document).ready(function($){
                 client = new $.RestClient('/OpenSim-CMS/api/', {
                     cache: 10
@@ -92,7 +93,9 @@ if($header != '' && $isAuthorized >= $authRequired) {
                 client.add('presentations');
                 client.add('presentation');
                 client.add('user');
+                client.add('users');
             });
+<?php } ?>
         </script>
 <?php
     if(isset($extraJs)) {
@@ -123,6 +126,7 @@ if($header != '' && $isAuthorized >= $authRequired) {
                         <li class="<?php echo (in_array($pageRequest, array('grids', 'grid')) ? 'active' : ''); ?>"><a href="<?php echo SERVER_ROOT; ?>/cms/grids/">Grids</a></li>
                         <li class="<?php echo (in_array($pageRequest, array('meetings', 'meeting')) ? 'active' : ''); ?>"><a href="<?php echo SERVER_ROOT; ?>/cms/meetings/">Meetings</a></li>
                         <li class="<?php echo (in_array($pageRequest, array('presentations', 'presentation')) ? 'active' : ''); ?>"><a href="<?php echo SERVER_ROOT; ?>/cms/presentations/">Presentations</a></li>
+                        <li class="<?php echo (in_array($pageRequest, array('users', 'user')) ? 'active' : ''); ?>"><a href="<?php echo SERVER_ROOT; ?>/cms/users/">Users</a></li>
 <?php } ?>
                     </ul>
                     <?php include dirname(__FILE__) .'/html/userinfo.php'; ?>

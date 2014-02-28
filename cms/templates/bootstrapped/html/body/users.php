@@ -4,11 +4,11 @@ if(EXEC != 1) {
 }
 ?>
 <div class="page-header">
-  <h1>Grids <small>Overview</small></h1>
+  <h1>Users <small>Overview</small></h1>
 </div>
 <div class="panel panel-primary filter">
     <div class="panel-heading">
-        <h3 class="panel-title">Grids</h3>
+        <h3 class="panel-title">Users</h3>
         <div class="pull-right">
             <span class="clickable filter" data-toggle="tooltip" title="Toggle table filter" data-container="body">
                 <i class="glyphicon glyphicon-filter"></i>
@@ -16,17 +16,16 @@ if(EXEC != 1) {
         </div>
     </div>
     <div class="panel-body">
-        <input type="text" class="form-control" id="grids-table-filter" data-action="filter" data-filters="#gridList" placeholder="Filter Grids">
+        <input type="text" class="form-control" id="user-table-filter" data-action="filter" data-filters="#userList" placeholder="Filter users">
     </div>
-    <table class="table table-bordered table-striped table-responsive" id="gridList">
+    <table class="table table-bordered table-striped table-responsive" id="userList">
         <thead>
             <tr>
                 <th>#</th>
-                <th>Name</th>
-                <th>Address</th>
-                <th># Regions</th>
-                <th>Status</th>
-                <th>Users</th>
+                <th>Username</th>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>E-mail address</th>
             </tr>
         </thead>
         <tbody>

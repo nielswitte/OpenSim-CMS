@@ -31,6 +31,8 @@ class User extends Module {
      * Initiates all routes for this module
      */
     public function setRoutes() {
+        $this->api->addRoute("/users\/?$/",                                       "getUsers",               $this, "GET",  TRUE);  // Gets a list of all users
+        $this->api->addRoute("/users\/(\d+)\/?$/",                                "getUsers",               $this, "GET",  TRUE);  // Gets a list of all users starting at the given offset
         $this->api->addRoute("/users\/([a-zA-Z0-9-_]{3,}+)\/?$/",                 "getUsersByUsername",     $this, "GET",  TRUE);  // Gets a list of all users with usernames matching the search of atleast 3 characters
         $this->api->addRoute("/user\/?$/",                                        "createUser",             $this, "POST", TRUE);  // Create a new CMS user
         $this->api->addRoute("/user\/(\d+)\/?$/",                                 "getUserById",            $this, "GET",  TRUE);  // Get a user by ID
@@ -95,6 +97,30 @@ class User extends Module {
     }
 
     /**
+     * Retuns a list with users, optionally starting at the given offset
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getUsers($args) {
+        $db             = \Helper::getDB();
+        // Offset parameter given?
+        $args[1]        = isset($args[1]) ? $args[1] : 0;
+        // Get 50 presentations from the given offset
+        $params         = array($db->escape($args[1]), 50);
+        $resutls        = $db->rawQuery("SELECT * FROM users ORDER BY LOWER(username) ASC LIMIT ?, ?", $params);
+        // Process results
+        $data           = array();
+        $x              = $args[1];
+        foreach($resutls as $result) {
+            $x++;
+            $user       = new \Models\User($result['id'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $data[$x]   = $this->getUserData($user, FALSE);
+        }
+        return $data;
+    }
+
+    /**
      * Searches the database for the given (partial) username and returns a list with users
      *
      * @param array $args
@@ -103,7 +129,7 @@ class User extends Module {
     public function getUsersByUsername($args) {
         $db             = \Helper::getDB();
         $params         = array("%". $db->escape($args[1]) ."%");
-        $results        = $db->rawQuery('SELECT * FROM users WHERE username LIKE ? ORDER BY username ASC', $params);
+        $results        = $db->rawQuery('SELECT * FROM users WHERE username LIKE ? ORDER BY LOWER(username) ASC', $params);
         $data           = array();
         $count          = 0;
         foreach($results as $result) {

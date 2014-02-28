@@ -39,6 +39,44 @@ to the grid list. In addition the `X-SecondLife-Shard` header needs to be set to
 done by default for OpenSim.
 
 ## Users
+To get a list of 50 users, use:
+
+```http
+GET /api/users/ HTTP/1.1
+```
+
+Or use the following API request with a offset to get more users
+
+```http
+GET /api/users/<OFFSET>/ HTTP/1.1
+```
+
+### Search for users by username
+To search for a specific user by his or her username, the following API can be used.
+Atleast 3 characters are required.
+
+```http
+GET /api/user/<SEARCH>/ HTTP/1.1
+```
+
+The result is similar to the request by UUID, but displayed as a list ordered by username and only the basic information.
+
+```json
+{
+    "1": {
+        "id": 1,
+        "username": "testuser",
+        "firstName": "Test",
+        "lastName": "User",
+        "email": "testuser@email.com"
+    },
+    "2": { (...) },
+    "3": { (...) },
+    (...)
+}
+```
+
+### Individual user
 User information can be accessed by using, the UUID of the user's avatar in OpenSim on the given Grid:
 
 ```http
@@ -88,31 +126,6 @@ about the avatars of the user. For each avatar the following information is show
 }
 ```
 
-### Search for users by username
-To search for a specific user by his or her username, the following API can be used.
-Atleast 3 characters are required.
-
-```http
-GET /api/user/<SEARCH>/ HTTP/1.1
-```
-
-The result is similar to the request by UUID, but displayed as a list ordered by username and only the basic information.
-
-```json
-{
-    "1": {
-        "id": 1,
-        "username": "testuser",
-        "firstName": "Test",
-        "lastName": "User",
-        "email": "testuser@email.com"
-    },
-    "2": { (...) },
-    "3": { (...) },
-    (...)
-}
-
-```
 ### Create user
 
 ```http
