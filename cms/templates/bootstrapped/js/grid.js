@@ -15,11 +15,25 @@ jQuery(document).ready(function($) {
         $.each(data.regions, function(i, region) {
             $('#regionThumbs').append(
                 '<div class="col-sm-4 col-md-4 region">'+
-                '    <h3><a href="opensim://'+ data.openSim.ip +':'+ data.openSim.port +'/'+ encodeURIComponent(region.name) +'/128/128/0/" title="Go to this region">'+ region.name +'</a>'+ (i === data.defaultRegionUuid ? ' <span class="glyphicon glyphicon-home" id="defaultRegion" title="Is the default region"></span>' : '') +'</h3>'+
-                '    <img src="'+ (region.serverStatus === 1 ? region.image +'?token='+ api_token : base_url +'/cms/templates/bootstrapped/img/img-placeholder.png')  +'" alt="'+ region.name +'" class="img-thumbnail img-responsive">'+
-                '    <p><strong>Uuid:</strong> '+ region.uuid +'</p>'+
-                '    <p><strong>Status:</strong> '+ (region.serverStatus === 1 ? '<span class="label label-success">Online</span>' : '<span class="label label-danger">Offline</span>') +'</p>'+
-                '    <p><strong>Users:</strong> '+ region.activeUsers +'/'+ region.totalUsers +'</p>'+
+                '   <div class="panel panel-default">'+
+                '       <div class="panel-heading">'+
+                '           <h3 class="panel-title">'+
+                                (region.serverStatus === 1 ? '<span class="label label-success">Online</span>' : '<span class="label label-danger">Offline</span>') +
+                '               '+ region.name +
+                                (i === data.defaultRegionUuid ? ' <span class="glyphicon glyphicon-home" id="defaultRegion" title="Is the default region"></span>' : '') +
+                '           </h3>'+
+                '       </div>'+
+                '       <div class="panel-body">'+
+                '           <p class="text-center"><img src="'+ (region.serverStatus === 1 ? region.image +'?token='+ api_token : base_url +'/cms/templates/bootstrapped/img/img-placeholder.png')  +'" alt="'+ region.name +'" class="img-thumbnail img-responsive"></p>'+
+                '           <ul>'+
+                '               <li><strong>Uuid:</strong> '+ region.uuid +'</li>'+
+                '               <li><strong>Users:</strong> '+ region.activeUsers +'/'+ region.totalUsers +'</li>'+
+                '           </ul>'+
+                '       </div>'+
+                '       <div class="panel-footer text-center">'+
+                '           <a href="opensim://'+ data.openSim.ip +':'+ data.openSim.port +'/'+ encodeURIComponent(region.name) +'/128/128/0/" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-send"></i> Visit '+ region.name +'</a>'+
+                '       </div>'+
+                '   </div>'+
                 '</div>'
             );
         });

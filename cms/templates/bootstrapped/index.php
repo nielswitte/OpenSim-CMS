@@ -14,7 +14,8 @@ $contentPages = array(
     'presentation'  => array('header' => '',                    'body' => 'presentation.php',   'auth' => TRUE),
     'signout'       => array('header' => 'signout.php',         'body' => 'signout.php',        'auth' => FALSE),
     'signin'        => array('header' => 'signin.php',          'body' => 'signin.php',         'auth' => FALSE),
-    'users'         => array('header' => '',                    'body' => 'users.php',          'auth' => TRUE)
+    'users'         => array('header' => '',                    'body' => 'users.php',          'auth' => TRUE),
+    'user'          => array('header' => '',                    'body' => 'user.php',           'auth' => TRUE)
 );
 
 // Get request parameters
@@ -88,7 +89,9 @@ if($header != '' && $isAuthorized >= $authRequired) {
 
                 client.add('grids');
                 client.add('grid');
+                client.grid.add('avatar');
                 client.add('meetings');
+                client.meetings.add('calendar');
                 client.add('meeting');
                 client.add('presentations');
                 client.add('presentation');

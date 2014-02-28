@@ -4,7 +4,7 @@ jQuery(document).ready(function($) {
     var date = new Date(new Date - (1000*60*60*24*14));
 
     // Get meetings
-    client.meetings.read(date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate() +'/calendar', { token: api_token }).done(function(data) {
+    client.meetings.calendar.read(date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate(), { token: api_token }).done(function(data) {
         // Insert the events into the calendar
         $('#calendar').fullCalendar({
             defaultView: 'agendaWeek',
