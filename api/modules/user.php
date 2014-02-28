@@ -208,6 +208,9 @@ class User extends Module {
             foreach($user->getAvatars() as $avatar) {
                 $avatars[$x] = array(
                     'uuid'          => $avatar->getUuid(),
+                    'firstName'     => $avatar->getFirstName(),
+                    'lastName'      => $avatar->getLastName(),
+                    'email'         => $avatar->getEmail(),
                     'gridId'        => $avatar->getGrid()->getId(),
                     'gridName'      => $avatar->getGrid()->getName(),
                     'confirmed'     => $avatar->getConfirmation(),
