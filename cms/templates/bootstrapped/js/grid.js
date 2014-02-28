@@ -14,8 +14,8 @@ jQuery(document).ready(function($) {
 
         $.each(data.regions, function(i, region) {
             $('#regionThumbs').append(
-                '<div class="col-sm-3 col-md-3">'+
-                '    <h3><a href="opensim://'+ data.openSim.ip +':'+ data.openSim.port +'/'+ encodeURIComponent(region.name) +'/128/128/0/">'+ region.name +'</a>'+ (i === data.defaultRegionUuid ? ' <span class="glyphicon glyphicon-home" id="defaultRegion" title="Is the default region"></span>' : '') +'</h3>'+
+                '<div class="col-sm-4 col-md-4 region">'+
+                '    <h3><a href="opensim://'+ data.openSim.ip +':'+ data.openSim.port +'/'+ encodeURIComponent(region.name) +'/128/128/0/" title="Go to this region">'+ region.name +'</a>'+ (i === data.defaultRegionUuid ? ' <span class="glyphicon glyphicon-home" id="defaultRegion" title="Is the default region"></span>' : '') +'</h3>'+
                 '    <img src="'+ (region.serverStatus === 1 ? region.image +'?token='+ api_token : base_url +'/cms/templates/bootstrapped/img/img-placeholder.png')  +'" alt="'+ region.name +'" class="img-thumbnail img-responsive">'+
                 '    <p><strong>Uuid:</strong> '+ region.uuid +'</p>'+
                 '    <p><strong>Status:</strong> '+ (region.serverStatus === 1 ? '<span class="label label-success">Online</span>' : '<span class="label label-danger">Offline</span>') +'</p>'+
