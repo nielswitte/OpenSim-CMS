@@ -3,7 +3,6 @@ jQuery(document).ready(function($) {
     client.grid.read(pages[1], { token: api_token }).done(function(data) {
         $('div.page-header h1 small').text(data.name);
         $('#inputId').val(data.id);
-        $('#inputType').val(data.type);
         $('#inputName').val(data.name);
         $('#inputCache').val(data.cacheTime);
         $('#inputOsProtocol').val(data.openSim.protocol);
@@ -16,7 +15,7 @@ jQuery(document).ready(function($) {
         $.each(data.regions, function(i, region) {
             $('#regionThumbs').append(
                 '<div class="col-sm-3 col-md-3">'+
-                '    <h3>'+ region.name + (i === data.defaultRegionUuid ? ' <span class="glyphicon glyphicon-home" id="defaultRegion" title="Is the default region"></span>' : '') +'</h3>'+
+                '    <h3><a href="opensim://'+ data.openSim.ip +':'+ data.openSim.port +'/'+ encodeURIComponent(region.name) +'/128/128/0/">'+ region.name +'</a>'+ (i === data.defaultRegionUuid ? ' <span class="glyphicon glyphicon-home" id="defaultRegion" title="Is the default region"></span>' : '') +'</h3>'+
                 '    <img src="'+ (region.serverStatus === 1 ? region.image +'?token='+ api_token : base_url +'/cms/templates/bootstrapped/img/img-placeholder.png')  +'" alt="'+ region.name +'" class="img-thumbnail img-responsive">'+
                 '    <p><strong>Uuid:</strong> '+ region.uuid +'</p>'+
                 '    <p><strong>Status:</strong> '+ (region.serverStatus === 1 ? '<span class="label label-success">Online</span>' : '<span class="label label-danger">Offline</span>') +'</p>'+

@@ -7,7 +7,7 @@ jQuery(document).ready(function($) {
                     '<tr>'+
                     '   <td>'+ item.id +'</td>'+
                     '   <td><a href="'+ base_url +'/cms/grid/'+ item.id +'/">'+ item.name +'</a></td>'+
-                    '   <td><a href="opensim://'+ item.openSim.ip +':'+ item.openSim.port +'/'+ item.regions[item.defaultRegionUuid].name.replace(" ", "%20") +'/128/128/0/">'+ item.openSim.protocol +'://'+ item.openSim.ip +':'+ item.openSim.port +'</a></td>'+
+                    '   <td><a href="opensim://'+ item.openSim.ip +':'+ item.openSim.port +'/'+ encodeURIComponent(item.regions[item.defaultRegionUuid].name) +'/128/128/0/">'+ item.openSim.protocol +'://'+ item.openSim.ip +':'+ item.openSim.port +'</a></td>'+
                     '   <td>'+ item.regionCount +'</td>'+
                     '   <td>'+ (item.isOnline === 1 ? 'Online' : 'Offline') +'</td>'+
                     '   <td>'+ item.activeUsers +' / '+ item.totalUsers +'</td>'+
