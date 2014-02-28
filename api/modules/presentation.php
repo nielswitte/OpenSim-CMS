@@ -60,7 +60,7 @@ class Presentation extends Module{
         foreach($resutls as $result) {
             $x++;
             $presentation = new \Models\Presentation($result['id'], 0, $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate']);
-            $data[$x]     = self::getPresentationData($presentation, FALSE);
+            $data[$x]     = $this->getPresentationData($presentation, FALSE);
         }
         return $data;
     }
@@ -74,7 +74,7 @@ class Presentation extends Module{
     public function getPresentationById($args) {
         $presentation = new \Models\Presentation($args[1]);
         $presentation->getInfoFromDatabase();
-        return self::getPresentationData($presentation);
+        return $this->getPresentationData($presentation);
     }
 
     /**
