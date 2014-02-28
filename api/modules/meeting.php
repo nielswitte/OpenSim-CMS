@@ -50,14 +50,14 @@ class Meeting extends Module{
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 presentations from the given offset
         $params         = array($db->escape($args[1]), 50);
-        $resutls        = $db->rawQuery("SELECT * FROM meetings m, users u WHERE u.id = m.userId ORDER BY m.startDate DESC LIMIT ?, ?", $params);
+        $resutls        = $db->rawQuery("SELECT *, m.id as meetingId FROM meetings m, users u WHERE u.id = m.userId ORDER BY m.startDate DESC LIMIT ?, ?", $params);
         // Process results
         $data           = array();
         $x              = $args[1];
         foreach($resutls as $result) {
             $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
             $room       = new \Models\MeetingRoom($result['roomId']);
-            $meeting    = new \Models\Meeting($result['id'], $result['startDate'], $result['endDate'], $user, $room);
+            $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room);
             $data[$x]   = $this->getMeetingData($meeting, FALSE);
             $x++;
         }
@@ -74,7 +74,7 @@ class Meeting extends Module{
         $db             = \Helper::getDB();
         // Get 50 presentations from the given offset
         $params         = array($db->escape($args[1]));
-        $resutls        = $db->rawQuery("SELECT * FROM meetings m, users u WHERE u.id = m.userId AND m.startDate >= ? ORDER BY m.startDate DESC", $params);
+        $resutls        = $db->rawQuery("SELECT *, m.id as meetingId FROM meetings m, users u WHERE u.id = m.userId AND m.startDate >= ? ORDER BY m.startDate DESC", $params);
         // Process results
         $data           = array();
 
@@ -82,7 +82,7 @@ class Meeting extends Module{
         foreach($resutls as $result) {
             $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
             $room       = new \Models\MeetingRoom($result['roomId']);
-            $meeting    = new \Models\Meeting($result['id'], $result['startDate'], $result['endDate'], $user, $room);
+            $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room);
             if(strpos($args[0], 'calendar') !== FALSE) {
                 // use the format for JSON Event Objects (@source: http://arshaw.com/fullcalendar/docs2/event_data/Event_Object/ )
                 $data[]   = array(
