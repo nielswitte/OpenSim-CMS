@@ -31,8 +31,8 @@ try {
 
     // Auth user
     $auth               = new \API\Auth();
-    $auth->setToken($token);
-    $authorized         = $auth->validate();
+    $auth::setToken($token);
+    $authorized         = $auth::validate();
 
     // Create new API
     $api                = new \API\API();

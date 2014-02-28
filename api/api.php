@@ -17,6 +17,7 @@ require_once dirname(__FILE__) .'/../controllers/regionController.php';
 require_once dirname(__FILE__) .'/../models/slide.php';
 require_once dirname(__FILE__) .'/../controllers/slideController.php';
 require_once dirname(__FILE__) .'/../models/user.php';
+require_once dirname(__FILE__) .'/../models/userLoggedIn.php';
 require_once dirname(__FILE__) .'/../controllers/userController.php';
 
 /**
