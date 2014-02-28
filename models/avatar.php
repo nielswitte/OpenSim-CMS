@@ -17,7 +17,7 @@ require_once dirname(__FILE__) . '/simpleModel.php';
 class Avatar implements simpleModel {
     private $grid;
     private $uuid;
-    private $firstName, $lastName, $email;
+    private $firstName = '', $lastName = '', $email = '';
     private $online = FALSE;
     private $lastPosition = '<0,0,0>';
     private $lastLogin = 0;
