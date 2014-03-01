@@ -98,7 +98,6 @@ if($sessionExpired !== FALSE) {
         <script src="templates/restangular/js/libs/less-1.6.3.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/main.js" type="text/javascript"></script>
         <script src="templates/restangular/js/app.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/controllers/loginController.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/controllers/toolbarController.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/controllers.js" type="text/javascript"></script>
     </body>
 </html>

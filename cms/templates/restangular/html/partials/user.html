@@ -1,0 +1,70 @@
+<div class="page-header">
+    <h1>User <small>{{user.username}}</small></h1>
+</div>
+<form class="form-horizontal" role="form" id="userForm">
+    <div class="form-group">
+        <label for="inputId" class="col-sm-2 control-label">ID</label>
+        <div class="col-sm-10">
+            <input type="number" class="form-control" id="inputId" value="{{user.id}}" placeholder="ID" readonly="readonly">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputUsername" class="col-sm-2 control-label">Username</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="inputUsername" value="{{user.username}}" placeholder="Username">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputFirstName" class="col-sm-2 control-label">First name</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="inputFirstName" value="{{user.firstName}}" placeholder="First name">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputLastName" class="col-sm-2 control-label">Last name</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="inputLastName" value="{{user.lastName}}" placeholder="Last name">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputEmail" class="col-sm-2 control-label">E-mail address</label>
+        <div class="col-sm-10">
+            <input type="email" class="form-control" id="inputEmail" value="{{user.email}}" placeholder="E-mail address">
+        </div>
+    </div>
+    <fieldset id="avatars">
+        <legend>Avatars <span id="avatarCount">{{user.avatars.length}}</span></legend>
+        <div class="row" ng-repeat="avatar in user.avatars">
+            <div class="col-sm-6 col-md-6 avatar">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <span class="label label-success" ng-show="{{avatar.online}} == 1">Online</span>
+                            <span class="label label-danger" ng-show="{{avatar.online}} == 0">Offline</span>
+                            {{avatar.firstName}} {{avatar.lastName}}
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        <ul>
+                            <li><strong>Uuid:</strong>{{avatar.uuid}}</li>
+                            <li><strong>E-mail address:</strong> {{avatar.email}}</li>
+                            <li><strong>Grid:</strong> <a href="grid/{{avatar.gridId}}/">{{avatar.gridName}}</a></li>
+                            <li>
+                                <strong>Confirmed:</strong>{{avatar.confirmed}}
+                                <span class="confirmationStatus" ng-show="{{avatar.confirmed}} == 1">Yes</span>
+                                <span class="confirmationStatus" ng-show="{{avatar.confirmed}} == 0">No</span>
+                            </li>
+                            <li><strong>Last Login:</strong>{{avatar.lastLogin}}</li>
+                            <li><strong>Last Region:</strong>{{avatar.lastRegion}}</li>
+                            <li><strong>Last Position:</strong>{{avatar.lastPosition}}</li>
+                        </ul>
+                    </div>
+                    <div class="panel-footer text-center">
+                        <button class="confirmAvatar btn btn-success btn-sm" ng-click="confirmAvatar(avatar)" ng-show="{{avatar.confirmed}} == 0"><i class="glyphicon glyphicon-ok"></i> Confirm</button>
+                        <button class="removeAvatar btn btn-danger btn-sm" ng-click="unlinkAvatar(avatar)"><i class="glyphicon glyphicon-remove"></i> Unlink</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</form>
