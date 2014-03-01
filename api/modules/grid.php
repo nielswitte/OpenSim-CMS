@@ -47,14 +47,12 @@ class Grid extends Module{
         $db = \Helper::getDB();
         $db->orderBy('LOWER(name)', 'asc');
         $grids  = $db->get('grids');
-        $i = 1;
         // Process al grids
         $data   = array();
         foreach($grids as $gridId) {
             $grid = new \Models\Grid($gridId['id']);
             $grid->getInfoFromDatabase();
-            $data[$i] = $this->getGridData($grid);
-            $i++;
+            $data[] = $this->getGridData($grid);
         }
         return $data;
     }

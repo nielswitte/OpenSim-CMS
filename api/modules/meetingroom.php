@@ -63,7 +63,6 @@ class MeetingRoom extends Module{
 
         // Process results
         $data       = array();
-        $i          = 1;
         foreach($results as $result) {
             // Only set the region once, reuse it for other rooms in the same region
             $region = $grid->getRegionByUuid($result['regionUuid']);
@@ -73,8 +72,7 @@ class MeetingRoom extends Module{
                 $grid->addRegion($region);
             }
             $room       = new \Models\MeetingRoom($result['roomId'], $region, $result['description'], $result['x'], $result['y'], $result['z']);
-            $data[$i]   = $this->getRoomData($room, FALSE);
-            $i++;
+            $data[]     = $this->getRoomData($room, FALSE);
         }
 
         return $data;
@@ -106,7 +104,6 @@ class MeetingRoom extends Module{
 
         // Process results
         $data       = array();
-        $i          = 1;
         foreach($results as $result) {
             // Only set the region once, reuse it for other rooms in the same region
             $region = $grid->getRegionByUuid($result['regionUuid']);
@@ -116,8 +113,7 @@ class MeetingRoom extends Module{
                 $grid->addRegion($region);
             }
             $room       = new \Models\MeetingRoom($result['roomId'], $region, $result['description'], $result['x'], $result['y'], $result['z']);
-            $data[$i]   = $this->getRoomData($room, TRUE);
-            $i++;
+            $data[]     = $this->getRoomData($room, TRUE);
         }
 
         return $data;
@@ -149,7 +145,6 @@ class MeetingRoom extends Module{
 
         // Process results
         $data       = array();
-        $i          = 1;
         foreach($results as $result) {
             // Only set the region once, reuse it for other rooms in the same region
             $region = $grid->getRegionByUuid($result['regionUuid']);
@@ -159,8 +154,7 @@ class MeetingRoom extends Module{
                 $grid->addRegion($region);
             }
             $room       = new \Models\MeetingRoom($result['roomId'], $region, $result['description'], $result['x'], $result['y'], $result['z']);
-            $data[$i]   = $this->getRoomData($room, TRUE);
-            $i++;
+            $data[]     = $this->getRoomData($room, TRUE);
         }
 
         return $data;

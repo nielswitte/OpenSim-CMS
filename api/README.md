@@ -175,7 +175,7 @@ Once an avatar is linked to a user account, it needs to be confirmed by the user
 by the user himself.
 
 ```http
-PUT /api/grid/<GRID-ID>/avatar/<UUID>/confirm/ HTTP/1.1
+PUT /api/grid/<GRID-ID>/avatar/<UUID>/ HTTP/1.1
 ```
 
 Because the token which is used for this request is matched to the userId, this will provide the additional

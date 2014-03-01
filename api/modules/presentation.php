@@ -56,11 +56,9 @@ class Presentation extends Module{
         $resutls        = $db->rawQuery("SELECT * FROM documents WHERE type = ? ORDER BY creationDate DESC LIMIT ?, ?", $params);
         // Process results
         $data           = array();
-        $x              = $args[1];
         foreach($resutls as $result) {
-            $x++;
-            $presentation = new \Models\Presentation($result['id'], 0, $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate']);
-            $data[$x]     = $this->getPresentationData($presentation, FALSE);
+            $presentation   = new \Models\Presentation($result['id'], 0, $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate']);
+            $data[]         = $this->getPresentationData($presentation, FALSE);
         }
         return $data;
     }
