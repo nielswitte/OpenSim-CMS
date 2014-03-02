@@ -16,6 +16,10 @@ var angularRest = angular.module('OpenSim-CMS', [
     }).when('/grids', {
         templateUrl: partial_path +'/grids.html',
         controller: 'gridsController'
+    }).when('/grid/:gridId', {
+        templateUrl: partial_path +'/grid.html',
+        controller: 'gridController'
+
     }).otherwise({
         redirectTo: '/'
     });
@@ -53,6 +57,12 @@ angularRest.config(["RestangularProvider", function(RestangularProvider) {
     }]
 );
 
+angularRest.config(["$compileProvider", function($compileProvider) {
+        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|opensim):/);
+        // Angular before v1.2 uses $compileProvider.urlSanitizationWhitelist(...)
+
+    }]
+);
 function MainCntl($scope, $route, $routeParams, $location) {
     $scope.$route = $route;
     $scope.$location = $location;

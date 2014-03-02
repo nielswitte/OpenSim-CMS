@@ -73,6 +73,23 @@ angularRest.controller("gridsController", ["Restangular", "$scope", function(Res
         var grids = Restangular.one('grids').get({ token: sessionStorage.token }).then(function(gridsResponse) {
             $scope.gridsList = gridsResponse;
         });
+
+        $scope.urlEncode = function(target){
+            return encodeURIComponent(target);
+        };
+    }]
+);
+
+// gridController ----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller("gridController", ["Restangular", "$scope", "$routeParams", function(Restangular, $scope, $routeParams) {
+        var grid = Restangular.one('grid').one($routeParams.gridId).get({ token: sessionStorage.token }).then(function(gridResponse) {
+            $scope.grid = gridResponse;
+            $scope.api_token = sessionStorage.token;
+        });
+
+        $scope.urlEncode = function(target){
+            return encodeURIComponent(target);
+        };
     }]
 );
 
@@ -90,18 +107,12 @@ angularRest.controller("userController", ["Restangular", "$scope", "$routeParams
             $scope.user = userResponse;
         });
 
-        $scope.confirmAvatar = function(avatar) {
+        $scope.confirmAvatar = function(index, avatar) {
             var confirm = Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).put({ token: sessionStorage.token }).then(function(confirmationResponse) {
                 if(confirmationResponse.error) {
                     addAlert('danger', '<strong>Error!</strong> '+ confirmationResponse.error);
                 } else {
-
-                    angular.forEach($scope.user.avatars, function(value, key){
-                        if(avatar === value) {
-                            $scope.user.avatars[key].confirmed = 1;
-                            alert($scope.user.avatars[key].uuid);
-                        }
-                    });
+                    $scope.user.avatars[index].confirmed = 1;
                     addAlert('success', '<strong>Avatar confirmed!</strong> The avatar is confirmed user.');
                 }
             });

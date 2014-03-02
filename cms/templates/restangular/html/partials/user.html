@@ -34,7 +34,7 @@
     </div>
     <fieldset id="avatars">
         <legend>Avatars <span id="avatarCount">{{user.avatars.length}}</span></legend>
-        <div class="row" ng-repeat="avatar in user.avatars">
+        <div class="row" ng-repeat="(index, avatar) in user.avatars">
             <div class="col-sm-6 col-md-6 avatar">
                 <div class="panel panel-default">
                     <div class="panel-heading">
@@ -60,7 +60,7 @@
                         </ul>
                     </div>
                     <div class="panel-footer text-center">
-                        <button class="confirmAvatar btn btn-success btn-sm" ng-click="confirmAvatar(avatar)" ng-show="{{avatar.confirmed}} == 0"><i class="glyphicon glyphicon-ok"></i> Confirm</button>
+                        <button class="confirmAvatar btn btn-success btn-sm" ng-click="confirmAvatar(index, avatar)" ng-show="{{avatar.confirmed}} == 0"><i class="glyphicon glyphicon-ok"></i> Confirm</button>
                         <button class="removeAvatar btn btn-danger btn-sm" ng-click="unlinkAvatar(avatar)"><i class="glyphicon glyphicon-remove"></i> Unlink</button>
                     </div>
                 </div>
