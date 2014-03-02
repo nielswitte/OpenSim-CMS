@@ -93,6 +93,39 @@ angularRest.controller("gridController", ["Restangular", "$scope", "$routeParams
     }]
 );
 
+// meetingsController ----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller("meetingsController", ["Restangular", "$scope", function(Restangular, $scope) {
+        var date = new Date(new Date - (1000*60*60*24*14));
+
+        var meetings = Restangular.one('meetings').one(date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).one('calendar').get({ token: sessionStorage.token }).then(function(meetingsResponse) {
+            $scope.meetings = meetingsResponse;
+
+            // Insert the events into the calendar
+            $('#calendar').fullCalendar({
+                defaultView: 'agendaWeek',
+                height: 650,
+                header: {
+                    left:   'title',
+                    center: 'agendaDay,agendaWeek,month',
+                    right:  'today prev,next'
+                },
+                events: meetingsResponse,
+                eventClick: function(event) {
+                    // Create a pop over for this event
+                    $(this).popover({
+                        placement: 'auto top',
+                        title: event.title,
+                        content: event.description
+                    });
+                    // Imediatly show it
+                    $(this).popover('show');
+                    return false;
+                }
+            });
+        });
+    }]
+);
+
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller("usersController", ["Restangular", "$scope", function(Restangular, $scope) {
         var users = Restangular.one('users').get({ token: sessionStorage.token }).then(function(usersResponse) {
