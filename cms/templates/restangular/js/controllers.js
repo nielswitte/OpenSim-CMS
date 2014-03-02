@@ -19,7 +19,7 @@ angularRest.controller("loginController", ["Restangular", "$scope", function(Res
 
                         // Finally store token
                         sessionStorage.token    = authResponse.token;
-                        addAlert('success', '<strong>Logged in!</strong> You are now logged in as '+ formData.username);
+                        addAlert('success', '<strong>Logged in!</strong> You are now logged in as '+ userResponse.username);
 
                         // Reload toolbar
                         $scope.getUserToolbar();
@@ -68,6 +68,14 @@ angularRest.controller("toolbarController", ["Restangular", "$scope", function(R
     }]
 );
 
+// gridsController ----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller("gridsController", ["Restangular", "$scope", function(Restangular, $scope) {
+        var grids = Restangular.one('grids').get({ token: sessionStorage.token }).then(function(gridsResponse) {
+            $scope.gridsList = gridsResponse;
+        });
+    }]
+);
+
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller("usersController", ["Restangular", "$scope", function(Restangular, $scope) {
         var users = Restangular.one('users').get({ token: sessionStorage.token }).then(function(usersResponse) {
@@ -75,6 +83,7 @@ angularRest.controller("usersController", ["Restangular", "$scope", function(Res
         });
     }]
 );
+
 // userController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller("userController", ["Restangular", "$scope", "$routeParams", function(Restangular, $scope, $routeParams) {
         var user = Restangular.one('user').one($routeParams.userId).get({ token: sessionStorage.token }).then(function(userResponse) {

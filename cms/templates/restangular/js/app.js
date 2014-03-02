@@ -13,6 +13,9 @@ var angularRest = angular.module('OpenSim-CMS', [
     }).when('/users', {
         templateUrl: partial_path +'/users.html',
         controller: 'usersController'
+    }).when('/grids', {
+        templateUrl: partial_path +'/grids.html',
+        controller: 'gridsController'
     }).otherwise({
         redirectTo: '/'
     });
@@ -25,7 +28,8 @@ angularRest.config(["RestangularProvider", function(RestangularProvider) {
         RestangularProvider.setBaseUrl('' + server_address + base_url + '/api');
         RestangularProvider.setDefaultHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
         RestangularProvider.setErrorInterceptor(function(resp) {
-            addAlert('danger', '<strong>Error!</strong> '+ resp);
+            console.log(resp);
+            addAlert('danger', '<strong>Error!</strong> '+ resp.data.error);
             jQuery('#loading').hide();
             return false; // stop the promise chain
         });
