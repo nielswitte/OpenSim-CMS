@@ -339,6 +339,7 @@ state presentation {
             // API key expired
             if(status == 401) {
                 llInstantMessage(userUuid, "The API key expired, turn the presenter off and on again: ");
+                open_menu(userUuid, mainNavigationText, mainNavigationButtons);
             } else {
                 // Send a more specific and meaningful response to the user
                 if(request_id == http_request_user) {

@@ -1,0 +1,90 @@
+
+<div class="page-header">
+    <h1>Grid <small>{{grid.name}}</small></h1>
+</div>
+<form class="form-horizontal" role="form" id="gridForm">
+    <div class="form-group">
+        <label for="inputId" class="col-sm-2 control-label">ID</label>
+        <div class="col-sm-10">
+            <input type="number" class="form-control" id="inputId" placeholder="ID" value="{{grid.id}}" readonly="readonly">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputName" class="col-sm-2 control-label">Name</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="inputName" placeholder="Name" value="{{grid.name}}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputCache" class="col-sm-2 control-label">Cache time</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="inputCache" placeholder="Cache" value="{{grid.cacheTime}}">
+        </div>
+    </div>
+    <fieldset>
+        <legend>OpenSim settings</legend>
+        <div class="form-group">
+            <label for="inputOsProtocol" class="col-sm-2 control-label">Protocol</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="inputOsProtocol" placeholder="Protocol" value="{{grid.openSim.protocol}}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputOsIp" class="col-sm-2 control-label">IP</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="inputOsIp" placeholder="IP" value="{{grid.openSim.ip}}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputOsPort" class="col-sm-2 control-label">Port</label>
+            <div class="col-sm-10">
+                <input type="number" class="form-control" id="inputOsPort" placeholder="Port" value="{{grid.openSim.port}}">
+            </div>
+        </div>
+    </fieldset>
+        <fieldset>
+        <legend>Remote Admin</legend>
+        <div class="form-group">
+            <label for="inputRaUrl" class="col-sm-2 control-label">URL</label>
+            <div class="col-sm-10">
+                <input type="url" class="form-control" id="inputRaUrl" placeholder="URL" value="{{grid.remoteAdmin.url}}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputRaPort" class="col-sm-2 control-label">Port</label>
+            <div class="col-sm-10">
+                <input type="number" class="form-control" id="inputRaPort" placeholder="Port" value="{{grid.remoteAdmin.port}}">
+            </div>
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Regions <span id="regionCount"></span></legend>
+        <div class="row" id='regionThumbs'>
+            <div class="col-sm-4 col-md-4 region" ng-repeat="region in grid.regions">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <span class="label label-success" ng-show="{{region.serverStatus}} == 1">Online</span>
+                            <span class="label label-danger" ng-show="{{region.serverStatus}} == 0">Offline</span>
+                            {{region.name}}
+                            <span class="glyphicon glyphicon-home" id="defaultRegion" title="Is the default region" ng-show="{{grid.defaultRegionUuid == region.uuid}}"></span>
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        <p class="text-center">
+                            <img src="{{region.image}}?token={{api_token}}" alt="{{region.name}}" class="img-thumbnail img-responsive" ng-show="{{region.serverStatus}} == 1">
+                            <img src="templates/bootstrapped/img/img-placeholder.png" alt="{{region.name}}" class="img-thumbnail img-responsive" ng-show="{{region.serverStatus}} == 0">
+                        </p>
+                        <ul>
+                            <li><strong>Uuid:</strong>{{region.uuid}}</li>
+                            <li><strong>Users:</strong>{{region.activeUsers}} / {{region.totalUsers}}</li>
+                        </ul>
+                    </div>
+                    <div class="panel-footer text-center">
+                        <a href="opensim://{{grid.openSim.ip}}:{{grid.openSim.port}}/{{urlEncode(region.name)}}/128/128/0/" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-send"></i> Visit {{region.name}}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+</form>

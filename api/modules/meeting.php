@@ -23,6 +23,7 @@ class Meeting extends Module{
      */
     public function __construct(\API\API $api) {
         $this->api = $api;
+        $this->api->addModule('meeting', $this);
 
         $this->setRoutes();
     }
@@ -53,13 +54,11 @@ class Meeting extends Module{
         $resutls        = $db->rawQuery("SELECT *, m.id as meetingId FROM meetings m, users u WHERE u.id = m.userId ORDER BY m.startDate DESC LIMIT ?, ?", $params);
         // Process results
         $data           = array();
-        $x              = $args[1];
         foreach($resutls as $result) {
             $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
             $room       = new \Models\MeetingRoom($result['roomId']);
             $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room);
-            $data[$x]   = $this->getMeetingData($meeting, FALSE);
-            $x++;
+            $data[]     = $this->getMeetingData($meeting, FALSE);
         }
         return $data;
     }
@@ -78,7 +77,6 @@ class Meeting extends Module{
         // Process results
         $data           = array();
 
-        $x              = 1;
         foreach($resutls as $result) {
             $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
             $room       = new \Models\MeetingRoom($result['roomId']);
@@ -94,12 +92,9 @@ class Meeting extends Module{
                     'description'   => 'Reservation made by: '. $meeting->getCreator()->getUsername()
                 );
             } else {
-                $data[$x] = $this->getMeetingData($meeting, FALSE);
+                $data[] = $this->getMeetingData($meeting, FALSE);
             }
-            $x++;
         }
-
-
 
         return $data;
     }
@@ -127,7 +122,7 @@ class Meeting extends Module{
      * @param boolean $full - [Optional]
      * @return array
      */
-    private function getMeetingData(\Models\Meeting $meeting, $full = TRUE) {
+    public function getMeetingData(\Models\Meeting $meeting, $full = TRUE) {
         $data       = array(
             'id'        => $meeting->getId(),
             'startDate' => $meeting->getStartDate(),

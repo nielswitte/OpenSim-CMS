@@ -23,6 +23,7 @@ class Grid extends Module{
      */
     public function __construct(\API\API $api) {
         $this->api = $api;
+        $this->api->addModule('grid', $this);
 
         $this->setRoutes();
     }
@@ -47,14 +48,12 @@ class Grid extends Module{
         $db = \Helper::getDB();
         $db->orderBy('LOWER(name)', 'asc');
         $grids  = $db->get('grids');
-        $i = 1;
         // Process al grids
         $data   = array();
         foreach($grids as $gridId) {
             $grid = new \Models\Grid($gridId['id']);
             $grid->getInfoFromDatabase();
-            $data[$i] = $this->getGridData($grid);
-            $i++;
+            $data[] = $this->getGridData($grid);
         }
         return $data;
     }
@@ -78,7 +77,7 @@ class Grid extends Module{
      * @param \Models\Grid $grid
      * @return array
      */
-    private function getGridData(\Models\Grid $grid) {
+    public function getGridData(\Models\Grid $grid) {
         $data['isOnline']           = $grid->getOnlineStatus() ? 1 : 0;
         $data['id']                 = $grid->getId();
         $data['name']               = $grid->getName();
@@ -116,7 +115,7 @@ class Grid extends Module{
      * @param \Models\Region $region
      * @return array
      */
-    private function getRegionData(\Models\Region $region) {
+    public function getRegionData(\Models\Region $region) {
         $data['uuid']           = $region->getUuid();
         $data['name']           = $region->getName();
         $data['image']          = $region->getApiUrl() .'image/';

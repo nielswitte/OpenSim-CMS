@@ -23,6 +23,7 @@ class User extends Module {
      */
     public function __construct(\API\API $api) {
         $this->api = $api;
+        $this->api->addModule('user', $this);
 
         $this->setRoutes();
     }
@@ -113,11 +114,9 @@ class User extends Module {
         $resutls        = $db->rawQuery("SELECT * FROM users ORDER BY LOWER(username) ASC LIMIT ?, ?", $params);
         // Process results
         $data           = array();
-        $x              = $args[1];
         foreach($resutls as $result) {
-            $x++;
             $user       = new \Models\User($result['id'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
-            $data[$x]   = $this->getUserData($user, FALSE);
+            $data[]     = $this->getUserData($user, FALSE);
         }
         return $data;
     }
@@ -133,12 +132,10 @@ class User extends Module {
         $params         = array("%". $db->escape($args[1]) ."%");
         $results        = $db->rawQuery('SELECT * FROM users WHERE username LIKE ? ORDER BY LOWER(username) ASC', $params);
         $data           = array();
-        $count          = 0;
         foreach($results as $result) {
-            $count++;
-            $user           = new \Models\User($result['id']);
+            $user       = new \Models\User($result['id']);
             $user->getInfoFromDatabase();
-            $data[$count]   = self::getUserData($user, FALSE);
+            $data[]     = self::getUserData($user, FALSE);
         }
         return $data;
     }
@@ -194,7 +191,7 @@ class User extends Module {
      * @param boolean $full - [Optional] Return all user information?
      * @return array
      */
-    private function getUserData(\Models\User $user, $full = TRUE) {
+    public function getUserData(\Models\User $user, $full = TRUE) {
         $data['id']                 = $user->getId();
         $data['username']           = $user->getUsername();
         $data['firstName']          = $user->getFirstName();
