@@ -76,8 +76,9 @@
                             <img src="templates/bootstrapped/img/img-placeholder.png" alt="{{region.name}}" class="img-thumbnail img-responsive" ng-show="{{region.serverStatus}} == 0">
                         </p>
                         <ul>
-                            <li><strong>Uuid:</strong>{{region.uuid}}</li>
-                            <li><strong>Users:</strong>{{region.activeUsers}} / {{region.totalUsers}}</li>
+                            <li><strong>Uuid:</strong> {{region.uuid}}</li>
+                            <li ng-show="{{region.serverStatus}}"><strong>Users:</strong> {{region.activeUsers}} / {{region.totalUsers}}</li>
+                            <li ng-hide="{{region.serverStatus}}"><strong>Users:</strong> unknown</li>
                         </ul>
                     </div>
                     <div class="panel-footer text-center">

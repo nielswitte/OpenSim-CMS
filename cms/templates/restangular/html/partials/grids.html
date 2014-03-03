@@ -34,7 +34,8 @@
                     <span class="label label-success" ng-show="{{grid.isOnline}}">Online</span>
                     <span class="label label-danger" ng-hide="{{grid.isOnline}}">Offline</span>
                 </td>
-                <td>{{grid.activeUsers}} / {{grid.totalUsers}}</td>
+                <td ng-show="{{grid.isOnline}}">{{grid.activeUsers}} / {{grid.totalUsers}}</td>
+                <td ng-hide="{{grid.isOnline}}">unknown</td>
             </tr>
         </tbody>
     </table>
