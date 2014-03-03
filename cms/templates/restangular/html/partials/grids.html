@@ -30,8 +30,10 @@
                 <td><a href="grid/{{grid.id}}/">{{grid.name}}</a></td>
                 <td><a href="opensim://{{grid.openSim.ip}}:{{grid.openSim.port}}/{{urlEncode(grid.regions[grid.defaultRegionUuid].name)}}/128/128/0">{{grid.openSim.protocol}}://{{grid.openSim.ip}}:{{grid.openSim.port}}</a></td>
                 <td>{{grid.regionCount}}</td>
-                <td ng-show="{{grid.isOnline}} == 1">Yes</td>
-                <td ng-show="{{grid.isOnline}} == 0">No</td>
+                <td>
+                    <span class="label label-success" ng-show="{{grid.isOnline}}">Online</span>
+                    <span class="label label-danger" ng-hide="{{grid.isOnline}}">Offline</span>
+                </td>
                 <td>{{grid.activeUsers}} / {{grid.totalUsers}}</td>
             </tr>
         </tbody>
