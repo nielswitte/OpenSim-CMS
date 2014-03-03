@@ -74,6 +74,9 @@ angularRest.controller("toolbarController", ["Restangular", "$scope", function(R
 angularRest.controller("gridsController", ["Restangular", "$scope", function(Restangular, $scope) {
         var grids = Restangular.one('grids').get({ token: sessionStorage.token }).then(function(gridsResponse) {
             $scope.gridsList = gridsResponse;
+
+            // attach table filter plugin to inputs
+            jQuery('[data-action="filter"]').filterTable();
         });
 
         $scope.urlEncode = function(target){
@@ -132,6 +135,9 @@ angularRest.controller("meetingsController", ["Restangular", "$scope", function(
 angularRest.controller("usersController", ["Restangular", "$scope", function(Restangular, $scope) {
         var users = Restangular.one('users').get({ token: sessionStorage.token }).then(function(usersResponse) {
             $scope.usersList = usersResponse;
+
+            // attach table filter plugin to inputs
+            jQuery('[data-action="filter"]').filterTable();
         });
     }]
 );
