@@ -33,7 +33,7 @@
         </div>
     </div>
     <fieldset id="avatars">
-        <legend>Avatars <span id="avatarCount">{{user.avatars.length}}</span></legend>
+        <legend>Avatars (<span id="avatarCount">{{user.avatarCount}}</span>)</legend>
         <div class="row" ng-repeat="(index, avatar) in user.avatars">
             <div class="col-sm-6 col-md-6 avatar">
                 <div class="panel panel-default">
@@ -50,9 +50,9 @@
                             <li><strong>E-mail address:</strong> {{avatar.email}}</li>
                             <li><strong>Grid:</strong> <a href="grid/{{avatar.gridId}}/">{{avatar.gridName}}</a></li>
                             <li>
-                                <strong>Confirmed:</strong>{{avatar.confirmed}}
-                                <span class="confirmationStatus" ng-show="{{avatar.confirmed}} == 1">Yes</span>
-                                <span class="confirmationStatus" ng-show="{{avatar.confirmed}} == 0">No</span>
+                                <strong>Confirmed:</strong>
+                                <span class="confirmationStatus" ng-show="isConfirmed(index)">Yes</span>
+                                <span class="confirmationStatus" ng-hide="isConfirmed(index)">No</span>
                             </li>
                             <li><strong>Last Login:</strong>{{avatar.lastLogin}}</li>
                             <li><strong>Last Region:</strong>{{avatar.lastRegion}}</li>
@@ -61,7 +61,7 @@
                     </div>
                     <div class="panel-footer text-center">
                         <button class="confirmAvatar btn btn-success btn-sm" ng-click="confirmAvatar(index, avatar)" ng-show="{{avatar.confirmed}} == 0"><i class="glyphicon glyphicon-ok"></i> Confirm</button>
-                        <button class="removeAvatar btn btn-danger btn-sm" ng-click="unlinkAvatar(avatar)"><i class="glyphicon glyphicon-remove"></i> Unlink</button>
+                        <button class="removeAvatar btn btn-danger btn-sm" ng-click="unlinkAvatar(index, avatar)"><i class="glyphicon glyphicon-remove"></i> Unlink</button>
                     </div>
                 </div>
             </div>

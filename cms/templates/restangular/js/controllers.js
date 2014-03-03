@@ -140,7 +140,12 @@ angularRest.controller("usersController", ["Restangular", "$scope", function(Res
 angularRest.controller("userController", ["Restangular", "$scope", "$routeParams", function(Restangular, $scope, $routeParams) {
         var user = Restangular.one('user').one($routeParams.userId).get({ token: sessionStorage.token }).then(function(userResponse) {
             $scope.user = userResponse;
+            $scope.user.avatarCount = Object.keys(userResponse.avatars).length;
         });
+
+        $scope.isConfirmed = function(index) {
+            return $scope.user.avatars[index].confirmed === 1 ? true : false;
+        };
 
         $scope.confirmAvatar = function(index, avatar) {
             var confirm = Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).put({ token: sessionStorage.token }).then(function(confirmationResponse) {
@@ -149,6 +154,18 @@ angularRest.controller("userController", ["Restangular", "$scope", "$routeParams
                 } else {
                     $scope.user.avatars[index].confirmed = 1;
                     addAlert('success', '<strong>Avatar confirmed!</strong> The avatar is confirmed user.');
+                }
+            });
+        };
+
+        $scope.unlinkAvatar = function(index, avatar) {
+            var unlink = Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).remove({ token: sessionStorage.token }).then(function(unlinkResponse) {
+                if(unlinkResponse.error) {
+                    addAlert('danger', '<strong>Error!</strong> '+ unlinkResponse.error);
+                } else {
+                    delete $scope.user.avatars[index];
+                    $scope.user.avatarCount--;
+                    addAlert('success', '<strong>Avatar unlinked!</strong> The avatar is no longer linked to this user.');
                 }
             });
         };
