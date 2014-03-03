@@ -51,7 +51,7 @@ angularRest.controller("loginController", ["Restangular", "$scope", function(Res
 );
 
 // toolbarController --------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller("toolbarController", ["Restangular", "$scope", function(Restangular, $scope) {
+angularRest.controller("toolbarController", ["Restangular", "$scope", "$location", function(Restangular, $scope, $location) {
         $scope.getUserToolbar = function() {
             if(sessionStorage.token){
                 return partial_path +'/userToolbarLoggedIn.html';
@@ -65,6 +65,21 @@ angularRest.controller("toolbarController", ["Restangular", "$scope", function(R
                 return partial_path +'/mainNavigationLoggedIn.html';
             } else {
                 return partial_path +'/mainNavigationLoggedOut.html';
+            }
+        };
+
+        /**
+         * Check to get the currently active menu item
+         *
+         * @source: http://stackoverflow.com/a/18562339
+         * @param {string} viewLocation
+         * @returns {Boolean}
+         */ 
+        $scope.isActive = function (viewLocation) {
+            if(viewLocation.length > 1) {
+                return $location.path().indexOf(viewLocation) === 0;
+            } else {
+                return $location.path() === viewLocation;
             }
         };
     }]
