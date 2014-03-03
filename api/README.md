@@ -317,6 +317,10 @@ GET /api/documents/ HTTP/1.1
 GET /api/documents/<OFFSET>/ HTTP/1.1
 ```
 
+```http
+GET /api/document/<DOCUMENT-ID>/ HTTP/1.1
+```
+
 ### Presentations
 A list with presentations can be requested by using the following GET request.
 

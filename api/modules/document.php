@@ -23,6 +23,7 @@ class Document extends Module{
      */
     public function __construct(\API\API $api) {
         $this->api = $api;
+        $this->api->addModule('document', $this);
 
         $this->setRoutes();
     }
@@ -31,8 +32,9 @@ class Document extends Module{
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/documents\/?$/",                                         "getDocuments",         $this, "GET",  TRUE);  // Get list with 50 documents
-        $this->api->addRoute("/documents\/(\d+)\/?$/",                                  "getDocuments",         $this, "GET",  TRUE);  // Get list with 50 documents starting at the given offset
+        $this->api->addRoute("/documents\/?$/",                "getDocuments",         $this, "GET",  TRUE);  // Get list with 50 documents
+        $this->api->addRoute("/documents\/(\d+)\/?$/",         "getDocuments",         $this, "GET",  TRUE);  // Get list with 50 documents starting at the given offset
+        $this->api->addRoute("/document\/(\d+)\/?$/",          "getDocumentById",      $this, "GET",  TRUE);  // Select specific document
     }
 
 
@@ -59,13 +61,34 @@ class Document extends Module{
     }
 
     /**
+     * Get document details for the given document
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getDocumentById($args) {
+        $document = new \Models\Document($args[1]);
+        $document->getInfoFromDatabase();
+
+        // If the given document is a presentation, return it as a presentation
+        if($document->getType() == 'presentation') {
+            $presentation = new \Models\Presentation($document->getId(), 0, $document->getTitle(), $document->getOwnerId(), $document->getCreationDate(), $document->getModificationDate());
+            return $this->api->getModule('presentation')->getPresentationData($presentation, TRUE);
+        // Return it as a document
+        } else {
+            return $this->getDocumentData($document, TRUE);
+        }
+    }
+
+
+    /**
      * Format the presentation data to the desired format
      *
      * @param \Models\Document $document
      * @param boolean $full - [Optional] Show all information about the presentation and slides
      * @return array
      */
-    private function getDocumentData(\Models\Document $document, $full = TRUE) {
+    public function getDocumentData(\Models\Document $document, $full = TRUE) {
         $data = array();
         $data['id']                 = $document->getId();
         $data['type']               = $document->getType();

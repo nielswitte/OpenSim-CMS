@@ -23,6 +23,7 @@ class Presentation extends Module{
      */
     public function __construct(\API\API $api) {
         $this->api = $api;
+        $this->api->addModule('presentation', $this);
 
         $this->setRoutes();
     }
@@ -82,7 +83,7 @@ class Presentation extends Module{
      * @param boolean $full - [Optional] Show all information about the presentation and slides
      * @return array
      */
-    private function getPresentationData(\Models\Presentation $presentation, $full = TRUE) {
+    public function getPresentationData(\Models\Presentation $presentation, $full = TRUE) {
         $data = array();
         $data['type']               = 'presentation';
         $data['title']              = $presentation->getTitle();
@@ -111,7 +112,7 @@ class Presentation extends Module{
      * @param boolean $full - [Optional] Show all information about the slide
      * @return array
      */
-    private function getSlideData(\Models\Presentation $presentation, \Models\Slide $slide, $full = TRUE) {
+    public function getSlideData(\Models\Presentation $presentation, \Models\Slide $slide, $full = TRUE) {
         $data = array(
             'id'    => $slide->getId(),
             'number'=> $slide->getNumber(),

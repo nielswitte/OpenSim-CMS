@@ -23,6 +23,7 @@ class Auth extends Module {
      */
     public function __construct(\API\API $api) {
         $this->api = $api;
+        $this->api->addModule('auth', $this);
 
         $this->setRoutes();
     }

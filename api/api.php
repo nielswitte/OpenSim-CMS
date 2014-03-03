@@ -25,11 +25,12 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  * This class is hosts all API calls and matches them to the corresponding model/controller functions
  *
  * @author Niels Witte
- * @version 0.4
+ * @version 0.5
  * @date February 18th, 2014
  */
 class API {
     private $routes = array();
+    private $modules = array();
 
     /**
      * Creates a new API with optional a list of routes
@@ -38,6 +39,25 @@ class API {
      */
     public function __construct($routes = array()) {
         $this->routes = $routes;
+    }
+
+    /**
+     * Add the given module to the list of API modules
+     *
+     * @param \API\Modules\Module $module
+     */
+    public function addModule($name, \API\Modules\Module $module) {
+        $this->modules[$name] = $module;
+    }
+
+    /**
+     * Returns the module with the given name
+     *
+     * @param string $name
+     * @return \API\Modules\Module
+     */
+    public function getModule($name) {
+        return $this->modules[$name];
     }
 
     /**

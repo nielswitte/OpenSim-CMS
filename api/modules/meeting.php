@@ -23,6 +23,7 @@ class Meeting extends Module{
      */
     public function __construct(\API\API $api) {
         $this->api = $api;
+        $this->api->addModule('meeting', $this);
 
         $this->setRoutes();
     }
@@ -121,7 +122,7 @@ class Meeting extends Module{
      * @param boolean $full - [Optional]
      * @return array
      */
-    private function getMeetingData(\Models\Meeting $meeting, $full = TRUE) {
+    public function getMeetingData(\Models\Meeting $meeting, $full = TRUE) {
         $data       = array(
             'id'        => $meeting->getId(),
             'startDate' => $meeting->getStartDate(),

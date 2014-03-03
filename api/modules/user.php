@@ -23,6 +23,7 @@ class User extends Module {
      */
     public function __construct(\API\API $api) {
         $this->api = $api;
+        $this->api->addModule('user', $this);
 
         $this->setRoutes();
     }
@@ -190,7 +191,7 @@ class User extends Module {
      * @param boolean $full - [Optional] Return all user information?
      * @return array
      */
-    private function getUserData(\Models\User $user, $full = TRUE) {
+    public function getUserData(\Models\User $user, $full = TRUE) {
         $data['id']                 = $user->getId();
         $data['username']           = $user->getUsername();
         $data['firstName']          = $user->getFirstName();

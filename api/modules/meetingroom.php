@@ -23,6 +23,7 @@ class MeetingRoom extends Module{
      */
     public function __construct(\API\API $api) {
         $this->api = $api;
+        $this->api->addModule('meetingsroom', $this);
 
         $this->setRoutes();
     }
@@ -167,7 +168,7 @@ class MeetingRoom extends Module{
      * @param boolean $full - [Optional] Whether or not to show specific information
      * @return array
      */
-    private function getRoomData(\Models\MeetingRoom $room, $full = TRUE) {
+    public function getRoomData(\Models\MeetingRoom $room, $full = TRUE) {
         $data['id']             = $room->getId();
         if($full) {
             $data['grid']       = array(
