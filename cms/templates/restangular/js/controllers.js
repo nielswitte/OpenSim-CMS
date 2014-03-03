@@ -1,5 +1,11 @@
 // loginController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller("loginController", ["Restangular", "$scope", function(Restangular, $scope) {
+angularRest.controller('homeController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
+        Page.setTitle('Home');
+    }]
+);
+
+// loginController ----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('loginController', ['Restangular', '$scope', function(Restangular, $scope) {
         $scope.login = function(user) {
             // Fix for autocomplete
             if(!user) {
@@ -7,7 +13,7 @@ angularRest.controller("loginController", ["Restangular", "$scope", function(Res
             }
 
             var formData = jQuery.param(user);
-            var auth = Restangular.one("auth").post('username', formData).then(function(authResponse) {
+            var auth = Restangular.one('auth').post('username', formData).then(function(authResponse) {
                 // Successful auth?
                 if(authResponse.token) {
                     var user = Restangular.one('user', authResponse.userId).get({ token: authResponse.token }).then(function(userResponse) {
@@ -51,7 +57,7 @@ angularRest.controller("loginController", ["Restangular", "$scope", function(Res
 );
 
 // toolbarController --------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller("toolbarController", ["Restangular", "$scope", "$location", function(Restangular, $scope, $location) {
+angularRest.controller('toolbarController', ['Restangular', '$scope', '$location', function(Restangular, $scope, $location) {
         $scope.getUserToolbar = function() {
             if(sessionStorage.token){
                 return partial_path +'/userToolbarLoggedIn.html';
@@ -86,9 +92,10 @@ angularRest.controller("toolbarController", ["Restangular", "$scope", "$location
 );
 
 // documentsController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller("documentsController", ["Restangular", "$scope", function(Restangular, $scope) {
+angularRest.controller('documentsController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
         var documents = Restangular.one('documents').get({ token: sessionStorage.token }).then(function(documentsResponse) {
             $scope.documentsList = documentsResponse;
+            Page.setTitle('Documents');
 
             // attach table filter plugin to inputs
             jQuery('[data-action="filter"]').filterTable();
@@ -97,17 +104,18 @@ angularRest.controller("documentsController", ["Restangular", "$scope", function
 );
 
 // documentController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller("documentController", ["Restangular", "$scope", "$routeParams", function(Restangular, $scope, $routeParams) {
+angularRest.controller('documentController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
         var document = Restangular.one('document').one($routeParams.documentId).get({ token: sessionStorage.token }).then(function(documentResponse) {
             $scope.document = documentResponse;
+            Page.setTitle(documentResponse.title);
 
             // Init select2
-            jQuery("#inputOwner").select2({
-                placeholder: "Search for a user",
+            jQuery('#inputOwner').select2({
+                placeholder: 'Search for a user',
                 minimumInputLength: 3,
                 ajax: {
                     url: function(term, page) {
-                        return base_url +"/api/users/"+ term +"/?token="+ sessionStorage.token;
+                        return base_url +'/api/users/'+ term +'/?token='+ sessionStorage.token;
                     },
                     dataType: 'json',
                     results: function(data, page) {
@@ -122,9 +130,9 @@ angularRest.controller("documentController", ["Restangular", "$scope", "$routePa
                 },
                 initSelection: function(element, callback) {
                     var id = jQuery(element).val();
-                    if (id !== "") {
-                        jQuery.ajax(base_url +"/api/user/"+ id +"/?token="+ sessionStorage.token, {
-                            dataType: "json"
+                    if (id !== '') {
+                        jQuery.ajax(base_url +'/api/user/'+ id +'/?token='+ sessionStorage.token, {
+                            dataType: 'json'
                         }).done(function(data) {
                             callback({id: data.id, text: data.username});
                         });
@@ -140,9 +148,10 @@ angularRest.controller("documentController", ["Restangular", "$scope", "$routePa
 );
 
 // gridsController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller("gridsController", ["Restangular", "$scope", function(Restangular, $scope) {
+angularRest.controller('gridsController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
         var grids = Restangular.one('grids').get({ token: sessionStorage.token }).then(function(gridsResponse) {
             $scope.gridsList = gridsResponse;
+            Page.setTitle('Grids');
 
             // attach table filter plugin to inputs
             jQuery('[data-action="filter"]').filterTable();
@@ -155,8 +164,9 @@ angularRest.controller("gridsController", ["Restangular", "$scope", function(Res
 );
 
 // gridController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller("gridController", ["Restangular", "$scope", "$routeParams", function(Restangular, $scope, $routeParams) {
+angularRest.controller('gridController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
         var grid = Restangular.one('grid').one($routeParams.gridId).get({ token: sessionStorage.token }).then(function(gridResponse) {
+            Page.setTitle(gridResponse.name);
             $scope.grid = gridResponse;
             $scope.api_token = sessionStorage.token;
         });
@@ -168,11 +178,12 @@ angularRest.controller("gridController", ["Restangular", "$scope", "$routeParams
 );
 
 // meetingsController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller("meetingsController", ["Restangular", "$scope", function(Restangular, $scope) {
+angularRest.controller('meetingsController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
         var date = new Date(new Date - (1000*60*60*24*14));
 
         var meetings = Restangular.one('meetings').one(date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).one('calendar').get({ token: sessionStorage.token }).then(function(meetingsResponse) {
             $scope.meetings = meetingsResponse;
+            Page.setTitle('Meetings');
 
             // Insert the events into the calendar
             $('#calendar').fullCalendar({
@@ -201,9 +212,10 @@ angularRest.controller("meetingsController", ["Restangular", "$scope", function(
 );
 
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller("usersController", ["Restangular", "$scope", function(Restangular, $scope) {
+angularRest.controller('usersController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
         var users = Restangular.one('users').get({ token: sessionStorage.token }).then(function(usersResponse) {
             $scope.usersList = usersResponse;
+            Page.setTitle('Users');
 
             // attach table filter plugin to inputs
             jQuery('[data-action="filter"]').filterTable();
@@ -212,8 +224,9 @@ angularRest.controller("usersController", ["Restangular", "$scope", function(Res
 );
 
 // userController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller("userController", ["Restangular", "$scope", "$routeParams", function(Restangular, $scope, $routeParams) {
+angularRest.controller('userController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
         var user = Restangular.one('user').one($routeParams.userId).get({ token: sessionStorage.token }).then(function(userResponse) {
+            Page.setTitle(userResponse.username);
             $scope.user = userResponse;
             $scope.user.avatarCount = Object.keys(userResponse.avatars).length;
         });

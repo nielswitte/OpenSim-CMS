@@ -31,12 +31,27 @@ var angularRest = angular.module('OpenSim-CMS', [
     }).when('/users', {
         templateUrl: partial_path +'/users.html',
         controller: 'usersController'
+    }).when('/', {
+        templateUrl: partial_path +'/home.html',
+        controller: 'homeController'
     }).otherwise({
         redirectTo: '/'
     });
 
     // configure html5 to get links working on jsfiddle
     $locationProvider.html5Mode(true);
+});
+
+angularRest.factory('Page', function() {
+    var title = 'OpenSim-CMS';
+    return {
+        title: function() {
+            return title;
+        },
+        setTitle: function(newTitle) {
+            title = newTitle +' - '+ title;
+        }
+    };
 });
 
 // Restangular settings
@@ -120,8 +135,9 @@ angularRest.directive('head', ['$rootScope','$compile',
 ]);
 
 // Routing
-function MainCntl($scope, $route, $routeParams, $location) {
+function MainCntl($scope, $route, $routeParams, $location, Page) {
     $scope.$route = $route;
     $scope.$location = $location;
     $scope.$routeParams = $routeParams;
+    $scope.Page = Page;
 };
