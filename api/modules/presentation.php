@@ -23,6 +23,7 @@ class Presentation extends Module{
      */
     public function __construct(\API\API $api) {
         $this->api = $api;
+        $this->api->addModule('presentation', $this);
 
         $this->setRoutes();
     }
@@ -52,15 +53,13 @@ class Presentation extends Module{
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 presentations from the given offset
-        $params         = array('presentation', $args[1], 50);
+        $params         = array('presentation', $db->escape($args[1]), 50);
         $resutls        = $db->rawQuery("SELECT * FROM documents WHERE type = ? ORDER BY creationDate DESC LIMIT ?, ?", $params);
         // Process results
         $data           = array();
-        $x              = $args[1];
         foreach($resutls as $result) {
-            $x++;
-            $presentation = new \Models\Presentation($result['id'], 0, $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate']);
-            $data[$x]     = self::getPresentationData($presentation, FALSE);
+            $presentation   = new \Models\Presentation($result['id'], 0, $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate']);
+            $data[]         = $this->getPresentationData($presentation, FALSE);
         }
         return $data;
     }
@@ -74,7 +73,7 @@ class Presentation extends Module{
     public function getPresentationById($args) {
         $presentation = new \Models\Presentation($args[1]);
         $presentation->getInfoFromDatabase();
-        return self::getPresentationData($presentation);
+        return $this->getPresentationData($presentation);
     }
 
     /**
@@ -84,11 +83,11 @@ class Presentation extends Module{
      * @param boolean $full - [Optional] Show all information about the presentation and slides
      * @return array
      */
-    private function getPresentationData(\Models\Presentation $presentation, $full = TRUE) {
+    public function getPresentationData(\Models\Presentation $presentation, $full = TRUE) {
         $data = array();
         $data['type']               = 'presentation';
         $data['title']              = $presentation->getTitle();
-        $data['presentationId']     = $presentation->getPresentationId();
+        $data['presentationId']     = $presentation->getId();
         $data['ownerId']            = $presentation->getOwnerId();
         $slides     = array();
         $x          = 1;
@@ -113,7 +112,7 @@ class Presentation extends Module{
      * @param boolean $full - [Optional] Show all information about the slide
      * @return array
      */
-    private function getSlideData(\Models\Presentation $presentation, \Models\Slide $slide, $full = TRUE) {
+    public function getSlideData(\Models\Presentation $presentation, \Models\Slide $slide, $full = TRUE) {
         $data = array(
             'id'    => $slide->getId(),
             'number'=> $slide->getNumber(),
@@ -180,12 +179,12 @@ class Presentation extends Module{
             // resize when needed
             if($resize->getWidth() > IMAGE_WIDTH || $resize->getHeight() > IMAGE_HEIGHT) {
                 $resize->resize(1024,1024,'fit');
-                $resize->save($presentation->getSlideId(), FILES_LOCATION . DS . PRESENTATIONS . DS . $presentation->getPresentationId(), 'jpg');
+                $resize->save($presentation->getSlideId(), FILES_LOCATION . DS . $presentation->getType() . DS . $presentation->getId(), 'jpg');
             }
             unset($resize);
 
             // Fill remaining of image with black
-            $image = new \Image(FILES_LOCATION . DS . PRESENTATIONS . DS .'background.jpg');
+            $image = new \Image(FILES_LOCATION . DS . $presentation->getType() . DS .'background.jpg');
             $image->addWatermark($slidePath);
             $image->writeWatermark(100, 0, 0, 'c', 'c');
             $image->resize(1024,1024,'fit');
@@ -222,6 +221,11 @@ class Presentation extends Module{
             throw new \Exception('Slide does not exist', 6);
         }
 
-        return $data;
+        // Format the result
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE),
+        );
+
+        return $result;
     }
 }

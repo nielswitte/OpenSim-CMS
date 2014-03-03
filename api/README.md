@@ -10,12 +10,12 @@ header is used.
 Before the API can be used, an user needs to authorize himself. This can be done by using the following API:
 
 ```http
-POST /api/auth/user/ HTTP/1.1
+POST /api/auth/username/ HTTP/1.1
 ```
 
 | Parameter         | Type      | Description                                                   |
 |-------------------|-----------|---------------------------------------------------------------|
-| UserName          | String    | The username of the user in the CMS                           |
+| username          | String    | The username of the user in the CMS                           |
 | password          | String    | The corresponding password of the user in the CMS             |
 | ip                | String    | [Optional] The IP address to assign this token to             |
 
@@ -34,11 +34,49 @@ This request will return, on succes the following JSON:
 ```
 
 The validity of the token depends on the config settings and is extended everytime the token is used.
-The user OpenSim with user ID -1 can only accessed from the IP set in the config which is used by OpenSim.
-In addition the `HTTP_X_SECONDLIFE_SHARD` header needs to be set to access this user, this is done by default
-for OpenSim.
+The user OpenSim with user ID -1 can only accessed from the IP/Hostname which is used by OpenSim according
+to the grid list. In addition the `X-SecondLife-Shard` header needs to be set to access this user, this is
+done by default for OpenSim.
 
 ## Users
+To get a list of 50 users, use:
+
+```http
+GET /api/users/ HTTP/1.1
+```
+
+Or use the following API request with a offset to get more users
+
+```http
+GET /api/users/<OFFSET>/ HTTP/1.1
+```
+
+### Search for users by username
+To search for a specific user by his or her username, the following API can be used.
+Atleast 3 characters are required.
+
+```http
+GET /api/user/<SEARCH>/ HTTP/1.1
+```
+
+The result is similar to the request by UUID, but displayed as a list ordered by username and only the basic information.
+
+```json
+{
+    {
+        "id": 1,
+        "username": "testuser",
+        "firstName": "Test",
+        "lastName": "User",
+        "email": "testuser@email.com"
+    },
+    { (...) },
+    { (...) },
+    (...)
+}
+```
+
+### Individual user
 User information can be accessed by using, the UUID of the user's avatar in OpenSim on the given Grid:
 
 ```http
@@ -55,7 +93,7 @@ Example of output
 ```json
 {
     "id": 1,
-    "userName": "testuser",
+    "username": "testuser",
     "firstName": "Test",
     "lastName": "User",
     "email": "testuser@email.com",
@@ -88,57 +126,83 @@ about the avatars of the user. For each avatar the following information is show
 }
 ```
 
-### Search for users by userName
-To search for a specific user by his or her username, the following API can be used.
-Atleast 3 characters are required.
+### Create user
 
 ```http
-GET /api/user/<SEARCH>/ HTTP/1.1
+POST /api/user/ HTTP/1.1
 ```
 
-The result is similar to the request by UUID, but displayed as a list ordered by username and only the basic information.
+| Parameter         | Type      | Description                                                       |
+|-------------------|-----------|-------------------------------------------------------------------|
+| username          | String    | The username of the new user                                      |
+| email             | String    | The email address for the new user                                |
+| firstName         | String    | The first name of the new user                                    |
+| lastName          | String    | The last name of the new user                                     |
+| password          | String    | The new user's password                                           |
+| password2         | String    | The new user's password again, to check if no typo has been made  |
 
-```json
-{
-    "1": {
-        "id": 1,
-        "userName": "testuser",
-        "firstName": "Test",
-        "lastName": "User",
-        "email": "testuser@email.com"
-    },
-    "2": { (...) },
-    "3": { (...) },
-    (...)
-}
 
+### Change password
+
+```http
+PUT /api/user/<USER-ID>/ HTTP/1.1
 ```
 
-### Update a user's UUID
+| Parameter         | Type      | Description                                                       |
+|-------------------|-----------|-------------------------------------------------------------------|
+| currentPassword   | String    | The user's current password                                       |
+| password          | String    | The user's new password                                           |
+| password2         | String    | The user's new password again, to check if no typo has been made  |
+
+## Avatars
+
+### Link avatar to user
 To match an UUID of a user to the user in the CMS the following command can be used.
 Some form of authentication will be added later on. By sending a PUT request to the server with the CMS
 username as parameter and use the UUID of the user in OpenSim as URL parameter.
 
 ```http
-PUT /api/grid/<GRID-ID>/avatar/<UUID>/ HTTP/1.1
+POST /api/grid/<GRID-ID>/avatar/<UUID>/ HTTP/1.1
 ```
 
 | Parameter         | Type      | Description                                                   |
 |-------------------|-----------|---------------------------------------------------------------|
-| UserName          | String    | The username of the user in the CMS                           |
+| username          | String    | The username of the user in the CMS                           |
 
-### Create a new avatar
-To create a new avatar the following API url can be used with a POST request.
+
+### Confirm avatar
+Once an avatar is linked to a user account, it needs to be confirmed by the user. This can only be done
+by the user himself.
 
 ```http
-POST /api/user/avatar/ HTTP/1.1
+PUT /api/grid/<GRID-ID>/avatar/<UUID>/ HTTP/1.1
+```
+
+Because the token which is used for this request is matched to the userId, this will provide the additional
+required information. Therefore no parameters are needed for this request.
+
+This request will also return `"success": false` when the avatar is already confirmed.
+
+### Unlink an avatar
+This unlinks an avatar from the user. Just like confirming, this can only be performed by the useraccount associated with
+the link.
+
+```http
+DELETE /api/grid/<GRID-ID>/avatar/<UUID>/confirm/ HTTP/1.1
+```
+
+
+### Create a new avatar
+To create a new avatar on the given Grid the following API url can be used with a POST request.
+
+```http
+POST /api/grid/<GRID-ID>/avatar/ HTTP/1.1
 ```
 
 The parameters that can be used are the following:
 
 | Parameter         | Type      | Description                                                   |
 |-------------------|-----------|---------------------------------------------------------------|
-| gridId            | integer   | the id to place the avatar on                                 |
 | firstName         | string    | agent's first name                                            |
 | lastName          | string    | agent's last name                                             |
 | email             | string    | agent's email address                                         |
@@ -151,6 +215,9 @@ This request will return a JSON message with the result. It contains two or thre
 the request is not successful. 3) the UUID of the newly created user, which is filled with zeros on
 failure. Two examples of output are listed below, first a successful request,
 second a failure because the user's first and lastname were already used.
+
+*WARNING* This way of avatar creation does not support special chars in the password. The following characters
+can not be used in a password: ` ?{}<>;" '[]/\ `. This will result in not being able to login in OpenSim.
 
 ```json
 {
@@ -240,7 +307,21 @@ GET /api/grid/<GRID-ID>/room/<ROOM-ID/ HTTP/1.1
 GET /api/grid/<GRID-ID>/region/<REGION-UUID>/rooms/ HTTP/1.1
 ```
 
-## Presentations
+## Documents
+
+```http
+GET /api/documents/ HTTP/1.1
+```
+
+```http
+GET /api/documents/<OFFSET>/ HTTP/1.1
+```
+
+```http
+GET /api/document/<DOCUMENT-ID>/ HTTP/1.1
+```
+
+### Presentations
 A list with presentations can be requested by using the following GET request.
 
 ```http
@@ -248,10 +329,10 @@ GET /api/presentations/ HTTP/1.1
 ```
 
 This will return the first 50 presentations. To request the next 50, add the offset as a parameter.
-The following example will return the presentations from 51 to 100.
+When using an ofset of 50, the following example will return the presentations from 51 to 100.
 
 ```http
-GET /api/presentations/50/ HTTP/1.1
+GET /api/presentations/<OFFSET>/ HTTP/1.1
 ```
 
 Example of the output will be similar to the request of a single presentation, only in a list form.
@@ -259,7 +340,7 @@ Cache information is left out in the list view.
 
 ```json
 {
-    "1": {
+    {
         "type": "presentation",
         "title": "Test presentation title",
         "presentationId": "1",
@@ -278,13 +359,13 @@ Cache information is left out in the list view.
         "creationDate": "2014-02-13 14:21:47",
         "modificationDate": "2014-02-13 14:22:09"
     },
-    "2": { (...) },
-    "3": { (...) },
+    { (...) },
+    { (...) },
     (...)
 }
 ```
 
-### Specific presentation
+#### Specific presentation
 To retrieve a specific presentation use the following command and replace the id with the number of the
 presentation you want to get. The trailing / is optional.
 
@@ -373,7 +454,7 @@ specific grid when possible.
 
 ```json
 {
-    "1": {
+    {
         "isOnline": 1,
         "id": 1,
         "name": "Test Grid",
@@ -402,8 +483,8 @@ specific grid when possible.
             }
         }
     },
-    "2": { (...) },
-    "3": { (...) }
+    { (...) },
+    { (...) }
 ]
 ```
 
@@ -491,7 +572,8 @@ is displayed when attempting to access a protected function without a valid API 
 
 ```json
 {
-    "Exception": "Unauthorized to access this API URL"
+    "success": false,
+    "error": "Unauthorized to access this API URL"
 }
 ```
 
@@ -500,7 +582,8 @@ file, line and stack trace of the error. It is recommended to disable debugging 
 
 ```json
 {
-    "Exception": "Unauthorized to access this API URL",
+    "success": false,
+    "error": "Unauthorized to access this API URL"
     "Code": 0,
     "File": "/OpenSim-CMS/api/index.php",
     "Line": 62,

@@ -7,8 +7,8 @@ presentations created in the CMS.
 
 This project is based on the MVC pattern and uses Apache web server with PHP5.4+ and a MySQL database. The API is RESTful and provides the basic GET, POST, PUT and DELETE functionalities.
 
-The CMS itself is build with jQuery.rest allowing it to remain separated from the Model and Controller and access only the API. The only thing the CMS shares with the other parts
-is the `config.php` file. However, this could become obsolute in the future.
+The CMS itself is build with AngularJS and RestAngular allowing it to remain separated from the Model and Controller and access only the API. The only thing the CMS shares with the
+other parts is the `config.php` file. However, this could become obsolute in the future.
 
 ## Installation
 clone this repository in your www directory. For example: `/var/www/`.
@@ -61,7 +61,9 @@ Used in the Models/Controllers and API:
  * Sprain for class.Images.php (https://github.com/sprain/class.Images.php)
 
 Used in the CMS:
- * Jpillora for jQuery.rest (https://github.com/jpillora/jquery.rest)
+ * Mgonto for Restangular (https://github.com/mgonto/restangular)
  * Arshaw for Fullcalendar (https://github.com/arshaw/fullcalendar)
  * Tobiasahlin for SpinKit (https://github.com/tobiasahlin/SpinKit)
- * Andris9 for jStorage (https://github.com/andris9/jStorage)
+ * Ivaynberg for Select2 (https://github.com/ivaynberg/select2)
+ * Moment (https://github.com/moment/moment)
+ * Jashkenas for Underscore (https://github.com/jashkenas/underscore)

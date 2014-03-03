@@ -5,6 +5,7 @@ require_once dirname(__FILE__) .'/../config.php';
 require_once dirname(__FILE__) .'/auth.php';
 require_once dirname(__FILE__) .'/api.php';
 require_once dirname(__FILE__) .'/modules/auth.php';
+require_once dirname(__FILE__) .'/modules/document.php';
 require_once dirname(__FILE__) .'/modules/grid.php';
 require_once dirname(__FILE__) .'/modules/meeting.php';
 require_once dirname(__FILE__) .'/modules/meetingroom.php';
@@ -31,14 +32,15 @@ try {
 
     // Auth user
     $auth               = new \API\Auth();
-    $auth->setToken($token);
-    $authorized         = $auth->validate();
+    $auth::setToken($token);
+    $authorized         = $auth::validate();
 
     // Create new API
     $api                = new \API\API();
 
     // Add modules
     $gridApi            = new \API\Modules\Grid($api);
+    $documentApi        = new \API\Modules\Document($api);
     $meetingsApi        = new \API\Modules\Meeting($api);
     $presentationApi    = new \API\Modules\Presentation($api);
     $roomApi            = new \API\Modules\MeetingRoom($api);
@@ -55,7 +57,8 @@ try {
     }
 // Catch any exception that occured
 } catch (\Exception $e) {
-	$result["Exception"]    = $e->getMessage();
+    $result["success"]  = FALSE;
+	$result["error"]    = $e->getMessage();
 
     // Do we want to show debug information?
     if(SERVER_DEBUG) {
@@ -81,7 +84,6 @@ if($result != '') {
 }
 
 /*
-$data = json_encode($_SERVER, JSON_PRETTY_PRINT);
 foreach($headers as $header => $value) {
     $data .= $header .': '. $value ."\n";
 }

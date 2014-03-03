@@ -15,7 +15,7 @@ require_once dirname(__FILE__) .'/user.php';
  * @version 0.1
  * @date February 19th, 2014
  */
-class UserLoggedIn extends User {
+class UserLoggedIn extends User implements SimpleModel {
     /**
      * Creates a new user with the given ID and UUID
      *
@@ -24,6 +24,5 @@ class UserLoggedIn extends User {
      */
     public function __construct($id = 0, $userUUID = '') {
         parent::__construct($id, $userUUID);
-        $this->getInfoFromDatabase();
     }
 }

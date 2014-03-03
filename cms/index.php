@@ -15,5 +15,5 @@ if(isset($_SESSION['AccessTokenExpires'])) {
     }
 }
 
-require dirname(__FILE__) .'/templates/bootstrapped/index.php';
+require dirname(__FILE__) .'/templates/restangular/index.php';
 

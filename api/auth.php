@@ -12,27 +12,21 @@ if(EXEC != 1) {
  * @date February 19th, 2014
  */
 class Auth {
-    private $token = '';
-    private $ip;
-    private $timestamp;
-    private $userId;
-    private $user;
-
-    /**
-     * Constructs a new Auth instance
-     */
-    public function __construct() {
-        $this->ip           = $_SERVER['REMOTE_ADDR'];
-        $this->timestamp    = date('Y-m-d H:i:s');
-    }
+    private static $token = '';
+    private static $ip;
+    private static $timestamp;
+    private static $userId;
+    private static $user;
 
     /**
      * Sets the token to be used in this class
      *
      * @param string $token
      */
-    public function setToken($token) {
-        $this->token = $token;
+    public static function setToken($token) {
+        self::$token     = $token;
+        self::$ip        = $_SERVER['REMOTE_ADDR'];
+        self::$timestamp = date('Y-m-d H:i:s');
     }
 
     /**
@@ -41,9 +35,9 @@ class Auth {
      *
      * @return boolean
      */
-    public function validate() {
+    public static function validate() {
         $token = filter_input(INPUT_GET, 'token', FILTER_SANITIZE_ENCODED);
-        $result = self::checkToken($this->token);
+        $result = self::checkToken($token);
 
         return $result;
     }
@@ -54,14 +48,14 @@ class Auth {
      *
      * @return \Models\UserLoggedIn or boolean when false
      */
-    public function getUser() {
+    public static function getUser() {
         $result = FALSE;
-        if(isset($this->userId)) {
-            if(!isset($this->user)) {
-                $this->user = new \Models\UserLoggedIn($this->userId);
-                $this->user->getInfoFromDB();
+        if(isset(self::$userId)) {
+            if(!isset(self::$user)) {
+                self::$user = new \Models\UserLoggedIn(self::$userId);
+                self::$user->getInfoFromDatabase();
             }
-            $result = $this->user;
+            $result = self::$user;
         }
         return $result;
     }
@@ -71,16 +65,20 @@ class Auth {
      *
      * @return boolean
      */
-    private function checkToken() {
+    private static function checkToken() {
         $db = \Helper::getDB();
-        $params = array($this->token, $this->ip, $this->timestamp);
+        $params = array(
+            $db->escape(self::$token),
+            $db->escape(self::$ip),
+            $db->escape(self::$timestamp)
+        );
         $result = $db->rawQuery('SELECT COUNT(*) AS count, userId FROM tokens WHERE token = ? AND ip = ? AND expires >= ? LIMIT 1', $params);
 
         // Extend token expiration time
         if($result[0]['count'] == 1) {
-            $this->userId = $result[0]['userId'];
-            $db->where('token', $db->escape($this->token));
-            $data['expires']    = date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES));
+            self::$userId       = $result[0]['userId'];
+            $db->where('token', $db->escape(self::$token));
+            $data['expires']    = $db->escape(date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES)));
             $db->update('tokens', $data);
         }
 
