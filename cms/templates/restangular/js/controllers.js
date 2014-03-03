@@ -25,6 +25,10 @@ angularRest.controller('loginController', ['Restangular', '$scope', function(Res
 
                         // Finally store token
                         sessionStorage.token        = authResponse.token;
+
+                        // Set token as default request parameter
+                        Restangular.setDefaultRequestParams({token: sessionStorage.token});
+
                         // Token is valid for half an hour
                         sessionStorage.tokenTimeOut = new Date(new Date + (1000*60*30)).getTime();
                         addAlert('success', '<strong>Logged in!</strong> You are now logged in as '+ userResponse.username);
@@ -93,7 +97,7 @@ angularRest.controller('toolbarController', ['Restangular', '$scope', '$location
 
 // documentsController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('documentsController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
-        var documents = Restangular.one('documents').get({ token: sessionStorage.token }).then(function(documentsResponse) {
+        var documents = Restangular.one('documents').get().then(function(documentsResponse) {
             $scope.documentsList = documentsResponse;
             Page.setTitle('Documents');
 
@@ -105,7 +109,7 @@ angularRest.controller('documentsController', ['Restangular', '$scope', 'Page', 
 
 // documentController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('documentController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
-        var document = Restangular.one('document').one($routeParams.documentId).get({ token: sessionStorage.token }).then(function(documentResponse) {
+        var document = Restangular.one('document').one($routeParams.documentId).get().then(function(documentResponse) {
             $scope.document = documentResponse;
             Page.setTitle(documentResponse.title);
 
@@ -149,7 +153,7 @@ angularRest.controller('documentController', ['Restangular', '$scope', '$routePa
 
 // gridsController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('gridsController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
-        var grids = Restangular.one('grids').get({ token: sessionStorage.token }).then(function(gridsResponse) {
+        var grids = Restangular.one('grids').get().then(function(gridsResponse) {
             $scope.gridsList = gridsResponse;
             Page.setTitle('Grids');
 
@@ -165,7 +169,7 @@ angularRest.controller('gridsController', ['Restangular', '$scope', 'Page', func
 
 // gridController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('gridController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
-        var grid = Restangular.one('grid').one($routeParams.gridId).get({ token: sessionStorage.token }).then(function(gridResponse) {
+        var grid = Restangular.one('grid').one($routeParams.gridId).get().then(function(gridResponse) {
             Page.setTitle(gridResponse.name);
             $scope.grid = gridResponse;
             $scope.api_token = sessionStorage.token;
@@ -181,7 +185,7 @@ angularRest.controller('gridController', ['Restangular', '$scope', '$routeParams
 angularRest.controller('meetingsController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
         var date = new Date(new Date - (1000*60*60*24*14));
 
-        var meetings = Restangular.one('meetings').one(date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).one('calendar').get({ token: sessionStorage.token }).then(function(meetingsResponse) {
+        var meetings = Restangular.one('meetings').one(date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).one('calendar').get().then(function(meetingsResponse) {
             $scope.meetings = meetingsResponse;
             Page.setTitle('Meetings');
 
@@ -213,7 +217,7 @@ angularRest.controller('meetingsController', ['Restangular', '$scope', 'Page', f
 
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('usersController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
-        var users = Restangular.one('users').get({ token: sessionStorage.token }).then(function(usersResponse) {
+        var users = Restangular.one('users').get().then(function(usersResponse) {
             $scope.usersList = usersResponse;
             Page.setTitle('Users');
 
@@ -225,7 +229,7 @@ angularRest.controller('usersController', ['Restangular', '$scope', 'Page', func
 
 // userController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('userController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
-        var user = Restangular.one('user').one($routeParams.userId).get({ token: sessionStorage.token }).then(function(userResponse) {
+        var user = Restangular.one('user').one($routeParams.userId).get().then(function(userResponse) {
             Page.setTitle(userResponse.username);
             $scope.user = userResponse;
             $scope.user.avatarCount = Object.keys(userResponse.avatars).length;
@@ -236,7 +240,7 @@ angularRest.controller('userController', ['Restangular', '$scope', '$routeParams
         };
 
         $scope.confirmAvatar = function(index, avatar) {
-            var confirm = Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).put({ token: sessionStorage.token }).then(function(confirmationResponse) {
+            var confirm = Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).put().then(function(confirmationResponse) {
                 if(confirmationResponse.error) {
                     addAlert('danger', '<strong>Error!</strong> '+ confirmationResponse.error);
                 } else {
@@ -247,7 +251,7 @@ angularRest.controller('userController', ['Restangular', '$scope', '$routeParams
         };
 
         $scope.unlinkAvatar = function(index, avatar) {
-            var unlink = Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).remove({ token: sessionStorage.token }).then(function(unlinkResponse) {
+            var unlink = Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).remove().then(function(unlinkResponse) {
                 if(unlinkResponse.error) {
                     addAlert('danger', '<strong>Error!</strong> '+ unlinkResponse.error);
                 } else {

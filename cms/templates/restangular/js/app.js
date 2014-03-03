@@ -31,7 +31,7 @@ var angularRest = angular.module('OpenSim-CMS', [
     }).when('/users', {
         templateUrl: partial_path +'/users.html',
         controller: 'usersController'
-    }).when('/', {
+    }).when('/home', {
         templateUrl: partial_path +'/home.html',
         controller: 'homeController'
     }).otherwise({
@@ -58,6 +58,12 @@ angularRest.factory('Page', function() {
 angularRest.config(["RestangularProvider", function(RestangularProvider) {
         RestangularProvider.setBaseUrl('' + server_address + base_url + '/api');
         RestangularProvider.setDefaultHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
+
+        // Add token to request when available (this line is required for page refreshes to keep the token)
+        if(sessionStorage.token) {
+            RestangularProvider.setDefaultRequestParams({token: sessionStorage.token});
+        }
+
         RestangularProvider.setErrorInterceptor(function(resp) {
             addAlert('danger', '<strong>Error!</strong> '+ resp.data.error);
             jQuery('#loading').hide();
