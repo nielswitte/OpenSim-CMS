@@ -86,7 +86,7 @@ class Presentation extends Module{
         $data = array();
         $data['type']               = 'presentation';
         $data['title']              = $presentation->getTitle();
-        $data['presentationId']     = $presentation->getPresentationId();
+        $data['presentationId']     = $presentation->getId();
         $data['ownerId']            = $presentation->getOwnerId();
         $slides     = array();
         $x          = 1;
@@ -178,12 +178,12 @@ class Presentation extends Module{
             // resize when needed
             if($resize->getWidth() > IMAGE_WIDTH || $resize->getHeight() > IMAGE_HEIGHT) {
                 $resize->resize(1024,1024,'fit');
-                $resize->save($presentation->getSlideId(), FILES_LOCATION . DS . PRESENTATIONS . DS . $presentation->getPresentationId(), 'jpg');
+                $resize->save($presentation->getSlideId(), FILES_LOCATION . DS . $presentation->getType() . DS . $presentation->getId(), 'jpg');
             }
             unset($resize);
 
             // Fill remaining of image with black
-            $image = new \Image(FILES_LOCATION . DS . PRESENTATIONS . DS .'background.jpg');
+            $image = new \Image(FILES_LOCATION . DS . $presentation->getType() . DS .'background.jpg');
             $image->addWatermark($slidePath);
             $image->writeWatermark(100, 0, 0, 'c', 'c');
             $image->resize(1024,1024,'fit');

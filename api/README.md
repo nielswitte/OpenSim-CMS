@@ -63,15 +63,15 @@ The result is similar to the request by UUID, but displayed as a list ordered by
 
 ```json
 {
-    "1": {
+    {
         "id": 1,
         "username": "testuser",
         "firstName": "Test",
         "lastName": "User",
         "email": "testuser@email.com"
     },
-    "2": { (...) },
-    "3": { (...) },
+    { (...) },
+    { (...) },
     (...)
 }
 ```
@@ -307,7 +307,17 @@ GET /api/grid/<GRID-ID>/room/<ROOM-ID/ HTTP/1.1
 GET /api/grid/<GRID-ID>/region/<REGION-UUID>/rooms/ HTTP/1.1
 ```
 
-## Presentations
+## Documents
+
+```http
+GET /api/documents/ HTTP/1.1
+```
+
+```http
+GET /api/documents/<OFFSET>/ HTTP/1.1
+```
+
+### Presentations
 A list with presentations can be requested by using the following GET request.
 
 ```http
@@ -315,10 +325,10 @@ GET /api/presentations/ HTTP/1.1
 ```
 
 This will return the first 50 presentations. To request the next 50, add the offset as a parameter.
-The following example will return the presentations from 51 to 100.
+When using an ofset of 50, the following example will return the presentations from 51 to 100.
 
 ```http
-GET /api/presentations/50/ HTTP/1.1
+GET /api/presentations/<OFFSET>/ HTTP/1.1
 ```
 
 Example of the output will be similar to the request of a single presentation, only in a list form.
@@ -326,7 +336,7 @@ Cache information is left out in the list view.
 
 ```json
 {
-    "1": {
+    {
         "type": "presentation",
         "title": "Test presentation title",
         "presentationId": "1",
@@ -345,13 +355,13 @@ Cache information is left out in the list view.
         "creationDate": "2014-02-13 14:21:47",
         "modificationDate": "2014-02-13 14:22:09"
     },
-    "2": { (...) },
-    "3": { (...) },
+    { (...) },
+    { (...) },
     (...)
 }
 ```
 
-### Specific presentation
+#### Specific presentation
 To retrieve a specific presentation use the following command and replace the id with the number of the
 presentation you want to get. The trailing / is optional.
 
@@ -440,7 +450,7 @@ specific grid when possible.
 
 ```json
 {
-    "1": {
+    {
         "isOnline": 1,
         "id": 1,
         "name": "Test Grid",
@@ -469,8 +479,8 @@ specific grid when possible.
             }
         }
     },
-    "2": { (...) },
-    "3": { (...) }
+    { (...) },
+    { (...) }
 ]
 ```
 

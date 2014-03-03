@@ -19,7 +19,6 @@
     // Files settings
 	define('FILES_LOCATION',            'C:\\Soas\\www\\storage');              // Absolute path to storage directory
 	define('DS',                        '\\');                                  // Directory separator
-	define('PRESENTATIONS',             'presentations');                       // Presentations folder name
 
     // Image settings
 	define('IMAGE_WIDTH',               1024);                                  // Texture width in OpenSim, used to resize presentations
