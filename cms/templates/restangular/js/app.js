@@ -37,9 +37,14 @@ angularRest.config(["RestangularProvider", function(RestangularProvider) {
         RestangularProvider.setBaseUrl('' + server_address + base_url + '/api');
         RestangularProvider.setDefaultHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
         RestangularProvider.setErrorInterceptor(function(resp) {
-            console.log(resp);
             addAlert('danger', '<strong>Error!</strong> '+ resp.data.error);
             jQuery('#loading').hide();
+            
+            // Session check? Logout if expired
+            if(sessionStorage.tokenTimeOut < new Date().getTime()) {
+                sessionStorage.clear();
+                addAlert('warning', '<strong>Session Expired!</strong> You have been logged out because your session has expired');
+            }
             return false; // stop the promise chain
         });
         RestangularProvider.addRequestInterceptor(function(element, operation, route, url) {
@@ -56,6 +61,8 @@ angularRest.config(["RestangularProvider", function(RestangularProvider) {
             if(loading == 0) {
                 jQuery('#loading').hide();
             }
+            // Increase token validaty
+            sessionStorage.tokenTimeOut = new Date(new Date + (1000*60*30));
 
             return data;
         });
@@ -66,7 +73,6 @@ angularRest.config(["RestangularProvider", function(RestangularProvider) {
 angularRest.config(["$compileProvider", function($compileProvider) {
         $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|opensim):/);
         // Angular before v1.2 uses $compileProvider.urlSanitizationWhitelist(...)
-
     }]
 );
 

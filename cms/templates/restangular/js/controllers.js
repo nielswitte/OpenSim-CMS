@@ -11,14 +11,16 @@ angularRest.controller("loginController", ["Restangular", "$scope", function(Res
                 // Successful auth?
                 if(authResponse.token) {
                     var user = Restangular.one('user', authResponse.userId).get({ token: authResponse.token }).then(function(userResponse) {
-                        sessionStorage.username    = userResponse.username;
-                        sessionStorage.email       = userResponse.email;
-                        sessionStorage.id          = userResponse.id;
-                        sessionStorage.firstName   = userResponse.firstName;
-                        sessionStorage.lastName    = userResponse.lastName;
+                        sessionStorage.username     = userResponse.username;
+                        sessionStorage.email        = userResponse.email;
+                        sessionStorage.id           = userResponse.id;
+                        sessionStorage.firstName    = userResponse.firstName;
+                        sessionStorage.lastName     = userResponse.lastName;
 
                         // Finally store token
-                        sessionStorage.token    = authResponse.token;
+                        sessionStorage.token        = authResponse.token;
+                        // Token is valid for half an hour
+                        sessionStorage.tokenTimeOut = new Date(new Date + (1000*60*30)).getTime();
                         addAlert('success', '<strong>Logged in!</strong> You are now logged in as '+ userResponse.username);
 
                         // Reload toolbar
