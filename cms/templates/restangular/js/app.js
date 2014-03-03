@@ -31,7 +31,7 @@ var angularRest = angular.module('OpenSim-CMS', [
     }).when('/users', {
         templateUrl: partial_path +'/users.html',
         controller: 'usersController'
-    }).when('/', {
+    }).when('/home', {
         templateUrl: partial_path +'/home.html',
         controller: 'homeController'
     }).otherwise({
