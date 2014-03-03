@@ -8,7 +8,14 @@ var angularRest = angular.module('OpenSim-CMS', [
     'restangular',
     'ngRoute'
 ]).config(function($routeProvider, $locationProvider) {
-    $routeProvider.when('/grids', {
+    $routeProvider
+    .when('/documents', {
+        templateUrl: partial_path +'/documents.html',
+        controller: 'documentsController'
+    }).when('/document/:documentId', {
+        templateUrl: partial_path +'/document.html',
+        controller: 'documentController'
+    }).when('/grids', {
         templateUrl: partial_path +'/grids.html',
         controller: 'gridsController'
     }).when('/grid/:gridId', {
@@ -39,7 +46,7 @@ angularRest.config(["RestangularProvider", function(RestangularProvider) {
         RestangularProvider.setErrorInterceptor(function(resp) {
             addAlert('danger', '<strong>Error!</strong> '+ resp.data.error);
             jQuery('#loading').hide();
-            
+
             // Session check? Logout if expired
             if(sessionStorage.tokenTimeOut < new Date().getTime()) {
                 sessionStorage.clear();

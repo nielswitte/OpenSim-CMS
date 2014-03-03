@@ -74,7 +74,7 @@ angularRest.controller("toolbarController", ["Restangular", "$scope", "$location
          * @source: http://stackoverflow.com/a/18562339
          * @param {string} viewLocation
          * @returns {Boolean}
-         */ 
+         */
         $scope.isActive = function (viewLocation) {
             if(viewLocation.length > 1) {
                 return $location.path().indexOf(viewLocation) === 0;
@@ -82,6 +82,60 @@ angularRest.controller("toolbarController", ["Restangular", "$scope", "$location
                 return $location.path() === viewLocation;
             }
         };
+    }]
+);
+
+// documentsController ----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller("documentsController", ["Restangular", "$scope", function(Restangular, $scope) {
+        var documents = Restangular.one('documents').get({ token: sessionStorage.token }).then(function(documentsResponse) {
+            $scope.documentsList = documentsResponse;
+
+            // attach table filter plugin to inputs
+            jQuery('[data-action="filter"]').filterTable();
+        });
+    }]
+);
+
+// documentController ----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller("documentController", ["Restangular", "$scope", "$routeParams", function(Restangular, $scope, $routeParams) {
+        var document = Restangular.one('document').one($routeParams.documentId).get({ token: sessionStorage.token }).then(function(documentResponse) {
+            $scope.document = documentResponse;
+
+            // Init select2
+            jQuery("#inputOwner").select2({
+                placeholder: "Search for a user",
+                minimumInputLength: 3,
+                ajax: {
+                    url: function(term, page) {
+                        return base_url +"/api/users/"+ term +"/?token="+ sessionStorage.token;
+                    },
+                    dataType: 'json',
+                    results: function(data, page) {
+                        var result = [];
+                        jQuery.each(data, function(i, item) {
+                            var items = {id: i, text: item.username};
+                            result.push(items);
+                        });
+
+                        return {results: result};
+                    }
+                },
+                initSelection: function(element, callback) {
+                    var id = jQuery(element).val();
+                    if (id !== "") {
+                        jQuery.ajax(base_url +"/api/user/"+ id +"/?token="+ sessionStorage.token, {
+                            dataType: "json"
+                        }).done(function(data) {
+                            callback({id: data.id, text: data.username});
+                        });
+                    }
+                }
+            });
+
+            // Trigger change and update
+            jQuery('#inputOwner').select2('val', documentResponse.ownerId, true);
+        });
+
     }]
 );
 

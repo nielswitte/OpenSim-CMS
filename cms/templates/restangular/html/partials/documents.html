@@ -1,47 +1,38 @@
 <div class="page-header">
-    <h1>Documents <small></small></h1>
+    <h1>Documents<small>Overview</small></h1>
 </div>
-<form class="form-horizontal" role="form" id="documentsForm">
-    <div class="form-group">
-        <label for="inputId" class="col-sm-2 control-label">ID</label>
-        <div class="col-sm-10">
-            <input type="number" class="form-control" id="inputId" placeholder="ID" readonly="readonly">
+<div class="panel panel-primary filter">
+    <div class="panel-heading">
+        <h3 class="panel-title">Documents</h3>
+        <div class="pull-right">
+            <span class="clickable filter" data-toggle="tooltip" title="Toggle table filter" data-container="body">
+                <i class="glyphicon glyphicon-filter"></i>
+            </span>
         </div>
     </div>
-    <div class="form-group">
-        <label for="inputType" class="col-sm-2 control-label">Type</label>
-        <div class="col-sm-10">
-            <input type="text" class="form-control" id="inputType" placeholder="Type" readonly="readonly">
-        </div>
+    <div class="panel-body">
+        <input type="text" class="form-control" id="documents-table-filter" data-action="filter" data-filters="#documentsList" placeholder="Filter documents">
     </div>
-    <div class="form-group">
-        <label for="inputTitle" class="col-sm-2 control-label">Title</label>
-        <div class="col-sm-10">
-            <input type="text" class="form-control" id="inputTitle" placeholder="Title">
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="inputOwner" class="col-sm-2 control-label">Owner ID</label>
-        <div class="col-sm-10">
-            <input type="hidden" class="form-control" id="inputOwner" placeholder="Owner ID">
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="inputSlidesCount" class="col-sm-2 control-label">Slides count</label>
-        <div class="col-sm-10">
-            <input type="number" class="form-control" id="inputSlidesCount" placeholder="Slides count" readonly="readonly">
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="inputCreationDate" class="col-sm-2 control-label">Creation date</label>
-        <div class="col-sm-10">
-            <input type="datetime" class="form-control" id="inputCreationDate" placeholder="Creation date" readonly="readonly">
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="inputModificationDate" class="col-sm-2 control-label">Modification date</label>
-        <div class="col-sm-10">
-            <input type="datetime" class="form-control" id="inputModificationDate" placeholder="Modification date" readonly="readonly">
-        </div>
-    </div>
-</form>
+    <table class="table table-bordered table-striped table-responsive" id="documentsList">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Owner</th>
+                <th>Creation Date</th>
+                <th>Modification Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="document in documentsList">
+                <td>{{document.id}}</td>
+                <td><a href="document/{{document.id}}/">{{document.title}}</a></td>
+                <td>{{document.type}}</td>
+                <td>{{document.ownerId}}</td>
+                <td>{{document.creationDate}}</td>
+                <td>{{document.modificationDate}}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
