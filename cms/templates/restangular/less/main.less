@@ -3,60 +3,47 @@ body {
     padding-top: 70px;
 }
 
+#calendar {
+    margin-top: 25px;
+}
+
 /**
  * @source: http://bootsnipp.com/snippets/featured/nav-account-manager
  * Special class on .container surrounding .navbar, used for positioning it into place.
  */
-.navbar-wrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 20;
-  margin-top: 20px;
 
-    /* Flip around the padding for proper display in narrow viewports */
-    .container {
-        padding-left: 0;
-        padding-right: 0;
-    }
-
-    .navbar {
-        padding-left: 15px;
-        padding-right: 15px;
-    }
-}
-
-.navbar-content {
-    width:320px;
-    padding: 15px;
-    padding-bottom:0px;
-
-    &:before,
-        &:after {
-        display: table;
-        content: "";
-        line-height: 0;
-    }
-}
-
-.navbar-nav.navbar-right:last-child {
-    margin-right: 15px !important;
-}
-.navbar-footer {
-    background-color:#DDD;
-}
-.navbar-footer-content {
-    padding:15px 15px 15px 15px;
-}
-.dropdown-menu {
+#loginForm {
+    display: block;
     padding: 0px;
     overflow: hidden;
+
+    .navbar-content {
+        width: 320px;
+        padding: 15px;
+        padding-bottom:0px;
+
+        &:before,
+            &:after {
+            display: table;
+            content: "";
+            line-height: 0;
+        }
+    }
+
+    .navbar-nav.navbar-right:last-child {
+        margin-right: 15px !important;
+    }
+    .navbar-footer {
+        background-color: #DDD;
+    }
+    .navbar-footer-content {
+        padding: 15px 15px 15px 15px;
+    }
 }
 
 .filter {
     .row{
-        margin-top:40px;
+        margin-top: 40px;
         padding: 0 10px;
     }
 
@@ -69,13 +56,9 @@ body {
             margin-top: -18px;
             font-size: 15px;
             span{
-                margin-left:5px;
+                margin-left: 5px;
             }
         }
-    }
-
-    .panel-body{
-        //display: none;
     }
 }
 
@@ -149,6 +132,38 @@ body {
         } 100% {
             transform: rotate(-360deg);
             -webkit-transform: rotate(-360deg);
+        }
+    }
+}
+
+
+.alert {
+    &.top,
+    &.top-left,
+    &.top-right {
+        position: fixed;
+        top: 50px;
+        z-index: 1050;
+        margin: 20px;
+    }
+
+    &.top {
+        right: 0;
+        left: 0;
+    }
+    
+    &.top-right {
+        right: 0;
+
+        .close {
+            padding-left: 10px
+        }
+    }
+
+    &.top-left {
+        left: 0;
+        .close {
+            padding-right: 10px;
         }
     }
 }

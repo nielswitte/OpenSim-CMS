@@ -14,6 +14,7 @@ if (EXEC != 1) {
 
         <!-- Bootstrap CSS -->
         <link href="templates/restangular/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+        <link href="templates/restangular/css/angular-motion.min.css" rel="stylesheet" type="text/css">
         <link href="templates/restangular/css/select2.css" rel="stylesheet" type="text/css">
         <link href="templates/restangular/css/select2-bootstrap.css" rel="stylesheet" type="text/css">
         <link href="templates/restangular/less/main.less" rel="stylesheet/less" type="text/css">
@@ -33,7 +34,7 @@ if (EXEC != 1) {
     </head>
     <body>
         <!-- Fixed navbar -->
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation" ng-controller="toolbarController">
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation" ng-controller="toolbarController" bs-navbar>
             <div class="container">
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -84,11 +85,6 @@ if (EXEC != 1) {
                 <p class="text-center">Loading... please be patient</p>
             </div>
 
-            <!-- Alerts -->
-            <div id="alerts">
-                <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)"><strong>{{alert.title}}</strong> {{alert.msg}}</alert>
-            </div>
-
             <!-- Main content -->
             <div ng-view></div>
             <hr>
@@ -98,11 +94,14 @@ if (EXEC != 1) {
         </div>
         <!-- Additional JS files -->
         <script src="templates/restangular/js/libs/jquery-2.1.0.min.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/libs/angular-1.2.13.min.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/libs/ui-bootstrap-tpls-0.10.0.min.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/libs/angular-route-1.2.13.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/angular-1.2.14.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/angular-animate-1.2.14.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/angular-route-1.2.14.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/angular-strap-2.0.0-rc.3.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/angular-strap.tpl-2.0.0-rc.3.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/restangular-1.3.1.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/underscore-1.6.0.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/moment-2.5.1.min.js" type="text/javascript"></script>
 
         <script src="templates/restangular/js/libs/select2-3.4.5.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/less-1.6.3.min.js" type="text/javascript"></script>

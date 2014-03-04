@@ -4,16 +4,6 @@ function MainCntl($scope, $route, $routeParams, $location, Page) {
     $scope.$location    = $location;
     $scope.$routeParams = $routeParams;
     $scope.Page         = Page;
-
-    // Alerts
-    $scope.alerts = [];
-    $scope.addAlert = function(type, title, msg) {
-        $scope.alerts.push({type: type, title: title, msg: msg});
-    };
-
-    $scope.closeAlert = function(index) {
-        $scope.alerts.splice(index, 1);
-    };
 };
 
 // homeController ------------------------------------------------------------------------------------------------------------------------------------
@@ -23,7 +13,7 @@ angularRest.controller('homeController', ['Restangular', '$scope', 'Page', funct
 );
 
 // loginController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('loginController', ['Restangular', '$scope', function(Restangular, $scope) {
+angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$sce', function(Restangular, $scope, $alert, $sce) {
         $scope.login = function(user) {
             // Fix for autocomplete
             if(!user) {
@@ -49,15 +39,15 @@ angularRest.controller('loginController', ['Restangular', '$scope', function(Res
 
                         // Token is valid for half an hour
                         sessionStorage.tokenTimeOut = new Date(new Date + (1000*60*30)).getTime();
-                        $scope.addAlert('success', 'Logged in!', 'You are now logged in as '+ userResponse.username);
+                        $alert({title: 'Logged In!', content: $sce.trustAsHtml('You are now logged in as '+ userResponse.username), type: 'success'});
 
-                        // Reload toolbar
-                        $scope.getUserToolbar();
+                        // Hide form
+                        $scope.toggleLoginForm();
                     });
                 // Failed auth
                 } else {
                     sessionStorage.clear();
-                    $scope.addAlert('danger', 'Error!', authResponse.error);
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(authResponse.error +'.'), type: 'danger'});
                 }
             });
         };
@@ -68,11 +58,13 @@ angularRest.controller('loginController', ['Restangular', '$scope', function(Res
                 email: sessionStorage.email,
                 userId: sessionStorage.id
             };
+            $scope.getUserToolbar();
         }
 
         $scope.logout = function() {
             sessionStorage.clear();
-            $scope.addAlert('success', 'Logged Out!', 'You are now logged out.');
+            $alert({title: 'Logged Out!', content: $sce.trustAsHtml('You are now logged out'), type: 'success'});
+            $scope.toggleLoginForm();
             $scope.getUserToolbar();
         };
     }]
@@ -96,19 +88,10 @@ angularRest.controller('toolbarController', ['Restangular', '$scope', '$location
             }
         };
 
-        /**
-         * Check to get the currently active menu item
-         *
-         * @source: http://stackoverflow.com/a/18562339
-         * @param {string} viewLocation
-         * @returns {Boolean}
-         */
-        $scope.isActive = function (viewLocation) {
-            if(viewLocation.length > 1) {
-                return $location.path().indexOf(viewLocation) === 0;
-            } else {
-                return $location.path() === viewLocation;
-            }
+        $scope.hideLoginForm = true;
+        $scope.toggleLoginForm = function() {
+            $scope.hideLoginForm = !$scope.hideLoginForm;
+            return $scope.hideLoginForm;
         };
     }]
 );
@@ -213,25 +196,77 @@ angularRest.controller('meetingsController', ['Restangular', '$scope', 'Page', f
             $scope.meetings = meetingsResponse;
             Page.setTitle('Meetings');
 
-            // Insert the events into the calendar
-            jQuery('#calendar').fullCalendar({
-                defaultView: 'agendaWeek',
-                height: 650,
-                header: {
-                    left:   'title',
-                    center: 'agendaDay,agendaWeek,month',
-                    right:  'today prev,next'
-                },
-                events: meetingsResponse,
-                eventClick: function(event) {
-                    // Create a pop over for this event
-                    //@todo
+            var calendar = jQuery('#calendar').calendar({
+                language: 'en-US',
+                events_source: meetingsResponse,
+                tmpl_path: 'templates/restangular/html/calendar/',
+                onAfterEventsLoad: function(events) {
+                    if(!events) {
+                        return;
+                    }
+                    var list = jQuery('#eventlist');
+                    list.html('');
 
-                    // Imediatly show it
-                    //jQuery(this).popover('show');
-                    return false;
+                    jQuery.each(events, function(key, val) {
+                        jQuery(document.createElement('li'))
+                            .html('<a href="' + val.url + '">' + val.title + '</a>')
+                            .appendTo(list);
+                    });
                 },
-                timeFormat: 'H(:mm)'
+                onAfterViewLoad: function(view) {
+                    jQuery('h3.month').text(this.getTitle());
+                    jQuery('.btn-group button').removeClass('active');
+                    jQuery('button[data-calendar-view="' + view + '"]').addClass('active');
+                },
+                first_day: 1,
+                holidays: {
+                    '01-01':     'Nieuwjaarsdag',
+                    '06-01':     'Drie koningen',
+                    'easter-2':  'Goede vrijdag',
+                    'easter':    '1e paasdag',
+                    'easter+1':  '2e paasdag',
+                    '26-04':     'Koningsdag',
+                    '05-05':     'Bevrijdingsdag',
+                    'easter+39': 'Hemelvaartsdag',
+                    'easter+49': '1e pinksterdag',
+                    'easter+50': '2e pinksterdag',
+                    '25-12':     '1e kerstdag',
+                    '26-12':     '2e kerstdag'
+                }
+            });
+
+            jQuery('.btn-group button[data-calendar-nav]').each(function() {
+                jQuery(this).click(function() {
+                    calendar.navigate(jQuery(this).data('calendar-nav'));
+                });
+            });
+
+            jQuery('.btn-group button[data-calendar-view]').each(function() {
+                jQuery(this).click(function() {
+                    calendar.view(jQuery(this).data('calendar-view'));
+                });
+            });
+
+            jQuery('#first_day').change(function(){
+                var value = jQuery(this).val();
+                value = value.length ? parseInt(value) : null;
+                calendar.setOptions({first_day: value});
+                calendar.view();
+            });
+
+            jQuery('#language').change(function(){
+                calendar.setLanguage(jQuery(this).val());
+                calendar.view();
+            });
+
+            jQuery('#events-in-modal').change(function(){
+                var val = jQuery(this).is(':checked') ? jQuery(this).val() : null;
+                calendar.setOptions({modal: val});
+            });
+
+            jQuery('#events-modal .modal-header, #events-modal .modal-footer').click(function(e){
+                //e.preventDefault();
+                //e.stopPropagation();
             });
         });
     }]
@@ -253,7 +288,7 @@ angularRest.controller('usersController', ['Restangular', '$scope', 'Page', func
 );
 
 // userController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('userController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
+angularRest.controller('userController', ['Restangular', '$scope', '$routeParams', 'Page', '$alert', function(Restangular, $scope, $routeParams, Page, $alert) {
         var user = Restangular.one('user').one($routeParams.userId).get().then(function(userResponse) {
             Page.setTitle(userResponse.username);
             $scope.user = userResponse;
@@ -267,10 +302,10 @@ angularRest.controller('userController', ['Restangular', '$scope', '$routeParams
         $scope.confirmAvatar = function(index, avatar) {
             var confirm = Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).put().then(function(confirmationResponse) {
                 if(confirmationResponse.error) {
-                    $scope.addAlert('danger', 'Error!', confirmationResponse.error);
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(confirmationResponse.error), type: 'danger'});
                 } else {
                     $scope.user.avatars[index].confirmed = 1;
-                    $scope.addAlert('success', 'Avatar confirmed!', 'The avatar is confirmed user.');
+                    $alert({title: 'Avatar confirmed!', content: $sce.trustAsHtml('The avatar is confirmed user.'), type: 'success'});
                 }
             });
         };
@@ -278,11 +313,11 @@ angularRest.controller('userController', ['Restangular', '$scope', '$routeParams
         $scope.unlinkAvatar = function(index, avatar) {
             var unlink = Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).remove().then(function(unlinkResponse) {
                 if(unlinkResponse.error) {
-                    $scope.addAlert('danger', 'Error!', unlinkResponse.error);
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(unlinkResponse.error), type: 'danger'});
                 } else {
                     delete $scope.user.avatars[index];
                     $scope.user.avatarCount--;
-                    $scope.addAlert('success', 'Avatar unlinked!', 'The avatar is no longer linked to this user.');
+                    $alert({title: 'Avatar unlinked!', content: $sce.trustAsHtml('The avatar is no longer linked to this user.'), type: 'success'});
                 }
             });
         };

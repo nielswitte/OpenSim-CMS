@@ -7,7 +7,8 @@ var loading = 0;
 var angularRest = angular.module('OpenSim-CMS', [
     'restangular',
     'ngRoute',
-    'ui.bootstrap'
+    'mgcrea.ngStrap',
+    'ngAnimate'
 ]).config(function($routeProvider, $locationProvider) {
     $routeProvider
     .when('/documents', {
@@ -25,14 +26,14 @@ var angularRest = angular.module('OpenSim-CMS', [
     }).when('/meetings', {
         templateUrl: partial_path +'/meetingsCalendar.html',
         controller: 'meetingsController',
-        css: 'templates/restangular/css/fullcalendar.css'
+        css: 'templates/restangular/css/bootstrap-calendar.min.css'
     }).when('/user/:userId', {
         templateUrl: partial_path +'/user.html',
         controller: 'userController'
     }).when('/users', {
         templateUrl: partial_path +'/users.html',
         controller: 'usersController'
-    }).when('/home', {
+    }).when('/', {
         templateUrl: partial_path +'/home.html',
         controller: 'homeController'
     }).otherwise({
@@ -43,6 +44,7 @@ var angularRest = angular.module('OpenSim-CMS', [
     $locationProvider.html5Mode(true);
 });
 
+// Handeling of the page title
 angularRest.factory('Page', function() {
     var title = 'OpenSim-CMS';
     return {
@@ -56,7 +58,7 @@ angularRest.factory('Page', function() {
 });
 
 // Restangular settings
-angularRest.config(["RestangularProvider", function(RestangularProvider) {
+angularRest.config(['RestangularProvider', function(RestangularProvider, $alert) {
         RestangularProvider.setBaseUrl('' + server_address + base_url + '/api');
         RestangularProvider.setDefaultHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
 
@@ -66,15 +68,14 @@ angularRest.config(["RestangularProvider", function(RestangularProvider) {
         }
 
         RestangularProvider.setErrorInterceptor(function(resp) {
-            var scope = angular.element(jQuery('html')).scope();
 
-            scope.addAlert('danger', 'Error!', resp.data.error);
+            $alert({title: 'Error!', content: resp.data.error, placement: 'top-right', type: 'danger', show: true});
             jQuery('#loading').hide();
 
             // Session check? Logout if expired
             if(sessionStorage.tokenTimeOut < new Date().getTime()) {
                 sessionStorage.clear();
-                scope.addAlert('warning', 'Session Expired!', 'You have been logged out because your session has expired');
+                $alert({title: 'Session Expired!', content: 'You have been logged out because your session has expired', placement: 'top-right', type: 'warning', show: true});
             }
             return false; // stop the promise chain
         });
@@ -99,6 +100,16 @@ angularRest.config(["RestangularProvider", function(RestangularProvider) {
         });
     }]
 );
+
+// AngularStrap configuration
+angularRest.config(function($alertProvider) {
+    angular.extend($alertProvider.defaults, {
+        animation: 'am-fade-and-slide-top',
+        placement: 'top-right',
+        container: 'body',
+        duration: 5
+    });
+});
 
 // Add opensim protocol to safe list
 angularRest.config(["$compileProvider", function($compileProvider) {
