@@ -6,7 +6,8 @@ var loading = 0;
 // Routing
 var angularRest = angular.module('OpenSim-CMS', [
     'restangular',
-    'ngRoute'
+    'ngRoute',
+    'ui.bootstrap'
 ]).config(function($routeProvider, $locationProvider) {
     $routeProvider
     .when('/documents', {
@@ -65,13 +66,15 @@ angularRest.config(["RestangularProvider", function(RestangularProvider) {
         }
 
         RestangularProvider.setErrorInterceptor(function(resp) {
-            addAlert('danger', '<strong>Error!</strong> '+ resp.data.error);
+            var scope = angular.element(jQuery('html')).scope();
+
+            scope.addAlert('danger', 'Error!', resp.data.error);
             jQuery('#loading').hide();
 
             // Session check? Logout if expired
             if(sessionStorage.tokenTimeOut < new Date().getTime()) {
                 sessionStorage.clear();
-                addAlert('warning', '<strong>Session Expired!</strong> You have been logged out because your session has expired');
+                scope.addAlert('warning', 'Session Expired!', 'You have been logged out because your session has expired');
             }
             return false; // stop the promise chain
         });
@@ -139,11 +142,3 @@ angularRest.directive('head', ['$rootScope','$compile',
         };
     }
 ]);
-
-// Routing
-function MainCntl($scope, $route, $routeParams, $location, Page) {
-    $scope.$route = $route;
-    $scope.$location = $location;
-    $scope.$routeParams = $routeParams;
-    $scope.Page = Page;
-};

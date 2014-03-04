@@ -5,13 +5,13 @@
     <div class="panel-heading">
         <h3 class="panel-title">Documents</h3>
         <div class="pull-right">
-            <span class="clickable filter" data-toggle="tooltip" title="Toggle table filter" data-container="body">
+            <span class="clickable filter" tooltip="Filter documents" ng-click="toggleFilter()">
                 <i class="glyphicon glyphicon-filter"></i>
             </span>
         </div>
     </div>
-    <div class="panel-body">
-        <input type="text" class="form-control" id="documents-table-filter" data-action="filter" data-filters="#documentsList" placeholder="Filter documents">
+    <div class="panel-body" collapse="collapseFilter">
+        <input type="text" class="form-control" id="grids-table-filter" placeholder="Filter documents" ng-model="searchText">
     </div>
     <table class="table table-bordered table-striped table-responsive" id="documentsList">
         <thead>
@@ -25,7 +25,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="document in documentsList">
+            <tr ng-repeat="document in documentsList | filter:searchText">
                 <td>{{document.id}}</td>
                 <td><a href="document/{{document.id}}/">{{document.title}}</a></td>
                 <td>{{document.type}}</td>

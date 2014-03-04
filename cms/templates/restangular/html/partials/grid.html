@@ -67,7 +67,7 @@
                             <span class="label label-success" ng-show="{{region.serverStatus}} == 1">Online</span>
                             <span class="label label-danger" ng-show="{{region.serverStatus}} == 0">Offline</span>
                             {{region.name}}
-                            <span class="glyphicon glyphicon-home" id="defaultRegion" title="Is the default region" ng-show="{{grid.defaultRegionUuid == region.uuid}}"></span>
+                            <span class="glyphicon glyphicon-home" id="defaultRegion" tooltip="Is the default region" title="Is the default region" ng-show="{{grid.defaultRegionUuid == region.uuid}}"></span>
                         </h3>
                     </div>
                     <div class="panel-body">

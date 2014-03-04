@@ -55,8 +55,27 @@ if (EXEC != 1) {
             </div>
         </div>
 
-        <!-- Content -->
+        <!-- Modal Dialogs -->
+        <div class="modal fade" id="modalDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                    </div>
+                    <div class="modal-body">
+                        ...
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Content container -->
         <div class="container">
+            <!-- Loading spinner -->
             <div id="loading">
                 <div class="spinner">
                     <div class="cube1"></div>
@@ -64,7 +83,13 @@ if (EXEC != 1) {
                 </div>
                 <p class="text-center">Loading... please be patient</p>
             </div>
-            <div id="alerts"></div>
+
+            <!-- Alerts -->
+            <div id="alerts">
+                <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)"><strong>{{alert.title}}</strong> {{alert.msg}}</alert>
+            </div>
+
+            <!-- Main content -->
             <div ng-view></div>
             <hr>
             <footer class="footer">
@@ -74,10 +99,11 @@ if (EXEC != 1) {
         <!-- Additional JS files -->
         <script src="templates/restangular/js/libs/jquery-2.1.0.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/angular-1.2.13.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/ui-bootstrap-tpls-0.10.0.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/angular-route-1.2.13.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/restangular-1.3.1.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/underscore-1.6.0.min.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/libs/bootstrap-3.1.1.min.js" type="text/javascript"></script>
+
         <script src="templates/restangular/js/libs/select2-3.4.5.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/less-1.6.3.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/main.js" type="text/javascript"></script>
