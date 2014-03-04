@@ -72,8 +72,8 @@
                     </div>
                     <div class="panel-body">
                         <p class="text-center">
-                            <img src="{{region.image}}?token={{api_token}}" alt="{{region.name}}" class="img-thumbnail img-responsive" ng-show="{{region.serverStatus}} == 1">
-                            <img src="templates/bootstrapped/img/img-placeholder.png" alt="{{region.name}}" class="img-thumbnail img-responsive" ng-show="{{region.serverStatus}} == 0">
+                            <img ng-src="{{region.image}}?token={{api_token}}" alt="{{region.name}}" class="img-thumbnail img-responsive" ng-show="{{region.serverStatus}}">
+                            <img ng-src="templates/restangular/img/img-placeholder.png" alt="{{region.name}}" class="img-thumbnail img-responsive" ng-hide="{{region.serverStatus}}">
                         </p>
                         <ul>
                             <li><strong>Uuid:</strong> {{region.uuid}}</li>
