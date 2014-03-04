@@ -62,7 +62,8 @@ Used in the Models/Controllers and API:
 
 Used in the CMS:
  * Mgonto for Restangular (https://github.com/mgonto/restangular)
- * Arshaw for Fullcalendar (https://github.com/arshaw/fullcalendar)
+ * Mgcrea for Angular-Strap (https://github.com/mgcrea/angular-strap)
+ * Serhioromano for Bootstrap-calendar (https://github.com/Serhioromano/bootstrap-calendar)
  * Tobiasahlin for SpinKit (https://github.com/tobiasahlin/SpinKit)
  * Ivaynberg for Select2 (https://github.com/ivaynberg/select2)
  * Moment (https://github.com/moment/moment)
