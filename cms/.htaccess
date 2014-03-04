@@ -1,6 +1,7 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !^(.*)\.(css|js|jpg|png|gif|php|html)$
     Options -MultiViews
     RewriteRule ^(.*)$ index.php?_url=/$1 [QSA,L]
 </IfModule>
