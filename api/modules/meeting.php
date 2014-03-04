@@ -85,8 +85,8 @@ class Meeting extends Module{
                 // use the format for JSON Event Objects (@source: http://arshaw.com/fullcalendar/docs2/event_data/Event_Object/ )
                 $data[]   = array(
                     'id'            => $meeting->getId(),
-                    'start'         => $meeting->getStartDate(),
-                    'end'           => $meeting->getEndDate(),
+                    'start'         => strtotime($meeting->getStartDate()) * 1000,
+                    'end'           => strtotime($meeting->getEndDate()) * 1000,
                     'url'           => $meeting->getApiUrl(),
                     'title'         => 'Room: '. $meeting->getRoom()->getId(),
                     'description'   => 'Reservation made by: '. $meeting->getCreator()->getUsername()
