@@ -288,7 +288,7 @@ angularRest.controller('usersController', ['Restangular', '$scope', 'Page', func
 );
 
 // userController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('userController', ['Restangular', '$scope', '$routeParams', 'Page', '$alert', function(Restangular, $scope, $routeParams, Page, $alert) {
+angularRest.controller('userController', ['Restangular', '$scope', '$routeParams', 'Page', '$alert', '$sce', function(Restangular, $scope, $routeParams, Page, $alert, $sce) {
         var user = Restangular.one('user').one($routeParams.userId).get().then(function(userResponse) {
             Page.setTitle(userResponse.username);
             $scope.user = userResponse;

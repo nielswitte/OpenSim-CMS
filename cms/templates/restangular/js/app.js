@@ -58,7 +58,7 @@ angularRest.factory('Page', function() {
 });
 
 // Restangular settings
-angularRest.config(['RestangularProvider', function(RestangularProvider, $alert) {
+angularRest.config(['RestangularProvider', function(RestangularProvider, $alert, $sce) {
         RestangularProvider.setBaseUrl('' + server_address + base_url + '/api');
         RestangularProvider.setDefaultHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
 
@@ -69,13 +69,13 @@ angularRest.config(['RestangularProvider', function(RestangularProvider, $alert)
 
         RestangularProvider.setErrorInterceptor(function(resp) {
 
-            $alert({title: 'Error!', content: resp.data.error, placement: 'top-right', type: 'danger', show: true});
+            $alert({title: 'Error!', content: $sce.trustAsHtml(resp.data.error), placement: 'top-right', type: 'danger', show: true});
             jQuery('#loading').hide();
 
             // Session check? Logout if expired
             if(sessionStorage.tokenTimeOut < new Date().getTime()) {
                 sessionStorage.clear();
-                $alert({title: 'Session Expired!', content: 'You have been logged out because your session has expired', placement: 'top-right', type: 'warning', show: true});
+                $alert({title: 'Session Expired!', content: $sce.trustAsHtml('You have been logged out because your session has expired'), placement: 'top-right', type: 'warning', show: true});
             }
             return false; // stop the promise chain
         });
