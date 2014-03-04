@@ -37,12 +37,22 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
                         // Set token as default request parameter
                         Restangular.setDefaultRequestParams({token: sessionStorage.token});
 
+                        // Set an error interceptor
+                        Restangular.setErrorInterceptor(function(resp) {
+                            $alert({title: 'Error!', content: $sce.trustAsHtml(resp.data.error), type: 'danger'});
+                            jQuery('#loading').hide();
+
+                            // Session check? Logout if expired
+                            if(sessionStorage.tokenTimeOut < new Date().getTime()) {
+                                //sessionStorage.clear();
+                                $alert({title: 'Session Expired!', content: $sce.trustAsHtml('You have been logged out because your session has expired'), type: 'warning'});
+                            }
+                            return false; // stop the promise chain
+                        });
+
                         // Token is valid for half an hour
                         sessionStorage.tokenTimeOut = new Date(new Date + (1000*60*30)).getTime();
                         $alert({title: 'Logged In!', content: $sce.trustAsHtml('You are now logged in as '+ userResponse.username), type: 'success'});
-
-                        // Hide form
-                        $scope.toggleLoginForm();
                     });
                 // Failed auth
                 } else {
