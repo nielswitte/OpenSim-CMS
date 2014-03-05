@@ -89,6 +89,10 @@ if (EXEC != 1) {
                 <p>&copy; OpenSim-CMS 2014</p>
             </footer>
         </div>
+
+        <!-- Alert container -->
+        <div id="alerts"></div>
+
         <!-- Additional JS files -->
         <script src="templates/restangular/js/libs/jquery-2.1.0.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/angular-1.2.14.min.js" type="text/javascript"></script>

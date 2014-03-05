@@ -117,8 +117,8 @@ angularRest.config(function($alertProvider) {
     angular.extend($alertProvider.defaults, {
         animation: 'am-fade-and-slide-top',
         placement: 'top-right',
-        container: 'body',
-        duration: 5
+        container: '#alerts',
+        duration: 10
     });
 });
 
