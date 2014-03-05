@@ -216,15 +216,18 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
         function BootstrapModalDialog(event) {
             var eventId = jQuery(this).data('event-id');
             var meeting = RestangularCache.one('meeting').one(''+ eventId).get().then(function(meetingResponse) {
-                $scope.title    = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
-                $scope.content  = $sce.trustAsHtml(meetingResponse.creator.username);
-                $scope.buttons  = [{
+                $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
+                $scope.template         = partial_path +'/meetingDetails.html';
+                $scope.meeting          = meetingResponse;
+                $scope.startDateTime    = moment(meetingResponse.startDate).toDate();
+                $scope.endDateTime      = moment(meetingResponse.endDate).toDate();
+                $scope.buttons          = [{
                         text: 'Ok',
                         func: 'hide',
                         type: 'default'
                     }
                 ];
-                modal = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalCalendar.html'});
+                modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
             });
             return false;
         }

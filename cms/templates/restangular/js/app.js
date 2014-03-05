@@ -122,12 +122,22 @@ angularRest.factory('RestangularCache', function(Restangular) {
 
 
 // AngularStrap configuration
-angularRest.config(function($alertProvider) {
+angularRest.config(function($alertProvider, $timepickerProvider, $datepickerProvider) {
     angular.extend($alertProvider.defaults, {
         animation: 'am-fade-and-slide-top',
         placement: 'top-right',
         container: '#alerts',
         duration: 10
+    });
+
+    angular.extend($timepickerProvider.defaults, {
+        timeFormat: 'HH:mm',
+        length: 5
+    });
+
+    angular.extend($datepickerProvider.defaults, {
+        dateFormat: 'dd/MM/yyyy',
+        startWeek: 1
     });
 });
 
