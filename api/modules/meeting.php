@@ -82,12 +82,19 @@ class Meeting extends Module{
             $room       = new \Models\MeetingRoom($result['roomId']);
             $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room);
             if(strpos($args[0], 'calendar') !== FALSE) {
-                // use the format for JSON Event Objects (@source: http://arshaw.com/fullcalendar/docs2/event_data/Event_Object/ )
+                $startTimestamp = strtotime($meeting->getStartDate());
+                $endTimestamp   = strtotime($meeting->getEndDate());
+
+                // use the format for JSON Event Objects (@source: https://github.com/Serhioromano/bootstrap-calendar#feed-url )
                 $data[]   = array(
                     'id'            => $meeting->getId(),
-                    'start'         => strtotime($meeting->getStartDate()) * 1000,
-                    'end'           => strtotime($meeting->getEndDate()) * 1000,
+                    'start'         => $startTimestamp * 1000,
+                    'end'           => $endTimestamp * 1000,
                     'url'           => $meeting->getApiUrl(),
+                    // Meeting has started but not ended (in progress) ? => event-success
+                    // Meeting has ended ? => event-default
+                    // Meeting still has to start => event-info
+                    'class'         => ($startTimestamp < time() && $endTimestamp > time() ? 'event-success' : ($startTimestamp > time() ? 'event-info' : 'event-default')),
                     'title'         => 'Room: '. $meeting->getRoom()->getId(),
                     'description'   => 'Reservation made by: '. $meeting->getCreator()->getUsername()
                 );
