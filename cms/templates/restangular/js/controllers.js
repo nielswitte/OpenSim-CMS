@@ -98,6 +98,10 @@ angularRest.controller('toolbarController', ['Restangular', '$scope', '$location
             }
         };
 
+        $scope.toggleNavigation = function() {
+            jQuery('header.navbar .navbar-collapse').toggleClass('collapse');
+        };
+
         $scope.hideLoginForm = true;
         $scope.toggleLoginForm = function() {
             $scope.hideLoginForm = !$scope.hideLoginForm;
