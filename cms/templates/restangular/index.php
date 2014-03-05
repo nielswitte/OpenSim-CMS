@@ -53,24 +53,7 @@ if (EXEC != 1) {
                 </div>
             </div>
         </header>
-        <!-- Modal Dialogs -->
-        <div class="modal fade" id="modalDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
-                    </div>
-                    <div class="modal-body">
-                        ...
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Save changes</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+
         <!-- Content container -->
         <div class="container">
             <!-- Loading spinner -->
@@ -83,7 +66,7 @@ if (EXEC != 1) {
             </div>
 
             <!-- Main content -->
-            <div ng-view></div>
+            <div id="main" ng-view></div>
             <hr>
             <footer class="footer">
                 <p>&copy; OpenSim-CMS 2014</p>
