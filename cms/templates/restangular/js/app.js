@@ -13,36 +13,55 @@ var angularRest = angular.module('OpenSim-CMS', [
     $routeProvider
     .when('/documents', {
         templateUrl: partial_path +'/documents.html',
-        controller: 'documentsController'
+        controller: 'documentsController',
+        requireLogin: true
     }).when('/document/:documentId', {
         templateUrl: partial_path +'/document.html',
-        controller: 'documentController'
+        controller: 'documentController',
+        requireLogin: true
     }).when('/grids', {
         templateUrl: partial_path +'/grids.html',
-        controller: 'gridsController'
+        controller: 'gridsController',
+        requireLogin: true
     }).when('/grid/:gridId', {
         templateUrl: partial_path +'/grid.html',
-        controller: 'gridController'
+        controller: 'gridController',
+        requireLogin: true
     }).when('/meetings', {
         templateUrl: partial_path +'/meetingsCalendar.html',
         controller: 'meetingsController',
-        css: 'templates/restangular/css/bootstrap-calendar.min.css'
+        css: 'templates/restangular/css/bootstrap-calendar.min.css',
+        requireLogin: true
     }).when('/user/:userId', {
         templateUrl: partial_path +'/user.html',
-        controller: 'userController'
+        controller: 'userController',
+        requireLogin: true
     }).when('/users', {
         templateUrl: partial_path +'/users.html',
-        controller: 'usersController'
+        controller: 'usersController',
+        requireLogin: true
     }).when('/', {
         templateUrl: partial_path +'/home.html',
-        controller: 'homeController'
+        controller: 'homeController',
+        requireLogin: false
     }).otherwise({
-        redirectTo: '/'
+        redirectTo: '/',
+        requireLogin: false
     });
 
     // configure html5 to get links working on jsfiddle
     $locationProvider.html5Mode(true);
 });
+
+// Authentication check on run
+angularRest.run(['$rootScope', '$location', '$alert', '$sce', function ($rootScope, $location, $alert, $sce) {
+        $rootScope.$on("$routeChangeStart", function(event, next, current) {
+            if (next.requireLogin && !sessionStorage.token) {
+                $alert({title: 'Error!', content: $sce.trustAsHtml('This page requires authentication.'), type: 'danger'});
+            }
+        });
+    }]
+);
 
 // Handeling of the page title
 angularRest.factory('Page', function() {
