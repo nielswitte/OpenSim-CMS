@@ -260,28 +260,6 @@ angularRest.controller('meetingsController', ['Restangular', '$scope', 'Page', f
                     calendar.view(jQuery(this).data('calendar-view'));
                 });
             });
-
-            jQuery('#first_day').change(function(){
-                var value = jQuery(this).val();
-                value = value.length ? parseInt(value) : null;
-                calendar.setOptions({first_day: value});
-                calendar.view();
-            });
-
-            jQuery('#language').change(function(){
-                calendar.setLanguage(jQuery(this).val());
-                calendar.view();
-            });
-
-            jQuery('#events-in-modal').change(function(){
-                var val = jQuery(this).is(':checked') ? jQuery(this).val() : null;
-                calendar.setOptions({modal: val});
-            });
-
-            jQuery('#events-modal .modal-header, #events-modal .modal-footer').click(function(e){
-                //e.preventDefault();
-                //e.stopPropagation();
-            });
         });
     }]
 );
