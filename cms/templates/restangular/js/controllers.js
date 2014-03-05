@@ -111,8 +111,8 @@ angularRest.controller('toolbarController', ['Restangular', '$scope', '$location
 );
 
 // documentsController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentsController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
-        var documents = Restangular.one('documents').get().then(function(documentsResponse) {
+angularRest.controller('documentsController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
+        var documents = RestangularCache.one('documents').get().then(function(documentsResponse) {
             $scope.documentsList = documentsResponse;
             Page.setTitle('Documents');
         });
@@ -170,8 +170,8 @@ angularRest.controller('documentController', ['Restangular', '$scope', '$routePa
 );
 
 // gridsController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('gridsController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
-        var grids = Restangular.one('grids').get().then(function(gridsResponse) {
+angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
+        var grids = RestangularCache.one('grids').get().then(function(gridsResponse) {
             $scope.gridsList = gridsResponse;
             Page.setTitle('Grids');
         });
@@ -203,52 +203,82 @@ angularRest.controller('gridController', ['Restangular', '$scope', '$routeParams
 );
 
 // meetingsController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('meetingsController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
+angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Page', '$modal', '$tooltip', '$sce', function(RestangularCache, $scope, Page, $modal, $tooltip, $sce) {
         var date = new Date(new Date - (1000*60*60*24*14));
+        var modal;
 
-        var meetings = Restangular.one('meetings').one(date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).one('calendar').get().then(function(meetingsResponse) {
+        $scope.call = function(func) {
+            if(func == 'hide') {
+                modal.hide();
+            }
+        };
+
+        function BootstrapModalDialog(event) {
+            var eventId = jQuery(this).data('event-id');
+            var meeting = RestangularCache.one('meeting').one(''+ eventId).get().then(function(meetingResponse) {
+                $scope.title    = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
+                $scope.content  = $sce.trustAsHtml(meetingResponse.creator.username);
+                $scope.buttons  = [{
+                        text: 'Ok',
+                        func: 'hide',
+                        type: 'default'
+                    }
+                ];
+                modal = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalCalendar.html'});
+            });
+            return false;
+        }
+
+        var meetings = RestangularCache.one('meetings').one(date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).one('calendar').get().then(function(meetingsResponse) {
             $scope.meetings = meetingsResponse;
             Page.setTitle('Meetings');
 
             var calendar = jQuery('#calendar').calendar({
-                language: 'en-US',
-                events_source: meetingsResponse,
-                tmpl_path: 'templates/restangular/html/calendar/',
+                language:       'en-US',
+                events_source:  meetingsResponse,
+                tmpl_cache:     false,
+                view:           'week',
+                tmpl_path:      'templates/restangular/html/calendar/',
+                first_day:      1,
+                holidays: {
+                                '01-01':     'Nieuwjaarsdag',
+                                '06-01':     'Drie koningen',
+                                'easter-2':  'Goede vrijdag',
+                                'easter':    '1e paasdag',
+                                'easter+1':  '2e paasdag',
+                                '26-04':     'Koningsdag',
+                                '05-05':     'Bevrijdingsdag',
+                                'easter+39': 'Hemelvaartsdag',
+                                'easter+49': '1e pinksterdag',
+                                'easter+50': '2e pinksterdag',
+                                '25-12':     '1e kerstdag',
+                                '26-12':     '2e kerstdag'
+                },
                 onAfterEventsLoad: function(events) {
                     if(!events) {
                         return;
                     }
-                    var list = jQuery('#eventlist');
-                    list.html('');
-
-                    jQuery.each(events, function(key, val) {
-                        jQuery(document.createElement('li'))
-                            .html('<a href="' + val.url + '">' + val.title + '</a>')
-                            .appendTo(list);
-                    });
                 },
                 onAfterViewLoad: function(view) {
                     jQuery('h3.month').text(this.getTitle());
                     jQuery('.btn-group button').removeClass('active');
                     jQuery('button[data-calendar-view="' + view + '"]').addClass('active');
-                },
-                first_day: 1,
-                holidays: {
-                    '01-01':     'Nieuwjaarsdag',
-                    '06-01':     'Drie koningen',
-                    'easter-2':  'Goede vrijdag',
-                    'easter':    '1e paasdag',
-                    'easter+1':  '2e paasdag',
-                    '26-04':     'Koningsdag',
-                    '05-05':     'Bevrijdingsdag',
-                    'easter+39': 'Hemelvaartsdag',
-                    'easter+49': '1e pinksterdag',
-                    'easter+50': '2e pinksterdag',
-                    '25-12':     '1e kerstdag',
-                    '26-12':     '2e kerstdag'
+
+                    // Process all links in the calendar
+                    jQuery('#calendar a.bsDialog').each(function(index){
+                        // Manually add tooltips (does not work when using template tags because jQuery loads the templates not AngularJS)
+                        $tooltip(jQuery(this), { title: $sce.trustAsHtml(jQuery(this).attr('title')) });
+                    });
+
+                    // Attach Modal Dialog to anchors
+                    jQuery('#calendar a.bsDialog').on('click', BootstrapModalDialog);
                 }
             });
 
+            // Add these items additionally (somehow they are not catched by the other on selector)
+            jQuery('#calendar').on('mousedown click', '.cal-event-list a.event-item', BootstrapModalDialog);
+
+            // Navigation and View calendar buttons
             jQuery('.btn-group button[data-calendar-nav]').each(function() {
                 jQuery(this).click(function() {
                     calendar.navigate(jQuery(this).data('calendar-nav'));
@@ -265,8 +295,8 @@ angularRest.controller('meetingsController', ['Restangular', '$scope', 'Page', f
 );
 
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('usersController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
-        var users = Restangular.one('users').get().then(function(usersResponse) {
+angularRest.controller('usersController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
+        var users = RestangularCache.one('users').get().then(function(usersResponse) {
             $scope.usersList = usersResponse;
             Page.setTitle('Users');
         });
@@ -280,12 +310,17 @@ angularRest.controller('usersController', ['Restangular', '$scope', 'Page', func
 );
 
 // userController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('userController', ['Restangular', '$scope', '$routeParams', 'Page', '$alert', '$sce', function(Restangular, $scope, $routeParams, Page, $alert, $sce) {
+angularRest.controller('userController', ['Restangular', '$scope', '$routeParams', 'Page', '$alert', '$sce', '$cacheFactory', function(Restangular, $scope, $routeParams, Page, $alert, $sce, $cacheFactory) {
         var user = Restangular.one('user').one($routeParams.userId).get().then(function(userResponse) {
             Page.setTitle(userResponse.username);
             $scope.user = userResponse;
             $scope.user.avatarCount = Object.keys(userResponse.avatars).length;
         });
+
+        $scope.clearCache = function() {
+            var cache = $cacheFactory.get('$http');
+            cache.removeAll();
+        };
 
         $scope.isConfirmed = function(index) {
             return $scope.user.avatars[index].confirmed === 1 ? true : false;
@@ -298,6 +333,7 @@ angularRest.controller('userController', ['Restangular', '$scope', '$routeParams
                 } else {
                     $scope.user.avatars[index].confirmed = 1;
                     $alert({title: 'Avatar confirmed!', content: $sce.trustAsHtml('The avatar is confirmed user.'), type: 'success'});
+                    $scope.clearCache();
                 }
             });
         };
@@ -310,6 +346,7 @@ angularRest.controller('userController', ['Restangular', '$scope', '$routeParams
                     delete $scope.user.avatars[index];
                     $scope.user.avatarCount--;
                     $alert({title: 'Avatar unlinked!', content: $sce.trustAsHtml('The avatar is no longer linked to this user.'), type: 'success'});
+                    $scope.clearCache();
                 }
             });
         };

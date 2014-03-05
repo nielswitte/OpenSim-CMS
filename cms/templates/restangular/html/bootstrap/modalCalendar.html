@@ -1,0 +1,16 @@
+<div class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" ng-show="title">
+                <button type="button" class="close" ng-click="$hide()">&times;</button>
+                <h4 class="modal-title" ng-bind-html="title"></h4>
+            </div>
+            <div class="modal-body" ng-show="content" ng-bind-html="content">
+                
+            </div>
+            <div class="modal-footer" ng-show="buttons">
+                <button type="button" class="btn btn-{{button.type}}" ng-click="call(button.func)" ng-repeat="button in buttons">{{button.text}}</button>
+            </div>
+        </div>
+    </div>
+</div>

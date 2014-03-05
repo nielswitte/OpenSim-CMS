@@ -41,6 +41,7 @@ body {
     }
 }
 
+// Filters for table lists
 .filter {
     .row{
         margin-top: 40px;
@@ -68,6 +69,7 @@ body {
     }
 }
 
+// Loading animation
 #loading {
     display: none;
     top: 0;
@@ -136,6 +138,7 @@ body {
     }
 }
 
+// Custom Bootstrap Alerts
 #alerts {
     position: fixed;
     top: 0;
@@ -180,6 +183,17 @@ body {
         left: 0;
         .close {
             padding-right: 10px;
+        }
+    }
+}
+
+// Bootstrap-calendar overwrites
+#calendar {
+    .events-list {
+        overflow: visible !important;
+
+        .tooltip {
+            min-width: 100px;
         }
     }
 }

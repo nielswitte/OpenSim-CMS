@@ -80,6 +80,7 @@ angularRest.factory('Page', function() {
 angularRest.config(['RestangularProvider', function(RestangularProvider) {
         RestangularProvider.setBaseUrl('' + server_address + base_url + '/api');
         RestangularProvider.setDefaultHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
+        RestangularProvider.setDefaultHttpFields({cache: false});
 
         // Add token to request when available (this line is required for page refreshes to keep the token)
         if(sessionStorage.token) {
@@ -90,7 +91,7 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
             jQuery('#loading').hide();
             return false;
         });
-        RestangularProvider.addRequestInterceptor(function(element, operation, route, url) {
+        RestangularProvider.addRequestInterceptor(function(element) {
             // Show loading screen
             if(loading == 0) {
                 jQuery('#loading').show();
@@ -98,7 +99,7 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
             loading++;
             return element;
         });
-        RestangularProvider.addResponseInterceptor(function(data, operation, what, url, response, deferred) {
+        RestangularProvider.addResponseInterceptor(function(data) {
             loading--;
             // Hide loading screen when all requests are finished
             if(loading == 0) {
@@ -111,6 +112,14 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
         });
     }]
 );
+
+// Restangular service with cache
+angularRest.factory('RestangularCache', function(Restangular) {
+    return Restangular.withConfig(function(RestangularProvider) {
+        RestangularProvider.setDefaultHttpFields({cache: true});
+    });
+});
+
 
 // AngularStrap configuration
 angularRest.config(function($alertProvider) {
