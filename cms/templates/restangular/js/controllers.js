@@ -14,6 +14,22 @@ angularRest.controller('homeController', ['Restangular', '$scope', 'Page', funct
 
 // loginController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$sce', 'Cache', function(Restangular, $scope, $alert, $sce, Cache) {
+        $scope.isLoggedIn = false;
+
+        // Check login
+        $scope.isLoggedInCheck = function() {
+            if(sessionStorage.token) {
+                $alert({title: 'Already logged in!', content: $sce.trustAsHtml('You are already logged in as '+ sessionStorage.username), type: 'warning'});
+                $scope.isLoggedIn = true;
+            } else {
+                $scope.isLoggedIn = false;
+            }
+        };
+
+        // Perform login check
+        $scope.isLoggedInCheck();
+
+        // Handle forum submit
         $scope.login = function(user) {
             // Fix for autocomplete
             if(!user) {
@@ -37,7 +53,7 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
                         // Set token as default request parameter
                         Restangular.setDefaultRequestParams({token: sessionStorage.token});
 
-                        // Set an error interceptor
+                        // Set an error interceptor for Restangular
                         Restangular.setErrorInterceptor(function(resp) {
                             $alert({title: 'Error!', content: $sce.trustAsHtml(resp.data.error), type: 'danger'});
                             jQuery('#loading').hide();
@@ -47,12 +63,20 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
                                 sessionStorage.clear();
                                 $alert({title: 'Session Expired!', content: $sce.trustAsHtml('You have been logged out because your session has expired'), type: 'warning'});
                             }
+                            // Unauthorized
+                            if(resp.status == 401) {
+                                $alert({title: 'Unauthorized!', content: $sce.trustAsHtml('You have insufficient privileges to access this API.'), type: 'warning'});
+                            }
                             return false; // stop the promise chain
                         });
 
                         // Token is valid for half an hour
                         sessionStorage.tokenTimeOut = new Date(new Date + (1000*60*30)).getTime();
                         $alert({title: 'Logged In!', content: $sce.trustAsHtml('You are now logged in as '+ userResponse.username), type: 'success'});
+                        // Remove all cached items (if any)
+                        Cache.clearCache();
+                        // Back to previous page
+                        window.history.back();
                     });
                 // Failed auth
                 } else {
@@ -61,15 +85,18 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
                 }
             });
         };
+    }]
+);
 
-        if(sessionStorage.token){
-            $scope.user = {
-                username: sessionStorage.username,
-                email: sessionStorage.email,
-                userId: sessionStorage.id
-            };
-            $scope.getUserToolbar();
-        }
+// toolbarController --------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$location', '$alert', function($scope, $sce, Cache, $location, $alert) {
+         $scope.accountDropdown = [
+            {text: 'Profile', href: '#!/profile'},
+            {divider: true},
+            {text: 'Log Out', click: 'logout()'}
+        ];
+
+        $scope.currentLocation = $location.path();
 
         $scope.logout = function() {
             sessionStorage.clear();
@@ -77,12 +104,9 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
             $alert({title: 'Logged Out!', content: $sce.trustAsHtml('You are now logged out'), type: 'success'});
             $scope.toggleLoginForm();
             $scope.getUserToolbar();
+            $location.path('#/home');
         };
-    }]
-);
 
-// toolbarController --------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('toolbarController', ['Restangular', '$scope', '$location', function(Restangular, $scope, $location) {
         $scope.getUserToolbar = function() {
             if(sessionStorage.token){
                 return partial_path +'/userToolbarLoggedIn.html';
@@ -99,15 +123,15 @@ angularRest.controller('toolbarController', ['Restangular', '$scope', '$location
             }
         };
 
-        $scope.toggleNavigation = function() {
-            jQuery('header.navbar .navbar-collapse').toggleClass('collapse');
-        };
-
-        $scope.hideLoginForm = true;
-        $scope.toggleLoginForm = function() {
-            $scope.hideLoginForm = !$scope.hideLoginForm;
-            return $scope.hideLoginForm;
-        };
+        // Restore session from storage
+        if(sessionStorage.token){
+            $scope.user = {
+                username:   sessionStorage.username,
+                email:      sessionStorage.email,
+                userId:     sessionStorage.id
+            };
+            $scope.getUserToolbar();
+        }
     }]
 );
 

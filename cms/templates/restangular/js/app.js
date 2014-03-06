@@ -27,6 +27,10 @@ var angularRest = angular.module('OpenSim-CMS', [
         templateUrl: partial_path +'/grid.html',
         controller: 'gridController',
         requireLogin: true
+    }).when('/login', {
+        templateUrl: partial_path +'/login.html',
+        controller: 'loginController',
+        requireLogin: false
     }).when('/meetings', {
         templateUrl: partial_path +'/meetingsCalendar.html',
         controller: 'meetingsController',
@@ -50,14 +54,15 @@ var angularRest = angular.module('OpenSim-CMS', [
     });
 
     // configure html5 to get links working on jsfiddle
-    $locationProvider.html5Mode(true);
+    $locationProvider.html5Mode(true).hashPrefix('!');
 });
 
 // Authentication check on run
-angularRest.run(['$rootScope', '$location', '$alert', '$sce', 'Cache', function ($rootScope, $location, $alert, $sce, Cache) {
+angularRest.run(['$rootScope', '$location', '$alert', '$sce', function ($rootScope, $location, $alert, $sce) {
         $rootScope.$on("$routeChangeStart", function(event, next, current) {
             if (next.requireLogin && !sessionStorage.token) {
                 $alert({title: 'Error!', content: $sce.trustAsHtml('This page requires authentication.'), type: 'danger'});
+                $location.path('/login');
             }
         });
     }]
@@ -108,7 +113,6 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
         }
 
         RestangularProvider.setErrorInterceptor(function(resp) {
-            console.log(resp);
             jQuery('#loading').hide();
             return false;
         });
