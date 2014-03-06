@@ -75,6 +75,13 @@ class UserController {
         return $results !== FALSE;
     }
 
+    /**
+     * Unlinks the given avatar from the user
+     *
+     * @param \Models\Avatar $avatar
+     * @return boolean
+     * @throws \Exception
+     */
     public function unlinkAvatar(\Models\Avatar $avatar) {
         $db         = \Helper::getDB();
         $db->where('userId', $db->escape($this->user->getId()));
@@ -175,6 +182,7 @@ class UserController {
      */
     public function createUser($parameters) {
         $result = FALSE;
+        $db     = \Helper::getDB();
         $data   = array(
             'username'      => $db->escape($parameters['username']),
             'firstName'     => $db->escape($parameters['firstName']),
@@ -182,12 +190,17 @@ class UserController {
             'email'         => $db->escape($parameters['email']),
             'password'      => $db->escape(\Helper::Hash($parameters['password']))
         );
-        $db     = \Helper::getDB();
         $userId = $db->insert('users', $data);
         // User created successful?
         if($userId !== FALSE) {
             $result = $userId;
         }
+        return $result;
+    }
+
+    public function updateUser($parameters) {
+        $result = FALSE;
+
         return $result;
     }
 
@@ -219,6 +232,13 @@ class UserController {
         } else {
             $result = TRUE;
         }
+        return $result;
+    }
+
+
+    public function validateParameterUpdateUser($parameters) {
+        $result = FALSE;
+
         return $result;
     }
 

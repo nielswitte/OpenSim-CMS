@@ -37,6 +37,7 @@ class User extends Module {
         $this->api->addRoute("/users\/([a-zA-Z0-9-_]{3,}+)\/?$/",                 "getUsersByUsername",     $this, "GET",    TRUE);  // Gets a list of all users with usernames matching the search of atleast 3 characters
         $this->api->addRoute("/user\/?$/",                                        "createUser",             $this, "POST",   TRUE);  // Create a new CMS user
         $this->api->addRoute("/user\/(\d+)\/?$/",                                 "getUserById",            $this, "GET",    TRUE);  // Get a user by ID
+        $this->api->addRoute("/user\/(\d+)\/?$/",                                 "updateUserById",         $this, "PUT",    TRUE);  // Update the given user
         $this->api->addRoute("/user\/(\d+)\/password\/?$/",                       "updateUserPasswordById", $this, "PUT",    TRUE);  // Updates the user's password
         $this->api->addRoute("/user\/([a-z0-9-]{36})\/teleport\/?$/",             "teleportAvatarByUuid",   $this, "PUT",    TRUE);  // Teleports a user
         $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "getUserByAvatar",        $this, "GET",    TRUE);  // Gets an user by the avatar of this grid
@@ -69,6 +70,31 @@ class User extends Module {
         $result = array(
             'success' => ($userId !== FALSE ? TRUE : FALSE),
             'userId' => ($userId !== FALSE ? $userId : 0)
+        );
+
+        return $result;
+    }
+
+    /**
+     * Update the information on the given user
+     *
+     * @param array $args
+     * @return array
+     */
+    public function updateUserById($args) {
+        $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
+        $parsedPutData  = (\Helper::parsePutRequest($putUserData));
+
+        $user           = new \Models\User($args[1]);
+        $userCtrl       = new \Controllers\UserController($user);
+        $data           = FALSE;
+        if($userCtrl->validateParameterUpdateUser($parsedPutData)) {
+            $data     = $userCtrl->updateUser($parsedPutData['password']);
+        }
+
+        // Format the result
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE)
         );
 
         return $result;
