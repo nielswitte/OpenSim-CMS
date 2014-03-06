@@ -321,10 +321,10 @@ class Grid implements SimpleModel {
             if($region->getTotalUsers() < 0) {
                 $users = 0;
             } else {
-                $users = $region->getTotalUsers();
+                $users = $region->getActiveUsers();
             }
 
-            $total += $total;
+            $total += $users;
         }
         return $total;
     }
