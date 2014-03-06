@@ -5,16 +5,16 @@
     <div class="form-group">
         <label for="inputId" class="col-sm-2 control-label">ID</label>
         <div class="col-sm-10">
-            <input type="number" class="form-control" id="inputId" ng-model="user.id" placeholder="ID" readonly="readonly">
+            <input type="number" class="form-control" id="inputId" value="{{user.id}}" placeholder="ID" readonly="readonly">
         </div>
     </div>
     <div class="form-group">
         <label for="inputUsername" class="col-sm-2 control-label">Username</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="inputUsername" ng-model="user.username" placeholder="Username">
+            <input type="text" class="form-control" id="inputUsername" value="{{user.username}}" placeholder="Username" readonly="readonly">
         </div>
     </div>
-    <div class="form-group">
+    <div class="form-group has-feedback">
         <label for="inputFirstName" class="col-sm-2 control-label">First name</label>
         <div class="col-sm-10">
             <input type="text" class="form-control" id="inputFirstName" ng-model="user.firstName" placeholder="First name">
@@ -32,7 +32,12 @@
             <input type="email" class="form-control" id="inputEmail" ng-model="user.email" placeholder="E-mail address">
         </div>
     </div>
-    <button class="btn btn-primary" ng-click="updateUser()">Save Changes</button>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button class="btn btn-primary" type="submit" ng-click="updateUser()">Save Changes</button>
+            <button class="btn btn-danger" type="button" ng-click="resetUser()">Reset</button>
+        </div>
+    </div>
     <fieldset id="avatars">
         <legend>Avatars (<span id="avatarCount">{{user.avatarCount}}</span>)</legend>
         <div class="row" ng-repeat="(index, avatar) in user.avatars">

@@ -335,14 +335,28 @@ angularRest.controller('usersController', ['RestangularCache', '$scope', 'Page',
 
 // userController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('userController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache) {
-        $scope.userRequestUrl = '';
+        $scope.userRequestUrl   = '';
+        $scope.userOld          = {};
 
         var user = RestangularCache.one('user', $routeParams.userId).get().then(function(userResponse) {
             Page.setTitle(userResponse.username);
             $scope.user             = userResponse;
+            angular.copy($scope.user, $scope.userOld);
             $scope.user.avatarCount = Object.keys(userResponse.avatars).length;
             $scope.userRequestUrl   = userResponse.getRequestedUrl();
         });
+
+        $scope.updateUser = function() {
+            $scope.user.put().then(function(putResponse) {
+                angular.copy($scope.user, $scope.userOld);
+                $alert({title: 'User updated!', content: $sce.trustAsHtml('The user information has been updated.'), type: 'success'});
+                Cache.clearCachedUrl($scope.userRequestUrl);
+            });
+        };
+
+        $scope.resetUser = function() {
+            angular.copy($scope.userOld, $scope.user);
+        };
 
         $scope.isConfirmed = function(index) {
             return $scope.user.avatars[index].confirmed === 1 ? true : false;
