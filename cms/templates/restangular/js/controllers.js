@@ -91,7 +91,7 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
 // toolbarController --------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$location', '$alert', function($scope, $sce, Cache, $location, $alert) {
          $scope.accountDropdown = [
-            {text: 'Profile', href: '#!/profile'},
+            {text: 'Profile', href: 'profile'},
             {divider: true},
             {text: 'Log Out', click: 'logout()'}
         ];
@@ -102,7 +102,6 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
             sessionStorage.clear();
             Cache.clearCache();
             $alert({title: 'Logged Out!', content: $sce.trustAsHtml('You are now logged out'), type: 'success'});
-            $scope.toggleLoginForm();
             $scope.getUserToolbar();
             $location.path('#/home');
         };

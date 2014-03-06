@@ -43,12 +43,12 @@ if (EXEC != 1) {
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="">OpenSim-CMS</a>
+                    <a class="navbar-brand" href=".">OpenSim-CMS</a>
                 </div>
                 <div class="collapse navbar-collapse" id="bs-navbar">
                     <ul class="nav navbar-nav" ng-include src="getMainNavigation()"></ul>
                     <ul class="nav navbar-nav navbar-right">
-                        <li class="dropdown" ng-include src="getUserToolbar()"></li>
+                        <li class="dropdown" ng-include src="getUserToolbar()" data-match-route="/login" ></li>
                     </ul>
                 </div>
             </div>
