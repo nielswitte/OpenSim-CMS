@@ -60,7 +60,7 @@
                         </ul>
                     </div>
                     <div class="panel-footer text-center">
-                        <button class="confirmAvatar btn btn-success btn-sm" ng-click="confirmAvatar(index, avatar)" ng-show="{{avatar.confirmed}} == 0"><i class="glyphicon glyphicon-ok"></i> Confirm</button>
+                        <button class="confirmAvatar btn btn-success btn-sm" ng-click="confirmAvatar(index, avatar)" ng-hide="isConfirmed(index)"><i class="glyphicon glyphicon-ok"></i> Confirm</button>
                         <button class="removeAvatar btn btn-danger btn-sm" ng-click="unlinkAvatar(index, avatar)"><i class="glyphicon glyphicon-remove"></i> Unlink</button>
                     </div>
                 </div>

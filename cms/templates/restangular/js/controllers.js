@@ -13,7 +13,7 @@ angularRest.controller('homeController', ['Restangular', '$scope', 'Page', funct
 );
 
 // loginController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$sce', function(Restangular, $scope, $alert, $sce) {
+angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$sce', 'Cache', function(Restangular, $scope, $alert, $sce, Cache) {
         $scope.login = function(user) {
             // Fix for autocomplete
             if(!user) {
@@ -44,7 +44,7 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
 
                             // Session check? Logout if expired
                             if(sessionStorage.tokenTimeOut < new Date().getTime()) {
-                                //sessionStorage.clear();
+                                sessionStorage.clear();
                                 $alert({title: 'Session Expired!', content: $sce.trustAsHtml('You have been logged out because your session has expired'), type: 'warning'});
                             }
                             return false; // stop the promise chain
@@ -73,6 +73,7 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
 
         $scope.logout = function() {
             sessionStorage.clear();
+            Cache.clearCache();
             $alert({title: 'Logged Out!', content: $sce.trustAsHtml('You are now logged out'), type: 'success'});
             $scope.toggleLoginForm();
             $scope.getUserToolbar();
@@ -112,7 +113,7 @@ angularRest.controller('toolbarController', ['Restangular', '$scope', '$location
 
 // documentsController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('documentsController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
-        var documents = RestangularCache.one('documents').get().then(function(documentsResponse) {
+        var documents = RestangularCache.all('documents').getList().then(function(documentsResponse) {
             $scope.documentsList = documentsResponse;
             Page.setTitle('Documents');
         });
@@ -127,7 +128,7 @@ angularRest.controller('documentsController', ['RestangularCache', '$scope', 'Pa
 
 // documentController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('documentController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
-        var document = Restangular.one('document').one($routeParams.documentId).get().then(function(documentResponse) {
+        var document = Restangular.one('document', $routeParams.documentId).get().then(function(documentResponse) {
             $scope.document = documentResponse;
             Page.setTitle(documentResponse.title);
 
@@ -171,7 +172,7 @@ angularRest.controller('documentController', ['Restangular', '$scope', '$routePa
 
 // gridsController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
-        var grids = RestangularCache.one('grids').get().then(function(gridsResponse) {
+        var grids = RestangularCache.all('grids').getList().then(function(gridsResponse) {
             $scope.gridsList = gridsResponse;
             Page.setTitle('Grids');
         });
@@ -190,7 +191,7 @@ angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page',
 
 // gridController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('gridController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
-        var grid = Restangular.one('grid').one($routeParams.gridId).get().then(function(gridResponse) {
+        var grid = Restangular.one('grid', $routeParams.gridId).get().then(function(gridResponse) {
             Page.setTitle(gridResponse.name);
             $scope.grid = gridResponse;
             $scope.api_token = sessionStorage.token;
@@ -215,7 +216,7 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
 
         function BootstrapModalDialog(event) {
             var eventId = jQuery(this).data('event-id');
-            var meeting = RestangularCache.one('meeting').one(''+ eventId).get().then(function(meetingResponse) {
+            var meeting = RestangularCache.one('meeting', eventId).get().then(function(meetingResponse) {
                 $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
                 $scope.template         = partial_path +'/meetingDetails.html';
                 $scope.meeting          = meetingResponse;
@@ -232,14 +233,14 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
             return false;
         }
 
-        var meetings = RestangularCache.one('meetings').one(date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).one('calendar').get().then(function(meetingsResponse) {
+        var meetings = RestangularCache.one('meetings', date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).all('calendar').getList().then(function(meetingsResponse) {
             $scope.meetings = meetingsResponse;
             Page.setTitle('Meetings');
 
             var calendar = jQuery('#calendar').calendar({
                 language:       'en-US',
                 events_source:  meetingsResponse,
-                tmpl_cache:     false,
+                tmpl_cache:     true,
                 view:           'week',
                 tmpl_path:      'templates/restangular/html/calendar/',
                 first_day:      1,
@@ -272,14 +273,11 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
                         // Manually add tooltips (does not work when using template tags because jQuery loads the templates not AngularJS)
                         $tooltip(jQuery(this), { title: $sce.trustAsHtml(jQuery(this).attr('title')) });
                     });
-
-                    // Attach Modal Dialog to anchors
-                    jQuery('#calendar a.bsDialog').on('click', BootstrapModalDialog);
                 }
             });
 
             // Add these items additionally (somehow they are not catched by the other on selector)
-            jQuery('#calendar').on('mousedown click', '.cal-event-list a.event-item', BootstrapModalDialog);
+            jQuery('#calendar').on('mousedown click', 'a.bsDialog', BootstrapModalDialog);
 
             // Navigation and View calendar buttons
             jQuery('.btn-group button[data-calendar-nav]').each(function() {
@@ -299,7 +297,7 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
 
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('usersController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
-        var users = RestangularCache.one('users').get().then(function(usersResponse) {
+        var users = RestangularCache.all('users').getList().then(function(usersResponse) {
             $scope.usersList = usersResponse;
             Page.setTitle('Users');
         });
@@ -313,17 +311,15 @@ angularRest.controller('usersController', ['RestangularCache', '$scope', 'Page',
 );
 
 // userController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('userController', ['Restangular', '$scope', '$routeParams', 'Page', '$alert', '$sce', '$cacheFactory', function(Restangular, $scope, $routeParams, Page, $alert, $sce, $cacheFactory) {
-        var user = Restangular.one('user').one($routeParams.userId).get().then(function(userResponse) {
-            Page.setTitle(userResponse.username);
-            $scope.user = userResponse;
-            $scope.user.avatarCount = Object.keys(userResponse.avatars).length;
-        });
+angularRest.controller('userController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache) {
+        $scope.userRequestUrl = '';
 
-        $scope.clearCache = function() {
-            var cache = $cacheFactory.get('$http');
-            cache.removeAll();
-        };
+        var user = RestangularCache.one('user', $routeParams.userId).get().then(function(userResponse) {
+            Page.setTitle(userResponse.username);
+            $scope.user             = userResponse;
+            $scope.user.avatarCount = Object.keys(userResponse.avatars).length;
+            $scope.userRequestUrl   = userResponse.getRequestedUrl();
+        });
 
         $scope.isConfirmed = function(index) {
             return $scope.user.avatars[index].confirmed === 1 ? true : false;
@@ -336,7 +332,7 @@ angularRest.controller('userController', ['Restangular', '$scope', '$routeParams
                 } else {
                     $scope.user.avatars[index].confirmed = 1;
                     $alert({title: 'Avatar confirmed!', content: $sce.trustAsHtml('The avatar is confirmed user.'), type: 'success'});
-                    $scope.clearCache();
+                    Cache.clearCachedUrl($scope.userRequestUrl);
                 }
             });
         };
@@ -349,7 +345,7 @@ angularRest.controller('userController', ['Restangular', '$scope', '$routeParams
                     delete $scope.user.avatars[index];
                     $scope.user.avatarCount--;
                     $alert({title: 'Avatar unlinked!', content: $sce.trustAsHtml('The avatar is no longer linked to this user.'), type: 'success'});
-                    $scope.clearCache();
+                    Cache.clearCachedUrl($scope.userRequestUrl);
                 }
             });
         };

@@ -54,12 +54,32 @@ var angularRest = angular.module('OpenSim-CMS', [
 });
 
 // Authentication check on run
-angularRest.run(['$rootScope', '$location', '$alert', '$sce', function ($rootScope, $location, $alert, $sce) {
+angularRest.run(['$rootScope', '$location', '$alert', '$sce', 'Cache', function ($rootScope, $location, $alert, $sce, Cache) {
         $rootScope.$on("$routeChangeStart", function(event, next, current) {
             if (next.requireLogin && !sessionStorage.token) {
                 $alert({title: 'Error!', content: $sce.trustAsHtml('This page requires authentication.'), type: 'danger'});
             }
         });
+    }]
+);
+
+// Clear cache
+angularRest.service('Cache', ['$cacheFactory', function($cacheFactory) {
+        var cache = $cacheFactory.get('$http');
+
+        this.info = function() {
+            return cache.info();
+        };
+
+        // Option to clear the cache
+        this.clearCache = function() {
+            cache.removeAll();
+        };
+
+        // Option to clear specific cache
+        this.clearCachedUrl = function(url) {
+            cache.remove(url);
+        };
     }]
 );
 
@@ -88,9 +108,11 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
         }
 
         RestangularProvider.setErrorInterceptor(function(resp) {
+            console.log(resp);
             jQuery('#loading').hide();
             return false;
         });
+
         RestangularProvider.addRequestInterceptor(function(element) {
             // Show loading screen
             if(loading == 0) {
@@ -99,6 +121,7 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
             loading++;
             return element;
         });
+
         RestangularProvider.addResponseInterceptor(function(data) {
             loading--;
             // Hide loading screen when all requests are finished
