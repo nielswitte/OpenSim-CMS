@@ -143,7 +143,7 @@ state linking {
             string success = JsonGetValue(json_body, "success");
             if(debug) llInstantMessage(userUuid, "[Debug] Server response on linking avatar ("+ success +"): "+ body);
             // Link successeeded ?
-            if(success == 1) {
+            if(success == "1") {
                 llInstantMessage(userUuid, "Avatar linked to user, the user still needs to confirm this link in the CMS");
             } else {
                 string error = JsonGetValue(json_body, "error");
