@@ -31,7 +31,7 @@ class User implements SimpleModel {
      * @param string $firstName - [Optional] the user's first name
      * @param string $lastName- [Optional] the user's last name
      */
-    public function __construct($id = 0, $username = '', $email = '', $firstName = '', $lastName = '') {
+    public function __construct($id = -1, $username = '', $email = '', $firstName = '', $lastName = '') {
         $this->id           = $id;
         $this->username     = $username;
         $this->email        = $email;
@@ -47,7 +47,7 @@ class User implements SimpleModel {
     public function getInfoFromDatabase() {
         $db = \Helper::getDB();
         // Get user information
-        if($this->getId() != 0) {
+        if($this->getId() > -1) {
             $db->where('id', $db->escape($this->getId()));
         }
         if($this->getUsername() != '') {

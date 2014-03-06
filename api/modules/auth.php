@@ -49,7 +49,7 @@ class Auth extends Module {
         $ip                     = filter_input(INPUT_POST, 'ip', FILTER_SANITIZE_ENCODED);
 
         // Default settings
-        $userId = ($username == "OpenSim" ? -1 : 0);
+        $userId = ($username == "OpenSim" ? 0 : -1);
         $isGrid = FALSE;
 
         // Basic output data
@@ -58,7 +58,7 @@ class Auth extends Module {
         $data['expires']        = $db->escape(date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES)));
 
         // Request from OpenSim? Add this additional check because of the access rights of OpenSim
-        if(isset($headers["X-SecondLife-Shard"]) && $userId == -1) {
+        if(isset($headers["X-SecondLife-Shard"]) && $userId == 0) {
             // Check server IP to grid list
             $grids  = $db->get('grids');
 
@@ -78,7 +78,7 @@ class Auth extends Module {
         }
 
         // Attempt to access with OpenSim from outside the Grid
-        if($userId == -1 && !$isGrid) {
+        if($userId == 0 && !$isGrid) {
             throw new \Exception("Not allowed to login as OpenSim outside the Grid", 2);
         }
 
