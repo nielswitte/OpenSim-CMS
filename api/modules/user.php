@@ -89,7 +89,7 @@ class User extends Module {
         $userCtrl       = new \Controllers\UserController($user);
         $data           = FALSE;
         if($userCtrl->validateParameterUpdateUser($parsedPutData)) {
-            $data     = $userCtrl->updateUser($parsedPutData['password']);
+            $data     = $userCtrl->updateUser($parsedPutData);
         }
 
         // Format the result

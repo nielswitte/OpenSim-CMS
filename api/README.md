@@ -141,6 +141,17 @@ POST /api/user/ HTTP/1.1
 | password          | String    | The new user's password                                           |
 | password2         | String    | The new user's password again, to check if no typo has been made  |
 
+### Update user
+Change some information about the user. The username and id are locked. The password is a separate function.
+
+```http
+PUT /api/user/<ID>/ HTTP/1.1
+```
+| Parameter         | Type      | Description                                                       |
+|-------------------|-----------|-------------------------------------------------------------------|
+| email             | String    | The email address for the new user                                |
+| firstName         | String    | The first name of the new user                                    |
+| lastName          | String    | The last name of the new user                                     |
 
 ### Change password
 

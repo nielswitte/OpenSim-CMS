@@ -198,8 +198,24 @@ class UserController {
         return $result;
     }
 
+    /**
+     * Updates part of the user's information
+     *
+     * @param array $parameters - Array with parameters to update the user
+     *              * string firstName - The user's first name
+     *              * string lastName - The user's last name
+     *              * string email - The user's email address
+     * @return boolean
+     */
     public function updateUser($parameters) {
-        $result = FALSE;
+        $db     = \Helper::getDB();
+        $data   = array(
+            'firstName'     => $db->escape($parameters['firstName']),
+            'lastName'      => $db->escape($parameters['lastName']),
+            'email'         => $db->escape($parameters['email'])
+        );
+        $db->where('id', $db->escape($this->user->getId()));
+        $result = $db->update('users', $data);
 
         return $result;
     }
@@ -235,9 +251,26 @@ class UserController {
         return $result;
     }
 
-
+    /**
+     * Checks the parameters given for updating user information
+     *
+     * @param array $parameters
+     * @return boolean
+     * @throws \Exception
+     */
     public function validateParameterUpdateUser($parameters) {
         $result = FALSE;
+        if(count($parameters) < 3) {
+            throw new \Exception('Expected 3 parameters, '. count($parameters) .' given', 1);
+        } elseif(!isset($parameters['firstName'])) {
+            throw new \Exception('Missing parameter (string) "firstName"', 6);
+        } elseif(!isset($parameters['lastName'])) {
+            throw new \Exception('Missing parameter (string) "lastName"', 7);
+        } elseif (!isset($parameters['email']) || !filter_var($parameters['email'], FILTER_VALIDATE_EMAIL)) {
+            throw new \Exception('Missing parameter (string) "email" with a valid email address', 8);
+        } else {
+            $result = TRUE;
+        }
 
         return $result;
     }
