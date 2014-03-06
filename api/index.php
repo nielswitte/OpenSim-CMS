@@ -1,6 +1,13 @@
 <?php
 namespace API;
 
+// Default headers to disable caching
+header("Expires: ". gmdate("D, d M Y H:i:s") ." GMT");
+header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
+header("Cache-Control: no-store, no-cache, must-revalidate");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
 require_once dirname(__FILE__) .'/../config.php';
 require_once dirname(__FILE__) .'/auth.php';
 require_once dirname(__FILE__) .'/api.php';
