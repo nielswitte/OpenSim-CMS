@@ -113,8 +113,12 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
         }
 
         RestangularProvider.setErrorInterceptor(function(resp) {
+            // Clear session when expired
+            if(sessionStorage.tokenTimeOut <  moment().unix()) {
+                sessionStorage.clear();
+            }
+
             jQuery('#loading').hide();
-            return false;
         });
 
         RestangularProvider.addRequestInterceptor(function(element) {
@@ -133,7 +137,7 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
                 jQuery('#loading').hide();
             }
             // Increase token validaty
-            sessionStorage.tokenTimeOut = new Date(new Date + (1000*60*30));
+            sessionStorage.tokenTimeOut = moment().add(1, 'minutes').unix();
 
             return data;
         });
