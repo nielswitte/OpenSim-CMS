@@ -14,6 +14,7 @@ if (EXEC != 1) {
 
         <!-- Bootstrap CSS -->
         <link href="templates/restangular/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+        <link href="templates/restangular/css/angular-motion.min.css" rel="stylesheet" type="text/css">
         <link href="templates/restangular/css/select2.css" rel="stylesheet" type="text/css">
         <link href="templates/restangular/css/select2-bootstrap.css" rel="stylesheet" type="text/css">
         <link href="templates/restangular/less/main.less" rel="stylesheet/less" type="text/css">
@@ -33,30 +34,29 @@ if (EXEC != 1) {
     </head>
     <body>
         <!-- Fixed navbar -->
-        <div class="navbar navbar-default navbar-fixed-top" role="navigation" ng-controller="toolbarController">
+        <header class="navbar navbar-default navbar-fixed-top" role="navigation" ng-controller="toolbarController" bs-navbar>
             <div class="container">
                 <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <button class="navbar-toggle" type="button" ng-click="toggleNavigation()">
                         <span class="sr-only">Toggle navigation</span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="">OpenSim-CMS</a>
+                    <a class="navbar-brand" href=".">OpenSim-CMS</a>
                 </div>
-                <div class="navbar-collapse collapse">
-                    <ul class="nav navbar-nav" ng-include src="getMainNavigation()">
-
-                    </ul>
+                <div class="collapse navbar-collapse" id="bs-navbar">
+                    <ul class="nav navbar-nav" ng-include src="getMainNavigation()"></ul>
                     <ul class="nav navbar-nav navbar-right">
-                        <li class="dropdown" ng-include src="getUserToolbar()"></li>
+                        <li class="dropdown" ng-include src="getUserToolbar()" data-match-route="/login" ></li>
                     </ul>
-                </div><!--/.nav-collapse -->
+                </div>
             </div>
-        </div>
+        </header>
 
-        <!-- Content -->
+        <!-- Content container -->
         <div class="container">
+            <!-- Loading spinner -->
             <div id="loading">
                 <div class="spinner">
                     <div class="cube1"></div>
@@ -64,20 +64,29 @@ if (EXEC != 1) {
                 </div>
                 <p class="text-center">Loading... please be patient</p>
             </div>
-            <div id="alerts"></div>
-            <div ng-view></div>
+
+            <!-- Main content -->
+            <div id="main" ng-view></div>
             <hr>
             <footer class="footer">
                 <p>&copy; OpenSim-CMS 2014</p>
             </footer>
         </div>
+
+        <!-- Alert container -->
+        <div id="alerts"></div>
+
         <!-- Additional JS files -->
         <script src="templates/restangular/js/libs/jquery-2.1.0.min.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/libs/angular-1.2.13.min.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/libs/angular-route-1.2.13.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/angular-1.2.14.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/angular-animate-1.2.14.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/angular-route-1.2.14.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/angular-strap-2.0.0-rc.3.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/angular-strap.tpl-2.0.0-rc.3.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/restangular-1.3.1.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/underscore-1.6.0.min.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/libs/bootstrap-3.1.1.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/moment-2.5.1.min.js" type="text/javascript"></script>
+
         <script src="templates/restangular/js/libs/select2-3.4.5.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/less-1.6.3.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/main.js" type="text/javascript"></script>

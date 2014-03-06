@@ -67,17 +67,18 @@
                             <span class="label label-success" ng-show="{{region.serverStatus}} == 1">Online</span>
                             <span class="label label-danger" ng-show="{{region.serverStatus}} == 0">Offline</span>
                             {{region.name}}
-                            <span class="glyphicon glyphicon-home" id="defaultRegion" title="Is the default region" ng-show="{{grid.defaultRegionUuid == region.uuid}}"></span>
+                            <span class="glyphicon glyphicon-home" id="defaultRegion" tooltip="Is the default region" title="Is the default region" ng-show="{{grid.defaultRegionUuid == region.uuid}}"></span>
                         </h3>
                     </div>
                     <div class="panel-body">
                         <p class="text-center">
-                            <img src="{{region.image}}?token={{api_token}}" alt="{{region.name}}" class="img-thumbnail img-responsive" ng-show="{{region.serverStatus}} == 1">
-                            <img src="templates/bootstrapped/img/img-placeholder.png" alt="{{region.name}}" class="img-thumbnail img-responsive" ng-show="{{region.serverStatus}} == 0">
+                            <img src="templates/restangular/img/img-placeholder.png" ng-src="{{region.image}}?token={{api_token}}" alt="{{region.name}}" class="img-thumbnail img-responsive" ng-show="{{region.serverStatus}}">
+                            <img src="templates/restangular/img/img-placeholder.png" alt="{{region.name}}" class="img-thumbnail img-responsive" ng-hide="{{region.serverStatus}}">
                         </p>
                         <ul>
-                            <li><strong>Uuid:</strong>{{region.uuid}}</li>
-                            <li><strong>Users:</strong>{{region.activeUsers}} / {{region.totalUsers}}</li>
+                            <li><strong>Uuid:</strong> {{region.uuid}}</li>
+                            <li ng-show="{{region.serverStatus}}"><strong>Users:</strong> {{region.activeUsers}} / {{region.totalUsers}}</li>
+                            <li ng-hide="{{region.serverStatus}}"><strong>Users:</strong> unknown</li>
                         </ul>
                     </div>
                     <div class="panel-footer text-center">

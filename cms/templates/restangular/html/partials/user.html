@@ -11,25 +11,31 @@
     <div class="form-group">
         <label for="inputUsername" class="col-sm-2 control-label">Username</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="inputUsername" value="{{user.username}}" placeholder="Username">
+            <input type="text" class="form-control" id="inputUsername" value="{{user.username}}" placeholder="Username" readonly="readonly">
         </div>
     </div>
-    <div class="form-group">
+    <div class="form-group has-feedback">
         <label for="inputFirstName" class="col-sm-2 control-label">First name</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="inputFirstName" value="{{user.firstName}}" placeholder="First name">
+            <input type="text" class="form-control" id="inputFirstName" ng-model="user.firstName" placeholder="First name">
         </div>
     </div>
     <div class="form-group">
         <label for="inputLastName" class="col-sm-2 control-label">Last name</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="inputLastName" value="{{user.lastName}}" placeholder="Last name">
+            <input type="text" class="form-control" id="inputLastName" ng-model="user.lastName" placeholder="Last name">
         </div>
     </div>
     <div class="form-group">
         <label for="inputEmail" class="col-sm-2 control-label">E-mail address</label>
         <div class="col-sm-10">
-            <input type="email" class="form-control" id="inputEmail" value="{{user.email}}" placeholder="E-mail address">
+            <input type="email" class="form-control" id="inputEmail" ng-model="user.email" placeholder="E-mail address">
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button class="btn btn-primary" type="submit" ng-click="updateUser()">Save Changes</button>
+            <button class="btn btn-danger" type="button" ng-click="resetUser()">Reset</button>
         </div>
     </div>
     <fieldset id="avatars">
@@ -46,7 +52,7 @@
                     </div>
                     <div class="panel-body">
                         <ul>
-                            <li><strong>Uuid:</strong>{{avatar.uuid}}</li>
+                            <li><strong>Uuid:</strong> {{avatar.uuid}}</li>
                             <li><strong>E-mail address:</strong> {{avatar.email}}</li>
                             <li><strong>Grid:</strong> <a href="grid/{{avatar.gridId}}/">{{avatar.gridName}}</a></li>
                             <li>
@@ -54,13 +60,13 @@
                                 <span class="confirmationStatus" ng-show="isConfirmed(index)">Yes</span>
                                 <span class="confirmationStatus" ng-hide="isConfirmed(index)">No</span>
                             </li>
-                            <li><strong>Last Login:</strong>{{avatar.lastLogin}}</li>
-                            <li><strong>Last Region:</strong>{{avatar.lastRegion}}</li>
-                            <li><strong>Last Position:</strong>{{avatar.lastPosition}}</li>
+                            <li><strong>Last Login:</strong> {{avatar.lastLogin}}</li>
+                            <li><strong>Last Region:</strong> {{avatar.lastRegion}}</li>
+                            <li><strong>Last Position:</strong> {{avatar.lastPosition}}</li>
                         </ul>
                     </div>
                     <div class="panel-footer text-center">
-                        <button class="confirmAvatar btn btn-success btn-sm" ng-click="confirmAvatar(index, avatar)" ng-show="{{avatar.confirmed}} == 0"><i class="glyphicon glyphicon-ok"></i> Confirm</button>
+                        <button class="confirmAvatar btn btn-success btn-sm" ng-click="confirmAvatar(index, avatar)" ng-hide="isConfirmed(index)"><i class="glyphicon glyphicon-ok"></i> Confirm</button>
                         <button class="removeAvatar btn btn-danger btn-sm" ng-click="unlinkAvatar(index, avatar)"><i class="glyphicon glyphicon-remove"></i> Unlink</button>
                     </div>
                 </div>

@@ -1,63 +1,50 @@
 body {
-    min-height: 2000px;
+    min-height: 1000px;
     padding-top: 70px;
 }
 
-/**
- * @source: http://bootsnipp.com/snippets/featured/nav-account-manager
- * Special class on .container surrounding .navbar, used for positioning it into place.
- */
-.navbar-wrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 20;
-  margin-top: 20px;
-
-    /* Flip around the padding for proper display in narrow viewports */
-    .container {
-        padding-left: 0;
-        padding-right: 0;
-    }
-
-    .navbar {
-        padding-left: 15px;
-        padding-right: 15px;
-    }
+#calendar {
+    margin-top: 25px;
 }
 
-.navbar-content
-{
-    width:320px;
+// Login form
+.form-signin {
+    max-width: 330px;
     padding: 15px;
-    padding-bottom:0px;
+    margin: 0 auto;
 
-    &:before,
-    &:after {
-        display: table;
-        content: "";
-        line-height: 0;
+    .form-signin-heading {
+        margin-bottom: 10px;
+    }
+
+    .form-control {
+        position: relative;
+        height: auto;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+        padding: 10px;
+        font-size: 16px;
+        &:focus {
+            z-index: 2;
+        }
+    }
+    input[type="text"] {
+        margin-bottom: -1px;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+    input[type="password"] {
+        margin-bottom: 10px;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
     }
 }
 
-.navbar-nav.navbar-right:last-child {
-    margin-right: 15px !important;
-}
-.navbar-footer {
-    background-color:#DDD;
-}
-.navbar-footer-content {
-    padding:15px 15px 15px 15px;
-}
-.dropdown-menu {
-    padding: 0px;
-    overflow: hidden;
-}
-
+// Filters for table lists
 .filter {
     .row{
-        margin-top:40px;
+        margin-top: 40px;
         padding: 0 10px;
     }
 
@@ -70,13 +57,9 @@ body {
             margin-top: -18px;
             font-size: 15px;
             span{
-                margin-left:5px;
+                margin-left: 5px;
             }
         }
-    }
-
-    .panel-body{
-        display: none;
     }
 }
 
@@ -86,6 +69,7 @@ body {
     }
 }
 
+// Loading animation
 #loading {
     display: none;
     top: 0;
@@ -150,6 +134,84 @@ body {
         } 100% {
             transform: rotate(-360deg);
             -webkit-transform: rotate(-360deg);
+        }
+    }
+}
+
+// Custom Bootstrap Alerts
+#alerts {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+
+    .alert {
+        &.top-right {
+            float: right;
+            clear: both;
+        }
+    }
+}
+
+.alert {
+    width: 25%;
+    min-width: 150px;
+
+    &.top,
+    &.top-left,
+    &.top-right {
+        position: relative;
+        top: 60px;
+        z-index: 1050;
+        margin: 10px 20px;
+    }
+
+    &.top {
+        right: 0;
+        left: 0;
+    }
+
+    &.top-right {
+        right: 0;
+
+        .close {
+            padding-left: 10px
+        }
+    }
+
+    &.top-left {
+        left: 0;
+        .close {
+            padding-right: 10px;
+        }
+    }
+}
+
+// Bootstrap-calendar overwrites
+#calendar {
+    .events-list {
+        overflow: visible !important;
+
+        .tooltip {
+            min-width: 100px;
+        }
+    }
+}
+
+// Modal dialogs
+.modal-backdrop.am-fade {
+    opacity: .5;
+    transition: opacity .15s linear;
+    &.ng-enter {
+        opacity: 0;
+        &.ng-enter-active {
+            opacity: .5;
+        }
+    }
+    &.ng-leave {
+        opacity: .5;
+        &.ng-leave-active {
+            opacity: 0;
         }
     }
 }

@@ -22,7 +22,7 @@ class UserLoggedIn extends User implements SimpleModel {
      * @param integer $id - [Optional]
      * @param string $userUUID - [Optional]
      */
-    public function __construct($id = 0, $userUUID = '') {
+    public function __construct($id = -1, $userUUID = '') {
         parent::__construct($id, $userUUID);
     }
 }

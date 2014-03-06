@@ -300,7 +300,12 @@ class Grid implements SimpleModel {
     public function getTotalUsers() {
         $total = 0;
         foreach($this->getRegions() as $region) {
-            $total += $region->getTotalUsers();
+            if($region->getTotalUsers() < 0) {
+                $users = 0;
+            } else {
+                $users = $region->getTotalUsers();
+            }
+            $total += $users;
         }
         return $total;
     }
@@ -313,7 +318,13 @@ class Grid implements SimpleModel {
     public function getActiveUsers() {
         $total = 0;
         foreach($this->getRegions() as $region) {
-            $total += $region->getActiveUsers();
+            if($region->getTotalUsers() < 0) {
+                $users = 0;
+            } else {
+                $users = $region->getActiveUsers();
+            }
+
+            $total += $users;
         }
         return $total;
     }

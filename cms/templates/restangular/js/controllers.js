@@ -1,11 +1,35 @@
-// loginController ----------------------------------------------------------------------------------------------------------------------------------
+// MainController
+function MainCntl($scope, $route, $routeParams, $location, Page) {
+    $scope.$route       = $route;
+    $scope.$location    = $location;
+    $scope.$routeParams = $routeParams;
+    $scope.Page         = Page;
+};
+
+// homeController ------------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('homeController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
         Page.setTitle('Home');
     }]
 );
 
 // loginController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('loginController', ['Restangular', '$scope', function(Restangular, $scope) {
+angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$sce', 'Cache', function(Restangular, $scope, $alert, $sce, Cache) {
+        $scope.isLoggedIn = false;
+
+        // Check login
+        $scope.isLoggedInCheck = function() {
+            if(sessionStorage.token) {
+                $alert({title: 'Already logged in!', content: $sce.trustAsHtml('You are already logged in as '+ sessionStorage.username), type: 'warning'});
+                $scope.isLoggedIn = true;
+            } else {
+                $scope.isLoggedIn = false;
+            }
+        };
+
+        // Perform login check
+        $scope.isLoggedInCheck();
+
+        // Handle forum submit
         $scope.login = function(user) {
             // Fix for autocomplete
             if(!user) {
@@ -29,39 +53,62 @@ angularRest.controller('loginController', ['Restangular', '$scope', function(Res
                         // Set token as default request parameter
                         Restangular.setDefaultRequestParams({token: sessionStorage.token});
 
-                        // Token is valid for half an hour
-                        sessionStorage.tokenTimeOut = new Date(new Date + (1000*60*30)).getTime();
-                        addAlert('success', '<strong>Logged in!</strong> You are now logged in as '+ userResponse.username);
+                        // Set an error interceptor for Restangular
+                        Restangular.setErrorInterceptor(function(resp) {
 
-                        // Reload toolbar
-                        $scope.getUserToolbar();
+                            jQuery('#loading').hide();
+
+                            // Session check? Logout if expired
+                            if(sessionStorage.tokenTimeOut < moment().unix()) {
+                                sessionStorage.clear();
+                                $alert({title: 'Session Expired!', content: $sce.trustAsHtml('You have been logged out because your session has expired'), type: 'warning'});
+                            }
+                            // Unauthorized
+                            if(resp.status == 401) {
+                                $alert({title: 'Unauthorized!', content: $sce.trustAsHtml('You have insufficient privileges to access this API.'), type: 'danger'});
+                            // Other errors
+                            } else {
+                                $alert({title: 'Error!', content: $sce.trustAsHtml(resp.data.error), type: 'danger'});
+                            }
+                            return false; // stop the promise chain
+                        });
+
+                        // Token is valid for half an hour
+                        sessionStorage.tokenTimeOut = moment().add(30, 'minutes').unix();
+                        $alert({title: 'Logged In!', content: $sce.trustAsHtml('You are now logged in as '+ userResponse.username), type: 'success'});
+                        // Remove all cached items (if any)
+                        Cache.clearCache();
+                        // Back to previous page
+                        window.history.back();
                     });
                 // Failed auth
                 } else {
                     sessionStorage.clear();
-                    addAlert('danger', '<strong>Error!</strong> '+ authResponse.error);
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(authResponse.error +'.'), type: 'danger'});
                 }
             });
-        };
-
-        if(sessionStorage.token){
-            $scope.user = {
-                username: sessionStorage.username,
-                email: sessionStorage.email,
-                userId: sessionStorage.id
-            };
-        }
-
-        $scope.logout = function() {
-            sessionStorage.clear();
-            addAlert('success', '<strong>Logged Out!</strong> You are now logged out.');
-            $scope.getUserToolbar();
         };
     }]
 );
 
 // toolbarController --------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('toolbarController', ['Restangular', '$scope', '$location', function(Restangular, $scope, $location) {
+angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$location', '$alert', function($scope, $sce, Cache, $location, $alert) {
+         $scope.accountDropdown = [
+            {text: 'Profile', href: 'profile'},
+            {divider: true},
+            {text: 'Log Out', click: 'logout()'}
+        ];
+
+        $scope.currentLocation = $location.path();
+
+        $scope.logout = function() {
+            sessionStorage.clear();
+            Cache.clearCache();
+            $alert({title: 'Logged Out!', content: $sce.trustAsHtml('You are now logged out'), type: 'success'});
+            $scope.getUserToolbar();
+            $location.path('#/home');
+        };
+
         $scope.getUserToolbar = function() {
             if(sessionStorage.token){
                 return partial_path +'/userToolbarLoggedIn.html';
@@ -78,38 +125,36 @@ angularRest.controller('toolbarController', ['Restangular', '$scope', '$location
             }
         };
 
-        /**
-         * Check to get the currently active menu item
-         *
-         * @source: http://stackoverflow.com/a/18562339
-         * @param {string} viewLocation
-         * @returns {Boolean}
-         */
-        $scope.isActive = function (viewLocation) {
-            if(viewLocation.length > 1) {
-                return $location.path().indexOf(viewLocation) === 0;
-            } else {
-                return $location.path() === viewLocation;
-            }
-        };
+        // Restore session from storage
+        if(sessionStorage.token){
+            $scope.user = {
+                username:   sessionStorage.username,
+                email:      sessionStorage.email,
+                userId:     sessionStorage.id
+            };
+            $scope.getUserToolbar();
+        }
     }]
 );
 
 // documentsController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentsController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
-        var documents = Restangular.one('documents').get().then(function(documentsResponse) {
+angularRest.controller('documentsController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
+        var documents = RestangularCache.all('documents').getList().then(function(documentsResponse) {
             $scope.documentsList = documentsResponse;
             Page.setTitle('Documents');
-
-            // attach table filter plugin to inputs
-            jQuery('[data-action="filter"]').filterTable();
         });
+
+        $scope.collapseFilter = true;
+        $scope.toggleFilter = function() {
+            $scope.collapseFilter = !$scope.collapseFilter;
+            return $scope.collapseFilter;
+        };
     }]
 );
 
 // documentController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('documentController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
-        var document = Restangular.one('document').one($routeParams.documentId).get().then(function(documentResponse) {
+        var document = Restangular.one('document', $routeParams.documentId).get().then(function(documentResponse) {
             $scope.document = documentResponse;
             Page.setTitle(documentResponse.title);
 
@@ -152,14 +197,17 @@ angularRest.controller('documentController', ['Restangular', '$scope', '$routePa
 );
 
 // gridsController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('gridsController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
-        var grids = Restangular.one('grids').get().then(function(gridsResponse) {
+angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
+        var grids = RestangularCache.all('grids').getList().then(function(gridsResponse) {
             $scope.gridsList = gridsResponse;
             Page.setTitle('Grids');
-
-            // attach table filter plugin to inputs
-            jQuery('[data-action="filter"]').filterTable();
         });
+
+        $scope.collapseFilter = true;
+        $scope.toggleFilter = function() {
+            $scope.collapseFilter = !$scope.collapseFilter;
+            return $scope.collapseFilter;
+        };
 
         $scope.urlEncode = function(target){
             return encodeURIComponent(target);
@@ -169,7 +217,7 @@ angularRest.controller('gridsController', ['Restangular', '$scope', 'Page', func
 
 // gridController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('gridController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
-        var grid = Restangular.one('grid').one($routeParams.gridId).get().then(function(gridResponse) {
+        var grid = Restangular.one('grid', $routeParams.gridId).get().then(function(gridResponse) {
             Page.setTitle(gridResponse.name);
             $scope.grid = gridResponse;
             $scope.api_token = sessionStorage.token;
@@ -182,58 +230,136 @@ angularRest.controller('gridController', ['Restangular', '$scope', '$routeParams
 );
 
 // meetingsController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('meetingsController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
+angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Page', '$modal', '$tooltip', '$sce', function(RestangularCache, $scope, Page, $modal, $tooltip, $sce) {
         var date = new Date(new Date - (1000*60*60*24*14));
+        var modal;
 
-        var meetings = Restangular.one('meetings').one(date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).one('calendar').get().then(function(meetingsResponse) {
+        $scope.call = function(func) {
+            if(func == 'hide') {
+                modal.hide();
+            }
+        };
+
+        function BootstrapModalDialog(event) {
+            var eventId = jQuery(this).data('event-id');
+            var meeting = RestangularCache.one('meeting', eventId).get().then(function(meetingResponse) {
+                $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
+                $scope.template         = partial_path +'/meetingDetails.html';
+                $scope.meeting          = meetingResponse;
+                $scope.startDateTime    = moment(meetingResponse.startDate).toDate();
+                $scope.endDateTime      = moment(meetingResponse.endDate).toDate();
+                $scope.buttons          = [{
+                        text: 'Ok',
+                        func: 'hide',
+                        type: 'default'
+                    }
+                ];
+                modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
+            });
+            return false;
+        }
+
+        var meetings = RestangularCache.one('meetings', date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).all('calendar').getList().then(function(meetingsResponse) {
             $scope.meetings = meetingsResponse;
             Page.setTitle('Meetings');
 
-            // Insert the events into the calendar
-            $('#calendar').fullCalendar({
-                defaultView: 'agendaWeek',
-                height: 650,
-                header: {
-                    left:   'title',
-                    center: 'agendaDay,agendaWeek,month',
-                    right:  'today prev,next'
+            var calendar = jQuery('#calendar').calendar({
+                language:       'en-US',
+                events_source:  meetingsResponse,
+                tmpl_cache:     true,
+                view:           'week',
+                tmpl_path:      'templates/restangular/html/calendar/',
+                first_day:      1,
+                holidays: {
+                                '01-01':     'Nieuwjaarsdag',
+                                '06-01':     'Drie koningen',
+                                'easter-2':  'Goede vrijdag',
+                                'easter':    '1e paasdag',
+                                'easter+1':  '2e paasdag',
+                                '26-04':     'Koningsdag',
+                                '05-05':     'Bevrijdingsdag',
+                                'easter+39': 'Hemelvaartsdag',
+                                'easter+49': '1e pinksterdag',
+                                'easter+50': '2e pinksterdag',
+                                '25-12':     '1e kerstdag',
+                                '26-12':     '2e kerstdag'
                 },
-                events: meetingsResponse,
-                eventClick: function(event) {
-                    // Create a pop over for this event
-                    $(this).popover({
-                        placement: 'auto top',
-                        title: event.title,
-                        content: event.description
+                onAfterEventsLoad: function(events) {
+                    if(!events) {
+                        return;
+                    }
+                },
+                onAfterViewLoad: function(view) {
+                    jQuery('h3.month').text(this.getTitle());
+                    jQuery('.btn-group button').removeClass('active');
+                    jQuery('button[data-calendar-view="' + view + '"]').addClass('active');
+
+                    // Process all links in the calendar
+                    jQuery('#calendar a.bsDialog').each(function(index){
+                        // Manually add tooltips (does not work when using template tags because jQuery loads the templates not AngularJS)
+                        $tooltip(jQuery(this), { title: $sce.trustAsHtml(jQuery(this).attr('title')) });
                     });
-                    // Imediatly show it
-                    $(this).popover('show');
-                    return false;
                 }
+            });
+
+            // Add these items additionally (somehow they are not catched by the other on selector)
+            jQuery('#calendar').on('mousedown click', 'a.bsDialog', BootstrapModalDialog);
+
+            // Navigation and View calendar buttons
+            jQuery('.btn-group button[data-calendar-nav]').each(function() {
+                jQuery(this).click(function() {
+                    calendar.navigate(jQuery(this).data('calendar-nav'));
+                });
+            });
+
+            jQuery('.btn-group button[data-calendar-view]').each(function() {
+                jQuery(this).click(function() {
+                    calendar.view(jQuery(this).data('calendar-view'));
+                });
             });
         });
     }]
 );
 
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('usersController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
-        var users = Restangular.one('users').get().then(function(usersResponse) {
+angularRest.controller('usersController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
+        var users = RestangularCache.all('users').getList().then(function(usersResponse) {
             $scope.usersList = usersResponse;
             Page.setTitle('Users');
-
-            // attach table filter plugin to inputs
-            jQuery('[data-action="filter"]').filterTable();
         });
+
+        $scope.collapseFilter = true;
+        $scope.toggleFilter = function() {
+            $scope.collapseFilter = !$scope.collapseFilter;
+            return $scope.collapseFilter;
+        };
     }]
 );
 
 // userController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('userController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
-        var user = Restangular.one('user').one($routeParams.userId).get().then(function(userResponse) {
+angularRest.controller('userController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache) {
+        $scope.userRequestUrl   = '';
+        $scope.userOld          = {};
+
+        var user = RestangularCache.one('user', $routeParams.userId).get().then(function(userResponse) {
             Page.setTitle(userResponse.username);
-            $scope.user = userResponse;
+            $scope.user             = userResponse;
+            angular.copy($scope.user, $scope.userOld);
             $scope.user.avatarCount = Object.keys(userResponse.avatars).length;
+            $scope.userRequestUrl   = userResponse.getRequestedUrl();
         });
+
+        $scope.updateUser = function() {
+            $scope.user.put().then(function(putResponse) {
+                angular.copy($scope.user, $scope.userOld);
+                $alert({title: 'User updated!', content: $sce.trustAsHtml('The user information has been updated.'), type: 'success'});
+                Cache.clearCachedUrl($scope.userRequestUrl);
+            });
+        };
+
+        $scope.resetUser = function() {
+            angular.copy($scope.userOld, $scope.user);
+        };
 
         $scope.isConfirmed = function(index) {
             return $scope.user.avatars[index].confirmed === 1 ? true : false;
@@ -242,10 +368,11 @@ angularRest.controller('userController', ['Restangular', '$scope', '$routeParams
         $scope.confirmAvatar = function(index, avatar) {
             var confirm = Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).put().then(function(confirmationResponse) {
                 if(confirmationResponse.error) {
-                    addAlert('danger', '<strong>Error!</strong> '+ confirmationResponse.error);
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(confirmationResponse.error), type: 'danger'});
                 } else {
                     $scope.user.avatars[index].confirmed = 1;
-                    addAlert('success', '<strong>Avatar confirmed!</strong> The avatar is confirmed user.');
+                    $alert({title: 'Avatar confirmed!', content: $sce.trustAsHtml('The avatar is confirmed user.'), type: 'success'});
+                    Cache.clearCachedUrl($scope.userRequestUrl);
                 }
             });
         };
@@ -253,11 +380,12 @@ angularRest.controller('userController', ['Restangular', '$scope', '$routeParams
         $scope.unlinkAvatar = function(index, avatar) {
             var unlink = Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).remove().then(function(unlinkResponse) {
                 if(unlinkResponse.error) {
-                    addAlert('danger', '<strong>Error!</strong> '+ unlinkResponse.error);
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(unlinkResponse.error), type: 'danger'});
                 } else {
                     delete $scope.user.avatars[index];
                     $scope.user.avatarCount--;
-                    addAlert('success', '<strong>Avatar unlinked!</strong> The avatar is no longer linked to this user.');
+                    $alert({title: 'Avatar unlinked!', content: $sce.trustAsHtml('The avatar is no longer linked to this user.'), type: 'success'});
+                    Cache.clearCachedUrl($scope.userRequestUrl);
                 }
             });
         };

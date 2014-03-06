@@ -1,0 +1,59 @@
+<form class="form-horizontal" role="form" id="documentsForm">
+    <div class="form-group">
+        <label for="inputId" class="col-sm-2 control-label">ID</label>
+        <div class="col-sm-10">
+            <input type="number" class="form-control" id="inputId" placeholder="ID" value="{{meeting.id}}" readonly="readonly">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputCreator" class="col-sm-2 control-label">Creator</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" id="inputCreator" placeholder="Username" value="{{meeting.creator.username}}" readonly="readonly">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label"><i class="glyphicon glyphicon-calendar"></i> Start</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" ng-model="startDateTime" data-autoclose="1" placeholder="Date" bs-datepicker>
+            <input type="text" class="form-control" ng-model="startDateTime" data-autoclose="1" placeholder="Time" bs-timepicker>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label"><i class="glyphicon glyphicon-calendar"></i> End</label>
+        <div class="col-sm-10">
+            <input type="text" class="form-control" ng-model="endDateTime" data-autoclose="1" placeholder="Date" bs-datepicker>
+            <input type="text" class="form-control" ng-model="endDateTime" data-autoclose="1" placeholder="Time" bs-timepicker>
+        </div>
+    </div>
+
+</form>
+
+<pre>
+{
+    "id": "2",
+    "startDate": "2014-03-05 13:20:00",
+    "endDate": "2014-03-05 16:30:00",
+    "creator": {
+        "id": 1,
+        "username": "nielswitte",
+        "firstName": "Niels",
+        "lastName": "Witte",
+        "email": "nielswitte@gmail.com"
+    },
+    "room": {
+        "id": 1,
+        "grid": {
+            "id": 1,
+            "name": "Niels' test grid"
+        },
+        "region": {
+            "name": "South Pole",
+            "uuid": "72efcc78-2b1a-4571-8704-fea352998c1c"
+        },
+        "description": "In the open air"
+    },
+    "participants": [
+
+    ]
+}
+</pre>
