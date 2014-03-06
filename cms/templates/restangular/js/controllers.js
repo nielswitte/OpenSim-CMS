@@ -55,23 +55,26 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
 
                         // Set an error interceptor for Restangular
                         Restangular.setErrorInterceptor(function(resp) {
-                            $alert({title: 'Error!', content: $sce.trustAsHtml(resp.data.error), type: 'danger'});
+
                             jQuery('#loading').hide();
 
                             // Session check? Logout if expired
-                            if(sessionStorage.tokenTimeOut < new Date().getTime()) {
+                            if(sessionStorage.tokenTimeOut < moment().unix()) {
                                 sessionStorage.clear();
                                 $alert({title: 'Session Expired!', content: $sce.trustAsHtml('You have been logged out because your session has expired'), type: 'warning'});
                             }
                             // Unauthorized
                             if(resp.status == 401) {
-                                $alert({title: 'Unauthorized!', content: $sce.trustAsHtml('You have insufficient privileges to access this API.'), type: 'warning'});
+                                $alert({title: 'Unauthorized!', content: $sce.trustAsHtml('You have insufficient privileges to access this API.'), type: 'danger'});
+                            // Other errors
+                            } else {
+                                $alert({title: 'Error!', content: $sce.trustAsHtml(resp.data.error), type: 'danger'});
                             }
                             return false; // stop the promise chain
                         });
 
                         // Token is valid for half an hour
-                        sessionStorage.tokenTimeOut = new Date(new Date + (1000*60*30)).getTime();
+                        sessionStorage.tokenTimeOut = moment().add(30, 'minutes').unix();
                         $alert({title: 'Logged In!', content: $sce.trustAsHtml('You are now logged in as '+ userResponse.username), type: 'success'});
                         // Remove all cached items (if any)
                         Cache.clearCache();
