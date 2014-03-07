@@ -16,16 +16,52 @@
     <table class="table table-bordered table-striped table-responsive" id="documentsList">
         <thead>
             <tr>
-                <th>#</th>
-                <th>Title</th>
-                <th>Type</th>
-                <th>Owner</th>
-                <th>Creation Date</th>
-                <th>Modification Date</th>
+                <th>
+                    <a ng-click="orderByField='id'; reverseSort = !reverseSort" title="Sort by ID">#</a>
+                    <span ng-show="orderByField == 'id'">
+                        <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
+                        <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
+                    </span>
+                </th>
+                <th>
+                    <a ng-click="orderByField='title'; reverseSort = !reverseSort" title="Sort by title">Title</a>
+                    <span ng-show="orderByField == 'title'">
+                        <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
+                        <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
+                    </span>
+                </th>
+                <th>
+                    <a ng-click="orderByField='type'; reverseSort = !reverseSort" title="Sort by type">Type</a>
+                    <span ng-show="orderByField == 'type'">
+                        <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
+                        <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
+                    </span>
+                </th>
+                <th>
+                    <a ng-click="orderByField='ownedId'; reverseSort = !reverseSort" title="Sort by owner ID">Owner ID</a>
+                    <span ng-show="orderByField == 'ownerId'">
+                        <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
+                        <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
+                    </span>
+                </th>
+                <th>
+                    <a ng-click="orderByField='creationDate'; reverseSort = !reverseSort" title="Sort by creation date">Creation date</a>
+                    <span ng-show="orderByField == 'creationDate'">
+                        <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
+                        <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
+                    </span>
+                </th>
+                <th>
+                    <a ng-click="orderByField='modificationDate'; reverseSort = !reverseSort" title="Sort by modification date">Modification date</a>
+                    <span ng-show="orderByField == 'modificationDate'">
+                        <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
+                        <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
+                    </span>
+                </th>
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="document in documentsList | filter:searchText">
+            <tr ng-repeat="document in documentsList | orderBy:orderByField:reverseSort | filter:searchText">
                 <td>{{document.id}}</td>
                 <td><a href="document/{{document.id}}/">{{document.title}}</a></td>
                 <td>{{document.type}}</td>

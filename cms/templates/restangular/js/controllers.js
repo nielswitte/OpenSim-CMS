@@ -139,6 +139,9 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
 
 // documentsController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('documentsController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
+        $scope.orderByField     = 'title';
+        $scope.reverseSort      = false;
+
         var documents = RestangularCache.all('documents').getList().then(function(documentsResponse) {
             $scope.documentsList = documentsResponse;
             Page.setTitle('Documents');
