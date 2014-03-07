@@ -328,19 +328,50 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
 );
 
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('usersController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
+angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', '$sce', 'Cache', function(RestangularCache, Restangular, $scope, Page, $modal, $alert, $sce, Cache) {
         $scope.orderByField     = 'username';
         $scope.reverseSort      = false;
+        $scope.requestUsersUrl  = '';
 
         var users = RestangularCache.all('users').getList().then(function(usersResponse) {
             $scope.usersList = usersResponse;
             Page.setTitle('Users');
+            $scope.requestUsersUrl = usersResponse.getRequestedUrl();
         });
 
         $scope.collapseFilter = true;
         $scope.toggleFilter = function() {
             $scope.collapseFilter = !$scope.collapseFilter;
             return $scope.collapseFilter;
+        };
+
+        // Dialog function handler
+        $scope.call = function(func) {
+            if(func == 'hide') {
+                modal.hide();
+            } else if(func == 'createUser') {
+                $alert({title: 'User created!', content: $sce.trustAsHtml('The user: '+ $scope.user.username + ' has been created.'), type: 'success'});
+                Cache.clearCachedUrl($scope.userRequestUrl);
+                modal.hide();
+            }
+        };
+
+        // New User dialog creation
+        $scope.newUser = function() {
+            $scope.template         = partial_path +'/userNewForm.html';
+            $scope.user             = {};
+            $scope.buttons          = [{
+                        text: 'Create',
+                        func: 'createUser',
+                        type: 'primary'
+                    },
+                    {
+                        text: 'Cancel',
+                        func: 'hide',
+                        type: 'danger'
+                    }
+                ];
+            modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
         };
     }]
 );
