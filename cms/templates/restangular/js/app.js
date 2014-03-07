@@ -153,12 +153,17 @@ angularRest.factory('RestangularCache', function(Restangular) {
 
 
 // AngularStrap configuration
-angularRest.config(function($alertProvider, $timepickerProvider, $datepickerProvider) {
+angularRest.config(function($alertProvider, $tooltipProvider, $timepickerProvider, $datepickerProvider) {
     angular.extend($alertProvider.defaults, {
         animation: 'am-fade-and-slide-top',
         placement: 'top-right',
         container: '#alerts',
         duration: 10
+    });
+
+    angular.extend($tooltipProvider.defaults, {
+        animation: 'am-flip-x',
+        trigger: 'hover'
     });
 
     angular.extend($timepickerProvider.defaults, {
