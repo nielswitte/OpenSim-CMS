@@ -328,19 +328,61 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
 );
 
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('usersController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
+angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', '$sce', 'Cache', function(RestangularCache, Restangular, $scope, Page, $modal, $alert, $sce, Cache) {
         $scope.orderByField     = 'username';
         $scope.reverseSort      = false;
+        $scope.requestUsersUrl  = '';
 
         var users = RestangularCache.all('users').getList().then(function(usersResponse) {
             $scope.usersList = usersResponse;
             Page.setTitle('Users');
+            $scope.requestUsersUrl = usersResponse.getRequestedUrl();
         });
 
         $scope.collapseFilter = true;
         $scope.toggleFilter = function() {
             $scope.collapseFilter = !$scope.collapseFilter;
             return $scope.collapseFilter;
+        };
+
+        $scope.saveUser = function() {
+            Restangular.all('user').post($scope.user).then(function(resp) {
+                if(resp.error) {
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                } else {
+                    $alert({title: 'User created!', content: $sce.trustAsHtml('The user: '+ $scope.user.username + ' has been created with ID: '+ resp.userId +'.'), type: 'success'});
+                    $scope.usersList.push($scope.user);
+                }
+            });
+            Cache.clearCachedUrl($scope.userRequestUrl);
+            modal.hide();
+        };
+
+        // Dialog function handler
+        $scope.call = function(func) {
+            if(func == 'hide') {
+                modal.hide();
+            } else if(func == 'createUser') {
+                $scope.saveUser();
+            }
+        };
+
+        // New User dialog creation
+        $scope.newUser = function() {
+            $scope.template         = partial_path +'/userNewForm.html';
+            $scope.user             = {};
+            $scope.buttons          = [{
+                        text: 'Create',
+                        func: 'createUser',
+                        type: 'primary'
+                    },
+                    {
+                        text: 'Cancel',
+                        func: 'hide',
+                        type: 'danger'
+                    }
+                ];
+            modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
         };
     }]
 );
