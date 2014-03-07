@@ -198,6 +198,9 @@ angularRest.controller('documentController', ['Restangular', '$scope', '$routePa
 
 // gridsController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
+        $scope.orderByField     = 'name';
+        $scope.reverseSort      = false;
+
         var grids = RestangularCache.all('grids').getList().then(function(gridsResponse) {
             $scope.gridsList = gridsResponse;
             Page.setTitle('Grids');
