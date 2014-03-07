@@ -323,6 +323,9 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
 
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('usersController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
+        $scope.orderByField     = 'username';
+        $scope.reverseSort      = false;
+
         var users = RestangularCache.all('users').getList().then(function(usersResponse) {
             $scope.usersList = usersResponse;
             Page.setTitle('Users');
