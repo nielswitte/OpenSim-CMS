@@ -54,7 +54,7 @@ var angularRest = angular.module('OpenSim-CMS', [
     });
 
     // configure html5 to get links working on jsfiddle
-    $locationProvider.html5Mode(true);
+    $locationProvider.html5Mode(true).hashPrefix('!');
 });
 
 // Authentication check on run
