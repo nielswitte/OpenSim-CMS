@@ -353,10 +353,11 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
                     $alert({title: 'User created!', content: $sce.trustAsHtml('The user: '+ $scope.user.username + ' has been created with ID: '+ resp.userId +'.'), type: 'success'});
                     $scope.user.id = resp.userId;
                     $scope.usersList.push($scope.user);
+
+                    Cache.clearCachedUrl($scope.requestUsersUrl);
+                    modal.hide();
                 }
             });
-            Cache.clearCachedUrl($scope.requestUsersUrl);
-            modal.hide();
         };
 
         // Show delete button only when allowed to delete
