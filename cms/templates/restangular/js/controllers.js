@@ -36,8 +36,7 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
                 user = { username: jQuery('#LoginUsername').val(), password: jQuery('#LoginPassword').val() };
             }
 
-            var formData = jQuery.param(user);
-            var auth = Restangular.one('auth').post('username', formData).then(function(authResponse) {
+            var auth = Restangular.one('auth').post('username', user).then(function(authResponse) {
                 // Successful auth?
                 if(authResponse.token) {
                     var user = Restangular.one('user', authResponse.userId).get({ token: authResponse.token }).then(function(userResponse) {
@@ -139,6 +138,9 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
 
 // documentsController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('documentsController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
+        $scope.orderByField     = 'title';
+        $scope.reverseSort      = false;
+
         var documents = RestangularCache.all('documents').getList().then(function(documentsResponse) {
             $scope.documentsList = documentsResponse;
             Page.setTitle('Documents');
@@ -198,6 +200,9 @@ angularRest.controller('documentController', ['Restangular', '$scope', '$routePa
 
 // gridsController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
+        $scope.orderByField     = 'name';
+        $scope.reverseSort      = false;
+
         var grids = RestangularCache.all('grids').getList().then(function(gridsResponse) {
             $scope.gridsList = gridsResponse;
             Page.setTitle('Grids');
@@ -322,16 +327,86 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
 );
 
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('usersController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
+angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', '$sce', 'Cache', function(RestangularCache, Restangular, $scope, Page, $modal, $alert, $sce, Cache) {
+        $scope.orderByField     = 'username';
+        $scope.reverseSort      = false;
+        $scope.requestUsersUrl  = '';
+        $scope.usersList        = {};
+
         var users = RestangularCache.all('users').getList().then(function(usersResponse) {
             $scope.usersList = usersResponse;
             Page.setTitle('Users');
+            $scope.requestUsersUrl = usersResponse.getRequestedUrl();
         });
 
         $scope.collapseFilter = true;
         $scope.toggleFilter = function() {
             $scope.collapseFilter = !$scope.collapseFilter;
             return $scope.collapseFilter;
+        };
+
+        $scope.saveUser = function() {
+            Restangular.all('user').post($scope.user).then(function(resp) {
+                if(resp.error) {
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                } else {
+                    $alert({title: 'User created!', content: $sce.trustAsHtml('The user: '+ $scope.user.username + ' has been created with ID: '+ resp.userId +'.'), type: 'success'});
+                    $scope.user.id = resp.userId;
+                    $scope.usersList.push($scope.user);
+
+                    Cache.clearCachedUrl($scope.requestUsersUrl);
+                    modal.hide();
+                }
+            });
+        };
+
+        // Show delete button only when allowed to delete
+        $scope.allowDelete = function(userId) {
+            if(userId != sessionStorage.id && userId != 0) {
+                return true;
+            } else {
+                return false;
+            }
+         }
+
+        // Remove a user
+        $scope.deleteUser = function(index) {
+            Restangular.one('user', $scope.usersList[index].id).remove().then(function(resp) {
+                if(resp.error) {
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                } else {
+                    $alert({title: 'User removed!', content: $sce.trustAsHtml('The user '+ $scope.usersList[index].username +' has been removed from the CMS.'), type: 'success'});
+                    delete $scope.usersList[index];
+                    Cache.clearCachedUrl($scope.requestUsersUrl);
+                }
+            });
+        };
+
+        // Dialog function handler
+        $scope.call = function(func) {
+            if(func == 'hide') {
+                modal.hide();
+            } else if(func == 'createUser') {
+                $scope.saveUser();
+            }
+        };
+
+        // New User dialog creation
+        $scope.newUser = function() {
+            $scope.template         = partial_path +'/userNewForm.html';
+            $scope.user             = {};
+            $scope.buttons          = [{
+                        text: 'Create',
+                        func: 'createUser',
+                        type: 'primary'
+                    },
+                    {
+                        text: 'Cancel',
+                        func: 'hide',
+                        type: 'danger'
+                    }
+                ];
+            modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
         };
     }]
 );
@@ -352,8 +427,12 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
         $scope.updateUser = function() {
             $scope.user.put().then(function(putResponse) {
                 angular.copy($scope.user, $scope.userOld);
-                $alert({title: 'User updated!', content: $sce.trustAsHtml('The user information has been updated.'), type: 'success'});
-                Cache.clearCachedUrl($scope.userRequestUrl);
+                if(putResponse.error) {
+                    $alert({title: 'User updating failed!', content: $sce.trustAsHtml(putResponse.error), type: 'danger'});
+                } else {
+                    $alert({title: 'User updated!', content: $sce.trustAsHtml('The user information has been updated.'), type: 'success'});
+                    Cache.clearCachedUrl($scope.userRequestUrl);
+                }
             });
         };
 

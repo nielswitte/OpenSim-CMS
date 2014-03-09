@@ -165,6 +165,12 @@ PUT /api/user/<USER-ID>/ HTTP/1.1
 | password          | String    | The user's new password                                           |
 | password2         | String    | The user's new password again, to check if no typo has been made  |
 
+### Delete user
+
+```http
+DELETE /api/user/<USER-ID>/ HTTP/1.1
+```
+
 ## Avatars
 
 ### Link avatar to user

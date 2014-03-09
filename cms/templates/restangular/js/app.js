@@ -54,7 +54,7 @@ var angularRest = angular.module('OpenSim-CMS', [
     });
 
     // configure html5 to get links working on jsfiddle
-    $locationProvider.html5Mode(true);
+    $locationProvider.html5Mode(true).hashPrefix('!');
 });
 
 // Authentication check on run
@@ -104,7 +104,7 @@ angularRest.factory('Page', function() {
 // Restangular settings
 angularRest.config(['RestangularProvider', function(RestangularProvider) {
         RestangularProvider.setBaseUrl('' + server_address + base_url + '/api');
-        RestangularProvider.setDefaultHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
+        //RestangularProvider.setDefaultHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
         RestangularProvider.setDefaultHttpFields({cache: false});
 
         // Add token to request when available (this line is required for page refreshes to keep the token)
@@ -153,12 +153,17 @@ angularRest.factory('RestangularCache', function(Restangular) {
 
 
 // AngularStrap configuration
-angularRest.config(function($alertProvider, $timepickerProvider, $datepickerProvider) {
+angularRest.config(function($alertProvider, $tooltipProvider, $timepickerProvider, $datepickerProvider) {
     angular.extend($alertProvider.defaults, {
         animation: 'am-fade-and-slide-top',
         placement: 'top-right',
         container: '#alerts',
         duration: 10
+    });
+
+    angular.extend($tooltipProvider.defaults, {
+        animation: 'am-flip-x',
+        trigger: 'hover'
     });
 
     angular.extend($timepickerProvider.defaults, {

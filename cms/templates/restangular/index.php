@@ -43,7 +43,7 @@ if (EXEC != 1) {
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href=".">OpenSim-CMS</a>
+                    <a class="navbar-brand" href="#!/">OpenSim-CMS</a>
                 </div>
                 <div class="collapse navbar-collapse" id="bs-navbar">
                     <ul class="nav navbar-nav" ng-include src="getMainNavigation()"></ul>
@@ -77,18 +77,18 @@ if (EXEC != 1) {
         <div id="alerts"></div>
 
         <!-- Additional JS files -->
-        <script src="templates/restangular/js/libs/jquery-2.1.0.min.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/libs/angular-1.2.14.min.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/libs/angular-animate-1.2.14.min.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/libs/angular-route-1.2.14.min.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/libs/angular-strap-2.0.0-rc.3.min.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/libs/angular-strap.tpl-2.0.0-rc.3.min.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/libs/restangular-1.3.1.min.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/libs/underscore-1.6.0.min.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/libs/moment-2.5.1.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/jquery.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/angular.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/angular-animate.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/angular-route.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/angular-strap.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/angular-strap.tpl.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/restangular.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/underscore.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/moment.min.js" type="text/javascript"></script>
 
-        <script src="templates/restangular/js/libs/select2-3.4.5.min.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/libs/less-1.6.3.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/select2.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/less.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/main.js" type="text/javascript"></script>
         <script src="templates/restangular/js/app.js" type="text/javascript"></script>
         <script src="templates/restangular/js/controllers.js" type="text/javascript"></script>

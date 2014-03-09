@@ -173,8 +173,8 @@ CREATE TABLE IF NOT EXISTS `meeting_participants` (
   `userId` int(11) NOT NULL,
   PRIMARY KEY (`meetingId`,`userId`),
   KEY `FK_meeting_participants_users` (`userId`),
-  CONSTRAINT `FK_meeting_participants_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`),
-  CONSTRAINT `FK_meeting_participants_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`)
+  CONSTRAINT `FK_meeting_participants_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_meeting_participants_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd

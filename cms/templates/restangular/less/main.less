@@ -41,6 +41,13 @@ body {
     }
 }
 
+// Toolbars
+.toolbar {
+    &.toolbar-top {
+        margin-bottom: 15px;
+    }
+}
+
 // Filters for table lists
 .filter {
     .row{
@@ -141,6 +148,7 @@ body {
 // Custom Bootstrap Alerts
 #alerts {
     position: fixed;
+    z-index: 2000;
     top: 0;
     left: 0;
     width: 100%;
@@ -212,6 +220,16 @@ body {
         opacity: .5;
         &.ng-leave-active {
             opacity: 0;
+        }
+    }
+}
+
+// Time and Date pickers
+.timepicker,
+.datepicker {
+    tbody {
+        button.btn-default {
+            border: none;
         }
     }
 }

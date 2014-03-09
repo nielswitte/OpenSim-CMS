@@ -69,15 +69,34 @@ class Helper {
     }
 
     /**
+     * Gets the input data from the request
+     *
+     * @param boolean $parse - Parse the input data to an array or return it raw string?
+     * @return string or array on success, or boolean FALSE when failed
+     */
+    public static function getInput($parse = FALSE) {
+        $request = $_SERVER['REQUEST_METHOD'];
+        // Only for PUT and POST requests
+        if($request == 'PUT' || $request == 'POST') {
+            $input  = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
+            $output = $parse ? self::parseInput($input) : $input;
+            return $output;
+        } else {
+            return FALSE;
+        }
+    }
+
+    /**
      * Helper function to parse PUT requests
      * @source: https://stackoverflow.com/questions/5483851/manually-parse-raw-http-data-with-php/5488449#5488449
      *
      * @param string $input
      * @return array
      */
-    public static function parsePutRequest($input) {
+    public static function parseInput($input) {
+        $headers = getallheaders();
         // Parse JSON
-        if(substr($input, 0, 1) == "{" && substr($input, -1) == "}") {
+        if((isset($headers['Content-Type']) && strpos($headers['Content-Type'], 'application/json') !== FALSE) || (substr($input, 0, 1) == "{" && substr($input, -1) == "}")) {
             $a_data = json_decode($input, TRUE);
         // Parse other form types
         } else {

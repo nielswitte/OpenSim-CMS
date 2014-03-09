@@ -134,6 +134,20 @@ class UserController {
     }
 
     /**
+     * Check to see if the given e-mail address in unused
+     * 
+     * @param string $email
+     * @return boolean - TRUE when available
+     */
+    public function checkEmail($email) {
+        $db = \Helper::getDB();
+        $db->where('email', $db->escape($email));
+        $result = $db->get('users', 1);
+
+        return !isset($result[0]);
+    }
+
+    /**
      * Checks to see if the password matches the stored hash for this user
      *
      * @param string $password - The unhashed password
@@ -221,6 +235,24 @@ class UserController {
     }
 
     /**
+     * Removes this user from the CMS
+     *
+     * @return boolean
+     * @throws \Exception
+     */
+    public function removeUser() {
+        $db         = \Helper::getDB();
+        $db->where('id', $db->escape($this->user->getId()));
+        $result     = $db->delete('users');
+
+        if($result === FALSE) {
+            throw new \Exception("Given User could not be removed from the CMS", 1);
+        }
+
+        return $result;
+    }
+
+    /**
      * Checks if the given parameters are valid for creating a new user
      *
      * @param array $parameters - See createUser()
@@ -235,6 +267,8 @@ class UserController {
             throw new \Exception('Missing parameter (string) "username" with a minimum length of '. SERVER_MIN_USERNAME_LENGTH, 2);
         } elseif(isset($parameters['username']) && !$this->checkUsername($parameters['username'])) {
             throw new \Exception("Username is already being used", 9);
+        } elseif(isset($parameters['email']) && !$this->checkEmail($parameters['email'])) {
+            throw new \Exception("This is email is already being used", 10);
         } elseif(!isset($parameters['password']) || strlen($parameters['password']) < SERVER_MIN_PASSWORD_LENGTH) {
             throw new \Exception('Missing parameter (string) "password" with a minimum length of '. SERVER_MIN_PASSWORD_LENGTH, 3);
         } elseif(!isset($parameters['password2']) || $parameters['password'] != $parameters['password2']) {

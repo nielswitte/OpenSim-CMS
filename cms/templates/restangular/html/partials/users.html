@@ -1,6 +1,9 @@
 <div class="page-header">
     <h1>Users <small>Overview</small></h1>
 </div>
+<div class="toolbar toolbar-top">
+    <button ng-click="newUser()" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> New user</button>
+</div>
 <div class="panel panel-primary filter">
     <div class="panel-heading">
         <h3 class="panel-title">Users</h3>
@@ -16,20 +19,52 @@
     <table class="table table-bordered table-striped table-responsive" id="userList">
         <thead>
             <tr>
-                <th>#</th>
-                <th>Username</th>
-                <th>First name</th>
-                <th>Last name</th>
-                <th>E-mail address</th>
+                <th>
+                    <a ng-click="orderByField='id'; reverseSort = !reverseSort" title="Sort by ID">#</a>
+                    <span ng-show="orderByField == 'id'">
+                        <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
+                        <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
+                    </span>
+                </th>
+                <th>
+                    <a ng-click="orderByField='username'; reverseSort = !reverseSort" title="Sort by username">Username</a>
+                    <span ng-show="orderByField == 'username'">
+                        <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
+                        <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
+                    </span>
+                </th>
+                <th>
+                    <a ng-click="orderByField='firstName'; reverseSort = !reverseSort" title="Sort by first name">First name</a>
+                    <span ng-show="orderByField == 'firstName'">
+                        <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
+                        <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
+                    </span>
+                </th>
+                <th>
+                    <a ng-click="orderByField='lastName'; reverseSort = !reverseSort" title="Sort by last name">Last name</a>
+                    <span ng-show="orderByField == 'lastName'">
+                        <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
+                        <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
+                    </span>
+                </th>
+                <th>
+                    <a ng-click="orderByField='email'; reverseSort = !reverseSort" title="Sort by e-email address">E-mail address</a>
+                    <span ng-show="orderByField == 'email'">
+                        <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
+                        <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
+                    </span>
+                </th>
+                <th> </th>
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="(index, user) in usersList | filter: searchText">
+            <tr ng-repeat="(index, user) in usersList | orderBy:orderByField:reverseSort | filter: searchText">
                 <td>{{user.id}}</td>
-                <td><a href="user/{{user.id}}/">{{user.username}}</a></td>
+                <td><a href="#!/user/{{user.id}}/">{{user.username}}</a></td>
                 <td>{{user.firstName}}</td>
                 <td>{{user.lastName}}</td>
                 <td>{{user.email}}</td>
+                <td><button class="btn btn-danger btn-xs" ng-click="deleteUser(index)" ng-show="allowDelete(user.id)"><i class="glyphicon glyphicon-remove"></i></button></td>
             </tr>
         </tbody>
     </table>
