@@ -36,8 +36,7 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
                 user = { username: jQuery('#LoginUsername').val(), password: jQuery('#LoginPassword').val() };
             }
 
-            var formData = jQuery.param(user);
-            var auth = Restangular.one('auth').post('username', formData).then(function(authResponse) {
+            var auth = Restangular.one('auth').post('username', user).then(function(authResponse) {
                 // Successful auth?
                 if(authResponse.token) {
                     var user = Restangular.one('user', authResponse.userId).get({ token: authResponse.token }).then(function(userResponse) {
@@ -403,8 +402,12 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
         $scope.updateUser = function() {
             $scope.user.put().then(function(putResponse) {
                 angular.copy($scope.user, $scope.userOld);
-                $alert({title: 'User updated!', content: $sce.trustAsHtml('The user information has been updated.'), type: 'success'});
-                Cache.clearCachedUrl($scope.userRequestUrl);
+                if(putResponse.error) {
+                    $alert({title: 'User updating failed!', content: $sce.trustAsHtml(putResponse.error), type: 'danger'});
+                } else {
+                    $alert({title: 'User updated!', content: $sce.trustAsHtml('The user information has been updated.'), type: 'success'});
+                    Cache.clearCachedUrl($scope.userRequestUrl);
+                }
             });
         };
 

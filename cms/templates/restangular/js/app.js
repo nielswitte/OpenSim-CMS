@@ -104,7 +104,7 @@ angularRest.factory('Page', function() {
 // Restangular settings
 angularRest.config(['RestangularProvider', function(RestangularProvider) {
         RestangularProvider.setBaseUrl('' + server_address + base_url + '/api');
-        RestangularProvider.setDefaultHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
+        //RestangularProvider.setDefaultHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
         RestangularProvider.setDefaultHttpFields({cache: false});
 
         // Add token to request when available (this line is required for page refreshes to keep the token)
