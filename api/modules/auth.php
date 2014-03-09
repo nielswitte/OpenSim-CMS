@@ -44,9 +44,11 @@ class Auth extends Module {
     public function authUser($args) {
         $headers                = getallheaders();
         $db                     = \Helper::getDB();
-        $username               = filter_input(INPUT_POST, 'username', FILTER_SANITIZE_ENCODED);
-        $password               = filter_input(INPUT_POST, 'password', FILTER_UNSAFE_RAW);
-        $ip                     = filter_input(INPUT_POST, 'ip', FILTER_SANITIZE_ENCODED);
+        $input                  = \Helper::getInput(TRUE);
+
+        $username               = isset($input['username']) ? $input['username'] : '';
+        $password               = isset($input['password']) ? $input['password'] : '';
+        $ip                     = isset($input['ip']) ? $input['ip'] : FALSE;
 
         // Default settings
         $userId = ($username == "OpenSim" ? 0 : -1);

@@ -126,7 +126,7 @@ class Presentation extends Module{
                 $cachedTextures[$cache['gridId']] = array(
                     'uuid'      => $cache['uuid'],
                     'expires'   => $cache['uuidExpires'],
-                    'isExpired' => $cache['uuidExpires'] > time() ? 1 : 0
+                    'isExpired' => strtotime($cache['uuidExpires']) > time() ? 0 : 1
                 );
             }
 
@@ -201,8 +201,7 @@ class Presentation extends Module{
      * @return boolean
      */
     public function updateSlideUuidByNumber($args) {
-        $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
-        $parsedPutData  = (\Helper::parsePutRequest($putUserData));
+        $parsedPutData  = \Helper::getInput(TRUE);
         $gridId         = isset($parsedPutData['gridId']) ? $parsedPutData['gridId'] : '';
         $postUuid       = isset($parsedPutData['uuid']) ? $parsedPutData['uuid'] : '';
 

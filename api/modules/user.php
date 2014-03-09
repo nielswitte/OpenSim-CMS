@@ -54,10 +54,7 @@ class User extends Module {
      * @return array
      */
     public function createUser($args) {
-        $userData               = filter_input_array(INPUT_POST, FILTER_SANITIZE_STRING);
-        // Overwrite these values because they may contain special chars
-        $userData['password']   = filter_input(INPUT_POST, 'password', FILTER_UNSAFE_RAW);
-        $userData['password2']  = filter_input(INPUT_POST, 'password2', FILTER_UNSAFE_RAW);
+        $userData = \Helper::getInput(TRUE);
 
         $userId         = FALSE;
         $userCtrl       = new \Controllers\UserController();
@@ -80,16 +77,20 @@ class User extends Module {
      *
      * @param array $args
      * @return array
+     * @throws \Exception
      */
     public function updateUserById($args) {
-        $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
-        $parsedPutData  = (\Helper::parsePutRequest($putUserData));
+        $putUserData    = \Helper::getInput(TRUE);
 
         $user           = new \Models\User($args[1]);
         $userCtrl       = new \Controllers\UserController($user);
         $data           = FALSE;
-        if($userCtrl->validateParameterUpdateUser($parsedPutData)) {
-            $data     = $userCtrl->updateUser($parsedPutData);
+        if($userCtrl->validateParameterUpdateUser($putUserData)) {
+            $data     = $userCtrl->updateUser($putUserData);
+            // No changes made
+            if($data !== TRUE) {
+                throw new \Exception("No rows updated, did you really made any changes?", 5);
+            }
         }
 
         // Format the result
@@ -107,14 +108,13 @@ class User extends Module {
      * @return array
      */
     public function updateUserPasswordById($args) {
-        $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
-        $parsedPutData  = (\Helper::parsePutRequest($putUserData));
+        $putUserData    = \Helper::getInput(TRUE);
 
         $user           = new \Models\User($args[1]);
         $userCtrl       = new \Controllers\UserController($user);
         $data           = FALSE;
-        if($userCtrl->validateParameterPassword($parsedPutData)) {
-            $data     = $userCtrl->setPassword($parsedPutData['password']);
+        if($userCtrl->validateParameterPassword($putUserData)) {
+            $data     = $userCtrl->setPassword($putUserData['password']);
         }
 
         // Format the result
@@ -258,9 +258,8 @@ class User extends Module {
      * @return array
      */
     public function linkAvatarToUser($args) {
-        $putUserData    = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
-        $parsedPutData  = (\Helper::parsePutRequest($putUserData));
-        $username       = isset($parsedPutData['username']) ? $parsedPutData['username'] : '';
+        $putUserData    = \Helper::getInput(TRUE);
+        $username       = isset($putUserData['username']) ? $putUserData['username'] : '';
 
         $userCtrl       = new \Controllers\UserController();
         $data           = $userCtrl->linkAvatar($username, $args[1], $args[2]);
@@ -320,8 +319,7 @@ class User extends Module {
      * @return array
      */
     public function teleportAvatarByUuid($args) {
-        $putAvatarData  = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
-        $parsedPutData  = (\Helper::parsePutRequest($putAvatarData));
+        $parsedPutData  = \Helper::getInput(TRUE);
 
         // use UUID from GET request
         $parsedPutData['agentUuid'] = $args[1];
@@ -345,12 +343,13 @@ class User extends Module {
      */
     public function createAvatar($args) {
         $result                     = '';
-        $avatarData['email']        = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
-        $avatarData['password']     = filter_input(INPUT_POST, 'password', FILTER_UNSAFE_RAW);
-        $avatarData['firstName']    = filter_input(INPUT_POST, 'firstName', FILTER_SANITIZE_STRING);
-        $avatarData['lastName']     = filter_input(INPUT_POST, 'lastName', FILTER_SANITIZE_STRING);
-        $avatarData['startRegionX'] = filter_input(INPUT_POST, 'startRegionX', FILTER_SANITIZE_NUMBER_FLOAT);
-        $avatarData['startRegionY'] = filter_input(INPUT_POST, 'startRegionY', FILTER_SANITIZE_NUMBER_FLOAT);
+        $avatarData                 = \Helper::getInput(TRUE);
+        //$avatarData['email']        = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
+        //$avatarData['password']     = filter_input(INPUT_POST, 'password', FILTER_UNSAFE_RAW);
+        //$avatarData['firstName']    = filter_input(INPUT_POST, 'firstName', FILTER_SANITIZE_STRING);
+        //$avatarData['lastName']     = filter_input(INPUT_POST, 'lastName', FILTER_SANITIZE_STRING);
+        //$avatarData['startRegionX'] = filter_input(INPUT_POST, 'startRegionX', FILTER_SANITIZE_NUMBER_FLOAT);
+        //$avatarData['startRegionY'] = filter_input(INPUT_POST, 'startRegionY', FILTER_SANITIZE_NUMBER_FLOAT);
         $avatarData['gridId']       = $args[1];
 
         // Check if the parameters are valid for creating a user
