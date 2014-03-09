@@ -221,6 +221,24 @@ class UserController {
     }
 
     /**
+     * Removes this user from the CMS
+     *
+     * @return boolean
+     * @throws \Exception
+     */
+    public function removeUser() {
+        $db         = \Helper::getDB();
+        $db->where('id', $db->escape($this->user->getId()));
+        $result     = $db->delete('users');
+
+        if($result === FALSE) {
+            throw new \Exception("Given User could not be removed from the CMS", 1);
+        }
+
+        return $result;
+    }
+
+    /**
      * Checks if the given parameters are valid for creating a new user
      *
      * @param array $parameters - See createUser()

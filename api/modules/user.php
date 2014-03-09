@@ -38,6 +38,7 @@ class User extends Module {
         $this->api->addRoute("/user\/?$/",                                        "createUser",             $this, "POST",   TRUE);  // Create a new CMS user
         $this->api->addRoute("/user\/(\d+)\/?$/",                                 "getUserById",            $this, "GET",    TRUE);  // Get a user by ID
         $this->api->addRoute("/user\/(\d+)\/?$/",                                 "updateUserById",         $this, "PUT",    TRUE);  // Update the given user
+        $this->api->addRoute("/user\/(\d+)\/?$/",                                 "deleteUserById",         $this, "DELETE", TRUE);  // Delete the given user
         $this->api->addRoute("/user\/(\d+)\/password\/?$/",                       "updateUserPasswordById", $this, "PUT",    TRUE);  // Updates the user's password
         $this->api->addRoute("/user\/([a-z0-9-]{36})\/teleport\/?$/",             "teleportAvatarByUuid",   $this, "PUT",    TRUE);  // Teleports a user
         $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "getUserByAvatar",        $this, "GET",    TRUE);  // Gets an user by the avatar of this grid
@@ -94,6 +95,23 @@ class User extends Module {
         }
 
         // Format the result
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE)
+        );
+
+        return $result;
+    }
+
+    /**
+     * Removes the given user
+     * @param array $args
+     * @return array
+     */
+    public function deleteUserById($args) {
+        $user     = new \Models\User($args[1]);
+        $userCtrl = new \Controllers\UserController($user);
+        $data     =  $userCtrl->removeUser();
+
         $result = array(
             'success' => ($data !== FALSE ? TRUE : FALSE)
         );

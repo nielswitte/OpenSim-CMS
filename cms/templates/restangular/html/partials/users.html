@@ -54,15 +54,17 @@
                         <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
                     </span>
                 </th>
+                <th> </th>
             </tr>
         </thead>
         <tbody>
             <tr ng-repeat="(index, user) in usersList | orderBy:orderByField:reverseSort | filter: searchText">
                 <td>{{user.id}}</td>
-                <td><a href="user/{{user.id}}/">{{user.username}}</a></td>
+                <td><a href="#!/user/{{user.id}}/">{{user.username}}</a></td>
                 <td>{{user.firstName}}</td>
                 <td>{{user.lastName}}</td>
                 <td>{{user.email}}</td>
+                <td><button class="btn btn-danger btn-xs" ng-click="deleteUser(index)" ng-show="allowDelete(user.id)"><i class="glyphicon glyphicon-remove"></i></button></td>
             </tr>
         </tbody>
     </table>

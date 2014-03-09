@@ -331,6 +331,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
         $scope.orderByField     = 'username';
         $scope.reverseSort      = false;
         $scope.requestUsersUrl  = '';
+        $scope.usersList        = {};
 
         var users = RestangularCache.all('users').getList().then(function(usersResponse) {
             $scope.usersList = usersResponse;
@@ -350,11 +351,34 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                 } else {
                     $alert({title: 'User created!', content: $sce.trustAsHtml('The user: '+ $scope.user.username + ' has been created with ID: '+ resp.userId +'.'), type: 'success'});
+                    $scope.user.id = resp.userId;
                     $scope.usersList.push($scope.user);
                 }
             });
-            Cache.clearCachedUrl($scope.userRequestUrl);
+            Cache.clearCachedUrl($scope.requestUsersUrl);
             modal.hide();
+        };
+
+        // Show delete button only when allowed to delete
+        $scope.allowDelete = function(userId) {
+            if(userId != sessionStorage.id && userId != 0) {
+                return true;
+            } else {
+                return false;
+            }
+         }
+
+        // Remove a user
+        $scope.deleteUser = function(index) {
+            Restangular.one('user', $scope.usersList[index].id).remove().then(function(resp) {
+                if(resp.error) {
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                } else {
+                    $alert({title: 'User removed!', content: $sce.trustAsHtml('The user '+ $scope.usersList[index].username +' has been removed from the CMS.'), type: 'success'});
+                    delete $scope.usersList[index];
+                    Cache.clearCachedUrl($scope.requestUsersUrl);
+                }
+            });
         };
 
         // Dialog function handler
