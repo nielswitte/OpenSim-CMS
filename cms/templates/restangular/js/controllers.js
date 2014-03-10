@@ -155,7 +155,9 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
             return $scope.collapseFilter;
         };
 
-        $scope.saveDocument = function() {
+        // Process file input type on change
+        jQuery('body').on('change', '#inputFile', function(e) {
+            console.log('hier');
              // Process File
             var reader = new FileReader();
             reader.readAsDataURL(jQuery('#inputFile')[0].files[0], "UTF-8");
@@ -165,9 +167,10 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
             reader.onerror = function(e) {
                 $alert({title: 'Error!', content: $sce.trustAsHtml('Processing file failed.'), type: 'danger'});
             };
-            
+        });
+
+        $scope.saveDocument = function() {
             Restangular.all('document').post($scope.document).then(function(resp) {
-            //Restangular.all('document').post($scope.document).then(function(resp) {
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                 } else {
@@ -176,7 +179,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
                     $scope.documentsList.push($scope.document);
 
                     Cache.clearCachedUrl($scope.requestUsersUrl);
-                    modal.hide();
+                    //modal.hide();
                 }
             });
         };
