@@ -21,8 +21,8 @@ integer debug = 1;              // Enables showing debugging comments
 string APIUsername = "OpenSim"; // API user name to be used
 string APIPassword = "OpenSim"; // API password
 integer serverId = 1;           // The ID of this server in OpenSim-CMS
-integer width = 2048;           // Texture width
-integer height = 2048;          // Texture height
+integer width = 1024;           // Texture width
+integer height = 1024;          // Texture height
 
 // Some general parameters
 string APIToken;                // The token to be used for the API
@@ -146,7 +146,7 @@ nav_slide(integer next) {
 
         // Load slide
         string url          = llList2String(slides, next-1);
-        string params       = "width:"+ width +",height:"+ height +"";
+        string params       = "width:"+ width +",height:"+ height;
 
         integer res = llListFindList(textureCache, [presentationId, next]);
         // Check if texture is found in cache, only required on first usage
@@ -360,6 +360,8 @@ state presentation {
             string slides_body  = JsonGetJson(json_body, "slides");
             // Parse the slides section
             key json_slides     = JsonCreateStore(slides_body);
+            // Empty slides list
+            slides              = [];
             integer x;
             integer length      = (integer) JsonGetValue(json_body, "slidesCount");
             // Get from each slide the URL or the UUID
