@@ -201,16 +201,16 @@ class Presentation extends Module{
             $resize = new \Image($slidePath);
             // resize when needed
             if($resize->getWidth() > IMAGE_WIDTH || $resize->getHeight() > IMAGE_HEIGHT) {
-                $resize->resize(1024,1024,'fit');
+                $resize->resize(IMAGE_WIDTH,IMAGE_HEIGHT,'fit');
                 $resize->save($presentation->getSlideId(), FILES_LOCATION . DS . $presentation->getType() . DS .'slide-'. ($presentation->getId() < 10 ? '0'. $presentation->getId() : $presentation->getId()), 'jpg');
             }
             unset($resize);
 
             // Fill remaining of image with black
             $image = new \Image(FILES_LOCATION . DS . $presentation->getType() . DS .'background.jpg');
+            $image->resize(IMAGE_WIDTH,IMAGE_HEIGHT,'fit');
             $image->addWatermark($slidePath);
             $image->writeWatermark(100, 0, 0, 'c', 'c');
-            $image->resize(1024,1024,'fit');
             $image->display();
         } else {
             throw new Exception("Requested slide does not exists", 5);
