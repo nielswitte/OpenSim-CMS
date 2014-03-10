@@ -17,7 +17,7 @@
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
-integer debug = 0;              // Enables showing debugging comments
+integer debug = 1;              // Enables showing debugging comments
 string APIUsername = "OpenSim"; // API user name to be used
 string APIPassword = "OpenSim"; // API password
 integer serverId = 1;           // The ID of this server in OpenSim-CMS
@@ -397,7 +397,7 @@ state presentation {
             if(debug) llInstantMessage(userUuid, "[Debug] Found the following presentations : "+ (string) json_presentations);
             // List with presentations is not empty?
             if(json_presentations != "[]") {
-                list presentations = llParseString2List(json_presentations, ["\",\"", "\"", "[", "]"], []);
+                list presentations = llParseString2List(json_presentations, ["\",\"", "\"", "[", "]", ","], []);
 
                 // Newest presentations first
                 presentations = llListSort(presentations, 1, FALSE);
