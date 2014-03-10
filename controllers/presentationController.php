@@ -6,7 +6,7 @@ if(EXEC != 1) {
 }
 
 /**
- * This class is the user controller
+ * This class is the presentation controller
  *
  * @author Niels Witte
  * @version 0.1
