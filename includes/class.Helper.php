@@ -139,4 +139,74 @@ class Helper {
 
         return $a_data;
     }
+
+    /**
+     * Attempts to decode string as base64
+     *
+     * @param string $base64
+     * @param boolean $decode - [Optional] Whether to decode the contents or not
+     * @return string or boolean when not base64
+     */
+    public static function getBase64Content($base64, $decode = TRUE) {
+        $result         = FALSE;
+        $base64_start   = ";base64,";
+        // Get position of base64 tag
+        $base64_offset  = strpos($base64, $base64_start);
+        // Is a base64 string?
+        if($base64_offset !== FALSE) {
+            // Get base64 content
+            $base64_content = substr($base64, $base64_offset + strlen($base64_start));
+            $result         = $decode ? base64_decode($base64_content) : $base64_content;
+        }
+        return $result;
+    }
+
+    /**
+     * Attempts to get the header from the base64 string
+     *
+     * @param string $base64
+     * @return string or boolean when not base64 or no header found
+     */
+    public static function getBase64Header($base64) {
+        $result         = FALSE;
+        $base64_start   = ";base64,";
+        // Get position of base64 tag
+        $base64_offset  = strpos($base64, $base64_start);
+        if($base64_offset !== FALSE) {
+            // base64 string starts with "data:", hence the 5.
+            $base64_header  = substr($base64, 5, $base64_offset - 5);
+            $result         = $base64_header;
+        }
+        return $result;
+    }
+
+    /**
+     * Attempts to match a file content type to an extension
+     *
+     * @param string $type
+     * @return string - Will return .txt if no other match is found
+     */
+    public static function getExtentionFromContentType($type) {
+        switch ($type) {
+            case "application/pdf":
+                return 'pdf';
+            break;
+            default:
+                return 'txt';
+            break;
+        }
+    }
+
+    /**
+     * Saves the given data to the given file on the given location
+     *
+     * @param string $filename - Filename and extension
+     * @param string $location - File location
+     * @param string $data - Data to store in file
+     * @return string full path to file or boolean when failed
+     */
+    public static function saveFile($filename, $location, $data) {
+        $filepath = $location .DS. $filename;
+        return @file_put_contents($filepath, $data) !== FALSE ? $filepath : FALSE;
+    }
 }
