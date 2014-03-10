@@ -157,7 +157,6 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 
         // Process file input type on change
         jQuery('body').on('change', '#inputFile', function(e) {
-            console.log('hier');
              // Process File
             var reader = new FileReader();
             reader.readAsDataURL(jQuery('#inputFile')[0].files[0], "UTF-8");
@@ -174,13 +173,14 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                 } else {
-                    $alert({title: 'User created!', content: $sce.trustAsHtml('The document: '+ $scope.document.title + ' has been created with ID: '+ resp.id +'.'), type: 'success'});
+                    $alert({title: 'Dpcument created!', content: $sce.trustAsHtml('The document: '+ $scope.document.title + ' has been created with ID: '+ resp.id +'.'), type: 'success'});
                     $scope.document.id                  = resp.id;
+                    $scope.document.ownerId             = sessionStorage.id;
                     $scope.document.creationDate        = new moment().format('YYYY-MM-DD HH:mm:ss');
                     $scope.document.modificationDate    = new moment().format('YYYY-MM-DD HH:mm:ss');
                     $scope.documentsList.push($scope.document);
 
-                    Cache.clearCachedUrl($scope.requestUsersUrl);
+                    Cache.clearCachedUrl($scope.requestDocumentsUrl);
                     modal.hide();
                 }
             });
@@ -195,13 +195,13 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
             }
          };
 
-        // Remove a user
+        // Remove a document
         $scope.deleteDocument = function(index) {
             Restangular.one('document', $scope.documentsList[index].id).remove().then(function(resp) {
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                 } else {
-                    $alert({title: 'User removed!', content: $sce.trustAsHtml('The document '+ $scope.documentsList[index].title +' has been removed from the CMS.'), type: 'success'});
+                    $alert({title: 'Document removed!', content: $sce.trustAsHtml('The document '+ $scope.documentsList[index].title +' has been removed from the CMS.'), type: 'success'});
                     delete $scope.documentsList[index];
                     Cache.clearCachedUrl($scope.requestDocumentsUrl);
                 }
