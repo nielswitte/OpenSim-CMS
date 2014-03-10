@@ -334,6 +334,18 @@ GET /api/documents/ HTTP/1.1
 GET /api/documents/<OFFSET>/ HTTP/1.1
 ```
 
+```
+### Add a new document
+
+```http
+POST /api/presentation/ HTTP/1.1
+```
+| Parameter         | Type      | Description                                                 |
+|-------------------|-----------|-------------------------------------------------------------|
+| title             | string    | The title of the document                                   |
+| type              | string    | The document type                                           |
+| file              | file      | Base64 encoded file                                         |
+
 ```http
 GET /api/document/<DOCUMENT-ID>/ HTTP/1.1
 ```
@@ -381,6 +393,17 @@ Cache information is left out in the list view.
     (...)
 }
 ```
+### Add a new presentation
+
+```http
+POST /api/presentation/ HTTP/1.1
+```
+| Parameter         | Type      | Description                                                 |
+|-------------------|-----------|-------------------------------------------------------------|
+| title             | string    | The title of the presentation                               |
+| type              | string    | The document type, in this case it should be "presentation" |
+| file              | file      | Base64 encoded file (PDF)                                   |
+
 
 #### Specific presentation
 To retrieve a specific presentation use the following command and replace the id with the number of the

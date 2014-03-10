@@ -175,11 +175,13 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                 } else {
                     $alert({title: 'User created!', content: $sce.trustAsHtml('The document: '+ $scope.document.title + ' has been created with ID: '+ resp.id +'.'), type: 'success'});
-                    $scope.document.id = resp.id;
+                    $scope.document.id                  = resp.id;
+                    $scope.document.creationDate        = new moment().format('YYYY-MM-DD HH:mm:ss');
+                    $scope.document.modificationDate    = new moment().format('YYYY-MM-DD HH:mm:ss');
                     $scope.documentsList.push($scope.document);
 
                     Cache.clearCachedUrl($scope.requestUsersUrl);
-                    //modal.hide();
+                    modal.hide();
                 }
             });
         };
@@ -196,7 +198,6 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
         // Remove a user
         $scope.deleteDocument = function(index) {
             Restangular.one('document', $scope.documentsList[index].id).remove().then(function(resp) {
-
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                 } else {

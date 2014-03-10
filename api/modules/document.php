@@ -72,7 +72,8 @@ class Document extends Module{
         $input  = \Helper::getInput(TRUE);
         // Presentations are handled by the presentations module
         if($input['type'] == 'presentation') {
-            $data = $this->api->getModule('presentation')->createPresentation($args);
+            $presentation = $this->api->getModule('presentation')->createPresentation($args);
+            $data = is_array($presentation) ? $presentation['id'] : $data;
         // Process other files
         } else {
             // @todo
@@ -81,7 +82,7 @@ class Document extends Module{
         // Format the result
         $result = array(
             'success'   => ($data !== FALSE ? TRUE : FALSE),
-            'id'        => ($data !== FALSE ? $data['id'] : 0)
+            'id'        => ($data !== FALSE ? $data : 0)
         );
 
         return $result;

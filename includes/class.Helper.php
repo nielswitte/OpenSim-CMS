@@ -224,4 +224,19 @@ class Helper {
         $command = 'pdftoppm -jpeg -scale-to '. (IMAGE_WIDTH > IMAGE_HEIGHT ? IMAGE_WIDTH : IMAGE_HEIGHT) .' -aa yes -aaVector yes '. $file .' '. $destination;
         exec($command);
     }
+
+    /**
+     * Removes direcotry and its contents
+     * 
+     * @param string $dir
+     */
+    public static function removeDirAndContents($dir) {
+        foreach (glob($dir . '/*') as $file) {
+            if (is_dir($file)) {
+                self::removeDirAndContents($file);
+            } else {
+                unlink($file);
+            }
+        } rmdir($dir);
+    }
 }

@@ -77,14 +77,25 @@ class Presentation extends Module{
         return $this->getPresentationData($presentation);
     }
 
-
+    /**
+     * Creates a new presentation based on the given POST data
+     *
+     * @param array $args
+     * @return array
+     */
     public function createPresentation($args) {
-        $result             = FALSE;
         $input              = \Helper::getInput(TRUE);
         $presentationCtrl   = new \Controllers\PresentationController();
         if($presentationCtrl->validateParametersCreate($input)) {
-            $result = $presentationCtrl->createPresentation($input);
+            $data = $presentationCtrl->createPresentation($input);
         }
+
+        // Format the result
+        $result = array(
+            'success'   => ($data !== FALSE ? TRUE : FALSE),
+            'id'        => ($data !== FALSE ? $data : 0)
+        );
+
         return $result;
     }
 
