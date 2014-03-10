@@ -137,19 +137,98 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
 );
 
 // documentsController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentsController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
-        $scope.orderByField     = 'title';
-        $scope.reverseSort      = false;
+angularRest.controller('documentsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$modal', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, Page, $alert, $modal, $sce, Cache) {
+        $scope.orderByField         = 'title';
+        $scope.reverseSort          = false;
+        $scope.requestDocumentsUrl  = '';
+        $scope.documentsList        = {};
 
         var documents = RestangularCache.all('documents').getList().then(function(documentsResponse) {
             $scope.documentsList = documentsResponse;
             Page.setTitle('Documents');
+            $scope.requestDocumentsUrl = documentsResponse.getRequestedUrl();
         });
 
         $scope.collapseFilter = true;
         $scope.toggleFilter = function() {
             $scope.collapseFilter = !$scope.collapseFilter;
             return $scope.collapseFilter;
+        };
+
+        $scope.saveDocument = function() {
+             // Process File
+            var reader = new FileReader();
+            reader.readAsDataURL(jQuery('#inputFile')[0].files[0], "UTF-8");
+            reader.onload = function (e) {
+                $scope.document.file = e.target.result;
+            };
+            reader.onerror = function(e) {
+                $alert({title: 'Error!', content: $sce.trustAsHtml('Processing file failed.'), type: 'danger'});
+            };
+            
+            Restangular.all('document').post($scope.document).then(function(resp) {
+            //Restangular.all('document').post($scope.document).then(function(resp) {
+                if(!resp.success) {
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                } else {
+                    $alert({title: 'User created!', content: $sce.trustAsHtml('The document: '+ $scope.document.title + ' has been created with ID: '+ resp.id +'.'), type: 'success'});
+                    $scope.document.id = resp.id;
+                    $scope.documentsList.push($scope.document);
+
+                    Cache.clearCachedUrl($scope.requestUsersUrl);
+                    modal.hide();
+                }
+            });
+        };
+
+        // Show delete button only when allowed to delete
+        $scope.allowDelete = function(ownerId) {
+            if(ownerId == sessionStorage.id) {
+                return true;
+            } else {
+                return false;
+            }
+         };
+
+        // Remove a user
+        $scope.deleteDocument = function(index) {
+            Restangular.one('document', $scope.documentsList[index].id).remove().then(function(resp) {
+
+                if(!resp.success) {
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                } else {
+                    $alert({title: 'User removed!', content: $sce.trustAsHtml('The document '+ $scope.documentsList[index].title +' has been removed from the CMS.'), type: 'success'});
+                    delete $scope.documentsList[index];
+                    Cache.clearCachedUrl($scope.requestDocumentsUrl);
+                }
+            });
+        };
+
+        // Dialog function handler
+        $scope.call = function(func) {
+            if(func == 'hide') {
+                modal.hide();
+            } else if(func == 'createDocument') {
+                $scope.saveDocument();
+            }
+        };
+
+        // New document dialog creation
+        $scope.newDocument = function() {
+            $scope.template         = partial_path +'/documentNewForm.html';
+            $scope.document         = {};
+            $scope.buttons          = [{
+                        text: 'Create',
+                        func: 'createDocument',
+                        type: 'primary'
+                    },
+                    {
+                        text: 'Cancel',
+                        func: 'hide',
+                        type: 'danger'
+                    }
+                ];
+            modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
         };
     }]
 );
@@ -347,7 +426,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
         $scope.saveUser = function() {
             Restangular.all('user').post($scope.user).then(function(resp) {
-                if(resp.error) {
+                if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                 } else {
                     $alert({title: 'User created!', content: $sce.trustAsHtml('The user: '+ $scope.user.username + ' has been created with ID: '+ resp.userId +'.'), type: 'success'});
@@ -367,12 +446,12 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
             } else {
                 return false;
             }
-         }
+         };
 
         // Remove a user
         $scope.deleteUser = function(index) {
             Restangular.one('user', $scope.usersList[index].id).remove().then(function(resp) {
-                if(resp.error) {
+                if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                 } else {
                     $alert({title: 'User removed!', content: $sce.trustAsHtml('The user '+ $scope.usersList[index].username +' has been removed from the CMS.'), type: 'success'});
@@ -427,7 +506,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
         $scope.updateUser = function() {
             $scope.user.put().then(function(putResponse) {
                 angular.copy($scope.user, $scope.userOld);
-                if(putResponse.error) {
+                if(!putResponse.success) {
                     $alert({title: 'User updating failed!', content: $sce.trustAsHtml(putResponse.error), type: 'danger'});
                 } else {
                     $alert({title: 'User updated!', content: $sce.trustAsHtml('The user information has been updated.'), type: 'success'});
@@ -446,7 +525,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
 
         $scope.confirmAvatar = function(index, avatar) {
             var confirm = Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).put().then(function(confirmationResponse) {
-                if(confirmationResponse.error) {
+                if(!confirmationResponse.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(confirmationResponse.error), type: 'danger'});
                 } else {
                     $scope.user.avatars[index].confirmed = 1;
@@ -458,7 +537,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
 
         $scope.unlinkAvatar = function(index, avatar) {
             var unlink = Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).remove().then(function(unlinkResponse) {
-                if(unlinkResponse.error) {
+                if(!unlinkResponse.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(unlinkResponse.error), type: 'danger'});
                 } else {
                     delete $scope.user.avatars[index];
