@@ -10,7 +10,7 @@ require_once dirname(__FILE__) .'/module.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date March 3rd, 2014
  */
 class Document extends Module{
@@ -34,6 +34,7 @@ class Document extends Module{
     public function setRoutes() {
         $this->api->addRoute("/documents\/?$/",                "getDocuments",         $this, "GET",  TRUE);  // Get list with 50 documents
         $this->api->addRoute("/documents\/(\d+)\/?$/",         "getDocuments",         $this, "GET",  TRUE);  // Get list with 50 documents starting at the given offset
+        $this->api->addRoute("/document\/?$/",                 "createDocument",       $this, "POST", TRUE);  // Create a document
         $this->api->addRoute("/document\/(\d+)\/?$/",          "getDocumentById",      $this, "GET",  TRUE);  // Select specific document
     }
 
@@ -58,6 +59,32 @@ class Document extends Module{
             $data[]         = $this->getDocumentData($document, FALSE);
         }
         return $data;
+    }
+
+    /**
+     * Creates a new document with the given POST data
+     *
+     * @param array $args
+     * @return array
+     */
+    public function createDocument($args) {
+        $data   = FALSE;
+        $input  = \Helper::getInput(TRUE);
+        // Presentations are handled by the presentations module
+        if($input['type'] == 'presentation') {
+            $data = $this->api->getModule('presentation')->createPresentation($args);
+        // Process other files
+        } else {
+            // @todo
+        }
+
+        // Format the result
+        $result = array(
+            'success'   => ($data !== FALSE ? TRUE : FALSE),
+            'id'        => ($data !== FALSE ? $data['id'] : 0)
+        );
+
+        return $result;
     }
 
     /**
