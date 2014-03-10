@@ -9,6 +9,7 @@ if(EXEC != 1) {
 require_once dirname(__FILE__) .'/../models/avatar.php';
 require_once dirname(__FILE__) .'/../controllers/avatarController.php';
 require_once dirname(__FILE__) .'/../models/document.php';
+require_once dirname(__FILE__) .'/../controllers/documentController.php';
 require_once dirname(__FILE__) .'/../models/grid.php';
 require_once dirname(__FILE__) .'/../models/meeting.php';
 require_once dirname(__FILE__) .'/../models/meetingRoom.php';
