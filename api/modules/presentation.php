@@ -34,6 +34,7 @@ class Presentation extends Module{
     public function setRoutes() {
         $this->api->addRoute("/presentations\/?$/",                                     "getPresentations",         $this, "GET",  TRUE);  // Get list with 50 presentations
         $this->api->addRoute("/presentations\/(\d+)\/?$/",                              "getPresentations",         $this, "GET",  TRUE);  // Get list with 50 presentations starting at the given offset
+        $this->api->addRoute("/presentation\/?$/",                                      "createPresentation",       $this, "POST", TRUE);  // Create a presentation
         $this->api->addRoute("/presentation\/(\d+)\/?$/",                               "getPresentationById",      $this, "GET",  TRUE);  // Select specific presentation
         $this->api->addRoute("/presentation\/(\d+)\/slide\/(\d+)\/?$/",                 "getSlideById",             $this, "GET",  TRUE);  // Get slide from presentation
         $this->api->addRoute("/presentation\/(\d+)\/slide\/number\/(\d+)\/?$/",         "getSlideByNumber",         $this, "GET",  TRUE);  // Get slide from presentation
@@ -76,6 +77,17 @@ class Presentation extends Module{
         return $this->getPresentationData($presentation);
     }
 
+
+    public function createPresentation($args) {
+        $result             = FALSE;
+        $input              = \Helper::getInput(TRUE);
+        $presentationCtrl   = new \Controllers\PresentationController();
+        if($presentationCtrl->validateParametersCreate($input)) {
+            $result = $presentationCtrl->createPresentation($input);
+        }
+        return $result;
+    }
+
     /**
      * Format the presentation data to the desired format
      *
@@ -85,9 +97,9 @@ class Presentation extends Module{
      */
     public function getPresentationData(\Models\Presentation $presentation, $full = TRUE) {
         $data = array();
+        $data['id']                 = $presentation->getId();
         $data['type']               = 'presentation';
         $data['title']              = $presentation->getTitle();
-        $data['presentationId']     = $presentation->getId();
         $data['ownerId']            = $presentation->getOwnerId();
         $slides     = array();
         $x          = 1;
