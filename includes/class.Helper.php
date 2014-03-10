@@ -209,4 +209,19 @@ class Helper {
         $filepath = $location .DS. $filename;
         return @file_put_contents($filepath, $data) !== FALSE ? $filepath : FALSE;
     }
+
+    /**
+     * Converts the given pdf to jpegs for each slide
+     * 
+     * @param string $file
+     * @param string $destination
+     */
+    public static function pdf2jpeg($file, $destination) {
+        // Create the full path if needed
+        $path    = dirname($destination);
+        mkdir($path, 0777, TRUE);
+        // Exec the command
+        $command = 'pdftoppm -jpeg -scale-to '. IMAGE_WIDTH .' -aa yes -aaVector yes '. $file .' '. $destination;
+        exec($command);
+    }
 }
