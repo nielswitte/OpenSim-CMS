@@ -334,6 +334,10 @@ GET /api/documents/ HTTP/1.1
 GET /api/documents/<OFFSET>/ HTTP/1.1
 ```
 
+```http
+GET /api/document/<DOCUMENT-ID>/ HTTP/1.1
+```
+
 ```
 ### Add a new document
 
@@ -346,8 +350,11 @@ POST /api/presentation/ HTTP/1.1
 | type              | string    | The document type                                           |
 | file              | file      | Base64 encoded file                                         |
 
+
+### Remove a document
+
 ```http
-GET /api/document/<DOCUMENT-ID>/ HTTP/1.1
+DELETE /api/document/<DOCUMENT-ID>/ HTTP/1.1
 ```
 
 ### Presentations
@@ -462,7 +469,7 @@ However, it is often easier to navigate based on page/slide number:
 GET /api/presentation/<ID>/slide/number/<SLIDE#>/ HTTP/1.1
 ```
 
-The given image url will provide a jpg of the slide resized and centered at 1024x1024 with a black background.
+The given image url will provide an IMAGE_TYPE of the slide resized and centered at IMAGE_WIDTH x IMAGE_HEIGHT with a black background.
 
 ```http
 GET /api/presentation/<ID>/slide/number/<SLIDE#>/image/ HTTP/1.1
@@ -470,7 +477,7 @@ GET /api/presentation/<ID>/slide/number/<SLIDE#>/image/ HTTP/1.1
 
 When an slide has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with
 the slide to speed up future use. The cache periode is set in the `OpenSim.ini` configuration and needs to be
-matched by the `OS_ASSET_CACHE_EXPIRES` value in `config.php`.
+matched by the config value for the grid in the CMS.
 
 ```http
 PUT /api/presentation/<ID>/slide/number/<SLIDE#>/ HTTP/1.1
