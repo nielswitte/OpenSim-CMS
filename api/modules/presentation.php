@@ -182,7 +182,7 @@ class Presentation extends Module{
     public function getSlideImageByNumber($args) {
         // Get presentation and slide details
         $presentation   = new \Models\Presentation($args[1], $args[2]);
-        $slidePath      = $presentation->getPath() . DS . $presentation->getCurrentSlide() .'.jpg';
+        $slidePath      = $presentation->getPath() . DS .'slide-'. ($presentation->getCurrentSlide() < 10 ? '0'. $presentation->getCurrentSlide() : $presentation->getCurrentSlide()) .'.jpg';
 
         // Show image if exists
         if(file_exists($slidePath)) {
@@ -191,7 +191,7 @@ class Presentation extends Module{
             // resize when needed
             if($resize->getWidth() > IMAGE_WIDTH || $resize->getHeight() > IMAGE_HEIGHT) {
                 $resize->resize(1024,1024,'fit');
-                $resize->save($presentation->getSlideId(), FILES_LOCATION . DS . $presentation->getType() . DS . $presentation->getId(), 'jpg');
+                $resize->save($presentation->getSlideId(), FILES_LOCATION . DS . $presentation->getType() . DS .'slide-'. ($presentation->getId() < 10 ? '0'. $presentation->getId() : $presentation->getId()), 'jpg');
             }
             unset($resize);
 
