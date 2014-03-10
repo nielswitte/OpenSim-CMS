@@ -98,6 +98,9 @@ class Helper {
         // Parse JSON
         if((isset($headers['Content-Type']) && strpos($headers['Content-Type'], 'application/json') !== FALSE) || (substr($input, 0, 1) == "{" && substr($input, -1) == "}")) {
             $a_data = json_decode($input, TRUE);
+        // Parse post data the default way
+        } elseif(count($_POST) > 0) {
+            $a_data = filter_input_array(INPUT_POST);
         // Parse other form types
         } else {
             // grab multipart boundary from content type header
