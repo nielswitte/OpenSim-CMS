@@ -227,16 +227,18 @@ class Helper {
 
     /**
      * Removes direcotry and its contents
-     * 
+     *
      * @param string $dir
      */
     public static function removeDirAndContents($dir) {
-        foreach (glob($dir . '/*') as $file) {
-            if (is_dir($file)) {
-                self::removeDirAndContents($file);
-            } else {
-                unlink($file);
-            }
-        } rmdir($dir);
+        if(file_exists($dir)) {
+            foreach (glob($dir . '/*') as $file) {
+                if (is_dir($file)) {
+                    self::removeDirAndContents($file);
+                } else {
+                    unlink($file);
+                }
+            } rmdir($dir);
+        }
     }
 }
