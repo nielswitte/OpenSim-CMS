@@ -34,6 +34,7 @@ class Presentation extends Module{
     public function setRoutes() {
         $this->api->addRoute("/presentations\/?$/",                                     "getPresentations",         $this, "GET",  TRUE);  // Get list with 50 presentations
         $this->api->addRoute("/presentations\/(\d+)\/?$/",                              "getPresentations",         $this, "GET",  TRUE);  // Get list with 50 presentations starting at the given offset
+        $this->api->addRoute("/presentation\/?$/",                                      "createPresentation",       $this, "POST", TRUE);  // Create a presentation
         $this->api->addRoute("/presentation\/(\d+)\/?$/",                               "getPresentationById",      $this, "GET",  TRUE);  // Select specific presentation
         $this->api->addRoute("/presentation\/(\d+)\/slide\/(\d+)\/?$/",                 "getSlideById",             $this, "GET",  TRUE);  // Get slide from presentation
         $this->api->addRoute("/presentation\/(\d+)\/slide\/number\/(\d+)\/?$/",         "getSlideByNumber",         $this, "GET",  TRUE);  // Get slide from presentation
@@ -77,6 +78,28 @@ class Presentation extends Module{
     }
 
     /**
+     * Creates a new presentation based on the given POST data
+     *
+     * @param array $args
+     * @return array
+     */
+    public function createPresentation($args) {
+        $input              = \Helper::getInput(TRUE);
+        $presentationCtrl   = new \Controllers\PresentationController();
+        if($presentationCtrl->validateParametersCreate($input)) {
+            $data = $presentationCtrl->createPresentation($input);
+        }
+
+        // Format the result
+        $result = array(
+            'success'   => ($data !== FALSE ? TRUE : FALSE),
+            'id'        => ($data !== FALSE ? $data : 0)
+        );
+
+        return $result;
+    }
+
+    /**
      * Format the presentation data to the desired format
      *
      * @param \Models\Presentation $presentation
@@ -85,9 +108,9 @@ class Presentation extends Module{
      */
     public function getPresentationData(\Models\Presentation $presentation, $full = TRUE) {
         $data = array();
+        $data['id']                 = $presentation->getId();
         $data['type']               = 'presentation';
         $data['title']              = $presentation->getTitle();
-        $data['presentationId']     = $presentation->getId();
         $data['ownerId']            = $presentation->getOwnerId();
         $slides     = array();
         $x          = 1;
@@ -170,7 +193,7 @@ class Presentation extends Module{
     public function getSlideImageByNumber($args) {
         // Get presentation and slide details
         $presentation   = new \Models\Presentation($args[1], $args[2]);
-        $slidePath      = $presentation->getPath() . DS . $presentation->getCurrentSlide() .'.jpg';
+        $slidePath      = $presentation->getPath() . DS .'slide-'. ($presentation->getCurrentSlide() < 10 ? '0'. $presentation->getCurrentSlide() : $presentation->getCurrentSlide()) .'.'. IMAGE_TYPE;
 
         // Show image if exists
         if(file_exists($slidePath)) {
@@ -178,16 +201,16 @@ class Presentation extends Module{
             $resize = new \Image($slidePath);
             // resize when needed
             if($resize->getWidth() > IMAGE_WIDTH || $resize->getHeight() > IMAGE_HEIGHT) {
-                $resize->resize(1024,1024,'fit');
-                $resize->save($presentation->getSlideId(), FILES_LOCATION . DS . $presentation->getType() . DS . $presentation->getId(), 'jpg');
+                $resize->resize(IMAGE_WIDTH,IMAGE_HEIGHT,'fit');
+                $resize->save('slide-'. ($presentation->getCurrentSlide() < 10 ? '0'. $presentation->getCurrentSlide() : $presentation->getCurrentSlide()), $presentation->getPath(), IMAGE_TYPE);
             }
             unset($resize);
 
             // Fill remaining of image with black
             $image = new \Image(FILES_LOCATION . DS . $presentation->getType() . DS .'background.jpg');
+            $image->resize(IMAGE_WIDTH,IMAGE_HEIGHT,'fit');
             $image->addWatermark($slidePath);
             $image->writeWatermark(100, 0, 0, 'c', 'c');
-            $image->resize(1024,1024,'fit');
             $image->display();
         } else {
             throw new Exception("Requested slide does not exists", 5);

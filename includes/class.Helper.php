@@ -98,6 +98,9 @@ class Helper {
         // Parse JSON
         if((isset($headers['Content-Type']) && strpos($headers['Content-Type'], 'application/json') !== FALSE) || (substr($input, 0, 1) == "{" && substr($input, -1) == "}")) {
             $a_data = json_decode($input, TRUE);
+        // Parse post data the default way
+        } elseif(count($_POST) > 0) {
+            $a_data = filter_input_array(INPUT_POST);
         // Parse other form types
         } else {
             // grab multipart boundary from content type header
@@ -135,5 +138,107 @@ class Helper {
         }
 
         return $a_data;
+    }
+
+    /**
+     * Attempts to decode string as base64
+     *
+     * @param string $base64
+     * @param boolean $decode - [Optional] Whether to decode the contents or not
+     * @return string or boolean when not base64
+     */
+    public static function getBase64Content($base64, $decode = TRUE) {
+        $result         = FALSE;
+        $base64_start   = ";base64,";
+        // Get position of base64 tag
+        $base64_offset  = strpos($base64, $base64_start);
+        // Is a base64 string?
+        if($base64_offset !== FALSE) {
+            // Get base64 content
+            $base64_content = substr($base64, $base64_offset + strlen($base64_start));
+            $result         = $decode ? base64_decode($base64_content) : $base64_content;
+        }
+        return $result;
+    }
+
+    /**
+     * Attempts to get the header from the base64 string
+     *
+     * @param string $base64
+     * @return string or boolean when not base64 or no header found
+     */
+    public static function getBase64Header($base64) {
+        $result         = FALSE;
+        $base64_start   = ";base64,";
+        // Get position of base64 tag
+        $base64_offset  = strpos($base64, $base64_start);
+        if($base64_offset !== FALSE) {
+            // base64 string starts with "data:", hence the 5.
+            $base64_header  = substr($base64, 5, $base64_offset - 5);
+            $result         = $base64_header;
+        }
+        return $result;
+    }
+
+    /**
+     * Attempts to match a file content type to an extension
+     *
+     * @param string $type
+     * @return string - Will return .txt if no other match is found
+     */
+    public static function getExtentionFromContentType($type) {
+        switch ($type) {
+            case "application/pdf":
+                return 'pdf';
+            break;
+            default:
+                return 'txt';
+            break;
+        }
+    }
+
+    /**
+     * Saves the given data to the given file on the given location
+     *
+     * @param string $filename - Filename and extension
+     * @param string $location - File location
+     * @param string $data - Data to store in file
+     * @return string full path to file or boolean when failed
+     */
+    public static function saveFile($filename, $location, $data) {
+        $filepath = $location .DS. $filename;
+        return @file_put_contents($filepath, $data) !== FALSE ? $filepath : FALSE;
+    }
+
+    /**
+     * Converts the given pdf to IMAGE_TYPE for each slide
+     *
+     * @param string $file
+     * @param string $destination
+     */
+    public static function pdf2jpeg($file, $destination) {
+        // Create the full path if needed
+        $path    = dirname($destination);
+        mkdir($path, 0777, TRUE);
+        // Exec the command uses the larges of the image width or height as limit
+        $command = 'pdftoppm -'. IMAGE_TYPE .' -scale-to '. (IMAGE_WIDTH > IMAGE_HEIGHT ? IMAGE_WIDTH : IMAGE_HEIGHT) .' -aa yes -aaVector yes '. $file .' '. $destination;
+        exec($command);
+    }
+
+    /**
+     * Removes direcotry and its contents
+     *
+     * @param string $dir
+     */
+    public static function removeDirAndContents($dir) {
+        if(file_exists($dir)) {
+            foreach (glob($dir . '/*') as $file) {
+                if (is_dir($file)) {
+                    self::removeDirAndContents($file);
+                } else {
+                    unlink($file);
+                }
+            } rmdir($dir);
+        }
     }
 }

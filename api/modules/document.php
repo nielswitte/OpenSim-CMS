@@ -10,7 +10,7 @@ require_once dirname(__FILE__) .'/module.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date March 3rd, 2014
  */
 class Document extends Module{
@@ -32,9 +32,11 @@ class Document extends Module{
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/documents\/?$/",                "getDocuments",         $this, "GET",  TRUE);  // Get list with 50 documents
-        $this->api->addRoute("/documents\/(\d+)\/?$/",         "getDocuments",         $this, "GET",  TRUE);  // Get list with 50 documents starting at the given offset
-        $this->api->addRoute("/document\/(\d+)\/?$/",          "getDocumentById",      $this, "GET",  TRUE);  // Select specific document
+        $this->api->addRoute("/documents\/?$/",                "getDocuments",         $this, "GET",    TRUE);  // Get list with 50 documents
+        $this->api->addRoute("/documents\/(\d+)\/?$/",         "getDocuments",         $this, "GET",    TRUE);  // Get list with 50 documents starting at the given offset
+        $this->api->addRoute("/document\/?$/",                 "createDocument",       $this, "POST",   TRUE);  // Create a document
+        $this->api->addRoute("/document\/(\d+)\/?$/",          "getDocumentById",      $this, "GET",    TRUE);  // Select specific document
+        $this->api->addRoute("/document\/(\d+)\/?$/",          "deleteDocumentById",   $this, "DELETE", TRUE);  // Delete specific document
     }
 
 
@@ -61,6 +63,33 @@ class Document extends Module{
     }
 
     /**
+     * Creates a new document with the given POST data
+     *
+     * @param array $args
+     * @return array
+     */
+    public function createDocument($args) {
+        $data   = FALSE;
+        $input  = \Helper::getInput(TRUE);
+        // Presentations are handled by the presentations module
+        if($input['type'] == 'presentation') {
+            $presentation = $this->api->getModule('presentation')->createPresentation($args);
+            $data = is_array($presentation) ? $presentation['id'] : $data;
+        // Process other files
+        } else {
+            // @todo
+        }
+
+        // Format the result
+        $result = array(
+            'success'   => ($data !== FALSE ? TRUE : FALSE),
+            'id'        => ($data !== FALSE ? $data : 0)
+        );
+
+        return $result;
+    }
+
+    /**
      * Get document details for the given document
      *
      * @param array $args
@@ -80,6 +109,23 @@ class Document extends Module{
         }
     }
 
+    /**
+     * Removes the given document from the CMS
+     *
+     * @param array $args
+     * @return array
+     */
+    public function deleteDocumentById($args) {
+        $document     = new \Models\Document($args[1]);
+        $document->getInfoFromDatabase();
+        $documentCtrl = new \Controllers\DocumentController($document);
+        $data         = $documentCtrl->removeDocument();
+        // Format the result
+        $result = array(
+            'success'   => ($data !== FALSE ? TRUE : FALSE)
+        );
+        return $result;
+    }
 
     /**
      * Format the presentation data to the desired format

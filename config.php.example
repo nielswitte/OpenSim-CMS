@@ -18,11 +18,13 @@
 
     // Files settings
 	define('FILES_LOCATION',            'C:\\Soas\\www\\storage');              // Absolute path to storage directory
+    define('TEMP_LOCATION',             'C:\\Soas\\www\\temp');                 // Absolute path to tmp folder
 	define('DS',                        '\\');                                  // Directory separator
 
     // Image settings
 	define('IMAGE_WIDTH',               1024);                                  // Texture width in OpenSim, used to resize presentations
 	define('IMAGE_HEIGHT',              1024);                                  // Texture height in OpenSim, used to resize presentations
+    define('IMAGE_TYPE',                'png');                                 // File type to store images in
 
     // PHP Settings
     date_default_timezone_set("Europe/Amsterdam");                              // see: http://www.php.net/manual/en/timezones.php

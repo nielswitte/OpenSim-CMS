@@ -1,6 +1,9 @@
 <div class="page-header">
     <h1>Documents <small>Overview</small></h1>
 </div>
+<div class="toolbar toolbar-top">
+    <button ng-click="newDocument()" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> New document</button>
+</div>
 <div class="panel panel-primary filter">
     <div class="panel-heading">
         <h3 class="panel-title">Documents</h3>
@@ -61,13 +64,14 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="document in documentsList | orderBy:orderByField:reverseSort | filter:searchText">
+            <tr ng-repeat="(index, document) in documentsList | orderBy:orderByField:reverseSort | filter:searchText">
                 <td>{{document.id}}</td>
                 <td><a href="document/{{document.id}}/">{{document.title}}</a></td>
                 <td>{{document.type}}</td>
                 <td>{{document.ownerId}}</td>
                 <td>{{document.creationDate}}</td>
                 <td>{{document.modificationDate}}</td>
+                <td><button class="btn btn-danger btn-xs" ng-click="deleteDocument(index)" ng-show="allowDelete(document.ownerId)"><i class="glyphicon glyphicon-remove"></i></button></td>
             </tr>
         </tbody>
     </table>

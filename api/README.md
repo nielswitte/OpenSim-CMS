@@ -338,6 +338,25 @@ GET /api/documents/<OFFSET>/ HTTP/1.1
 GET /api/document/<DOCUMENT-ID>/ HTTP/1.1
 ```
 
+```
+### Add a new document
+
+```http
+POST /api/presentation/ HTTP/1.1
+```
+| Parameter         | Type      | Description                                                 |
+|-------------------|-----------|-------------------------------------------------------------|
+| title             | string    | The title of the document                                   |
+| type              | string    | The document type                                           |
+| file              | file      | Base64 encoded file                                         |
+
+
+### Remove a document
+
+```http
+DELETE /api/document/<DOCUMENT-ID>/ HTTP/1.1
+```
+
 ### Presentations
 A list with presentations can be requested by using the following GET request.
 
@@ -381,6 +400,17 @@ Cache information is left out in the list view.
     (...)
 }
 ```
+### Add a new presentation
+
+```http
+POST /api/presentation/ HTTP/1.1
+```
+| Parameter         | Type      | Description                                                 |
+|-------------------|-----------|-------------------------------------------------------------|
+| title             | string    | The title of the presentation                               |
+| type              | string    | The document type, in this case it should be "presentation" |
+| file              | file      | Base64 encoded file (PDF)                                   |
+
 
 #### Specific presentation
 To retrieve a specific presentation use the following command and replace the id with the number of the
@@ -439,7 +469,7 @@ However, it is often easier to navigate based on page/slide number:
 GET /api/presentation/<ID>/slide/number/<SLIDE#>/ HTTP/1.1
 ```
 
-The given image url will provide a jpg of the slide resized and centered at 1024x1024 with a black background.
+The given image url will provide an IMAGE_TYPE of the slide resized and centered at IMAGE_WIDTH x IMAGE_HEIGHT with a black background.
 
 ```http
 GET /api/presentation/<ID>/slide/number/<SLIDE#>/image/ HTTP/1.1
@@ -447,7 +477,7 @@ GET /api/presentation/<ID>/slide/number/<SLIDE#>/image/ HTTP/1.1
 
 When an slide has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with
 the slide to speed up future use. The cache periode is set in the `OpenSim.ini` configuration and needs to be
-matched by the `OS_ASSET_CACHE_EXPIRES` value in `config.php`.
+matched by the config value for the grid in the CMS.
 
 ```http
 PUT /api/presentation/<ID>/slide/number/<SLIDE#>/ HTTP/1.1
