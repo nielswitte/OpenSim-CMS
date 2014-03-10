@@ -18,6 +18,7 @@
 
     // Files settings
 	define('FILES_LOCATION',            'C:\\Soas\\www\\storage');              // Absolute path to storage directory
+    define('TEMP_LOCATION',             'C:\\Soas\\www\\temp');                 // Absolute path to tmp folder
 	define('DS',                        '\\');                                  // Directory separator
 
     // Image settings
