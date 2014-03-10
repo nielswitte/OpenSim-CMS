@@ -60,9 +60,9 @@ class PresentationController {
                 // Remove temp file
                 unlink($filename);
                 // Save successful?
-                if(file_exists($slidesDirectory) && glob($slidesDirectory . DS . '*.jpg') != false) {
+                if(file_exists($slidesDirectory) && glob($slidesDirectory . DS . '*.'. IMAGE_TYPE) != false) {
                     // Save all slides to the database
-                    for($i = 0; $i < count(glob($slidesDirectory . DS . '*.jpg')); $i++) {
+                    for($i = 0; $i < count(glob($slidesDirectory . DS . '*.'. IMAGE_TYPE)); $i++) {
                         // Has to be done one by one...
                         // @todo improve this for multiple insert
                         $slides = array(
@@ -95,7 +95,6 @@ class PresentationController {
 
                 // Remove the created files
                 if(isset($slidesDirectory)) {
-                    echo $slidesDirectory;
                     \Helper::removeDirAndContents($slidesDirectory);
 
                     throw new \Exception('Failed to save slides to storage', 7);
