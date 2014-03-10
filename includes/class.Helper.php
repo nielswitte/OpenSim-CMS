@@ -212,7 +212,7 @@ class Helper {
 
     /**
      * Converts the given pdf to jpegs for each slide
-     * 
+     *
      * @param string $file
      * @param string $destination
      */
@@ -220,8 +220,8 @@ class Helper {
         // Create the full path if needed
         $path    = dirname($destination);
         mkdir($path, 0777, TRUE);
-        // Exec the command
-        $command = 'pdftoppm -jpeg -scale-to '. IMAGE_WIDTH .' -aa yes -aaVector yes '. $file .' '. $destination;
+        // Exec the command uses the larges of the image width or height as limit
+        $command = 'pdftoppm -jpeg -scale-to '. (IMAGE_WIDTH > IMAGE_HEIGHT ? IMAGE_WIDTH : IMAGE_HEIGHT) .' -aa yes -aaVector yes '. $file .' '. $destination;
         exec($command);
     }
 }
