@@ -10,7 +10,7 @@ require_once dirname(__FILE__) .'/module.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date February 24th, 2014
  */
 class Presentation extends Module{

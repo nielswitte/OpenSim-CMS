@@ -6,7 +6,7 @@ if(EXEC != 1) {
  * This class is used to check authorization tokens
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date February 19th, 2014
  */
 class Auth {

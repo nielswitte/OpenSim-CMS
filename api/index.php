@@ -23,7 +23,7 @@ require_once dirname(__FILE__) .'/modules/user.php';
  * This class is catches the API calls and searches for the matching function
  *
  * @author Niels Witte
- * @version 0.3
+ * @version 0.4
  * @date February 10th, 2014
  */
 

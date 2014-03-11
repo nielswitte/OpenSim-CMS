@@ -9,7 +9,7 @@ if(EXEC != 1) {
  * This class is the presentation controller
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date March 10th, 2014
  */
 class PresentationController {
