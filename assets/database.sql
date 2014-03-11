@@ -2,7 +2,7 @@
 -- Host:                         localhost
 -- Server versie:                5.5.35-0ubuntu0.13.10.2 - (Ubuntu)
 -- Server OS:                    debian-linux-gnu
--- HeidiSQL Versie:              8.3.0.4694
+-- HeidiSQL Versie:              8.3.0.4727
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -56,9 +56,9 @@ CREATE TABLE IF NOT EXISTS `documents` (
 
 -- Structuur van  tabel OpenSim-CMS.document_slides wordt geschreven
 CREATE TABLE IF NOT EXISTS `document_slides` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
   `documentId` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`,`documentId`),
   KEY `FK_presentation_slides_presentations` (`documentId`),
   CONSTRAINT `FK_document_slides_documents` FOREIGN KEY (`documentId`) REFERENCES `documents` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
@@ -144,8 +144,8 @@ CREATE TABLE IF NOT EXISTS `meeting_agenda_items` (
   PRIMARY KEY (`id`),
   KEY `FK_meeting_agenda_items_meetings` (`meetingId`),
   KEY `FK_meeting_agenda_items_meeting_agenda_items` (`parentId`),
-  CONSTRAINT `FK_meeting_agenda_items_meeting_agenda_items` FOREIGN KEY (`parentId`) REFERENCES `meeting_agenda_items` (`id`),
-  CONSTRAINT `FK_meeting_agenda_items_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`)
+  CONSTRAINT `FK_meeting_agenda_items_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`),
+  CONSTRAINT `FK_meeting_agenda_items_meeting_agenda_items` FOREIGN KEY (`parentId`) REFERENCES `meeting_agenda_items` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
@@ -224,6 +224,23 @@ CREATE TABLE IF NOT EXISTS `users` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `userName` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.user_permissions wordt geschreven
+CREATE TABLE IF NOT EXISTS `user_permissions` (
+  `userId` int(11) NOT NULL AUTO_INCREMENT,
+  `auth` tinyint(1) unsigned NOT NULL,
+  `document` tinyint(1) unsigned NOT NULL,
+  `grid` tinyint(1) unsigned NOT NULL,
+  `meeting` tinyint(1) unsigned NOT NULL,
+  `meetingroom` tinyint(1) unsigned NOT NULL,
+  `presentation` tinyint(1) unsigned NOT NULL,
+  `user` tinyint(1) unsigned NOT NULL,
+  PRIMARY KEY (`userId`),
+  CONSTRAINT `user_permissions_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
