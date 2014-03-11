@@ -37,6 +37,7 @@ class Document extends Module{
         $this->api->addRoute("/document\/?$/",                 "createDocument",       $this, "POST",   TRUE);  // Create a document
         $this->api->addRoute("/document\/(\d+)\/?$/",          "getDocumentById",      $this, "GET",    TRUE);  // Select specific document
         $this->api->addRoute("/document\/(\d+)\/?$/",          "deleteDocumentById",   $this, "DELETE", TRUE);  // Delete specific document
+        $this->api->addRoute("/documents\/cache\/?$/",         "deleteExpiredCache",   $this, "DELETE", TRUE);  // Removes all expired cached assets
     }
 
 
@@ -144,5 +145,25 @@ class Document extends Module{
         $data['modificationDate']   = $document->getModificationDate();
 
         return $data;
+    }
+
+    /**
+     * Removes all expired assets from the cache of the CMS
+     * Returns the number of removed assets
+     *
+     * @param array $args
+     * @return array
+     */
+    public function deleteExpiredCache($args) {
+        $documentCtrl = new \Controllers\DocumentController(NULL);
+        $data         = $documentCtrl->removeExpiredCache();
+
+        // Format the result
+        $result = array(
+            'success'       => ($data !== FALSE ? TRUE : FALSE),
+            'removedAssets' => $data
+        );
+
+        return $result;
     }
 }
