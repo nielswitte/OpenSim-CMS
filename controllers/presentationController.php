@@ -61,8 +61,9 @@ class PresentationController {
                 unlink($filename);
                 // Save successful?
                 if(file_exists($slidesDirectory) && glob($slidesDirectory . DS . '*.'. IMAGE_TYPE) != false) {
+                    $slidesCount = count(glob($slidesDirectory . DS . '*.'. IMAGE_TYPE));
                     // Save all slides to the database
-                    for($i = 0; $i < count(glob($slidesDirectory . DS . '*.'. IMAGE_TYPE)); $i++) {
+                    for($i = 1; $i <= $slidesCount; $i++) {
                         // Has to be done one by one...
                         // @todo improve this for multiple insert
                         $slides = array(
