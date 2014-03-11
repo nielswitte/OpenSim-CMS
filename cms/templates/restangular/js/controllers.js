@@ -40,11 +40,21 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
                 // Successful auth?
                 if(authResponse.token) {
                     var user = Restangular.one('user', authResponse.userId).get({ token: authResponse.token }).then(function(userResponse) {
+                        // Store basic user data
                         sessionStorage.username     = userResponse.username;
                         sessionStorage.email        = userResponse.email;
                         sessionStorage.id           = userResponse.id;
                         sessionStorage.firstName    = userResponse.firstName;
                         sessionStorage.lastName     = userResponse.lastName;
+
+                        // Store permissions
+                        sessionStorage.authPermission          = userResponse.permissions.auth;
+                        sessionStorage.documentPermission      = userResponse.permissions.document;
+                        sessionStorage.gridPermission          = userResponse.permissions.grid;
+                        sessionStorage.meetingPermission       = userResponse.permissions.meeting;
+                        sessionStorage.meetingroomPermission   = userResponse.permissions.meetingroom;
+                        sessionStorage.presentationPermission  = userResponse.permissions.presentation;
+                        sessionStorage.userPermission          = userResponse.permissions.user;
 
                         // Finally store token
                         sessionStorage.token        = authResponse.token;
@@ -445,11 +455,15 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
         // Show delete button only when allowed to delete
         $scope.allowDelete = function(userId) {
-            if(userId != sessionStorage.id && userId != 0) {
+            if(userId != sessionStorage.id && userId != 0 && sessionStorage.userPermission >= 6) {
                 return true;
             } else {
                 return false;
             }
+         };
+
+         $scope.allowCreate = function() {
+             return sessionStorage.userPermission >= 6;
          };
 
         // Remove a user
