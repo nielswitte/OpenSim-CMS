@@ -42,7 +42,7 @@ class PresentationController {
         $data           = array(
             'title'         => $db->escape($parameters['title']),
             'type'          => $db->escape($parameters['type']),
-            'ownerId'       => $db->escape(\API\Auth::getUser()->getId()),
+            'ownerId'       => $db->escape(\Auth::getUser()->getId()),
             'creationDate'  => $db->escape(date('Y-m-d H:m:s'))
         );
         $fileId = $db->insert('documents', $data);
@@ -60,20 +60,7 @@ class PresentationController {
                 // Remove temp file
                 unlink($filename);
                 // Save successful?
-                if(file_exists($slidesDirectory) && glob($slidesDirectory . DS . '*.'. IMAGE_TYPE) != false) {
-                    // Save all slides to the database
-                    for($i = 0; $i < count(glob($slidesDirectory . DS . '*.'. IMAGE_TYPE)); $i++) {
-                        // Has to be done one by one...
-                        // @todo improve this for multiple insert
-                        $slides = array(
-                            'id'            => $db->escape($i),
-                            'documentId'    => $db->escape($fileId)
-                        );
-                        $slideQuery = $db->insert('document_slides', $slides);
-                    }
-                    // Finally update the result?
-                    $result = ($slideQuery !== FALSE ? $fileId : $result);
-                }
+                $result = $this->setPresentationSlides($fileId) ? $fileId : $result;
             }
         }
 
@@ -85,13 +72,13 @@ class PresentationController {
                     unlink($filename);
                 }
 
-                // Remove document from DB
-                $db->where('id', $db->escape($fileId));
-                $db->delete('documents');
-
                 // Remove slides from DB
                 $db->where('documentId', $db->escape($fileId));
                 $db->delete('document_slides');
+
+                // Remove document from DB
+                $db->where('id', $db->escape($fileId));
+                $db->delete('documents');
 
                 // Remove the created files
                 if(isset($slidesDirectory)) {
@@ -104,6 +91,34 @@ class PresentationController {
             } else {
                 throw new \Exception('Failed to insert document into database', 5);
             }
+        }
+        return $result;
+    }
+
+    /**
+     * Links the slides found in the directory of the given presentation to the presentation
+     *
+     * @param integer $presentationId
+     * @return boolean
+     */
+    public function setPresentationSlides($presentationId) {
+        $db              = \Helper::getDB();
+        $slidesDirectory = FILES_LOCATION . DS . 'presentation' . DS . $presentationId;
+        $result          = FALSE;
+        if (file_exists($slidesDirectory) && glob($slidesDirectory . DS . '*.' . IMAGE_TYPE) != false) {
+            $slidesCount = count(glob($slidesDirectory . DS . '*.' . IMAGE_TYPE));
+            // Save all slides to the database
+            for ($i = 1; $i <= $slidesCount; $i++) {
+                // Has to be done one by one...
+                // @todo improve this for multiple insert
+                $slides = array(
+                    'id'         => $db->escape($i),
+                    'documentId' => $db->escape($presentationId)
+                );
+                $slideQuery = $db->insert('document_slides', $slides);
+            }
+            // Finally update the result?
+            $result = ($db->getLastError() == NULL ? TRUE : FALSE);
         }
         return $result;
     }

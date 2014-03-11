@@ -10,7 +10,7 @@ require_once dirname(__FILE__) .'/module.php';
  * Implements the functions for users
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date February 24th, 2014
  */
 class User extends Module {
@@ -23,7 +23,8 @@ class User extends Module {
      */
     public function __construct(\API\API $api) {
         $this->api = $api;
-        $this->api->addModule('user', $this);
+        $this->setName('user');
+        $this->api->addModule($this->getName(), $this);
 
         $this->setRoutes();
     }
@@ -32,20 +33,20 @@ class User extends Module {
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/users\/?$/",                                       "getUsers",               $this, "GET",    TRUE);  // Gets a list of all users
-        $this->api->addRoute("/users\/(\d+)\/?$/",                                "getUsers",               $this, "GET",    TRUE);  // Gets a list of all users starting at the given offset
-        $this->api->addRoute("/users\/([a-zA-Z0-9-_]{3,}+)\/?$/",                 "getUsersByUsername",     $this, "GET",    TRUE);  // Gets a list of all users with usernames matching the search of atleast 3 characters
-        $this->api->addRoute("/user\/?$/",                                        "createUser",             $this, "POST",   TRUE);  // Create a new CMS user
-        $this->api->addRoute("/user\/(\d+)\/?$/",                                 "getUserById",            $this, "GET",    TRUE);  // Get a user by ID
-        $this->api->addRoute("/user\/(\d+)\/?$/",                                 "updateUserById",         $this, "PUT",    TRUE);  // Update the given user
-        $this->api->addRoute("/user\/(\d+)\/?$/",                                 "deleteUserById",         $this, "DELETE", TRUE);  // Delete the given user
-        $this->api->addRoute("/user\/(\d+)\/password\/?$/",                       "updateUserPasswordById", $this, "PUT",    TRUE);  // Updates the user's password
-        $this->api->addRoute("/user\/([a-z0-9-]{36})\/teleport\/?$/",             "teleportAvatarByUuid",   $this, "PUT",    TRUE);  // Teleports a user
-        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "getUserByAvatar",        $this, "GET",    TRUE);  // Gets an user by the avatar of this grid
-        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "linkAvatarToUser",       $this, "POST",   TRUE);  // Add this avatar to the user's avatar list
-        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "confirmAvatar",          $this, "PUT",    TRUE);  // Confirms the avatar for the authenticated user
-        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "unlinkAvatar",           $this, "DELETE", TRUE);  // Removes the avatar for the authenticated user's avatar list
-        $this->api->addRoute("/grid\/(\d+)\/avatar\/?$/",                         "createAvatar",           $this, "POST",   TRUE);  // Create an avatar
+        $this->api->addRoute("/users\/?$/",                                       "getUsers",               $this, "GET",    \Auth::READ);     // Gets a list of all users
+        $this->api->addRoute("/users\/(\d+)\/?$/",                                "getUsers",               $this, "GET",    \Auth::READ);     // Gets a list of all users starting at the given offset
+        $this->api->addRoute("/users\/([a-zA-Z0-9-_]{3,}+)\/?$/",                 "getUsersByUsername",     $this, "GET",    \Auth::READ);     // Gets a list of all users with usernames matching the search of atleast 3 characters
+        $this->api->addRoute("/user\/?$/",                                        "createUser",             $this, "POST",   \Auth::WRITE);    // Create a new CMS user
+        $this->api->addRoute("/user\/(\d+)\/?$/",                                 "getUserById",            $this, "GET",    \Auth::READ);     // Get a user by ID
+        $this->api->addRoute("/user\/(\d+)\/?$/",                                 "updateUserById",         $this, "PUT",    \Auth::READ);     // Update the given user
+        $this->api->addRoute("/user\/(\d+)\/?$/",                                 "deleteUserById",         $this, "DELETE", \Auth::WRITE);    // Delete the given user
+        $this->api->addRoute("/user\/(\d+)\/password\/?$/",                       "updateUserPasswordById", $this, "PUT",    \Auth::READ);     // Updates the user's password
+        $this->api->addRoute("/user\/([a-z0-9-]{36})\/teleport\/?$/",             "teleportAvatarByUuid",   $this, "PUT",    \Auth::READ);     // Teleports a user
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "getUserByAvatar",        $this, "GET",    \Auth::READ);     // Gets an user by the avatar of this grid
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "linkAvatarToUser",       $this, "POST",   \Auth::EXECUTE);  // Add this avatar to the user's avatar list
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "confirmAvatar",          $this, "PUT",    \Auth::READ);     // Confirms the avatar for the authenticated user
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "unlinkAvatar",           $this, "DELETE", \Auth::READ);     // Removes the avatar for the authenticated user's avatar list
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/?$/",                         "createAvatar",           $this, "POST",   \Auth::WRITE);    // Create an avatar
     }
 
     /**
@@ -81,6 +82,11 @@ class User extends Module {
      * @throws \Exception
      */
     public function updateUserById($args) {
+        // Only allow when the user has write access or wants to update his/her own profile
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $args[1] != \Auth::getUser()->getId()) {
+            throw new \Exception('You do not have permissions to update this user.', 6);
+        }
+
         $putUserData    = \Helper::getInput(TRUE);
 
         $user           = new \Models\User($args[1]);
@@ -126,6 +132,11 @@ class User extends Module {
      * @return array
      */
     public function updateUserPasswordById($args) {
+        // Only allow when the user has write access or wants to update his/her own profile
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $args[1] != \Auth::getUser()->getId()) {
+            throw new \Exception('You do not have permissions to update this user.', 6);
+        }
+
         $putUserData    = \Helper::getInput(TRUE);
 
         $user           = new \Models\User($args[1]);
@@ -244,6 +255,7 @@ class User extends Module {
 
         if($full) {
             $data['presentationIds']    = $user->getPresentationIds();
+            $data['permissions']        = $user->getRights();
         }
         if($full) {
             $avatars                    = array();
@@ -279,8 +291,14 @@ class User extends Module {
         $putUserData    = \Helper::getInput(TRUE);
         $username       = isset($putUserData['username']) ? $putUserData['username'] : '';
 
-        $userCtrl       = new \Controllers\UserController();
-        $data           = $userCtrl->linkAvatar($username, $args[1], $args[2]);
+        // Only allow when the user has write access or wants to update his/her own profile
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $username != \Auth::getUser()->getUsername()) {
+            throw new \Exception('You do not have permissions to link avatars to this user.', 6);
+        }
+        $user           = new \Models\User(-1, $username);
+        $user->getInfoFromDatabase();
+        $userCtrl       = new \Controllers\UserController($user);
+        $data           = $userCtrl->linkAvatar($args[1], $args[2]);
 
         // Format the result
         $result = array(
@@ -292,16 +310,22 @@ class User extends Module {
 
     /**
      * Confirms that the given avatar UUID on the given grid is owned by the
-     * currently loggedin user
+     * linked user
      *
      * @param array $args
      * @return array
      */
     public function confirmAvatar($args) {
-        $user           = \API\Auth::getUser();
-        $userCtrl       = new \Controllers\UserController($user);
         $grid           = new \Models\Grid($args[1]);
         $avatar         = new \Models\Avatar($grid, $args[2]);
+        $user           = new \Models\User($avatar->getUserId());
+
+        // Only allow when the user has write access or wants to update his/her own profile
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $user->getId() != \Auth::getUser()->getId()) {
+            throw new \Exception('You do not have permissions to confirm avatars for this user.', 6);
+        }
+
+        $userCtrl       = new \Controllers\UserController($user);
         $data           = $userCtrl->confirmAvatar($avatar);
         $result = array(
             'success' => ($data !== FALSE ? TRUE : FALSE)
@@ -311,17 +335,22 @@ class User extends Module {
     }
 
     /**
-     * Deletes the link between the currently loggedin user
-     * and the given avatar UUID on the given grid
+     * Deletes the link between the user and the given avatar UUID on the given grid
      *
      * @param array $args
      * @return array
      */
     public function unlinkAvatar($args) {
-        $user           = \API\Auth::getUser();
-        $userCtrl       = new \Controllers\UserController($user);
         $grid           = new \Models\Grid($args[1]);
         $avatar         = new \Models\Avatar($grid, $args[2]);
+        $user           = new \Models\User($avatar->getUserId());
+
+        // Only allow when the user has write access or wants to update his/her own profile
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $user->getId() != \Auth::getUser()->getId()) {
+            throw new \Exception('You do not have permissions to unlink avatars for this user.', 6);
+        }
+
+        $userCtrl       = new \Controllers\UserController($user);
         $data           = $userCtrl->unlinkAvatar($avatar);
         $result = array(
             'success' => ($data !== FALSE ? TRUE : FALSE)
@@ -337,6 +366,11 @@ class User extends Module {
      * @return array
      */
     public function teleportAvatarByUuid($args) {
+        // Only allow when the user has write access or wants to update his/her own profile
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $args[1] != \Auth::getUser()->getId()) {
+            throw new \Exception('You do not have permissions to teleport this user.', 6);
+        }
+
         $parsedPutData  = \Helper::getInput(TRUE);
 
         // use UUID from GET request

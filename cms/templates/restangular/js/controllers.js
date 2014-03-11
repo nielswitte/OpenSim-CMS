@@ -40,37 +40,27 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
                 // Successful auth?
                 if(authResponse.token) {
                     var user = Restangular.one('user', authResponse.userId).get({ token: authResponse.token }).then(function(userResponse) {
+                        // Store basic user data
                         sessionStorage.username     = userResponse.username;
                         sessionStorage.email        = userResponse.email;
                         sessionStorage.id           = userResponse.id;
                         sessionStorage.firstName    = userResponse.firstName;
                         sessionStorage.lastName     = userResponse.lastName;
 
+                        // Store permissions
+                        sessionStorage.authPermission          = userResponse.permissions.auth;
+                        sessionStorage.documentPermission      = userResponse.permissions.document;
+                        sessionStorage.gridPermission          = userResponse.permissions.grid;
+                        sessionStorage.meetingPermission       = userResponse.permissions.meeting;
+                        sessionStorage.meetingroomPermission   = userResponse.permissions.meetingroom;
+                        sessionStorage.presentationPermission  = userResponse.permissions.presentation;
+                        sessionStorage.userPermission          = userResponse.permissions.user;
+
                         // Finally store token
                         sessionStorage.token        = authResponse.token;
 
                         // Set token as default request parameter
                         Restangular.setDefaultRequestParams({token: sessionStorage.token});
-
-                        // Set an error interceptor for Restangular
-                        Restangular.setErrorInterceptor(function(resp) {
-
-                            jQuery('#loading').hide();
-
-                            // Session check? Logout if expired
-                            if(sessionStorage.tokenTimeOut < moment().unix()) {
-                                sessionStorage.clear();
-                                $alert({title: 'Session Expired!', content: $sce.trustAsHtml('You have been logged out because your session has expired'), type: 'warning'});
-                            }
-                            // Unauthorized
-                            if(resp.status == 401) {
-                                $alert({title: 'Unauthorized!', content: $sce.trustAsHtml('You have insufficient privileges to access this API.'), type: 'danger'});
-                            // Other errors
-                            } else {
-                                $alert({title: 'Error!', content: $sce.trustAsHtml(resp.data.error), type: 'danger'});
-                            }
-                            return false; // stop the promise chain
-                        });
 
                         // Token is valid for half an hour
                         sessionStorage.tokenTimeOut = moment().add(30, 'minutes').unix();
@@ -137,7 +127,8 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
 );
 
 // documentsController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$modal', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, Page, $alert, $modal, $sce, Cache) {
+angularRest.controller('documentsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$modal', '$sce', 'Cache', '$route',
+    function(Restangular, RestangularCache, $scope, Page, $alert, $modal, $sce, Cache, $route) {
         $scope.orderByField         = 'title';
         $scope.reverseSort          = false;
         $scope.requestDocumentsUrl  = '';
@@ -173,7 +164,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                 } else {
-                    $alert({title: 'Dpcument created!', content: $sce.trustAsHtml('The document: '+ $scope.document.title + ' has been created with ID: '+ resp.id +'.'), type: 'success'});
+                    $alert({title: 'Document created!', content: $sce.trustAsHtml('The document: '+ $scope.document.title + ' has been created with ID: '+ resp.id +'.'), type: 'success'});
                     $scope.document.id                  = resp.id;
                     $scope.document.ownerId             = sessionStorage.id;
                     $scope.document.creationDate        = new moment().format('YYYY-MM-DD HH:mm:ss');
@@ -186,9 +177,15 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
             });
         };
 
+        $scope.allowCreate = function() {
+             return sessionStorage.documentPermission >= 6;
+        };
+
         // Show delete button only when allowed to delete
         $scope.allowDelete = function(ownerId) {
             if(ownerId == sessionStorage.id) {
+                return true;
+            } else if(sessionStorage.documentPermission >= 6) {
                 return true;
             } else {
                 return false;
@@ -204,6 +201,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
                     $alert({title: 'Document removed!', content: $sce.trustAsHtml('The document '+ $scope.documentsList[index].title +' has been removed from the CMS.'), type: 'success'});
                     delete $scope.documentsList[index];
                     Cache.clearCachedUrl($scope.requestDocumentsUrl);
+                    $route.reload();
                 }
             });
         };
@@ -410,7 +408,7 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
 );
 
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', '$sce', 'Cache', function(RestangularCache, Restangular, $scope, Page, $modal, $alert, $sce, Cache) {
+angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', '$sce', 'Cache', '$route', function(RestangularCache, Restangular, $scope, Page, $modal, $alert, $sce, Cache, $route) {
         $scope.orderByField     = 'username';
         $scope.reverseSort      = false;
         $scope.requestUsersUrl  = '';
@@ -445,11 +443,15 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
         // Show delete button only when allowed to delete
         $scope.allowDelete = function(userId) {
-            if(userId != sessionStorage.id && userId != 0) {
+            if(userId != sessionStorage.id && userId != 0 && sessionStorage.userPermission >= 6) {
                 return true;
             } else {
                 return false;
             }
+         };
+
+         $scope.allowCreate = function() {
+             return sessionStorage.userPermission >= 6;
          };
 
         // Remove a user
@@ -461,6 +463,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
                     $alert({title: 'User removed!', content: $sce.trustAsHtml('The user '+ $scope.usersList[index].username +' has been removed from the CMS.'), type: 'success'});
                     delete $scope.usersList[index];
                     Cache.clearCachedUrl($scope.requestUsersUrl);
+                    $route.reload();
                 }
             });
         };
@@ -506,6 +509,16 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             $scope.user.avatarCount = Object.keys(userResponse.avatars).length;
             $scope.userRequestUrl   = userResponse.getRequestedUrl();
         });
+
+        $scope.allowUpdate = function() {
+            if(sessionStorage.userPermission >= 6) {
+                return true;
+            } else if(sessionStorage.userPermission >= 4 && $routeParams.userId == sessionStorage.id) {
+                return true;
+            } else {
+                return false;
+            }
+        };
 
         $scope.updateUser = function() {
             $scope.user.put().then(function(putResponse) {

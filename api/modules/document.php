@@ -23,7 +23,8 @@ class Document extends Module{
      */
     public function __construct(\API\API $api) {
         $this->api = $api;
-        $this->api->addModule('document', $this);
+        $this->setName('document');
+        $this->api->addModule($this->getName(), $this);
 
         $this->setRoutes();
     }
@@ -32,11 +33,12 @@ class Document extends Module{
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/documents\/?$/",                "getDocuments",         $this, "GET",    TRUE);  // Get list with 50 documents
-        $this->api->addRoute("/documents\/(\d+)\/?$/",         "getDocuments",         $this, "GET",    TRUE);  // Get list with 50 documents starting at the given offset
-        $this->api->addRoute("/document\/?$/",                 "createDocument",       $this, "POST",   TRUE);  // Create a document
-        $this->api->addRoute("/document\/(\d+)\/?$/",          "getDocumentById",      $this, "GET",    TRUE);  // Select specific document
-        $this->api->addRoute("/document\/(\d+)\/?$/",          "deleteDocumentById",   $this, "DELETE", TRUE);  // Delete specific document
+        $this->api->addRoute("/documents\/?$/",                "getDocuments",         $this, "GET",    \Auth::READ);    // Get list with 50 documents
+        $this->api->addRoute("/documents\/(\d+)\/?$/",         "getDocuments",         $this, "GET",    \Auth::READ);    // Get list with 50 documents starting at the given offset
+        $this->api->addRoute("/document\/?$/",                 "createDocument",       $this, "POST",   \Auth::WRITE);   // Create a document
+        $this->api->addRoute("/document\/(\d+)\/?$/",          "getDocumentById",      $this, "GET",    \Auth::READ);    // Select specific document
+        $this->api->addRoute("/document\/(\d+)\/?$/",          "deleteDocumentById",   $this, "DELETE", \Auth::WRITE);   // Delete specific document
+        $this->api->addRoute("/documents\/cache\/?$/",         "deleteExpiredCache",   $this, "DELETE", \Auth::EXECUTE); // Removes all expired cached assets
     }
 
 
@@ -118,6 +120,12 @@ class Document extends Module{
     public function deleteDocumentById($args) {
         $document     = new \Models\Document($args[1]);
         $document->getInfoFromDatabase();
+
+        // Only allow when the user has write access or wants to update his/her own documents
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $document->getOwnerId() != \Auth::getUser()->getId()) {
+            throw new \Exception('You do not have permissions to update this user.', 6);
+        }
+
         $documentCtrl = new \Controllers\DocumentController($document);
         $data         = $documentCtrl->removeDocument();
         // Format the result
@@ -144,5 +152,25 @@ class Document extends Module{
         $data['modificationDate']   = $document->getModificationDate();
 
         return $data;
+    }
+
+    /**
+     * Removes all expired assets from the cache of the CMS
+     * Returns the number of removed assets
+     *
+     * @param array $args
+     * @return array
+     */
+    public function deleteExpiredCache($args) {
+        $documentCtrl = new \Controllers\DocumentController(NULL);
+        $data         = $documentCtrl->removeExpiredCache();
+
+        // Format the result
+        $result = array(
+            'success'       => ($data !== FALSE ? TRUE : FALSE),
+            'removedAssets' => $data
+        );
+
+        return $result;
     }
 }

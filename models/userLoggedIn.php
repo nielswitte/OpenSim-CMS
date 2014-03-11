@@ -25,4 +25,18 @@ class UserLoggedIn extends User implements SimpleModel {
     public function __construct($id = -1, $userUUID = '') {
         parent::__construct($id, $userUUID);
     }
+
+    /**
+     * Checks if the given the user has the required rights
+     *
+     * @param string $module
+     * @param integer $rightsRequired
+     * @return boolean
+     */
+    public function checkRights($module, $rightsRequired) {
+        $rights = $this->getRights();
+        $rightsAvailable = $rights[$module];
+
+        return $rightsAvailable >= $rightsRequired;
+    }
 }

@@ -23,7 +23,8 @@ class Meeting extends Module{
      */
     public function __construct(\API\API $api) {
         $this->api = $api;
-        $this->api->addModule('meeting', $this);
+        $this->setName('meeting');
+        $this->api->addModule($this->getName(), $this);
 
         $this->setRoutes();
     }
@@ -32,11 +33,11 @@ class Meeting extends Module{
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/meetings\/([0-9]{4}-[0-9]{1,2}-[0-9]{1,2})\/?$/",            "getMeetingsByDate",   $this, "GET",  TRUE);  // Get all meetings that start after the given date
-        $this->api->addRoute("/meetings\/([0-9]{4}-[0-9]{1,2}-[0-9]{1,2})\/calendar\/?$/",  "getMeetingsByDate",   $this, "GET",  TRUE);  // Get all meetings that start after the given date
-        $this->api->addRoute("/meetings\/?$/",                                              "getMeetings",         $this, "GET",  TRUE);  // Get list with 50 meetings ordered by startdate DESC
-        $this->api->addRoute("/meetings\/(\d+)\/?$/",                                       "getMeetings",         $this, "GET",  TRUE);  // Get list with 50 meetings ordered by startdate DESC starting at the given offset
-        $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "getMeetingById",      $this, "GET",  TRUE);  // Select specific meeting
+        $this->api->addRoute("/meetings\/([0-9]{4}-[0-9]{1,2}-[0-9]{1,2})\/?$/",            "getMeetingsByDate",   $this, "GET",  \Auth::READ);  // Get all meetings that start after the given date
+        $this->api->addRoute("/meetings\/([0-9]{4}-[0-9]{1,2}-[0-9]{1,2})\/calendar\/?$/",  "getMeetingsByDate",   $this, "GET",  \Auth::READ);  // Get all meetings that start after the given date
+        $this->api->addRoute("/meetings\/?$/",                                              "getMeetings",         $this, "GET",  \Auth::READ);  // Get list with 50 meetings ordered by startdate DESC
+        $this->api->addRoute("/meetings\/(\d+)\/?$/",                                       "getMeetings",         $this, "GET",  \Auth::READ);  // Get list with 50 meetings ordered by startdate DESC starting at the given offset
+        $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "getMeetingById",      $this, "GET",  \Auth::READ);  // Select specific meeting
     }
 
     /**

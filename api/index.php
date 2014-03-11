@@ -9,7 +9,7 @@ header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
 require_once dirname(__FILE__) .'/../config.php';
-require_once dirname(__FILE__) .'/auth.php';
+require_once dirname(__FILE__) .'/../includes/class.Auth.php';
 require_once dirname(__FILE__) .'/api.php';
 require_once dirname(__FILE__) .'/modules/auth.php';
 require_once dirname(__FILE__) .'/modules/document.php';
@@ -28,7 +28,7 @@ require_once dirname(__FILE__) .'/modules/user.php';
  */
 
 // Remove expired tokens
-\API\Auth::removeExpiredTokens();
+\Auth::removeExpiredTokens();
 
 // Try to parse the requested URL and paramters to a function of the API
 try {
@@ -38,7 +38,7 @@ try {
     $selectors          = array();
 
     // Auth user
-    $auth               = new \API\Auth();
+    $auth               = new \Auth();
     $auth::setToken($token);
     $authorized         = $auth::validate();
 
@@ -55,7 +55,7 @@ try {
     $authApi            = new \API\Modules\Auth($api);
 
     // Match the route to a function
-    $result             = $api->getRoute($get, $authorized);
+    $result             = $api->getRoute($get);
 
     // Wrong request?
     if($result === FALSE) {
@@ -64,8 +64,8 @@ try {
     }
 // Catch any exception that occured
 } catch (\Exception $e) {
-    $result["success"]  = FALSE;
-	$result["error"]    = $e->getMessage();
+    $result["success"]      = FALSE;
+	$result["error"]        = $e->getMessage();
 
     // Do we want to show debug information?
     if(SERVER_DEBUG) {

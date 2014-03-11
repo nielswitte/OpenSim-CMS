@@ -1,6 +1,4 @@
 <?php
-namespace API;
-
 if(EXEC != 1) {
 	die('Invalid request');
 }
@@ -17,6 +15,12 @@ class Auth {
     private static $timestamp;
     private static $userId;
     private static $user;
+
+    const NONE      = 0b000; // 0 - No rights
+    const READ      = 0b100; // 4 - Read access
+    const EXECUTE   = 0b101; // 5 - Allows to read and execute functions (i.e. confirm avatar links, clear cache)
+    const WRITE     = 0b110; // 6 - Allows to read and modify data
+    const ALL       = 0b111; // 7 - All above
 
     /**
      * Sets the token to be used in this class
@@ -57,6 +61,24 @@ class Auth {
             }
             $result = self::$user;
         }
+        return $result;
+    }
+
+    /**
+     * Checks if the current user has the required rights for this module
+     *
+     * @param string $module - Name of the module
+     * @param integer $rightsRequired - The required rights 400 = read only own data to 777 = read,write,execute everything
+     * @return boolean TRUE when user has rights
+     */
+    public static function checkRights($module, $rightsRequired) {
+        $user = self::getUser();
+        if($user !== FALSE) {
+            $result = $user->checkRights($module, $rightsRequired);
+        } else {
+            $result = $rightsRequired == 0 ? TRUE : FALSE;
+        }
+
         return $result;
     }
 

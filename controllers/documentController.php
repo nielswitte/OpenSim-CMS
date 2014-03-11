@@ -48,4 +48,18 @@ class DocumentController {
 
         return $result;
     }
+
+    /**
+     * Removes all expired cache files
+     *
+     * @return integer (number of cached assets removed) or boolean FALSE when failed
+     */
+    public function removeExpiredCache() {
+        $db = \Helper::getDB();
+
+        $db->where('uuidExpires', array( '<' =>  'NOW()'));
+        $results = $db->delete('cached_assets');
+
+        return $results;
+    }
 }

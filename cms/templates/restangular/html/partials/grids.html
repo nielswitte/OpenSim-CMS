@@ -70,8 +70,10 @@
                     <span class="label label-success" ng-show="{{grid.isOnline}}">Online</span>
                     <span class="label label-danger" ng-hide="{{grid.isOnline}}">Offline</span>
                 </td>
-                <td ng-show="{{grid.isOnline}}">{{grid.activeUsers}} / {{grid.totalUsers}}</td>
-                <td ng-hide="{{grid.isOnline}}">unknown</td>
+                <td>
+                    <span ng-show="{{grid.isOnline}}">{{grid.activeUsers}} / {{grid.totalUsers}}</span>
+                    <span ng-hide="{{grid.isOnline}}">unknown</span>
+                </td>
             </tr>
         </tbody>
     </table>

@@ -33,7 +33,7 @@
         </div>
     </div>
     <div class="form-group">
-        <div class="col-sm-offset-2 col-sm-10">
+        <div class="col-sm-offset-2 col-sm-10" ng-show="allowUpdate()">
             <button class="btn btn-primary" type="submit" ng-click="updateUser()"><i class="glyphicon glyphicon-ok"></i> Save Changes</button>
             <button class="btn btn-danger" type="button" ng-click="resetUser()"><i class="glyphicon glyphicon-remove"></i> Reset</button>
         </div>
@@ -65,7 +65,7 @@
                             <li><strong>Last Position:</strong> {{avatar.lastPosition}}</li>
                         </ul>
                     </div>
-                    <div class="panel-footer text-center">
+                    <div class="panel-footer text-center" ng-show="allowUpdate()">
                         <button class="confirmAvatar btn btn-success btn-sm" ng-click="confirmAvatar(index, avatar)" ng-hide="isConfirmed(index)"><i class="glyphicon glyphicon-ok"></i> Confirm</button>
                         <button class="removeAvatar btn btn-danger btn-sm" ng-click="unlinkAvatar(index, avatar)"><i class="glyphicon glyphicon-remove"></i> Unlink</button>
                     </div>

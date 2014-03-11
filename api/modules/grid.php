@@ -23,7 +23,8 @@ class Grid extends Module{
      */
     public function __construct(\API\API $api) {
         $this->api = $api;
-        $this->api->addModule('grid', $this);
+        $this->setName('grid');
+        $this->api->addModule($this->getName(), $this);
 
         $this->setRoutes();
     }
@@ -32,10 +33,10 @@ class Grid extends Module{
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/grids\/?$/",                                       "getGrids",             $this, "GET",  TRUE);  // Get a list with grids
-        $this->api->addRoute("/grid\/(\d+)\/?$/",                                 "getGridById",          $this, "GET",  TRUE);  // Get grid information by ID
-        $this->api->addRoute("/grid\/(\d+)\/region\/([a-z0-9-]{36})\/?$/",        "getRegionByUuid",      $this, "GET",  TRUE);  // Get information about the given region
-        $this->api->addRoute("/grid\/(\d+)\/region\/([a-z0-9-]{36})\/image\/?$/", "getRegionImageByUuid", $this, "GET",  TRUE);  // Get the map of the region
+        $this->api->addRoute("/grids\/?$/",                                       "getGrids",             $this, "GET",  \Auth::READ);  // Get a list with grids
+        $this->api->addRoute("/grid\/(\d+)\/?$/",                                 "getGridById",          $this, "GET",  \Auth::READ);  // Get grid information by ID
+        $this->api->addRoute("/grid\/(\d+)\/region\/([a-z0-9-]{36})\/?$/",        "getRegionByUuid",      $this, "GET",  \Auth::READ);  // Get information about the given region
+        $this->api->addRoute("/grid\/(\d+)\/region\/([a-z0-9-]{36})\/image\/?$/", "getRegionImageByUuid", $this, "GET",  \Auth::READ);  // Get the map of the region
     }
 
     /**

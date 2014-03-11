@@ -27,13 +27,12 @@ class UserController {
     /**
      * Sets the avatar UUID and matches it to the username
      *
-     * @param string $username - User name to match
      * @param integer $gridId - The grid where the Avatar is on
      * @param string $uuid - UUID to use
      * @return boolean
      * @throws \Exception
      */
-    public function linkAvatar($username, $gridId, $uuid) {
+    public function linkAvatar($gridId, $uuid) {
         $results = FALSE;
         if(\Helper::isValidUuid($uuid)) {
             $db = \Helper::getDB();
@@ -44,20 +43,12 @@ class UserController {
 
             // Not used?
             if(!isset($avatars[0])) {
-                // Get user's ID
-                $db->where("username", $db->escape($username));
-                $user = $db->get("users", 1);
-
-                if(isset($user[0])) {
-                    $avatarData = array(
-                        'userId'        => $db->escape($user[0]['id']),
-                        'gridId'        => $db->escape($gridId),
-                        'uuid'          => $db->escape($uuid)
-                    );
-                    $results = $db->insert('avatars', $avatarData);
-                } else {
-                    throw new \Exception("Username not found", 4);
-                }
+                $avatarData = array(
+                    'userId'        => $db->escape($this->user->getId()),
+                    'gridId'        => $db->escape($gridId),
+                    'uuid'          => $db->escape($uuid)
+                );
+                $results = $db->insert('avatars', $avatarData);
             } else {
                 $db->where("id", $db->escape($avatars[0]['userId']));
                 $user = $db->get("users", 1);
@@ -90,7 +81,7 @@ class UserController {
         $result     = $db->delete('avatars');
 
         if($result === FALSE) {
-            throw new \Exception("Given Avatar not found on the given Grid for the currently logged in User", 1);
+            throw new \Exception("Given Avatar not found on the given Grid for the given User", 1);
         }
 
         return $result;
@@ -135,7 +126,7 @@ class UserController {
 
     /**
      * Check to see if the given e-mail address in unused
-     * 
+     *
      * @param string $email
      * @return boolean - TRUE when available
      */

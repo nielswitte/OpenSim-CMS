@@ -1,7 +1,7 @@
 <div class="page-header">
     <h1>Users <small>Overview</small></h1>
 </div>
-<div class="toolbar toolbar-top">
+<div class="toolbar toolbar-top" ng-show="allowCreate()">
     <button ng-click="newUser()" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> New user</button>
 </div>
 <div class="panel panel-primary filter">

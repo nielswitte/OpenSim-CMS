@@ -21,6 +21,7 @@ class User implements SimpleModel {
     private $email;
     private $presentationIds = array();
     private $avatars = array();
+    private $rights = array();
 
     /**
      * Construct a new User with the given UUID
@@ -46,24 +47,29 @@ class User implements SimpleModel {
      */
     public function getInfoFromDatabase() {
         $db = \Helper::getDB();
-        // Get user information
+        // Get user information based on ID
         if($this->getId() > -1) {
             $db->where('id', $db->escape($this->getId()));
         }
+        // Based on Username
         if($this->getUsername() != '') {
             $db->where('username', $db->escape($this->getUsername()));
         }
-        $user = $db->get('users', 1);
+        if($this->getUsername() != '' || $this->getId() > -1) {
+            $user = $db->get('users', 1);
 
-        // Results!
-        if(isset($user[0])) {
-            $this->id               = $user[0]['id'];
-            $this->username         = $user[0]['username'];
-            $this->firstName        = $user[0]['firstName'];
-            $this->lastName         = $user[0]['lastName'];
-            $this->email            = $user[0]['email'];
+            // Results!
+            if(isset($user[0])) {
+                $this->id               = $user[0]['id'];
+                $this->username         = $user[0]['username'];
+                $this->firstName        = $user[0]['firstName'];
+                $this->lastName         = $user[0]['lastName'];
+                $this->email            = $user[0]['email'];
+            } else {
+                throw new \Exception("User not found", 3);
+            }
         } else {
-            throw new \Exception("User not found", 3);
+            throw new \Exception("No username or ID provided", 4);
         }
     }
 
@@ -87,8 +93,10 @@ class User implements SimpleModel {
 
     /**
      * Gets the user's avatars from the database
+     *
+     * @param boolean $full - Also get information from Grid if possible
      */
-    public function getAvatarsFromDatabase() {
+    public function getAvatarsFromDatabase($full = TRUE) {
         $db = \Helper::getDB();
         // Get avatars
         $db->where('userId', $db->escape($this->getId()));
@@ -96,10 +104,13 @@ class User implements SimpleModel {
         $i = 1;
         foreach($avatars as $avatar) {
             $grid = new \Models\Grid($avatar['gridId']);
-            $grid->getInfoFromDatabase();
             $newAvatar = new \Models\Avatar($grid, $avatar['uuid']);
             $newAvatar->setConfirmation($avatar['confirmed']);
-            $newAvatar->getInfoFromDatabase();
+            // Get additional data from Grid?
+            if($full) {
+                $grid->getInfoFromDatabase();
+                $newAvatar->getInfoFromDatabase();
+            }
             $this->avatars[$i] = $newAvatar;
             $i++;
         }
@@ -166,5 +177,58 @@ class User implements SimpleModel {
      */
     public function getAvatars() {
         return $this->avatars;
+    }
+
+    /**
+     * Searches the list of avatars for the given UUID
+     *
+     * @param string $uuid
+     * @return \Models\Avatar or boolean FALSE when no match is found
+     */
+    public function getAvatarByUuid($uuid) {
+        foreach($this->getAvatars() as $avatar) {
+            if($avatar->getUuid() == $uuid) {
+                return $avatar;
+            }
+        }
+        return FALSE;
+    }
+
+    /**
+     * Gets the users rights
+     *
+     * @return array
+     */
+    public function getRights() {
+        if(empty($this->rights)) {
+            // Default rights
+            $this->rights = array(
+                'auth'              => (int) \Auth::NONE, // 0
+                'document'          => (int) \Auth::NONE, // 0
+                'grid'              => (int) \Auth::NONE, // 0
+                'meeting'           => (int) \Auth::NONE, // 0
+                'meetingroom'       => (int) \Auth::NONE, // 0
+                'presentation'      => (int) \Auth::NONE, // 0
+                'user'              => (int) \Auth::NONE  // 0
+            );
+
+            // Get user's permissions from DB
+            $db = \Helper::getDB();
+            $db->where('userId', $db->escape($this->getId()));
+            $result = $db->get('user_permissions', 1);
+
+            if(isset($result[0])) {
+                $this->rights = array(
+                    'auth'              => $result[0]['auth'],
+                    'document'          => $result[0]['document'],
+                    'grid'              => $result[0]['grid'],
+                    'meeting'           => $result[0]['meeting'],
+                    'meetingroom'       => $result[0]['meetingroom'],
+                    'presentation'      => $result[0]['presentation'],
+                    'user'              => $result[0]['user'],
+                );
+            }
+        }
+        return $this->rights;
     }
 }

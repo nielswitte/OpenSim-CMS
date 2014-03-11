@@ -335,6 +335,10 @@ GET /api/documents/<OFFSET>/ HTTP/1.1
 ```
 
 ```http
+DELETE /api/documents/cache/ HTTP/1.1
+```
+
+```http
 GET /api/document/<DOCUMENT-ID>/ HTTP/1.1
 ```
 
