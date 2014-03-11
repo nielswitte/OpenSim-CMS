@@ -23,7 +23,8 @@ class Presentation extends Module{
      */
     public function __construct(\API\API $api) {
         $this->api = $api;
-        $this->api->addModule('presentation', $this);
+        $this->setName('presentation');
+        $this->api->addModule($this->getName(), $this);
 
         $this->setRoutes();
     }
