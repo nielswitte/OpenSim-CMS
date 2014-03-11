@@ -62,26 +62,6 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
                         // Set token as default request parameter
                         Restangular.setDefaultRequestParams({token: sessionStorage.token});
 
-                        // Set an error interceptor for Restangular
-                        Restangular.setErrorInterceptor(function(resp) {
-
-                            jQuery('#loading').hide();
-
-                            // Session check? Logout if expired
-                            if(sessionStorage.tokenTimeOut < moment().unix()) {
-                                sessionStorage.clear();
-                                $alert({title: 'Session Expired!', content: $sce.trustAsHtml('You have been logged out because your session has expired'), type: 'warning'});
-                            }
-                            // Unauthorized
-                            if(resp.status == 401) {
-                                $alert({title: 'Unauthorized!', content: $sce.trustAsHtml('You have insufficient privileges to access this API.'), type: 'danger'});
-                            // Other errors
-                            } else {
-                                $alert({title: 'Error!', content: $sce.trustAsHtml(resp.data.error), type: 'danger'});
-                            }
-                            return false; // stop the promise chain
-                        });
-
                         // Token is valid for half an hour
                         sessionStorage.tokenTimeOut = moment().add(30, 'minutes').unix();
                         $alert({title: 'Logged In!', content: $sce.trustAsHtml('You are now logged in as '+ userResponse.username), type: 'success'});
@@ -196,9 +176,15 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
             });
         };
 
+        $scope.allowCreate = function() {
+             return sessionStorage.documentPermission >= 6;
+        };
+
         // Show delete button only when allowed to delete
         $scope.allowDelete = function(ownerId) {
             if(ownerId == sessionStorage.id) {
+                return true;
+            } else if(sessionStorage.documentPermission >= 6) {
                 return true;
             } else {
                 return false;
