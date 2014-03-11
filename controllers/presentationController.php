@@ -60,9 +60,12 @@ class PresentationController {
                 // Remove temp file
                 unlink($filename);
                 // Save successful?
+                echo '1';
                 if(file_exists($slidesDirectory) && glob($slidesDirectory . DS . '*.'. IMAGE_TYPE) != false) {
+                    echo '2';
                     // Save all slides to the database
                     for($i = 0; $i < count(glob($slidesDirectory . DS . '*.'. IMAGE_TYPE)); $i++) {
+                        echo '3';
                         // Has to be done one by one...
                         // @todo improve this for multiple insert
                         $slides = array(
@@ -72,7 +75,7 @@ class PresentationController {
                         $slideQuery = $db->insert('document_slides', $slides);
                     }
                     // Finally update the result?
-                    $result = ($slideQuery !== FALSE ? $fileId : $result);
+                    $result = ($db->getLastError() == NULL ? $fileId : $result);
                 }
             }
         }
@@ -85,13 +88,13 @@ class PresentationController {
                     unlink($filename);
                 }
 
-                // Remove document from DB
-                $db->where('id', $db->escape($fileId));
-                $db->delete('documents');
-
                 // Remove slides from DB
                 $db->where('documentId', $db->escape($fileId));
                 $db->delete('document_slides');
+
+                // Remove document from DB
+                $db->where('id', $db->escape($fileId));
+                $db->delete('documents');
 
                 // Remove the created files
                 if(isset($slidesDirectory)) {
