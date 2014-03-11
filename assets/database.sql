@@ -56,9 +56,9 @@ CREATE TABLE IF NOT EXISTS `documents` (
 
 -- Structuur van  tabel OpenSim-CMS.document_slides wordt geschreven
 CREATE TABLE IF NOT EXISTS `document_slides` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
   `documentId` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`,`documentId`),
   KEY `FK_presentation_slides_presentations` (`documentId`),
   CONSTRAINT `FK_document_slides_documents` FOREIGN KEY (`documentId`) REFERENCES `documents` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
