@@ -521,6 +521,16 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             $scope.userRequestUrl   = userResponse.getRequestedUrl();
         });
 
+        $scope.allowUpdate = function() {
+            if(sessionStorage.userPermission >= 6) {
+                return true;
+            } else if(sessionStorage.userPermission >= 4 && $routeParams.userId == sessionStorage.id) {
+                return true;
+            } else {
+                return false;
+            }
+        };
+
         $scope.updateUser = function() {
             $scope.user.put().then(function(putResponse) {
                 angular.copy($scope.user, $scope.userOld);
