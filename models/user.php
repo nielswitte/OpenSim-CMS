@@ -55,17 +55,21 @@ class User implements SimpleModel {
         if($this->getUsername() != '') {
             $db->where('username', $db->escape($this->getUsername()));
         }
-        $user = $db->get('users', 1);
+        if($this->getUsername() != '' || $this->getId() > -1) {
+            $user = $db->get('users', 1);
 
-        // Results!
-        if(isset($user[0])) {
-            $this->id               = $user[0]['id'];
-            $this->username         = $user[0]['username'];
-            $this->firstName        = $user[0]['firstName'];
-            $this->lastName         = $user[0]['lastName'];
-            $this->email            = $user[0]['email'];
+            // Results!
+            if(isset($user[0])) {
+                $this->id               = $user[0]['id'];
+                $this->username         = $user[0]['username'];
+                $this->firstName        = $user[0]['firstName'];
+                $this->lastName         = $user[0]['lastName'];
+                $this->email            = $user[0]['email'];
+            } else {
+                throw new \Exception("User not found", 3);
+            }
         } else {
-            throw new \Exception("User not found", 3);
+            throw new \Exception("No username or ID provided", 4);
         }
     }
 
