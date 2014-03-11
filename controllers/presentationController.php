@@ -42,7 +42,7 @@ class PresentationController {
         $data           = array(
             'title'         => $db->escape($parameters['title']),
             'type'          => $db->escape($parameters['type']),
-            'ownerId'       => $db->escape(\API\Auth::getUser()->getId()),
+            'ownerId'       => $db->escape(\Auth::getUser()->getId()),
             'creationDate'  => $db->escape(date('Y-m-d H:m:s'))
         );
         $fileId = $db->insert('documents', $data);

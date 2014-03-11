@@ -1,6 +1,4 @@
 <?php
-namespace API;
-
 if(EXEC != 1) {
 	die('Invalid request');
 }
