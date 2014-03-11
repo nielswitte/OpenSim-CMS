@@ -10,7 +10,7 @@ require_once dirname(__FILE__) .'/module.php';
  * Implements the functions for users
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date February 24th, 2014
  */
 class User extends Module {
@@ -56,9 +56,6 @@ class User extends Module {
      * @return array
      */
     public function createUser($args) {
-        if(\Auth::checkRights($module, $rightsRequired)) {
-
-        }
         $userData = \Helper::getInput(TRUE);
 
         $userId         = FALSE;
@@ -85,6 +82,11 @@ class User extends Module {
      * @throws \Exception
      */
     public function updateUserById($args) {
+        // Only allow when the user has write access or wants to update his/her own profile
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $args[1] != \Auth::getUser()->getId()) {
+            throw new \Exception('You do not have permissions to update this user.', 6);
+        }
+
         $putUserData    = \Helper::getInput(TRUE);
 
         $user           = new \Models\User($args[1]);
@@ -130,6 +132,11 @@ class User extends Module {
      * @return array
      */
     public function updateUserPasswordById($args) {
+        // Only allow when the user has write access or wants to update his/her own profile
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $args[1] != \Auth::getUser()->getId()) {
+            throw new \Exception('You do not have permissions to update this user.', 6);
+        }
+
         $putUserData    = \Helper::getInput(TRUE);
 
         $user           = new \Models\User($args[1]);
@@ -280,6 +287,11 @@ class User extends Module {
      * @return array
      */
     public function linkAvatarToUser($args) {
+        // Only allow when the user has write access or wants to update his/her own profile
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $args[1] != \Auth::getUser()->getId()) {
+            throw new \Exception('You do not have permissions to link avatars to this user.', 6);
+        }
+
         $putUserData    = \Helper::getInput(TRUE);
         $username       = isset($putUserData['username']) ? $putUserData['username'] : '';
 
@@ -302,6 +314,11 @@ class User extends Module {
      * @return array
      */
     public function confirmAvatar($args) {
+        // Only allow when the user has write access or wants to update his/her own profile
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $args[1] != \Auth::getUser()->getId()) {
+            throw new \Exception('You do not have permissions to confirm avatars for this user.', 6);
+        }
+
         $user           = \API\Auth::getUser();
         $userCtrl       = new \Controllers\UserController($user);
         $grid           = new \Models\Grid($args[1]);
@@ -322,6 +339,11 @@ class User extends Module {
      * @return array
      */
     public function unlinkAvatar($args) {
+        // Only allow when the user has write access or wants to update his/her own profile
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $args[1] != \Auth::getUser()->getId()) {
+            throw new \Exception('You do not have permissions to unlink avatars for this user.', 6);
+        }
+
         $user           = \API\Auth::getUser();
         $userCtrl       = new \Controllers\UserController($user);
         $grid           = new \Models\Grid($args[1]);
@@ -341,6 +363,11 @@ class User extends Module {
      * @return array
      */
     public function teleportAvatarByUuid($args) {
+        // Only allow when the user has write access or wants to update his/her own profile
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $args[1] != \Auth::getUser()->getId()) {
+            throw new \Exception('You do not have permissions to teleport this user.', 6);
+        }
+
         $parsedPutData  = \Helper::getInput(TRUE);
 
         // use UUID from GET request
