@@ -120,6 +120,12 @@ class Document extends Module{
     public function deleteDocumentById($args) {
         $document     = new \Models\Document($args[1]);
         $document->getInfoFromDatabase();
+
+        // Only allow when the user has write access or wants to update his/her own documents
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $document->getOwnerId() != \Auth::getUser()->getId()) {
+            throw new \Exception('You do not have permissions to update this user.', 6);
+        }
+
         $documentCtrl = new \Controllers\DocumentController($document);
         $data         = $documentCtrl->removeDocument();
         // Format the result
