@@ -101,8 +101,6 @@ class Auth extends Module {
             if($result != 1) {
                 throw new \Exception('Storing token at the server side failed', 3);
             }
-
-            $data['permissions']    = $user->getRights();
         }
 
         return $data;

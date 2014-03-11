@@ -76,7 +76,7 @@ class Auth {
         if($user !== FALSE) {
             $result = $user->checkRights($module, $rightsRequired);
         } else {
-            $result = FALSE;
+            $result = $rightsRequired == 0 ? TRUE : FALSE;
         }
 
         return $result;

@@ -255,6 +255,7 @@ class User extends Module {
 
         if($full) {
             $data['presentationIds']    = $user->getPresentationIds();
+            $data['permissions']        = $user->getRights();
         }
         if($full) {
             $avatars                    = array();
