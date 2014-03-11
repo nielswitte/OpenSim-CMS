@@ -112,13 +112,13 @@ class PresentationController {
                 // Has to be done one by one...
                 // @todo improve this for multiple insert
                 $slides = array(
-                    'id'         => $db->escape($i),
+                    'id'         => '',
                     'documentId' => $db->escape($presentationId)
                 );
-                $slideQuery = $db->insert('document_slides', $slides);
+                $slideId = $db->insert('document_slides', $slides);
             }
             // Finally update the result?
-            $result = ($db->getLastError() == NULL ? TRUE : FALSE);
+            $result = ($slideId !== FALSE ? TRUE : FALSE);
         }
         return $result;
     }

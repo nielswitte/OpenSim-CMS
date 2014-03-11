@@ -194,7 +194,8 @@ class Presentation extends Module{
     public function getSlideImageByNumber($args) {
         // Get presentation and slide details
         $presentation   = new \Models\Presentation($args[1], $args[2]);
-        $slidePath      = $presentation->getPath() . DS .'slide-'. ($presentation->getCurrentSlide() < 10 ? '0'. $presentation->getCurrentSlide() : $presentation->getCurrentSlide()) .'.'. IMAGE_TYPE;
+        $presentation->getSlides();
+        $slidePath      = $presentation->getPath() . DS .'slide-'. ($presentation->getCurrentSlide() < 10 && $presentation->getNumberOfSlides() >= 10 ? '0'. $presentation->getCurrentSlide() : $presentation->getCurrentSlide()) .'.'. IMAGE_TYPE;
 
         // Show image if exists
         if(file_exists($slidePath)) {
@@ -203,7 +204,7 @@ class Presentation extends Module{
             // resize when needed
             if($resize->getWidth() > IMAGE_WIDTH || $resize->getHeight() > IMAGE_HEIGHT) {
                 $resize->resize(IMAGE_WIDTH,IMAGE_HEIGHT,'fit');
-                $resize->save('slide-'. ($presentation->getCurrentSlide() < 10 ? '0'. $presentation->getCurrentSlide() : $presentation->getCurrentSlide()), $presentation->getPath(), IMAGE_TYPE);
+                $resize->save('slide-'. ($presentation->getCurrentSlide() < 10 && $presentation->getNumberOfSlides() >= 10 ? '0'. $presentation->getCurrentSlide() : $presentation->getCurrentSlide()), $presentation->getPath(), IMAGE_TYPE);
             }
             unset($resize);
 
@@ -214,7 +215,7 @@ class Presentation extends Module{
             $image->writeWatermark(100, 0, 0, 'c', 'c');
             $image->display();
         } else {
-            throw new Exception("Requested slide does not exists", 5);
+            throw new \Exception("Requested slide does not exists", 5);
         }
     }
 
