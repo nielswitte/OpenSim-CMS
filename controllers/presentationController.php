@@ -60,12 +60,9 @@ class PresentationController {
                 // Remove temp file
                 unlink($filename);
                 // Save successful?
-                echo '1';
                 if(file_exists($slidesDirectory) && glob($slidesDirectory . DS . '*.'. IMAGE_TYPE) != false) {
-                    echo '2';
                     // Save all slides to the database
                     for($i = 0; $i < count(glob($slidesDirectory . DS . '*.'. IMAGE_TYPE)); $i++) {
-                        echo '3';
                         // Has to be done one by one...
                         // @todo improve this for multiple insert
                         $slides = array(
