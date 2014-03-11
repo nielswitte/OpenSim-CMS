@@ -164,7 +164,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                 } else {
-                    $alert({title: 'Dpcument created!', content: $sce.trustAsHtml('The document: '+ $scope.document.title + ' has been created with ID: '+ resp.id +'.'), type: 'success'});
+                    $alert({title: 'Document created!', content: $sce.trustAsHtml('The document: '+ $scope.document.title + ' has been created with ID: '+ resp.id +'.'), type: 'success'});
                     $scope.document.id                  = resp.id;
                     $scope.document.ownerId             = sessionStorage.id;
                     $scope.document.creationDate        = new moment().format('YYYY-MM-DD HH:mm:ss');
