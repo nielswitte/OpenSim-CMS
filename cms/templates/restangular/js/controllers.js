@@ -127,7 +127,8 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
 );
 
 // documentsController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$modal', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, Page, $alert, $modal, $sce, Cache) {
+angularRest.controller('documentsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$modal', '$sce', 'Cache', '$route',
+    function(Restangular, RestangularCache, $scope, Page, $alert, $modal, $sce, Cache, $route) {
         $scope.orderByField         = 'title';
         $scope.reverseSort          = false;
         $scope.requestDocumentsUrl  = '';
@@ -200,6 +201,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
                     $alert({title: 'Document removed!', content: $sce.trustAsHtml('The document '+ $scope.documentsList[index].title +' has been removed from the CMS.'), type: 'success'});
                     delete $scope.documentsList[index];
                     Cache.clearCachedUrl($scope.requestDocumentsUrl);
+                    $route.reload();
                 }
             });
         };
@@ -406,7 +408,7 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
 );
 
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', '$sce', 'Cache', function(RestangularCache, Restangular, $scope, Page, $modal, $alert, $sce, Cache) {
+angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', '$sce', 'Cache', '$route', function(RestangularCache, Restangular, $scope, Page, $modal, $alert, $sce, Cache, $route) {
         $scope.orderByField     = 'username';
         $scope.reverseSort      = false;
         $scope.requestUsersUrl  = '';
@@ -461,6 +463,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
                     $alert({title: 'User removed!', content: $sce.trustAsHtml('The user '+ $scope.usersList[index].username +' has been removed from the CMS.'), type: 'success'});
                     delete $scope.usersList[index];
                     Cache.clearCachedUrl($scope.requestUsersUrl);
+                    $route.reload();
                 }
             });
         };
