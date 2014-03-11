@@ -108,7 +108,7 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
         RestangularProvider.setDefaultHttpFields({cache: false});
 
         // Add token to request when available (this line is required for page refreshes to keep the token)
-        if(sessionStorage.token) {
+        if(sessionStorage.token && sessionStorage.tokenTimeOut < moment().unix()) {
             RestangularProvider.setDefaultRequestParams({token: sessionStorage.token});
         }
 

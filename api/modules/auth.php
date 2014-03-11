@@ -23,7 +23,8 @@ class Auth extends Module {
      */
     public function __construct(\API\API $api) {
         $this->api = $api;
-        $this->api->addModule('auth', $this);
+        $this->setName('auth');
+        $this->api->addModule($this->getName(), $this);
 
         $this->setRoutes();
     }
@@ -32,7 +33,7 @@ class Auth extends Module {
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/auth\/username\/?$/", "authUser", $this, "POST", FALSE); // Authenticate the given user
+        $this->api->addRoute("/auth\/username\/?$/", "authUser", $this, "POST", \Auth::NONE); // Authenticate the given user
     }
 
     /**
@@ -84,11 +85,11 @@ class Auth extends Module {
             throw new \Exception("Not allowed to login as OpenSim outside the Grid", 2);
         }
 
-        $user           = new \Models\User($userId, $username);
+        $user                   = new \Models\UserLoggedIn($userId, $username);
         $user->getInfoFromDatabase();
-        $userCtrl       = new \Controllers\UserController($user);
-        $validRequest   = $userCtrl->checkPassword($password);
-        $data['userId'] = $db->escape($user->getId());
+        $userCtrl               = new \Controllers\UserController($user);
+        $validRequest           = $userCtrl->checkPassword($password);
+        $data['userId']         = $db->escape($user->getId());
         if(!$validRequest) {
             throw new \Exception("Invalid username/password combination used", 1);
         }
@@ -100,6 +101,8 @@ class Auth extends Module {
             if($result != 1) {
                 throw new \Exception('Storing token at the server side failed', 3);
             }
+
+            $data['permissions']    = $user->getRights();
         }
 
         return $data;
