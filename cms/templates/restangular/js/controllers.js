@@ -173,6 +173,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 
                     Cache.clearCachedUrl($scope.requestDocumentsUrl);
                     modal.hide();
+                    $route.reload();
                 }
             });
         };
@@ -437,6 +438,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
                     Cache.clearCachedUrl($scope.requestUsersUrl);
                     modal.hide();
+                    $route.reload();
                 }
             });
         };
@@ -498,7 +500,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 );
 
 // userController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('userController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache) {
+angularRest.controller('userController', ['Restangular', 'RestangularCache', '$scope', '$route', '$routeParams', 'Page', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, $route, $routeParams, Page, $alert, $sce, Cache) {
         $scope.userRequestUrl   = '';
         $scope.userOld          = {};
 
@@ -561,6 +563,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                     $scope.user.avatarCount--;
                     $alert({title: 'Avatar unlinked!', content: $sce.trustAsHtml('The avatar is no longer linked to this user.'), type: 'success'});
                     Cache.clearCachedUrl($scope.userRequestUrl);
+                    $route.reload();
                 }
             });
         };
