@@ -288,16 +288,17 @@ class User extends Module {
      * @return array
      */
     public function linkAvatarToUser($args) {
-        // Only allow when the user has write access or wants to update his/her own profile
-        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $args[1] != \Auth::getUser()->getId()) {
-            throw new \Exception('You do not have permissions to link avatars to this user.', 6);
-        }
-
         $putUserData    = \Helper::getInput(TRUE);
         $username       = isset($putUserData['username']) ? $putUserData['username'] : '';
 
-        $userCtrl       = new \Controllers\UserController();
-        $data           = $userCtrl->linkAvatar($username, $args[1], $args[2]);
+        // Only allow when the user has write access or wants to update his/her own profile
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $username != \Auth::getUser()->getUsername()) {
+            throw new \Exception('You do not have permissions to link avatars to this user.', 6);
+        }
+        $user           = new \Models\User(-1, $username);
+        $user->getInfoFromDatabase();
+        $userCtrl       = new \Controllers\UserController($user);
+        $data           = $userCtrl->linkAvatar($args[1], $args[2]);
 
         // Format the result
         $result = array(
@@ -309,21 +310,22 @@ class User extends Module {
 
     /**
      * Confirms that the given avatar UUID on the given grid is owned by the
-     * currently loggedin user
+     * linked user
      *
      * @param array $args
      * @return array
      */
     public function confirmAvatar($args) {
+        $grid           = new \Models\Grid($args[1]);
+        $avatar         = new \Models\Avatar($grid, $args[2]);
+        $user           = new \Models\User($avatar->getUserId());
+
         // Only allow when the user has write access or wants to update his/her own profile
-        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $args[1] != \Auth::getUser()->getId()) {
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $user->getId() != \Auth::getUser()->getId()) {
             throw new \Exception('You do not have permissions to confirm avatars for this user.', 6);
         }
 
-        $user           = \API\Auth::getUser();
         $userCtrl       = new \Controllers\UserController($user);
-        $grid           = new \Models\Grid($args[1]);
-        $avatar         = new \Models\Avatar($grid, $args[2]);
         $data           = $userCtrl->confirmAvatar($avatar);
         $result = array(
             'success' => ($data !== FALSE ? TRUE : FALSE)
@@ -333,22 +335,22 @@ class User extends Module {
     }
 
     /**
-     * Deletes the link between the currently loggedin user
-     * and the given avatar UUID on the given grid
+     * Deletes the link between the user and the given avatar UUID on the given grid
      *
      * @param array $args
      * @return array
      */
     public function unlinkAvatar($args) {
+        $grid           = new \Models\Grid($args[1]);
+        $avatar         = new \Models\Avatar($grid, $args[2]);
+        $user           = new \Models\User($avatar->getUserId());
+
         // Only allow when the user has write access or wants to update his/her own profile
-        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $args[1] != \Auth::getUser()->getId()) {
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $user->getId() != \Auth::getUser()->getId()) {
             throw new \Exception('You do not have permissions to unlink avatars for this user.', 6);
         }
 
-        $user           = \API\Auth::getUser();
         $userCtrl       = new \Controllers\UserController($user);
-        $grid           = new \Models\Grid($args[1]);
-        $avatar         = new \Models\Avatar($grid, $args[2]);
         $data           = $userCtrl->unlinkAvatar($avatar);
         $result = array(
             'success' => ($data !== FALSE ? TRUE : FALSE)

@@ -47,10 +47,11 @@ class User implements SimpleModel {
      */
     public function getInfoFromDatabase() {
         $db = \Helper::getDB();
-        // Get user information
+        // Get user information based on ID
         if($this->getId() > -1) {
             $db->where('id', $db->escape($this->getId()));
         }
+        // Based on Username
         if($this->getUsername() != '') {
             $db->where('username', $db->escape($this->getUsername()));
         }
@@ -88,8 +89,10 @@ class User implements SimpleModel {
 
     /**
      * Gets the user's avatars from the database
+     *
+     * @param boolean $full - Also get information from Grid if possible
      */
-    public function getAvatarsFromDatabase() {
+    public function getAvatarsFromDatabase($full = TRUE) {
         $db = \Helper::getDB();
         // Get avatars
         $db->where('userId', $db->escape($this->getId()));
@@ -97,10 +100,13 @@ class User implements SimpleModel {
         $i = 1;
         foreach($avatars as $avatar) {
             $grid = new \Models\Grid($avatar['gridId']);
-            $grid->getInfoFromDatabase();
             $newAvatar = new \Models\Avatar($grid, $avatar['uuid']);
             $newAvatar->setConfirmation($avatar['confirmed']);
-            $newAvatar->getInfoFromDatabase();
+            // Get additional data from Grid?
+            if($full) {
+                $grid->getInfoFromDatabase();
+                $newAvatar->getInfoFromDatabase();
+            }
             $this->avatars[$i] = $newAvatar;
             $i++;
         }
@@ -167,6 +173,21 @@ class User implements SimpleModel {
      */
     public function getAvatars() {
         return $this->avatars;
+    }
+
+    /**
+     * Searches the list of avatars for the given UUID
+     *
+     * @param string $uuid
+     * @return \Models\Avatar or boolean FALSE when no match is found
+     */
+    public function getAvatarByUuid($uuid) {
+        foreach($this->getAvatars() as $avatar) {
+            if($avatar->getUuid() == $uuid) {
+                return $avatar;
+            }
+        }
+        return FALSE;
     }
 
     /**

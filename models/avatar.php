@@ -62,6 +62,20 @@ class Avatar implements simpleModel {
     }
 
     /**
+     * Returns the userId of the owner of this avatar
+     *
+     * @return integer or boolean FALSE on failure
+     */
+    public function getUserId() {
+        $db = \Helper::getDB();
+        $db->where('uuid', $db->escape($this->getUuid()));
+        $db->where('gridId', $db->escape($this->getGrid()->getId()));
+        $id = $db->get('avatars', 1);
+
+        return isset($id[0]) ? $id[0]['userId'] : FALSE;
+    }
+
+    /**
      * Set to true when an avatar is confirmed
      *
      * @param boolean $confirmed
