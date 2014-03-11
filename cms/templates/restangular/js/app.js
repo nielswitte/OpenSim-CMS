@@ -58,12 +58,31 @@ var angularRest = angular.module('OpenSim-CMS', [
 });
 
 // Authentication check on run
-angularRest.run(['$rootScope', '$location', '$alert', '$sce', function ($rootScope, $location, $alert, $sce) {
+angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', function ($rootScope, Restangular, $location, $alert, $sce) {
         $rootScope.$on("$routeChangeStart", function(event, next, current) {
             if (next.requireLogin && !sessionStorage.token) {
                 $alert({title: 'Error!', content: $sce.trustAsHtml('This page requires authentication.'), type: 'danger'});
                 $location.path('/login');
             }
+        });
+
+        // Set an error interceptor for Restangular
+        Restangular.setErrorInterceptor(function(resp) {
+            jQuery('#loading').hide();
+
+            // Session check? Logout if expired
+            if(sessionStorage.tokenTimeOut < moment().unix()) {
+                sessionStorage.clear();
+                $alert({title: 'Session Expired!', content: $sce.trustAsHtml('You have been logged out because your session has expired'), type: 'warning'});
+            }
+            // Unauthorized
+            if(resp.status == 401) {
+                $alert({title: 'Unauthorized!', content: $sce.trustAsHtml('You have insufficient privileges to access this API.'), type: 'danger'});
+            // Other errors
+            } else {
+                $alert({title: 'Error!', content: $sce.trustAsHtml(resp.data.error), type: 'danger'});
+            }
+            return false; // stop the promise chain
         });
     }]
 );
