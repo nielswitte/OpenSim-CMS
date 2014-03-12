@@ -334,6 +334,10 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
         };
 
         function updateMeeting() {
+            // Reformat back to the expected format for the API
+            meetingResponse.startDate = $scope.startDateString.replace(/\//g, '-') +' '+ $scope.startTimeString +':00';
+            meetingResponse.endDate   = $scope.endDateString.replace(/\//g, '-') +' '+ $scope.endTimeString +':00';
+
             $scope.meeting.put();
             Cache.clearCachedUrl(meetingRequestUrl);
         }
@@ -346,21 +350,12 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
                 $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
                 $scope.template         = partial_path +'/meeting/meetingDetails.html';
                 $scope.meeting          = meetingResponse;
-                $scope.startDateString  = new moment(meetingResponse.startDate).format('YYYY/MM/DD');
+                $scope.startDateString  = new moment(meetingResponse.startDate).format('dddd D MMMM YYYY');
                 $scope.startTimeString  = new moment(meetingResponse.startDate).format('HH:mm');
-                $scope.endDateString    = new moment(meetingResponse.endDate).format('YYYY/MM/DD');
                 $scope.endTimeString    = new moment(meetingResponse.endDate).format('HH:mm');
-
-                // Reformat back to the expected format for the API
-                $scope.startDate        = $scope.startDateString.replace(/\//g, '-') +' '+ $scope.startTimeString +':00';
-                $scope.endDate          = $scope.endDateString.replace(/\//g, '-') +' '+ $scope.endTimeString +':00';
 
                 // Modal buttons
                 $scope.buttons          = [{
-                        text: 'Update',
-                        func: 'save',
-                        type: 'primary'
-                    }, {
                         text: 'Ok',
                         func: 'hide',
                         type: 'default'
