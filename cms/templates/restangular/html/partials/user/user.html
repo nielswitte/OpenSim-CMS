@@ -1,7 +1,7 @@
 <div class="page-header">
     <h1>User <small>{{user.username}}</small></h1>
 </div>
-<form class="form-horizontal" role="form" id="userForm">
+<form class="form-horizontal" role="form" id="userForm" ng-submit="updateUser()">
     <div class="form-group">
         <label for="inputId" class="col-sm-2 control-label">ID</label>
         <div class="col-sm-10">
@@ -17,19 +17,19 @@
     <div class="form-group has-feedback">
         <label for="inputFirstName" class="col-sm-2 control-label">First name</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="inputFirstName" ng-model="user.firstName" placeholder="First name">
+            <input type="text" class="form-control" id="inputFirstName" ng-model="user.firstName" required placeholder="First name">
         </div>
     </div>
     <div class="form-group">
         <label for="inputLastName" class="col-sm-2 control-label">Last name</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="inputLastName" ng-model="user.lastName" placeholder="Last name">
+            <input type="text" class="form-control" id="inputLastName" ng-model="user.lastName" required placeholder="Last name">
         </div>
     </div>
     <div class="form-group">
         <label for="inputEmail" class="col-sm-2 control-label">E-mail address</label>
         <div class="col-sm-10">
-            <input type="email" class="form-control" id="inputEmail" ng-model="user.email" placeholder="E-mail address">
+            <input type="email" class="form-control" id="inputEmail" ng-model="user.email" required placeholder="E-mail address">
         </div>
     </div>
     <div class="form-group" ng-show="allowPermissions()">
@@ -40,7 +40,7 @@
                     <th class="col-sm-3">{{type}}</th>
                     <td>
                         <div class="btn-group" ng-model="user.permissions[type]" bs-radio-group>
-                            <label class="btn btn-default"><input type="radio" class="btn btn-default" value="0"> None</label>
+                            <label class="btn btn-default"><input type="radio" class="btn btn-default" value="0" required> None</label>
                             <label class="btn btn-default"><input type="radio" class="btn btn-default" value="4"> Read</label>
                             <label class="btn btn-default"><input type="radio" class="btn btn-default" value="5"> Execute</label>
                             <label class="btn btn-default"><input type="radio" class="btn btn-default" value="6"> Write</label>
@@ -53,7 +53,7 @@
     </div>
     <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10" ng-show="allowUpdate()">
-            <button class="btn btn-primary" type="submit" ng-click="updateUser()"><i class="glyphicon glyphicon-ok"></i> Save Changes</button>
+            <button class="btn btn-primary" type="submit"><i class="glyphicon glyphicon-ok"></i> Save Changes</button>
             <button class="btn btn-danger" type="button" ng-click="resetUser()"><i class="glyphicon glyphicon-remove"></i> Reset</button>
         </div>
     </div>
