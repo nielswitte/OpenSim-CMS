@@ -219,16 +219,19 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
         // New document dialog creation
         $scope.newDocument = function() {
             $scope.template         = partial_path +'/document/documentNewForm.html';
+            $scope.formSubmit       = 'createDocument';
             $scope.document         = {};
             $scope.buttons          = [{
                         text: 'Create',
-                        func: 'createDocument',
-                        type: 'primary'
+                        func: '',
+                        class: 'primary',
+                        type: 'submit'
                     },
                     {
                         text: 'Cancel',
                         func: 'hide',
-                        type: 'danger'
+                        class: 'danger',
+                        type: 'button'
                     }
                 ];
             modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
@@ -351,12 +354,14 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
                 $scope.buttons          = [{
                         text: 'Edit',
                         func: 'edit',
-                        type: 'primary'
+                        class: 'primary',
+                        type: 'submit'
                     },
                     {
                         text: 'Ok',
                         func: 'hide',
-                        type: 'default'
+                        class: 'default',
+                        type: 'button'
                     }
                 ];
                 modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
@@ -433,7 +438,9 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
         $scope.template         = false;
         $scope.meeting          = {};
         $scope.grids            = {};
+        $scope.rooms            = {};
 
+        // Return the partial template for the form (when it is set, after loading meeting data)
         $scope.getForm = function() {
             return $scope.template;
         };
@@ -453,6 +460,14 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
             return false;
         };
 
+        // Get meeting rooms for selected region
+        $scope.getMeetingRooms = function() {
+            RestangularCache.one('grid', $scope.meeting.room.grid.id).one('region', $scope.meeting.room.region.uuid).all('rooms').getList().then(function(roomsResponse){
+                $scope.rooms = roomsResponse;
+            });
+        };
+
+        // Update the meeting with the new data
         $scope.updateMeeting = function () {
             // Reformat back to the expected format for the API
             meetingResponse.startDate   = $scope.startDateString.replace(/\//g, '-') +' '+ $scope.startTimeString +':00';
@@ -461,12 +476,19 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
             $scope.meeting.put();
         };
 
+        // Get the selected meeting
         RestangularCache.one('meeting', $routeParams.meetingId).get().then(function(meetingResponse) {
             $scope.meeting          = meetingResponse;
+            // Page and content titles
+            $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
+            Page.setTitle('Meeting '+ meetingResponse.id);
+
+            // Parse dates to working Angular-Strap date strings (somehow Date-objects do not work with min/max date/time)
             $scope.startDateString  = new moment(meetingResponse.startDate).format('YYYY/MM/DD');
             $scope.startTimeString  = new moment(meetingResponse.startDate).format('HH:mm');
             $scope.endDateString    = new moment(meetingResponse.endDate).format('YYYY/MM/DD');
             $scope.endTimeString    = new moment(meetingResponse.endDate).format('HH:mm');
+
             // load form template
             $scope.template         = partial_path +'/meeting/meetingForm.html';
             meetingRequestUrl       = meetingResponse.getRequestedUrl();
@@ -476,6 +498,9 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
                 gridsRequestUrl = gridsResponse.getRequestedUrl();
                 $scope.grids    = gridsResponse;
             });
+
+            // Get additional meeting rooms
+            $scope.getMeetingRooms();
         });
     }]
 );
@@ -499,7 +524,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
             return $scope.collapseFilter;
         };
 
-        function saveUser() {
+        $scope.saveUser = function() {
             Restangular.all('user').post($scope.user).then(function(resp) {
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
@@ -542,12 +567,21 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
             });
         };
 
+        // Compare passwords
+        $scope.passwordDoNotMatch = function() {
+            if($scope.user.password !== $scope.user.password2) {
+                jQuery('#inputPassword, #inputPassword2').parents('div.form-group').addClass('has-error');
+            } else {
+                jQuery('#inputPassword, #inputPassword2').parents('div.form-group').removeClass('has-error');
+            }
+        };
+
         // Dialog function handler
         $scope.call = function(func) {
             if(func === 'hide') {
                 modal.hide();
             } else if(func === 'createUser') {
-                saveUser();
+                $scope.saveUser();
             }
         };
 
@@ -555,15 +589,18 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
         $scope.newUser = function() {
             $scope.template         = partial_path +'/user/userNewForm.html';
             $scope.user             = {};
+            $scope.formSubmit       = 'createUser';
             $scope.buttons          = [{
                         text: 'Create',
-                        func: 'createUser',
-                        type: 'primary'
+                        func: '',
+                        class: 'primary',
+                        type: 'submit'
                     },
                     {
                         text: 'Cancel',
                         func: 'hide',
-                        type: 'danger'
+                        class: 'danger',
+                        type: 'button'
                     }
                 ];
             modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});

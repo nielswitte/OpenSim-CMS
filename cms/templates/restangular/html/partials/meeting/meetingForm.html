@@ -37,6 +37,17 @@
 <div class="form-group">
     <label class="col-sm-2 control-label" for="inputRegion">Region</label>
     <div class="col-sm-10">
-        <select id="inputRegion" class="form-control" ng-model="meeting.room.region.uuid" ng-options="region.uuid as region.name for region in grids[selectedGridIndex()].regions"></select>
+        <select id="inputRegion" class="form-control" ng-model="meeting.room.region.uuid" ng-options="region.uuid as region.name for region in grids[selectedGridIndex()].regions" ng-change="getMeetingRooms()"></select>
     </div>
 </div>
+<div class="form-group">
+    <label class="col-sm-2 control-label" for="inputRegion">Rooms</label>
+    <div class="col-sm-10">
+        <select id="inputRegion" class="form-control" ng-model="meeting.room.id" ng-options="room.id as room.id for room in rooms"></select>
+    </div>
+</div>
+<pre>
+- Participants
+- Buttons (Save and Reset)
+- Form validation
+</pre>

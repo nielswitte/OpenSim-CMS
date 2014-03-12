@@ -1,6 +1,6 @@
 <div class="page-header">
-    <h1>Meeting <small></small></h1>
+    <h1>Meeting <small>{{title}}</small></h1>
 </div>
-<form class="form-horizontal" role="form" id="meetingForm" ng-include src="template">
+<form class="form-horizontal" role="form" id="meetingForm" ng-include src="template" ng-submit="updateMeeting()">
     <!-- Include form dynamically to prevent initialization of field before data is loaded -->
 </form>
