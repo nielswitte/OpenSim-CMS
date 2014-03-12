@@ -554,16 +554,18 @@ specific grid when possible.
         },
         "cacheTime": "48 hours",
         "defaultRegionUuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
-        "regionCount": 1,
+        "regionCount": 3,
         "regions": {
-            "72efcc78-2b1a-4571-8704-fea352998c0c": {
+            {
                 "uuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
                 "name": "The Grid",
                 "image": "http://localhost:80/OpenSim-CMS/api/grid/1/region/72efcc78-2b1a-4571-8704-fea352998c0c/image/",
                 "serverStatus": 1,
                 "totalUsers": 2,
                 "activeUsers": 1
-            }
+            },
+            { (...) },
+            { (...) }
         }
     },
     { (...) },
@@ -597,15 +599,16 @@ This will return a summary of the grid and regions, excluding the passwords.
         "port": 9001
     },
     "cacheTime": "48 hours",
+    "defaultRegionUuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
+    "regionCount": 3,
     "regions": {
-        "72efcc78-2b1a-4571-8704-fea352998c0c": {
+        {
             "uuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
             "name": "The Grid",
             "image": "http://localhost:80/OpenSim-CMS/api/grid/1/region/72efcc78-2b1a-4571-8704-fea352998c0c/image/"
         },
-        "(...)": {
-            (...)
-        }
+        { (...) },
+        { (...) }
     }
 }
 

@@ -104,7 +104,7 @@ class Grid extends Module{
         $data['defaultRegionUuid']  = $grid->getDefaultRegionUuid();
         $data['regionCount']        = count($grid->getRegions());
         foreach($grid->getRegions() as $region) {
-            $data['regions'][$region->getUuid()] = $this->getRegionData($region);
+            $data['regions'][] = $this->getRegionData($region);
         }
 
         return $data;
