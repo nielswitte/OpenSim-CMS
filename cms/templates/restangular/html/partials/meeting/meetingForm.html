@@ -1,0 +1,42 @@
+<div class="form-group">
+    <label for="inputId" class="col-sm-2 control-label">ID</label>
+    <div class="col-sm-10">
+        <input type="number" class="form-control" id="inputId" placeholder="ID" value="{{meeting.id}}" readonly="readonly">
+    </div>
+</div>
+<div class="form-group">
+    <label for="inputCreator" class="col-sm-2 control-label">Creator</label>
+    <div class="col-sm-10">
+        <input type="text" class="form-control" id="inputCreator" placeholder="Username" value="{{meeting.creator.username}}" readonly="readonly">
+    </div>
+</div>
+<div class="form-group">
+    <label class="col-sm-2 control-label" for="inputStartDate"><i class="glyphicon glyphicon-calendar"></i> Start</label>
+    <div class="col-sm-7">
+        <input type="text" class="form-control" id="inputStartDate" ng-model="startDateString" data-autoclose="1" data-date-type="string" placeholder="Start date" bs-datepicker>
+    </div>
+    <div class="col-sm-3">
+        <input type="text" class="form-control" ng-model="startTimeString" data-autoclose="1" data-time-type="string" placeholder="Start time" bs-timepicker>
+    </div>
+</div>
+<div class="form-group">
+    <label class="col-sm-2 control-label" for="inputEndDate"><i class="glyphicon glyphicon-calendar"></i> End</label>
+    <div class="col-sm-7">
+        <input type="text" class="form-control" id="inputEndDate" ng-model="endDateString" data-min-date="{{startDateString}}" data-date-type="string" data-autoclose="1" placeholder="End date" bs-datepicker>
+    </div>
+    <div class="col-sm-3">
+        <input type="text" class="form-control" ng-model="endTimeString" data-min-time="{{startTimeString}}" data-time-type="string" data-autoclose="1" placeholder="End time" bs-timepicker>
+    </div>
+</div>
+<div class="form-group">
+    <label class="col-sm-2 control-label" for="inputGrid">Grid</label>
+    <div class="col-sm-10">
+        <select id="inputGrid" class="form-control" ng-model="meeting.room.grid.id" ng-options="grid.id as grid.name for grid in grids"></select>
+    </div>
+</div>
+<div class="form-group">
+    <label class="col-sm-2 control-label" for="inputRegion">Region</label>
+    <div class="col-sm-10">
+        <select id="inputRegion" class="form-control" ng-model="meeting.room.region.uuid" ng-options="region.uuid as region.name for region in grids[selectedGridIndex()].regions"></select>
+    </div>
+</div>

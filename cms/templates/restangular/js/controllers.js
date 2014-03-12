@@ -95,7 +95,7 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
             Cache.clearCache();
             $alert({title: 'Logged Out!', content: $sce.trustAsHtml('You are now logged out'), type: 'success'});
             $scope.getUserToolbar();
-            $location.path('#/home');
+            $location.path('home');
         };
 
         $scope.getUserToolbar = function() {
@@ -318,7 +318,7 @@ angularRest.controller('gridController', ['Restangular', '$scope', '$routeParams
 );
 
 // meetingsController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Page', '$modal', '$tooltip', '$sce', 'Cache', function(RestangularCache, $scope, Page, $modal, $tooltip, $sce, Cache) {
+angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Page', '$modal', '$tooltip', '$sce', 'Cache', '$location',  function(RestangularCache, $scope, Page, $modal, $tooltip, $sce, Cache, $location) {
         var date = new Date(new Date - (1000*60*60*24*14));
         var modal;
         var meeting;
@@ -328,19 +328,12 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
         $scope.call = function(func) {
             if(func === 'hide') {
                 modal.hide();
-            } else if(func === 'save') {
-                updateMeeting();
+            } else if(func === 'edit') {
+                Cache.clearCachedUrl(meetingRequestUrl);
+                modal.hide();
+                $location.path('meeting/'+ eventId);
             }
         };
-
-        function updateMeeting() {
-            // Reformat back to the expected format for the API
-            meetingResponse.startDate = $scope.startDateString.replace(/\//g, '-') +' '+ $scope.startTimeString +':00';
-            meetingResponse.endDate   = $scope.endDateString.replace(/\//g, '-') +' '+ $scope.endTimeString +':00';
-
-            $scope.meeting.put();
-            Cache.clearCachedUrl(meetingRequestUrl);
-        }
 
         function BootstrapModalDialog(event) {
             eventId = jQuery(this).data('event-id');
@@ -356,6 +349,11 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
 
                 // Modal buttons
                 $scope.buttons          = [{
+                        text: 'Edit',
+                        func: 'edit',
+                        type: 'primary'
+                    },
+                    {
                         text: 'Ok',
                         func: 'hide',
                         type: 'default'
@@ -423,6 +421,60 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
                 jQuery(this).click(function() {
                     calendar.view(jQuery(this).data('calendar-view'));
                 });
+            });
+        });
+    }]
+);
+
+// meetingsController ----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('meetingController', ['RestangularCache', '$scope', '$routeParams', 'Page', '$modal', '$tooltip', '$sce', 'Cache', '$location',  function(RestangularCache, $scope, $routeParams, Page, $modal, $tooltip, $sce, Cache, $location) {
+        var meetingRequestUrl;
+        var gridsRequestUrl;
+        $scope.template         = false;
+        $scope.meeting          = {};
+        $scope.grids            = {};
+
+        $scope.getForm = function() {
+            return $scope.template;
+        };
+
+        /**
+         * Gives the index of the selected grid
+         *
+         * @returns {Number}
+         */
+        $scope.selectedGridIndex = function() {
+            for (var i = 0; i < $scope.grids.length; i += 1) {
+                var grid = $scope.grids[i];
+                if (grid.id === $scope.meeting.room.grid.id) {
+                    return i;
+                }
+            }
+            return false;
+        };
+
+        $scope.updateMeeting = function () {
+            // Reformat back to the expected format for the API
+            meetingResponse.startDate   = $scope.startDateString.replace(/\//g, '-') +' '+ $scope.startTimeString +':00';
+            meetingResponse.endDate     = $scope.endDateString.replace(/\//g, '-') +' '+ $scope.endTimeString +':00';
+
+            $scope.meeting.put();
+        };
+
+        RestangularCache.one('meeting', $routeParams.meetingId).get().then(function(meetingResponse) {
+            $scope.meeting          = meetingResponse;
+            $scope.startDateString  = new moment(meetingResponse.startDate).format('YYYY/MM/DD');
+            $scope.startTimeString  = new moment(meetingResponse.startDate).format('HH:mm');
+            $scope.endDateString    = new moment(meetingResponse.endDate).format('YYYY/MM/DD');
+            $scope.endTimeString    = new moment(meetingResponse.endDate).format('HH:mm');
+            // load form template
+            $scope.template         = partial_path +'/meeting/meetingForm.html';
+            meetingRequestUrl       = meetingResponse.getRequestedUrl();
+
+            // Get additional information about the Grids
+            RestangularCache.all('grids').getList().then(function(gridsResponse) {
+                gridsRequestUrl = gridsResponse.getRequestedUrl();
+                $scope.grids    = gridsResponse;
             });
         });
     }]

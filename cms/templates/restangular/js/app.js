@@ -36,6 +36,10 @@ var angularRest = angular.module('OpenSim-CMS', [
         controller: 'meetingsController',
         css: 'templates/restangular/css/bootstrap-calendar.min.css',
         requireLogin: true
+    }).when('/meeting/:meetingId', {
+        templateUrl: partial_path +'/meeting/meeting.html',
+        controller: 'meetingController',
+        requireLogin: true
     }).when('/user/:userId', {
         templateUrl: partial_path +'/user/user.html',
         controller: 'userController',
