@@ -58,7 +58,7 @@ var angularRest = angular.module('OpenSim-CMS', [
 });
 
 // Authentication check on run
-angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', function ($rootScope, Restangular, $location, $alert, $sce) {
+angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', 'Cache', function ($rootScope, Restangular, $location, $alert, $sce, Cache) {
         $rootScope.$on("$routeChangeStart", function(event, next, current) {
             if (next.requireLogin && !sessionStorage.token) {
                 $alert({title: 'Error!', content: $sce.trustAsHtml('This page requires authentication.'), type: 'danger'});
@@ -73,6 +73,7 @@ angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', fun
             // Session check? Logout if expired
             if(sessionStorage.tokenTimeOut < moment().unix()) {
                 sessionStorage.clear();
+                Cache.clearCache();
                 $alert({title: 'Session Expired!', content: $sce.trustAsHtml('You have been logged out because your session has expired'), type: 'warning'});
             }
             // Unauthorized

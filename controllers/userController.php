@@ -9,7 +9,7 @@ if(EXEC != 1) {
  * This class is the user controller
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date February 12th, 2014
  */
 class UserController {
@@ -239,6 +239,35 @@ class UserController {
     }
 
     /**
+     *
+     * @param array $parameters - Array with parameters to set permissions to
+     *              * integer auth - permission level
+     *              * integer document - permission level
+     *              * integer grid - permission level
+     *              * integer meeting - permission level
+     *              * integer meetingroom - permission level
+     *              * integer presentation - permission level
+     *              * integer user - permission level
+     * @return boolean
+     */
+    public function updateUserPermissions($parameters) {
+        $db     = \Helper::getDB();
+        $data   = array(
+            'auth'          => $db->escape($parameters['auth']),
+            'document'      => $db->escape($parameters['document']),
+            'grid'          => $db->escape($parameters['grid']),
+            'meeting'       => $db->escape($parameters['meeting']),
+            'meetingroom'   => $db->escape($parameters['meetingroom']),
+            'presentation'  => $db->escape($parameters['presentation']),
+            'user'          => $db->escape($parameters['user'])
+        );
+        $db->where('userId', $db->escape($this->user->getId()));
+        $result = $db->update('user_permissions', $data);
+
+        return $result;
+    }
+
+    /**
      * Removes this user from the CMS
      *
      * @return boolean
@@ -310,6 +339,45 @@ class UserController {
             $result = TRUE;
         }
 
+        return $result;
+    }
+
+    /**
+     * Checks to see if the list with rights is correct
+     *
+     * @param array $parameters
+     * @return boolean
+     * @throws \Exception
+     */
+    public function validatePermissions($parameters) {
+        $result = FALSE;
+        $permissions = array(
+            \Auth::NONE,
+            \Auth::READ,
+            \Auth::EXECUTE,
+            \Auth::WRITE,
+            \Auth::ALL
+        );
+
+        if(count($parameters) < 7) {
+            throw new \Exception('Expected 7 parameters, '. count($parameters) .' given', 1);
+        } elseif(!isset($parameters['auth']) || !in_array($parameters['auth'], $permissions)) {
+            throw new \Exception('Missing parameter (integer) "auth", with value in ('. implode(', ', $permissions) .')', 2);
+        } elseif(!isset($parameters['document']) || !in_array($parameters['document'], $permissions)) {
+            throw new \Exception('Missing parameter (integer) "document", with value in ('. implode(', ', $permissions) .')', 2);
+        } elseif(!isset($parameters['grid']) || !in_array($parameters['grid'], $permissions)) {
+            throw new \Exception('Missing parameter (integer) "grid", with value in ('. implode(', ', $permissions) .')', 2);
+        } elseif(!isset($parameters['meeting']) || !in_array($parameters['meeting'], $permissions)) {
+            throw new \Exception('Missing parameter (integer) "meeting", with value in ('. implode(', ', $permissions) .')', 2);
+        } elseif(!isset($parameters['meetingroom']) || !in_array($parameters['meetingroom'], $permissions)) {
+            throw new \Exception('Missing parameter (integer) "meetingroom", with value in ('. implode(', ', $permissions) .')', 2);
+        } elseif(!isset($parameters['presentation']) || !in_array($parameters['presentation'], $permissions)) {
+            throw new \Exception('Missing parameter (integer) "presentation", with value in ('. implode(', ', $permissions) .')', 2);
+        } elseif(!isset($parameters['user']) || !in_array($parameters['user'], $permissions)) {
+            throw new \Exception('Missing parameter (integer) "user", with value in ('. implode(', ', $permissions) .')', 2);
+        } else {
+            $result = TRUE;
+        }
         return $result;
     }
 

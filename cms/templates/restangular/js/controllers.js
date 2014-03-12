@@ -512,10 +512,20 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             $scope.userRequestUrl   = userResponse.getRequestedUrl();
         });
 
+        // Allow changing general user information
         $scope.allowUpdate = function() {
             if(sessionStorage.userPermission >= 6) {
                 return true;
             } else if(sessionStorage.userPermission >= 4 && $routeParams.userId == sessionStorage.id) {
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        // Allow changing user's permissions
+        $scope.allowPermissions = function() {
+            if(sessionStorage.userPermission >= 6) {
                 return true;
             } else {
                 return false;

@@ -10,7 +10,7 @@ require_once dirname(__FILE__) .'/module.php';
  * Implements the functions for users
  *
  * @author Niels Witte
- * @version 0.2
+ * @version 0.3
  * @date February 24th, 2014
  */
 class User extends Module {
@@ -75,7 +75,7 @@ class User extends Module {
     }
 
     /**
-     * Update the information on the given user
+     * Update the information on the given user and when allowed its permissions
      *
      * @param array $args
      * @return array
@@ -88,21 +88,27 @@ class User extends Module {
         }
 
         $putUserData    = \Helper::getInput(TRUE);
-
         $user           = new \Models\User($args[1]);
         $userCtrl       = new \Controllers\UserController($user);
         $data           = FALSE;
+        $permissions    = FALSE;
+
         if($userCtrl->validateParameterUpdateUser($putUserData)) {
             $data     = $userCtrl->updateUser($putUserData);
+            // Allowed to change user permissions, user permissions set and valid?
+            if(\Auth::checkRights($this->getName(), \Auth::WRITE) && isset($putUserData['permissions']) && $userCtrl->validatePermissions($putUserData['permissions'])) {
+                $permissions = $userCtrl->updateUserPermissions($putUserData['permissions']);
+            }
+
             // No changes made
-            if($data !== TRUE) {
+            if($data !== TRUE && $permissions !== TRUE) {
                 throw new \Exception("No rows updated, did you really made any changes?", 5);
             }
         }
 
         // Format the result
         $result = array(
-            'success' => ($data !== FALSE ? TRUE : FALSE)
+            'success' => ($data !== FALSE || $permissions !== FALSE ? TRUE : FALSE)
         );
 
         return $result;

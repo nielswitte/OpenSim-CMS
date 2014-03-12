@@ -38,6 +38,31 @@ The user OpenSim with user ID -1 can only accessed from the IP/Hostname which is
 to the grid list. In addition the `X-SecondLife-Shard` header needs to be set to access this user, this is
 done by default for OpenSim.
 
+### Permissions
+
+For each API there are permissions for the user account. The user requires a specific level for accessing certain
+functions. The levels are represented by integers that represent a binary permission.
+
+| Level         | Binary    | Integer |
+|---------------|-----------|---------|
+| NONE          | 000       | 0       |
+| READ          | 100       | 4       |
+| EXECUTE       | 101       | 5       |
+| WRITE         | 110       | 6       |
+| ALL           | 111       | 7       |
+
+These numbers can be used for the following parameters:
+
+| Parameter         | Type      | Description                                                   |
+|-------------------|-----------|---------------------------------------------------------------|
+| auth              | Integer   | Permission level regarding Authorization API                  |
+| document          | Integer   | Permission level regarding Documents API                      |
+| grid              | Integer   | Permission level regarding Grids API                          |
+| meeting           | Integer   | Permission level regarding Meetings API                       |
+| meetingroom       | Integer   | Permission level regarding Meeting rooms API                  |
+| presentation      | Integer   | Permission level regarding Presentations API                  |
+| user              | Integer   | Permission level regarding Users API                          |
+
 ## Users
 To get a list of 50 users, use:
 
@@ -102,6 +127,12 @@ Example of output
         "5",
         "8"
     ],
+    "permissions" : {
+        "auth": 7,
+        "document": 5,
+        "grid": 4,
+        (...)
+    },
     "avatars": {
         "1": {
             "uuid": "0a1811f4-7174-4e42-8bb5-26ef78335407",
@@ -152,6 +183,7 @@ PUT /api/user/<ID>/ HTTP/1.1
 | email             | String    | The email address for the new user                                |
 | firstName         | String    | The first name of the new user                                    |
 | lastName          | String    | The last name of the new user                                     |
+| permissions       | Array     | The permission levels for the user (see permissions)              |
 
 ### Change password
 
