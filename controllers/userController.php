@@ -196,9 +196,22 @@ class UserController {
             'password'      => $db->escape(\Helper::Hash($parameters['password']))
         );
         $userId = $db->insert('users', $data);
-        // User created successful?
+        // User creation successful?
         if($userId !== FALSE) {
             $result = $userId;
+
+            // Add default permissions
+            $permissions = array(
+                'userId'        => $db->escape($userId),
+                'auth'          => $db->escape(\Auth::READ),
+                'document'      => $db->escape(\Auth::READ),
+                'grid'          => $db->escape(\Auth::READ),
+                'meeting'       => $db->escape(\Auth::READ),
+                'meetingroom'   => $db->escape(\Auth::READ),
+                'presentation'  => $db->escape(\Auth::READ),
+                'user'          => $db->escape(\Auth::READ)
+            );
+            $db->insert('user_permissions', $permissions);
         }
         return $result;
     }
