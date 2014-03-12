@@ -100,17 +100,17 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
 
         $scope.getUserToolbar = function() {
             if(sessionStorage.token){
-                return partial_path +'/userToolbarLoggedIn.html';
+                return partial_path +'/navbar/userToolbarLoggedIn.html';
             } else {
-                return partial_path +'/userToolbarLoggedOut.html';
+                return partial_path +'/navbar/userToolbarLoggedOut.html';
             }
         };
 
         $scope.getMainNavigation = function() {
             if(sessionStorage.token){
-                return partial_path +'/mainNavigationLoggedIn.html';
+                return partial_path +'/navbar/mainNavigationLoggedIn.html';
             } else {
-                return partial_path +'/mainNavigationLoggedOut.html';
+                return partial_path +'/navbar/mainNavigationLoggedOut.html';
             }
         };
 
@@ -218,7 +218,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 
         // New document dialog creation
         $scope.newDocument = function() {
-            $scope.template         = partial_path +'/documentNewForm.html';
+            $scope.template         = partial_path +'/document/documentNewForm.html';
             $scope.document         = {};
             $scope.buttons          = [{
                         text: 'Create',
@@ -331,7 +331,7 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
             var eventId = jQuery(this).data('event-id');
             var meeting = RestangularCache.one('meeting', eventId).get().then(function(meetingResponse) {
                 $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
-                $scope.template         = partial_path +'/meetingDetails.html';
+                $scope.template         = partial_path +'/meeting/meetingDetails.html';
                 $scope.meeting          = meetingResponse;
                 $scope.startDateTime    = moment(meetingResponse.startDate).toDate();
                 $scope.endDateTime      = moment(meetingResponse.endDate).toDate();
@@ -481,7 +481,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
         // New User dialog creation
         $scope.newUser = function() {
-            $scope.template         = partial_path +'/userNewForm.html';
+            $scope.template         = partial_path +'/user/userNewForm.html';
             $scope.user             = {};
             $scope.buttons          = [{
                         text: 'Create',

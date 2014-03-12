@@ -12,19 +12,19 @@ var angularRest = angular.module('OpenSim-CMS', [
 ]).config(function($routeProvider, $locationProvider) {
     $routeProvider
     .when('/documents', {
-        templateUrl: partial_path +'/documents.html',
+        templateUrl: partial_path +'/document/documents.html',
         controller: 'documentsController',
         requireLogin: true
     }).when('/document/:documentId', {
-        templateUrl: partial_path +'/document.html',
+        templateUrl: partial_path +'/document/document.html',
         controller: 'documentController',
         requireLogin: true
     }).when('/grids', {
-        templateUrl: partial_path +'/grids.html',
+        templateUrl: partial_path +'/grid/grids.html',
         controller: 'gridsController',
         requireLogin: true
     }).when('/grid/:gridId', {
-        templateUrl: partial_path +'/grid.html',
+        templateUrl: partial_path +'/grid/grid.html',
         controller: 'gridController',
         requireLogin: true
     }).when('/login', {
@@ -32,16 +32,16 @@ var angularRest = angular.module('OpenSim-CMS', [
         controller: 'loginController',
         requireLogin: false
     }).when('/meetings', {
-        templateUrl: partial_path +'/meetingsCalendar.html',
+        templateUrl: partial_path +'/meeting/meetingsCalendar.html',
         controller: 'meetingsController',
         css: 'templates/restangular/css/bootstrap-calendar.min.css',
         requireLogin: true
     }).when('/user/:userId', {
-        templateUrl: partial_path +'/user.html',
+        templateUrl: partial_path +'/user/user.html',
         controller: 'userController',
         requireLogin: true
     }).when('/users', {
-        templateUrl: partial_path +'/users.html',
+        templateUrl: partial_path +'/user/users.html',
         controller: 'usersController',
         requireLogin: true
     }).when('/', {
