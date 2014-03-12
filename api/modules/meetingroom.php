@@ -10,7 +10,7 @@ require_once dirname(__FILE__) .'/module.php';
  * Implements the functions for rooms
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date February 26th, 2014
  */
 class MeetingRoom extends Module{
@@ -35,7 +35,7 @@ class MeetingRoom extends Module{
     public function setRoutes() {
         $this->api->addRoute("/grid\/(\d+)\/rooms\/?$/",                                    "getRoomsByGrid",       $this, "GET",  \Auth::READ);  // Get rooms for the given grid
         $this->api->addRoute("/grid\/(\d+)\/room\/(\d+)\/?$/",                              "getRoomById",          $this, "GET",  \Auth::READ);  // Get the given room on the grid
-        $this->api->addRoute("/grid\/(\d+)\/region\/([a-z0-9-]{36})\/rooms\/(\d+)\/?$/",    "getRoomsByGridRegion", $this, "GET",  \Auth::READ);  // Get the given room on the grid
+        $this->api->addRoute("/grid\/(\d+)\/region\/([a-z0-9-]{36})\/rooms\/?$/",           "getRoomsByGridRegion", $this, "GET",  \Auth::READ);  // Get the given room on the grid
     }
 
     /**
@@ -80,11 +80,18 @@ class MeetingRoom extends Module{
         return $data;
     }
 
+    /**
+     * Gets the rooms for the given grid region
+     *
+     * @param array $args
+     * @return array
+     */
     public function getRoomsByGridRegion($args) {
         $db      = \Helper::getDB();
         $db->join('grid_regions r', 'mr.regionUuid = r.uuid AND r.gridId = mr.gridId', 'LEFT');
         $db->join('grids g', 'g.id = mr.gridId', 'LEFT');
-        $db->where("mr.gridUuid", $db->escape($args[1]));
+        $db->where("mr.id", $db->escape($args[1]));
+        $db->where("mr.regionUuid", $db->escape($args[2]));
         $columns = array(
             'mr.id as roomId',
             'mr.regionUuid as regionUuid',
@@ -101,26 +108,34 @@ class MeetingRoom extends Module{
         );
         $results    = $db->get('meeting_rooms mr', NULL, $columns);
 
-        // Create the grid
-        $grid       = new \Models\Grid($results[0]['gridId'], $results[0]['gridName'], $results[0]['osProtocol'], $results[0]['osIp'], $results[0]['osPort']);
-
-        // Process results
         $data       = array();
-        foreach($results as $result) {
-            // Only set the region once, reuse it for other rooms in the same region
-            $region = $grid->getRegionByUuid($result['regionUuid']);
-            if($region == FALSE) {
-                $region = new \Models\Region($result['regionUuid'], $grid);
-                $region->setName($result['regionName']);
-                $grid->addRegion($region);
+        // Rooms found?
+        if(isset($results[0])) {
+            // Create the grid
+            $grid       = new \Models\Grid($results[0]['gridId'], $results[0]['gridName'], $results[0]['osProtocol'], $results[0]['osIp'], $results[0]['osPort']);
+
+            // Create region and add it to grid
+            $region     = new \Models\Region($args[2], $grid);
+            $region->setName($results[0]['regionName']);
+            $grid->addRegion($region);
+
+            // Process results
+            foreach($results as $result) {
+                // Only set the region once, reuse it for other rooms in the same region
+                $room       = new \Models\MeetingRoom($result['roomId'], $region, $result['description'], $result['x'], $result['y'], $result['z']);
+                $data[]     = $this->getRoomData($room, TRUE);
             }
-            $room       = new \Models\MeetingRoom($result['roomId'], $region, $result['description'], $result['x'], $result['y'], $result['z']);
-            $data[]     = $this->getRoomData($room, TRUE);
         }
 
         return $data;
     }
 
+    /**
+     * Gets the information for the given room
+     *
+     * @param array $args
+     * @return array
+     */
     public function getRoomById($args) {
         $db      = \Helper::getDB();
         $db->join('grid_regions r', 'mr.regionUuid = r.uuid AND r.gridId = mr.gridId', 'LEFT');
@@ -140,23 +155,24 @@ class MeetingRoom extends Module{
             'g.osIp as osIp',
             'g.osPort as osPort'
         );
-        $results    = $db->get('meeting_rooms mr', NULL, $columns);
-
-        // Create the grid
-        $grid       = new \Models\Grid($results[0]['gridId'], $results[0]['gridName'], $results[0]['osProtocol'], $results[0]['osIp'], $results[0]['osPort']);
-
-        // Process results
+        $results    = $db->get('meeting_rooms mr', 1, $columns);
         $data       = array();
-        foreach($results as $result) {
-            // Only set the region once, reuse it for other rooms in the same region
-            $region = $grid->getRegionByUuid($result['regionUuid']);
-            if($region == FALSE) {
-                $region = new \Models\Region($result['regionUuid'], $grid);
-                $region->setName($result['regionName']);
-                $grid->addRegion($region);
-            }
-            $room       = new \Models\MeetingRoom($result['roomId'], $region, $result['description'], $result['x'], $result['y'], $result['z']);
-            $data[]     = $this->getRoomData($room, TRUE);
+
+        // Room found?
+        if(isset($results[0])) {
+            // Create the grid
+            $grid       = new \Models\Grid($results[0]['gridId'], $results[0]['gridName'], $results[0]['osProtocol'], $results[0]['osIp'], $results[0]['osPort']);
+
+            // Create region and add it to Grid
+            $region     = new \Models\Region($results[0]['regionUuid'], $grid);
+            $region->setName($results[0]['regionName']);
+            $grid->addRegion($region);
+
+            // Create the room
+            $room       = new \Models\MeetingRoom($results[0]['roomId'], $region, $results[0]['description'], $results[0]['x'], $results[0]['y'], $results[0]['z']);
+
+            // Process results
+            $data       = $this->getRoomData($room, TRUE);
         }
 
         return $data;
