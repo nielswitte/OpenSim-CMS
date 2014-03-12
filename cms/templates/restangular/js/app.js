@@ -77,7 +77,7 @@ angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', 'Ca
                 $alert({title: 'Session Expired!', content: $sce.trustAsHtml('You have been logged out because your session has expired'), type: 'warning'});
             }
             // Unauthorized
-            if(resp.status == 401) {
+            if(resp.status === 401) {
                 $alert({title: 'Unauthorized!', content: $sce.trustAsHtml('You have insufficient privileges to access this API.'), type: 'danger'});
             // Other errors
             } else {
@@ -143,7 +143,7 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
 
         RestangularProvider.addRequestInterceptor(function(element) {
             // Show loading screen
-            if(loading == 0) {
+            if(loading === 0) {
                 jQuery('#loading').show();
             }
             loading++;
@@ -153,7 +153,7 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
         RestangularProvider.addResponseInterceptor(function(data) {
             loading--;
             // Hide loading screen when all requests are finished
-            if(loading == 0) {
+            if(loading === 0) {
                 jQuery('#loading').hide();
             }
             // Increase token validaty
@@ -188,12 +188,14 @@ angularRest.config(function($alertProvider, $tooltipProvider, $timepickerProvide
 
     angular.extend($timepickerProvider.defaults, {
         timeFormat: 'HH:mm',
-        length: 5
+        length: 5,
+        dateType: 'date'
     });
 
     angular.extend($datepickerProvider.defaults, {
-        dateFormat: 'dd/MM/yyyy',
-        startWeek: 1
+        dateFormat: 'yyyy/MM/dd',
+        startWeek: 1,
+        dateType: 'date'
     });
 });
 
@@ -208,6 +210,9 @@ angularRest.config(["$compileProvider", function($compileProvider) {
  * Lazy loading of CSS files
  *
  * @source http://stackoverflow.com/a/20404559
+ *
+ * @param $rootScope
+ * @param $compile
  */
 angularRest.directive('head', ['$rootScope','$compile',
     function($rootScope, $compile){
