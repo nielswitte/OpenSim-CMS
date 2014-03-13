@@ -86,9 +86,9 @@ if (EXEC != 1) {
         <script src="templates/restangular/js/libs/restangular.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/underscore.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/moment.min.js" type="text/javascript"></script>
-
         <script src="templates/restangular/js/libs/select2.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/less.min.js" type="text/javascript"></script>
+
         <script src="templates/restangular/js/main.js" type="text/javascript"></script>
         <script src="templates/restangular/js/app.js" type="text/javascript"></script>
         <script src="templates/restangular/js/controllers.js" type="text/javascript"></script>
