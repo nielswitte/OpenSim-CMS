@@ -433,20 +433,9 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
                 view:           'week',
                 tmpl_path:      'templates/restangular/html/calendar/',
                 first_day:      1,
-                holidays: {
-                                '01-01':     'Nieuwjaarsdag',
-                                '06-01':     'Drie koningen',
-                                'easter-2':  'Goede vrijdag',
-                                'easter':    '1e paasdag',
-                                'easter+1':  '2e paasdag',
-                                '26-04':     'Koningsdag',
-                                '05-05':     'Bevrijdingsdag',
-                                'easter+39': 'Hemelvaartsdag',
-                                'easter+49': '1e pinksterdag',
-                                'easter+50': '2e pinksterdag',
-                                '25-12':     '1e kerstdag',
-                                '26-12':     '2e kerstdag'
-                },
+                holidays:       HOLIDAYS,
+                time_start:     TIME_START,
+                time_end:       TIME_END,
                 onAfterEventsLoad: function(events) {
                     if(!events) {
                         return;
@@ -491,6 +480,7 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
 angularRest.controller('meetingController', ['RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', function(RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache) {
         var meetingRequestUrl;
         var gridsRequestUrl;
+        var calendar;
         // Initial values to prevent errors
         $scope.startDateString          = new moment().format('YYYY/MM/DD');
         $scope.startTimeString          = new moment().format('HH:mm');
@@ -504,6 +494,27 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
         $scope.rooms                    = {};
         $scope.participant              = '';
         $scope.usernameSearchResults    = {};
+
+        // Navigate the calendar to the current date
+        $scope.updateCalendar = function() {
+            var currentDate = new moment(calendar.getStartDate());
+            var newDate     = new moment($scope.startDateString, 'YYYY/MM/DD');
+            var diff        = newDate.diff(currentDate, 'days');
+            var i           = 0;
+            // Navigate the calendar until the difference is 0 or a whole year has passed
+            while(diff != 0 && i < 365) {
+                // New date is in the future
+                if(diff > 0) {
+                    diff--;
+                    calendar.navigate('next');
+                // New date is in the past
+                } else {
+                    diff++;
+                    calendar.navigate('prev');
+                }
+                i++;
+            }
+        };
 
         /**
          * Gives the index of the selected grid
@@ -646,6 +657,29 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
 
             // Remove loading screen
             jQuery('#loading').hide();
+
+            // Load meetings on same day
+            var date = new moment($scope.meeting.startDate).format('YYYY-MM-DD');
+            RestangularCache.one('meetings', date).all('calendar').getList().then(function(meetingsResponse) {
+                calendar = jQuery('#calendar').calendar({
+                    language:       'en-US',
+                    events_source:  meetingsResponse,
+                    tmpl_cache:     true,
+                    view:           'day',
+                    day:            date,
+                    time_start:     TIME_START,
+                    time_end:       TIME_END,
+                    tmpl_path:      partial_path +'/../calendar/',
+                    holidays:       HOLIDAYS,
+                    onAfterViewLoad: function(view) {
+                        jQuery('h4.calendar-date').text(this.getTitle());
+
+                        // Scroll halfway they calendar
+                        var container = jQuery('#calendar').parent('div.calendar-container');
+                        container.scrollTop(container.height() / 2);
+                    }
+                });
+            });
         });
     }]
 );
