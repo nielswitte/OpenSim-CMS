@@ -4,7 +4,10 @@ namespace API\Modules;
 if(EXEC != 1) {
 	die('Invalid request');
 }
+
 require_once dirname(__FILE__) .'/module.php';
+require_once dirname(__FILE__) .'/../../models/meeting.php';
+require_once dirname(__FILE__) .'/../../controllers/meetingController.php';
 
 /**
  * Implements the functions for meetings
@@ -37,7 +40,8 @@ class Meeting extends Module{
         $this->api->addRoute("/meetings\/([0-9]{4}-[0-9]{1,2}-[0-9]{1,2})\/calendar\/?$/",  "getMeetingsByDate",   $this, "GET",  \Auth::READ);  // Get all meetings that start after the given date
         $this->api->addRoute("/meetings\/?$/",                                              "getMeetings",         $this, "GET",  \Auth::READ);  // Get list with 50 meetings ordered by startdate DESC
         $this->api->addRoute("/meetings\/(\d+)\/?$/",                                       "getMeetings",         $this, "GET",  \Auth::READ);  // Get list with 50 meetings ordered by startdate DESC starting at the given offset
-        $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "getMeetingById",      $this, "GET",  \Auth::READ);  // Select specific meeting
+        $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "getMeetingById",      $this, "GET",  \Auth::READ);  // Select a specific meeting
+        $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "updateMeetingById",   $this, "PUT",  \Auth::EXECUTE); // Update a specific meeting
     }
 
     /**
@@ -121,6 +125,30 @@ class Meeting extends Module{
         $meeting->getParticipantsFromDatabase();
 
         return $this->getMeetingData($meeting, TRUE);
+    }
+
+    /**
+     * Updates the given meeting
+     *
+     * @param array $args
+     * @return array
+     */
+    public function updateMeetingById($args) {
+        $data           = FALSE;
+        $meeting        = new \Models\Meeting($args[1]);
+        $meetingCtrl    = new \Controllers\MeetingController($meeting);
+        $input          = \Helper::getInput(TRUE);
+        print_r($input);
+        if($meetingCtrl->validateParametersUpdate($input)) {
+            $data = TRUE;
+        }
+
+        // Format the result
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE),
+        );
+
+        return $result;
     }
 
     /**

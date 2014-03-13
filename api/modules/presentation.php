@@ -4,7 +4,12 @@ namespace API\Modules;
 if(EXEC != 1) {
 	die('Invalid request');
 }
+
 require_once dirname(__FILE__) .'/module.php';
+require_once dirname(__FILE__) .'/../../models/slide.php';
+require_once dirname(__FILE__) .'/../../controllers/slideController.php';
+require_once dirname(__FILE__) .'/../../models/presentation.php';
+require_once dirname(__FILE__) .'/../../controllers/presentationController.php';
 
 /**
  * Implements the functions for presentations

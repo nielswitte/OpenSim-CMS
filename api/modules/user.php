@@ -5,6 +5,11 @@ if(EXEC != 1) {
 	die('Invalid request');
 }
 require_once dirname(__FILE__) .'/module.php';
+require_once dirname(__FILE__) .'/../../models/avatar.php';
+require_once dirname(__FILE__) .'/../../controllers/avatarController.php';
+require_once dirname(__FILE__) .'/../../models/user.php';
+require_once dirname(__FILE__) .'/../../models/userLoggedIn.php';
+require_once dirname(__FILE__) .'/../../controllers/userController.php';
 
 /**
  * Implements the functions for users
