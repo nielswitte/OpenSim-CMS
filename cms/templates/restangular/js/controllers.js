@@ -483,9 +483,9 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
         var calendar;
         // Initial values to prevent errors
         $scope.startDateString          = new moment().format('YYYY/MM/DD');
-        $scope.startTimeString          = new moment().format('HH:mm');
+        $scope.startTimeString          = new moment().format('HH') +':00';
         $scope.endDateString            = new moment().format('YYYY/MM/DD');
-        $scope.endTimeString            = new moment().format('HH:mm');
+        $scope.endTimeString            = new moment().format('HH') +':00';
         $scope.meeting                  = {
             creator: { id: -1 },
             participants: []
@@ -693,9 +693,9 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
         // Initial values to prevent errors
         $scope.startDateString          = new moment().format('YYYY/MM/DD');
         $scope.todayDateString          = new moment().format('YYYY/MM/DD');
-        $scope.startTimeString          = new moment().format('HH:mm');
+        $scope.startTimeString          = new moment().format('HH') +':00';
         $scope.endDateString            = new moment().format('YYYY/MM/DD');
-        $scope.endTimeString            = new moment().format('HH:mm');
+        $scope.endTimeString            = new moment().format('HH') +':00';
         $scope.meeting                  = {
             room: {
                 grid: { }
@@ -752,10 +752,6 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
 
         // Parse dates to working Angular-Strap date strings (somehow Date-objects do not work with min/max date/time)
         function setDateTimes() {
-            $scope.startDateString  = new moment($scope.meeting.startDate).format('YYYY/MM/DD');
-            $scope.startTimeString  = new moment($scope.meeting.startDate).format('HH:mm');
-            $scope.endDateString    = new moment($scope.meeting.endDate).format('YYYY/MM/DD');
-            $scope.endTimeString    = new moment($scope.meeting.endDate).format('HH:mm');
             // Manually update input since angular-strap does not do this...
             jQuery('#inputStartDate').val($scope.startDateString);
             jQuery('#inputStartTime').val($scope.startTimeString);
