@@ -533,7 +533,13 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
             $scope.meeting.startDate   = $scope.startDateString.replace(/\//g, '-') +' '+ $scope.startTimeString +':00';
             $scope.meeting.endDate     = $scope.endDateString.replace(/\//g, '-') +' '+ $scope.endTimeString +':00';
 
-            $scope.meeting.put();
+            $scope.meeting.put().then(function(resp) {
+                if(!resp.success) {
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                } else {
+                    $alert({title: 'Meeting updated!', content: $sce.trustAsHtml('The meeting has been updated.'), type: 'success'});
+                }
+            });
         };
 
         // Restore the meeting to the original values
@@ -548,6 +554,11 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
             $scope.startTimeString  = new moment($scope.meeting.startDate).format('HH:mm');
             $scope.endDateString    = new moment($scope.meeting.endDate).format('YYYY/MM/DD');
             $scope.endTimeString    = new moment($scope.meeting.endDate).format('HH:mm');
+            // Manually update input since angular-strap does not do this...
+            jQuery('#inputStartDate').val($scope.startDateString);
+            jQuery('#inputStartTime').val($scope.startTimeString);
+            jQuery('#inputEndDate').val($scope.dndDateString);
+            jQuery('#inputEndTime').val($scope.endTimeString);
         }
 
         // Does the user have permission to edit this meeting?
