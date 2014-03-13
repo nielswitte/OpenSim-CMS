@@ -139,7 +139,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
         $scope.orderByField         = 'title';
         $scope.reverseSort          = false;
         var requestDocumentsUrl     = '';
-        $scope.documentsList        = {};
+        $scope.documentsList        = [];
 
         // Show loading screen
         jQuery('#loading').show();
@@ -486,14 +486,15 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
         $scope.startTimeString          = new moment().format('HH:mm');
         $scope.endDateString            = new moment().format('YYYY/MM/DD');
         $scope.endTimeString            = new moment().format('HH:mm');
-        $scope.meeting                  = {};
+        $scope.meeting                  = {
+            creator: { id: -1 },
+            participants: []
+        };
         var meetingOld                  = {};
-        $scope.meeting.creator          = {};
-        $scope.meeting.creator.id       = -1;
-        $scope.grids                    = {};
-        $scope.rooms                    = {};
+        $scope.grids                    = [];
+        $scope.rooms                    = [];
         $scope.participant              = '';
-        $scope.usernameSearchResults    = {};
+        $scope.usernameSearchResults    = [];
 
         // Navigate the calendar to the current date
         $scope.updateCalendar = function() {
@@ -684,12 +685,202 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
     }]
 );
 
+// meetingNewController ----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, Page, $alert, $sce, Cache) {
+        Page.setTitle('Schedule meeting');
+        var gridsRequestUrl;
+        var calendar;
+        // Initial values to prevent errors
+        $scope.startDateString          = new moment().format('YYYY/MM/DD');
+        $scope.todayDateString          = new moment().format('YYYY/MM/DD');
+        $scope.startTimeString          = new moment().format('HH:mm');
+        $scope.endDateString            = new moment().format('YYYY/MM/DD');
+        $scope.endTimeString            = new moment().format('HH:mm');
+        $scope.meeting                  = {
+            room: {
+                grid: { }
+            },
+            participants: []
+        };
+        $scope.grids                    = [];
+        $scope.rooms                    = [];
+        $scope.participant              = '';
+        $scope.usernameSearchResults    = [];
+
+        // Navigate the calendar to the current date
+        $scope.updateCalendar = function() {
+            var currentDate = new moment(calendar.getStartDate());
+            var newDate     = new moment($scope.startDateString, 'YYYY/MM/DD');
+            var diff        = newDate.diff(currentDate, 'days');
+            var i           = 0;
+            // Navigate the calendar until the difference is 0 or a whole year has passed
+            while(diff != 0 && i < 365) {
+                // New date is in the future
+                if(diff > 0) {
+                    diff--;
+                    calendar.navigate('next');
+                // New date is in the past
+                } else {
+                    diff++;
+                    calendar.navigate('prev');
+                }
+                i++;
+            }
+        };
+
+        /**
+         * Gives the index of the selected grid
+         *
+         * @returns {Number}
+         */
+        $scope.selectedGridIndex = function() {
+            for (var i = 0; i < $scope.grids.length; i += 1) {
+                var grid = $scope.grids[i];
+                if (grid.id == $scope.meeting.room.grid.id) {
+                    return i;
+                }
+            }
+            return false;
+        };
+
+        // Get meeting rooms for selected region
+        $scope.getMeetingRooms = function() {
+            RestangularCache.one('grid', $scope.meeting.room.grid.id).one('region', $scope.meeting.room.region.uuid).all('rooms').getList().then(function(roomsResponse){
+                $scope.rooms = roomsResponse;
+            });
+        };
+
+        // Parse dates to working Angular-Strap date strings (somehow Date-objects do not work with min/max date/time)
+        function setDateTimes() {
+            $scope.startDateString  = new moment($scope.meeting.startDate).format('YYYY/MM/DD');
+            $scope.startTimeString  = new moment($scope.meeting.startDate).format('HH:mm');
+            $scope.endDateString    = new moment($scope.meeting.endDate).format('YYYY/MM/DD');
+            $scope.endTimeString    = new moment($scope.meeting.endDate).format('HH:mm');
+            // Manually update input since angular-strap does not do this...
+            jQuery('#inputStartDate').val($scope.startDateString);
+            jQuery('#inputStartTime').val($scope.startTimeString);
+            jQuery('#inputEndDate').val($scope.endDateString);
+            jQuery('#inputEndTime').val($scope.endTimeString);
+        }
+
+        // Does the user have permission to edit this meeting?
+        $scope.allowCreate = function() {
+            if(sessionStorage.meetingPermission >= EXECUTE) {
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        // Search for the given username
+        $scope.getUserByUsername = function($viewValue) {
+            if($viewValue != null && $viewValue.length >= 3) {
+                var results = RestangularCache.one('users', $viewValue).get().then(function(usersResponse) {
+                    $scope.usernameSearchResults = usersResponse;
+                    return usersResponse;
+                });
+            } else {
+                var results = '';
+            }
+            return results;
+        };
+
+        // Adds the currently selected participant to the list
+        $scope.addParticipant = function() {
+            for(var i = 0; i < $scope.usernameSearchResults.length; i++) {
+                // Only add user when match found and not already listed
+                if($scope.usernameSearchResults[i].username == $scope.participant) {
+                    if(!isDuplicateParticipant()) {
+                        $scope.meeting.participants.push($scope.usernameSearchResults[i]);
+                    } else {
+                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The user '+ $scope.usernameSearchResults[i].username + ' is already a participant for this meeting'), type: 'warning'});
+                    }
+                }
+            }
+        };
+
+        // Checks for duplicate participants
+        function isDuplicateParticipant() {
+            for(var i = 0; i < $scope.meeting.participants.length; i++) {
+                if($scope.meeting.participants[i].username == $scope.participant) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Removes the user with the given ID from the list
+        $scope.removeParticipant = function(id) {
+            for(var i = 0; i < $scope.meeting.participants.length; i++) {
+                if($scope.meeting.participants[i].id == id) {
+                    $scope.meeting.participants.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Creates the meeting by sending it to the server
+        $scope.createMeeting = function() {
+            // Reformat back to the expected format for the API
+            $scope.meeting.startDate   = $scope.startDateString.replace(/\//g, '-') +' '+ $scope.startTimeString +':00';
+            $scope.meeting.endDate     = $scope.endDateString.replace(/\//g, '-') +' '+ $scope.endTimeString +':00';
+
+            Restangular.all('meeting').post($scope.meeting).then(function(resp) {
+                if(!resp.success) {
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                } else {
+                    $alert({title: 'User created!', content: $sce.trustAsHtml('The meeting for '+ $scope.meeting.startDate +' has been created with ID: '+ resp.meetingId +'.'), type: 'success'});
+                    Cache.clearCache();
+                }
+            });
+        };
+
+        // Show loading screen
+        jQuery('#loading').show();
+
+        // Load meetings on same day
+        var date = new moment($scope.meeting.startDate).format('YYYY-MM-DD');
+        RestangularCache.one('meetings', date).all('calendar').getList().then(function(meetingsResponse) {
+            calendar = jQuery('#calendar').calendar({
+                language:       'en-US',
+                events_source:  meetingsResponse,
+                tmpl_cache:     true,
+                view:           'day',
+                day:            date,
+                time_start:     TIME_START,
+                time_end:       TIME_END,
+                tmpl_path:      partial_path +'/../calendar/',
+                holidays:       HOLIDAYS,
+                onAfterViewLoad: function(view) {
+                    jQuery('h4.calendar-date').text(this.getTitle());
+
+                    // Scroll halfway they calendar
+                    var container = jQuery('#calendar').parent('div.calendar-container');
+                    container.scrollTop(container.height() / 2);
+                }
+            });
+            // Remove loading screen
+            jQuery('#loading').hide();
+        });
+
+        // Set the dates and times
+        setDateTimes();
+
+        // Get additional information about the Grids
+        RestangularCache.all('grids').getList().then(function(gridsResponse) {
+            gridsRequestUrl = gridsResponse.getRequestedUrl();
+            $scope.grids    = gridsResponse;
+        });
+    }]
+);
+
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', '$sce', 'Cache', '$route', function(RestangularCache, Restangular, $scope, Page, $modal, $alert, $sce, Cache, $route) {
         $scope.orderByField     = 'username';
         $scope.reverseSort      = false;
         var requestUsersUrl     = '';
-        $scope.usersList        = {};
+        $scope.usersList        = [];
 
         // Remove loading screen
         jQuery('#loading').show();
