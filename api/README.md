@@ -385,7 +385,6 @@ DELETE /api/documents/cache/ HTTP/1.1
 GET /api/document/<DOCUMENT-ID>/ HTTP/1.1
 ```
 
-```
 ### Add a new document
 
 ```http
