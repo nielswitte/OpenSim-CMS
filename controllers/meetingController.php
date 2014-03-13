@@ -25,6 +25,54 @@ class MeetingController {
     }
 
     /**
+     * Creates a new meeting
+     *
+     * @param array $parameters
+     *              * string startDate - YYYY-MM-DD HH:mm:ss
+     *              * string endDate - YYYY-MM-DD HH:mm:ss
+     *              * integer or array room - Room ID or array which contains id => roomId
+     *              * array participants - An array with User IDs or with users which contain id => userId
+     * @return integer - meetingId or boolean FALSE on failure
+     * @throws \Exception
+     */
+    public function createMeeting($parameters) {
+        $db = \Helper::getDB();
+
+        // Room is a number or an object?
+        if(is_numeric($parameters['room'])) {
+            $room = $parameters['room'];
+        } else {
+            $room = $parameters['room']['id'];
+        }
+
+        // Update the meeting itself
+        $data = array(
+            'userId'    => \Auth::getUser()->getId(),
+            'startDate' => $db->escape($parameters['startDate']),
+            'endDate'   => $db->escape($parameters['endDate']),
+            'roomId'    => $db->escape($room)
+        );
+        $meetingId = $db->insert('meetings', $data);
+
+        // Create a new meeting object for this meeting
+        $this->meeting = new \Models\Meeting($meetingId);
+
+        // Participants are a array of ids or an array of users?
+        if(isset($parameters['participants'][0]) && is_numeric($parameters['participants'][0])) {
+            $participants = $parameters['participants'];
+        } else {
+            $participants = array();
+            foreach($parameters['participants'] as $participant) {
+                $participants[] = $participant['id'];
+            }
+        }
+
+        $this->setParticipants($participants);
+
+        return $meetingId;
+    }
+
+    /**
      * Updates this meeting
      *
      * @param array $parameters
@@ -49,7 +97,7 @@ class MeetingController {
         $data = array(
             'startDate' => $db->escape($parameters['startDate']),
             'endDate'   => $db->escape($parameters['endDate']),
-            'roomId'      => $db->escape($room)
+            'roomId'    => $db->escape($room)
         );
         $db->where('id', $db->escape($this->meeting->getId()));
         $update = $db->update('meetings', $data);
@@ -107,6 +155,18 @@ class MeetingController {
     }
 
     /**
+     * Validates the parameters for creating a meeting
+     *
+     * @param array $parameters
+     * @return boolean
+     * @throws \Exception
+     */
+    public function validateParametersCreate($parameters) {
+        $result = $this->validateParametersUpdate($parameters);
+        return $result;
+    }
+
+    /**
      * Validates the parameters for updating a meeting
      *
      * @param array $parameters
@@ -115,11 +175,13 @@ class MeetingController {
      */
     public function validateParametersUpdate($parameters) {
         $result = FALSE;
+
+        // @todo prevent overlapping meetings in same room
         if(count($parameters) < 4) {
-            throw new \Exception('Expected atleast 5 parameters, '. count($parameters) .' given', 1);
+            throw new \Exception('Expected atleast 4 parameters, '. count($parameters) .' given', 1);
         } elseif(!isset($parameters['startDate']) || !preg_match("/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/", $parameters['startDate'])) {
             throw new \Exception('Missing parameter (string) "startDate", which should be in the format YYYY-MM-DD HH:mm:ss', 2);
-        } elseif(!isset($parameters['endDate']) || !preg_match("/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/", $parameters['endDate']) || strtotime($parameters['endDate']) <  strtotime($parameters['startDate'])) {
+        } elseif(!isset($parameters['endDate']) || !preg_match("/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/", $parameters['endDate']) || strtotime($parameters['endDate']) <=  strtotime($parameters['startDate'])) {
             throw new \Exception('Missing parameter (string) "endDate", which should be in the format YYYY-MM-DD HH:mm:ss and past "startDate"', 3);
         } elseif(!isset($parameters['room']) || (!isset($parameters['room']['id']) && !is_numeric($parameters['room']))) {
             throw new \Exception('Missing parameter (integer or array) "room", which should be roomId or a room array which contains an roomId ', 4);
