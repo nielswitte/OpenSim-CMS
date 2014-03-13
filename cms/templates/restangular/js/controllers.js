@@ -184,7 +184,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 
         // Show delete button only when allowed to delete
         $scope.allowDelete = function(ownerId) {
-            if(ownerId === sessionStorage.id && sessionStorage.documentPermission >= EXECUTE) {
+            if(ownerId == sessionStorage.id && sessionStorage.documentPermission >= EXECUTE) {
                 return true;
             } else if(sessionStorage.documentPermission >= WRITE) {
                 return true;
@@ -209,9 +209,9 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 
         // Dialog function handler
         $scope.call = function(func) {
-            if(func === 'hide') {
+            if(func == 'hide') {
                 modal.hide();
-            } else if(func === 'createDocument') {
+            } else if(func == 'createDocument') {
                 saveDocument();
             }
         };
@@ -266,7 +266,7 @@ angularRest.controller('documentController', ['Restangular', '$scope', '$routePa
                 },
                 initSelection: function(element, callback) {
                     var id = jQuery(element).val();
-                    if (id !== '') {
+                    if (id != '') {
                         jQuery.ajax(base_url +'/api/user/'+ id +'/?token='+ sessionStorage.token, {
                             dataType: 'json'
                         }).done(function(data) {
@@ -329,9 +329,9 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
         var meetingRequestUrl;
 
         $scope.call = function(func) {
-            if(func === 'hide') {
+            if(func == 'hide') {
                 modal.hide();
-            } else if(func === 'edit') {
+            } else if(func == 'edit') {
                 Cache.clearCachedUrl(meetingRequestUrl);
                 modal.hide();
                 $location.path('meeting/'+ eventId);
@@ -435,15 +435,16 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
 angularRest.controller('meetingController', ['RestangularCache', '$scope', '$routeParams', 'Page', '$modal', '$tooltip', '$sce', 'Cache', '$location',  function(RestangularCache, $scope, $routeParams, Page, $modal, $tooltip, $sce, Cache, $location) {
         var meetingRequestUrl;
         var gridsRequestUrl;
-        $scope.template         = false;
-        $scope.meeting          = {};
-        $scope.grids            = {};
-        $scope.rooms            = {};
-
-        // Return the partial template for the form (when it is set, after loading meeting data)
-        $scope.getForm = function() {
-            return $scope.template;
-        };
+        // Initial values to prevent errors
+        $scope.startDateString      = new moment().format('YYYY/MM/DD');
+        $scope.startTimeString      = new moment().format('HH:mm');
+        $scope.endDateString        = new moment().format('YYYY/MM/DD');
+        $scope.endTimeString        = new moment().format('HH:mm');
+        $scope.meeting              = {};
+        $scope.meeting.creator      = {};
+        $scope.meeting.creator.id   = -1;
+        $scope.grids                = {};
+        $scope.rooms                = {};
 
         /**
          * Gives the index of the selected grid
@@ -453,7 +454,7 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
         $scope.selectedGridIndex = function() {
             for (var i = 0; i < $scope.grids.length; i += 1) {
                 var grid = $scope.grids[i];
-                if (grid.id === $scope.meeting.room.grid.id) {
+                if (grid.id == $scope.meeting.room.grid.id) {
                     return i;
                 }
             }
@@ -476,22 +477,33 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
             $scope.meeting.put();
         };
 
+        // Does the user have permission to edit this meeting?
+        $scope.allowUpdate = function() {
+            if(sessionStorage.meetingPermission >= EXECUTE && $scope.meeting.creator.id == sessionStorage.id) {
+                console.log('ja');
+                return true;
+            } else if(sessionStorage.meetingPermission >= WRITE) {
+                console.log('ja!');
+                return true;
+            } else {
+                console.log('NEE');
+                return false;
+            }
+        };
+
         // Get the selected meeting
         RestangularCache.one('meeting', $routeParams.meetingId).get().then(function(meetingResponse) {
             $scope.meeting          = meetingResponse;
             // Page and content titles
             $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
             Page.setTitle('Meeting '+ meetingResponse.id);
+            meetingRequestUrl       = meetingResponse.getRequestedUrl();
 
             // Parse dates to working Angular-Strap date strings (somehow Date-objects do not work with min/max date/time)
             $scope.startDateString  = new moment(meetingResponse.startDate).format('YYYY/MM/DD');
             $scope.startTimeString  = new moment(meetingResponse.startDate).format('HH:mm');
             $scope.endDateString    = new moment(meetingResponse.endDate).format('YYYY/MM/DD');
             $scope.endTimeString    = new moment(meetingResponse.endDate).format('HH:mm');
-
-            // load form template
-            $scope.template         = partial_path +'/meeting/meetingForm.html';
-            meetingRequestUrl       = meetingResponse.getRequestedUrl();
 
             // Get additional information about the Grids
             RestangularCache.all('grids').getList().then(function(gridsResponse) {
@@ -542,7 +554,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
         // Show delete button only when allowed to delete
         $scope.allowDelete = function(userId) {
-            if(userId !== sessionStorage.id && userId !== 0 && sessionStorage.userPermission >= WRITE) {
+            if(userId != sessionStorage.id && userId != 0 && sessionStorage.userPermission >= WRITE) {
                 return true;
             } else {
                 return false;
@@ -569,7 +581,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
         // Compare passwords
         $scope.passwordDoNotMatch = function() {
-            if($scope.user.password !== $scope.user.password2) {
+            if($scope.user.password != $scope.user.password2) {
                 jQuery('#inputPassword, #inputPassword2').parents('div.form-group').addClass('has-error');
             } else {
                 jQuery('#inputPassword, #inputPassword2').parents('div.form-group').removeClass('has-error');
@@ -578,9 +590,9 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
         // Dialog function handler
         $scope.call = function(func) {
-            if(func === 'hide') {
+            if(func == 'hide') {
                 modal.hide();
-            } else if(func === 'createUser') {
+            } else if(func == 'createUser') {
                 $scope.saveUser();
             }
         };
@@ -625,7 +637,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
         $scope.allowUpdate = function() {
             if(sessionStorage.userPermission >= WRITE) {
                 return true;
-            } else if(sessionStorage.userPermission >= 4 && $routeParams.userId === sessionStorage.id) {
+            } else if(sessionStorage.userPermission >= 4 && $routeParams.userId == sessionStorage.id) {
                 return true;
             } else {
                 return false;
@@ -658,7 +670,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
         };
 
         $scope.isConfirmed = function(index) {
-            return $scope.user.avatars[index].confirmed === 1 ? true : false;
+            return $scope.user.avatars[index].confirmed == 1 ? true : false;
         };
 
         $scope.confirmAvatar = function(index, avatar) {
