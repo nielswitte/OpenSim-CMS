@@ -35,9 +35,9 @@ class Document extends Module{
     public function setRoutes() {
         $this->api->addRoute("/documents\/?$/",                "getDocuments",         $this, "GET",    \Auth::READ);    // Get list with 50 documents
         $this->api->addRoute("/documents\/(\d+)\/?$/",         "getDocuments",         $this, "GET",    \Auth::READ);    // Get list with 50 documents starting at the given offset
-        $this->api->addRoute("/document\/?$/",                 "createDocument",       $this, "POST",   \Auth::WRITE);   // Create a document
+        $this->api->addRoute("/document\/?$/",                 "createDocument",       $this, "POST",   \Auth::EXECUTE); // Create a document
         $this->api->addRoute("/document\/(\d+)\/?$/",          "getDocumentById",      $this, "GET",    \Auth::READ);    // Select specific document
-        $this->api->addRoute("/document\/(\d+)\/?$/",          "deleteDocumentById",   $this, "DELETE", \Auth::WRITE);   // Delete specific document
+        $this->api->addRoute("/document\/(\d+)\/?$/",          "deleteDocumentById",   $this, "DELETE", \Auth::EXECUTE); // Delete specific document
         $this->api->addRoute("/documents\/cache\/?$/",         "deleteExpiredCache",   $this, "DELETE", \Auth::EXECUTE); // Removes all expired cached assets
     }
 

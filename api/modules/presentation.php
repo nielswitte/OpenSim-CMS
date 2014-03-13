@@ -35,7 +35,7 @@ class Presentation extends Module{
     public function setRoutes() {
         $this->api->addRoute("/presentations\/?$/",                                     "getPresentations",         $this, "GET",  \Auth::READ);  // Get list with 50 presentations
         $this->api->addRoute("/presentations\/(\d+)\/?$/",                              "getPresentations",         $this, "GET",  \Auth::READ);  // Get list with 50 presentations starting at the given offset
-        $this->api->addRoute("/presentation\/?$/",                                      "createPresentation",       $this, "POST", \Auth::WRITE); // Create a presentation
+        $this->api->addRoute("/presentation\/?$/",                                      "createPresentation",       $this, "POST", \Auth::EXECUTE); // Create a presentation
         $this->api->addRoute("/presentation\/(\d+)\/?$/",                               "getPresentationById",      $this, "GET",  \Auth::READ);  // Select specific presentation
         $this->api->addRoute("/presentation\/(\d+)\/slide\/(\d+)\/?$/",                 "getSlideById",             $this, "GET",  \Auth::READ);  // Get slide from presentation
         $this->api->addRoute("/presentation\/(\d+)\/slide\/number\/(\d+)\/?$/",         "getSlideByNumber",         $this, "GET",  \Auth::READ);  // Get slide from presentation
