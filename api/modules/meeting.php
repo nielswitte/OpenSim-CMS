@@ -13,7 +13,7 @@ require_once dirname(__FILE__) .'/../../controllers/meetingController.php';
  * Implements the functions for meetings
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date February 25th, 2014
  */
 class Meeting extends Module{
@@ -138,9 +138,9 @@ class Meeting extends Module{
         $meeting        = new \Models\Meeting($args[1]);
         $meetingCtrl    = new \Controllers\MeetingController($meeting);
         $input          = \Helper::getInput(TRUE);
-        print_r($input);
+
         if($meetingCtrl->validateParametersUpdate($input)) {
-            $data = TRUE;
+            $data = $meetingCtrl->updateMeeting($input);
         }
 
         // Format the result
