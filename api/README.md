@@ -337,7 +337,6 @@ GET /api/meetings/<YYYY-MM-DD>/ HTTP/1.1
 ```http
 GET /api/meetings/<YYYY-MM-DD>/calendar/ HTTP/1.1
 ```
-### Specific meeting
 
 ```http
 GET /api/meeting/<MEETING-ID>/ HTTP/1.1
