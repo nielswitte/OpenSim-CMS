@@ -568,7 +568,7 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
             // Manually update input since angular-strap does not do this...
             jQuery('#inputStartDate').val($scope.startDateString);
             jQuery('#inputStartTime').val($scope.startTimeString);
-            jQuery('#inputEndDate').val($scope.dndDateString);
+            jQuery('#inputEndDate').val($scope.endDateString);
             jQuery('#inputEndTime').val($scope.endTimeString);
         }
 
