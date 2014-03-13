@@ -179,14 +179,14 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
         };
 
         $scope.allowCreate = function() {
-             return sessionStorage.documentPermission >= 6;
+             return sessionStorage.documentPermission >= EXECUTE;
         };
 
         // Show delete button only when allowed to delete
         $scope.allowDelete = function(ownerId) {
-            if(ownerId === sessionStorage.id) {
+            if(ownerId === sessionStorage.id && sessionStorage.documentPermission >= EXECUTE) {
                 return true;
-            } else if(sessionStorage.documentPermission >= 6) {
+            } else if(sessionStorage.documentPermission >= WRITE) {
                 return true;
             } else {
                 return false;
@@ -542,7 +542,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
         // Show delete button only when allowed to delete
         $scope.allowDelete = function(userId) {
-            if(userId !== sessionStorage.id && userId !== 0 && sessionStorage.userPermission >= 6) {
+            if(userId !== sessionStorage.id && userId !== 0 && sessionStorage.userPermission >= WRITE) {
                 return true;
             } else {
                 return false;
@@ -550,7 +550,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
          };
 
          $scope.allowCreate = function() {
-             return sessionStorage.userPermission >= 6;
+             return sessionStorage.userPermission >= WRITE;
          };
 
         // Remove a user
@@ -623,7 +623,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
 
         // Allow changing general user information
         $scope.allowUpdate = function() {
-            if(sessionStorage.userPermission >= 6) {
+            if(sessionStorage.userPermission >= WRITE) {
                 return true;
             } else if(sessionStorage.userPermission >= 4 && $routeParams.userId === sessionStorage.id) {
                 return true;
@@ -634,7 +634,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
 
         // Allow changing user's permissions
         $scope.allowPermissions = function() {
-            if(sessionStorage.userPermission >= 6) {
+            if(sessionStorage.userPermission >= WRITE) {
                 return true;
             } else {
                 return false;
