@@ -40,6 +40,7 @@ class Meeting extends Module{
         $this->api->addRoute("/meetings\/([0-9]{4}-[0-9]{1,2}-[0-9]{1,2})\/calendar\/?$/",  "getMeetingsByDate",   $this, "GET",  \Auth::READ);  // Get all meetings that start after the given date
         $this->api->addRoute("/meetings\/?$/",                                              "getMeetings",         $this, "GET",  \Auth::READ);  // Get list with 50 meetings ordered by startdate DESC
         $this->api->addRoute("/meetings\/(\d+)\/?$/",                                       "getMeetings",         $this, "GET",  \Auth::READ);  // Get list with 50 meetings ordered by startdate DESC starting at the given offset
+        $this->api->addRoute("/meeting\/?$/",                                               "createMeeting",       $this, "POST", \AUTH::EXECUTE); //Create a new meeting
         $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "getMeetingById",      $this, "GET",  \Auth::READ);  // Select a specific meeting
         $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "updateMeetingById",   $this, "PUT",  \Auth::EXECUTE); // Update a specific meeting
     }
@@ -125,6 +126,30 @@ class Meeting extends Module{
         $meeting->getParticipantsFromDatabase();
 
         return $this->getMeetingData($meeting, TRUE);
+    }
+
+    /**
+     * Creates a new meeting
+     *
+     * @param array $args
+     * @return array
+     */
+    public function createMeeting($args) {
+        $data           = FALSE;
+        $meetingCtrl    = new \Controllers\MeetingController();
+        $input          = \Helper::getInput(TRUE);
+
+        if($meetingCtrl->validateParametersCreate($input)) {
+            $data = $meetingCtrl->createMeeting($input);
+        }
+
+        // Format the result
+        $result = array(
+            'success'   => ($data !== FALSE ? TRUE : FALSE),
+            'meetingId' => ($data !== FALSE ? $data : 0)
+        );
+
+        return $result;
     }
 
     /**
