@@ -686,7 +686,7 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
 );
 
 // meetingNewController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, Page, $alert, $sce, Cache) {
+angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$location', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, Page, $location, $alert, $sce, Cache) {
         Page.setTitle('Schedule meeting');
         var gridsRequestUrl;
         var calendar;
@@ -828,6 +828,7 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
                 } else {
                     $alert({title: 'User created!', content: $sce.trustAsHtml('The meeting for '+ $scope.meeting.startDate +' has been created with ID: '+ resp.meetingId +'.'), type: 'success'});
                     Cache.clearCache();
+                    $location.path('meetings');
                 }
             });
         };
