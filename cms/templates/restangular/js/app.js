@@ -81,7 +81,7 @@ angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', 'Ca
                 $alert({title: 'Session Expired!', content: $sce.trustAsHtml('You have been logged out because your session has expired'), type: 'warning'});
             }
             // Unauthorized
-            if(resp.status === 401) {
+            if(resp.status == 401) {
                 $alert({title: 'Unauthorized!', content: $sce.trustAsHtml('You have insufficient privileges to access this API.'), type: 'danger'});
             // Other errors
             } else {
@@ -128,7 +128,6 @@ angularRest.factory('Page', function() {
 // Restangular settings
 angularRest.config(['RestangularProvider', function(RestangularProvider) {
         RestangularProvider.setBaseUrl('' + server_address + base_url + '/api');
-        //RestangularProvider.setDefaultHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
         RestangularProvider.setDefaultHttpFields({cache: false});
 
         // Add token to request when available (this line is required for page refreshes to keep the token)
@@ -141,25 +140,9 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
             if(sessionStorage.tokenTimeOut < moment().unix()) {
                 sessionStorage.clear();
             }
-
-            jQuery('#loading').hide();
-        });
-
-        RestangularProvider.addRequestInterceptor(function(element) {
-            // Show loading screen
-            if(loading === 0) {
-                jQuery('#loading').show();
-            }
-            loading++;
-            return element;
         });
 
         RestangularProvider.addResponseInterceptor(function(data) {
-            loading--;
-            // Hide loading screen when all requests are finished
-            if(loading === 0) {
-                jQuery('#loading').hide();
-            }
             // Increase token validaty
             sessionStorage.tokenTimeOut = moment().add(30, 'minutes').unix();
 
@@ -175,9 +158,8 @@ angularRest.factory('RestangularCache', function(Restangular) {
     });
 });
 
-
 // AngularStrap configuration
-angularRest.config(function($alertProvider, $tooltipProvider, $timepickerProvider, $datepickerProvider) {
+angularRest.config(function($alertProvider, $tooltipProvider, $timepickerProvider, $datepickerProvider, $typeaheadProvider) {
     angular.extend($alertProvider.defaults, {
         animation: 'am-fade-and-slide-top',
         placement: 'top-right',
@@ -200,6 +182,13 @@ angularRest.config(function($alertProvider, $tooltipProvider, $timepickerProvide
         dateFormat: 'yyyy/MM/dd',
         startWeek: 1,
         dateType: 'date'
+    });
+
+    angular.extend($typeaheadProvider.defaults, {
+        minLength: 3,
+        limit: 8,
+        animation: 'am-flip-x',
+        delay: { show: 500, hide: 100 }
     });
 });
 

@@ -1,4 +1,17 @@
 <div class="page-header">
     <h1>Meeting <small>Schedule a new meeting</small></h1>
 </div>
-<form class="form-horizontal" role="form" id="meetingForm" ng-include src="template" ng-submit="createMeeting()"></form>
+<form class="form-horizontal" role="form" id="meetingForm" ng-submit="createMeeting()">
+
+
+
+
+
+    
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10" ng-show="allowCreate()">
+            <button class="btn btn-primary" type="submit"><i class="glyphicon glyphicon-ok"></i> Save Changes</button>
+            <button class="btn btn-danger" type="button" ng-click="resetUser()"><i class="glyphicon glyphicon-remove"></i> Reset</button>
+        </div>
+    </div>
+</form>

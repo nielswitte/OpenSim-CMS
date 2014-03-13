@@ -31,6 +31,9 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
 
         // Handle forum submit
         $scope.login = function(user) {
+            // Show loading screen
+            jQuery('#loading').show();
+
             // Fix for autocomplete
             if(!user) {
                 user = { username: jQuery('#LoginUsername').val(), password: jQuery('#LoginPassword').val() };
@@ -64,6 +67,8 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
 
                         // Token is valid for half an hour
                         sessionStorage.tokenTimeOut = moment().add(30, 'minutes').unix();
+
+                        // Feedback to user
                         $alert({title: 'Logged In!', content: $sce.trustAsHtml('You are now logged in as '+ userResponse.username), type: 'success'});
                         // Remove all cached items (if any)
                         Cache.clearCache();
@@ -75,6 +80,8 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
                     sessionStorage.clear();
                     $alert({title: 'Error!', content: $sce.trustAsHtml(authResponse.error +'.'), type: 'danger'});
                 }
+                // Remove loading screen
+                jQuery('#loading').hide();
             });
         };
     }]
@@ -134,10 +141,16 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
         var requestDocumentsUrl     = '';
         $scope.documentsList        = {};
 
+        // Show loading screen
+        jQuery('#loading').show();
+
         RestangularCache.all('documents').getList().then(function(documentsResponse) {
             $scope.documentsList = documentsResponse;
             Page.setTitle('Documents');
             requestDocumentsUrl = documentsResponse.getRequestedUrl();
+
+            // Remove loading screen
+            jQuery('#loading').hide();
         });
 
         $scope.collapseFilter = true;
@@ -160,6 +173,9 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
         });
 
         function saveDocument() {
+            // Show loading screen
+            jQuery('#loading').show();
+
             Restangular.all('document').post($scope.document).then(function(resp) {
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
@@ -174,6 +190,9 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
                     Cache.clearCachedUrl(requestDocumentsUrl);
                     modal.hide();
                     $route.reload();
+
+                    // Remove loading screen
+                    jQuery('#loading').hide();
                 }
             });
         };
@@ -195,6 +214,9 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 
         // Remove a document
         $scope.deleteDocument = function(index) {
+            // Show loading screen
+            jQuery('#loading').show();
+
             Restangular.one('document', $scope.documentsList[index].id).remove().then(function(resp) {
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
@@ -204,6 +226,9 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
                     Cache.clearCachedUrl($scope.requestDocumentsUrl);
                     $route.reload();
                 }
+
+                // Remove loading screen
+                jQuery('#loading').hide();
             });
         };
 
@@ -241,13 +266,16 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 
 // documentController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('documentController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
+        // Show loading screen
+        jQuery('#loading').show();
+
         Restangular.one('document', $routeParams.documentId).get().then(function(documentResponse) {
             $scope.document = documentResponse;
             Page.setTitle(documentResponse.title);
 
             // Init select2
             jQuery('#inputOwner').select2({
-                placeholder: 'Search for a user',
+                placeholder: 'Search for an user',
                 minimumInputLength: 3,
                 ajax: {
                     url: function(term, page) {
@@ -278,6 +306,9 @@ angularRest.controller('documentController', ['Restangular', '$scope', '$routePa
 
             // Trigger change and update
             jQuery('#inputOwner').select2('val', documentResponse.ownerId, true);
+
+            // Remove loading screen
+            jQuery('#loading').hide();
         });
 
     }]
@@ -288,9 +319,15 @@ angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page',
         $scope.orderByField     = 'name';
         $scope.reverseSort      = false;
 
+        // Show loading screen
+        jQuery('#loading').show();
+
         RestangularCache.all('grids').getList().then(function(gridsResponse) {
             $scope.gridsList = gridsResponse;
             Page.setTitle('Grids');
+
+            // Remove loading screen
+            jQuery('#loading').hide();
         });
 
         $scope.collapseFilter = true;
@@ -307,11 +344,17 @@ angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page',
 
 // gridController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('gridController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
-        var grid = Restangular.one('grid', $routeParams.gridId).get().then(function(gridResponse) {
+        // Show loading screen
+        jQuery('#loading').show();
+
+        Restangular.one('grid', $routeParams.gridId).get().then(function(gridResponse) {
             Page.setTitle(gridResponse.name);
             $scope.grid = gridResponse;
             // Token required to request grid images
             $scope.api_token = sessionStorage.token;
+
+            // Remove loading screen
+            jQuery('#loading').hide();
         });
 
         $scope.urlEncode = function(target){
@@ -340,6 +383,10 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
 
         function BootstrapModalDialog(event) {
             eventId = jQuery(this).data('event-id');
+
+            // Show loading screen
+            jQuery('#loading').show();
+
             meeting = RestangularCache.one('meeting', eventId).get().then(function(meetingResponse) {
                 meetingRequestUrl       = meetingResponse.getRequestedUrl();
 
@@ -365,11 +412,17 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
                     }
                 ];
                 modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
+
+                // Remove loading screen
+                jQuery('#loading').hide();
             });
             return false;
         }
 
         RestangularCache.one('meetings', date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).all('calendar').getList().then(function(meetingsResponse) {
+            // Show loading screen
+            jQuery('#loading').show();
+
             $scope.meetings = meetingsResponse;
             Page.setTitle('Meetings');
 
@@ -427,24 +480,30 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
                     calendar.view(jQuery(this).data('calendar-view'));
                 });
             });
+
+            // Remove loading screen
+            jQuery('#loading').hide();
         });
     }]
 );
 
-// meetingsController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('meetingController', ['RestangularCache', '$scope', '$routeParams', 'Page', '$modal', '$tooltip', '$sce', 'Cache', '$location',  function(RestangularCache, $scope, $routeParams, Page, $modal, $tooltip, $sce, Cache, $location) {
+// meetingController ----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('meetingController', ['RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', function(RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache) {
         var meetingRequestUrl;
         var gridsRequestUrl;
         // Initial values to prevent errors
-        $scope.startDateString      = new moment().format('YYYY/MM/DD');
-        $scope.startTimeString      = new moment().format('HH:mm');
-        $scope.endDateString        = new moment().format('YYYY/MM/DD');
-        $scope.endTimeString        = new moment().format('HH:mm');
-        $scope.meeting              = {};
-        $scope.meeting.creator      = {};
-        $scope.meeting.creator.id   = -1;
-        $scope.grids                = {};
-        $scope.rooms                = {};
+        $scope.startDateString          = new moment().format('YYYY/MM/DD');
+        $scope.startTimeString          = new moment().format('HH:mm');
+        $scope.endDateString            = new moment().format('YYYY/MM/DD');
+        $scope.endTimeString            = new moment().format('HH:mm');
+        $scope.meeting                  = {};
+        var meetingOld                  = {};
+        $scope.meeting.creator          = {};
+        $scope.meeting.creator.id       = -1;
+        $scope.grids                    = {};
+        $scope.rooms                    = {};
+        $scope.participant              = '';
+        $scope.usernameSearchResults    = {};
 
         /**
          * Gives the index of the selected grid
@@ -471,39 +530,99 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
         // Update the meeting with the new data
         $scope.updateMeeting = function () {
             // Reformat back to the expected format for the API
-            meetingResponse.startDate   = $scope.startDateString.replace(/\//g, '-') +' '+ $scope.startTimeString +':00';
-            meetingResponse.endDate     = $scope.endDateString.replace(/\//g, '-') +' '+ $scope.endTimeString +':00';
+            $scope.meeting.startDate   = $scope.startDateString.replace(/\//g, '-') +' '+ $scope.startTimeString +':00';
+            $scope.meeting.endDate     = $scope.endDateString.replace(/\//g, '-') +' '+ $scope.endTimeString +':00';
 
             $scope.meeting.put();
         };
 
+        // Restore the meeting to the original values
+        $scope.resetMeeting = function() {
+            angular.copy(meetingOld, $scope.meeting);
+            setDateTimes();
+        };
+
+        // Parse dates to working Angular-Strap date strings (somehow Date-objects do not work with min/max date/time)
+        function setDateTimes() {
+            $scope.startDateString  = new moment($scope.meeting.startDate).format('YYYY/MM/DD');
+            $scope.startTimeString  = new moment($scope.meeting.startDate).format('HH:mm');
+            $scope.endDateString    = new moment($scope.meeting.endDate).format('YYYY/MM/DD');
+            $scope.endTimeString    = new moment($scope.meeting.endDate).format('HH:mm');
+        }
+
         // Does the user have permission to edit this meeting?
         $scope.allowUpdate = function() {
             if(sessionStorage.meetingPermission >= EXECUTE && $scope.meeting.creator.id == sessionStorage.id) {
-                console.log('ja');
                 return true;
             } else if(sessionStorage.meetingPermission >= WRITE) {
-                console.log('ja!');
                 return true;
             } else {
-                console.log('NEE');
                 return false;
             }
         };
 
+        // Search for the given username
+        $scope.getUserByUsername = function($viewValue) {
+            if($viewValue != null && $viewValue.length >= 3) {
+                var results = RestangularCache.one('users', $viewValue).get().then(function(usersResponse) {
+                    $scope.usernameSearchResults = usersResponse;
+                    return usersResponse;
+                });
+            } else {
+                var results = '';
+            }
+            return results;
+        };
+
+        // Adds the currently selected participant to the list
+        $scope.addParticipant = function() {
+            for(var i = 0; i < $scope.usernameSearchResults.length; i++) {
+                // Only add user when match found and not already listed
+                if($scope.usernameSearchResults[i].username == $scope.participant) {
+                    if(!isDuplicateParticipant()) {
+                        $scope.meeting.participants.push($scope.usernameSearchResults[i]);
+                    } else {
+                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The user '+ $scope.usernameSearchResults[i].username + ' is already a participant for this meeting'), type: 'warning'});
+                    }
+                }
+            }
+        };
+
+        // Checks for duplicate participants
+        function isDuplicateParticipant() {
+            for(var i = 0; i < $scope.meeting.participants.length; i++) {
+                if($scope.meeting.participants[i].username == $scope.participant) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Removes the user with the given ID from the list
+        $scope.removeParticipant = function(id) {
+            for(var i = 0; i < $scope.meeting.participants.length; i++) {
+                if($scope.meeting.participants[i].id == id) {
+                    $scope.meeting.participants.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Show loading screen
+        jQuery('#loading').show();
+
         // Get the selected meeting
         RestangularCache.one('meeting', $routeParams.meetingId).get().then(function(meetingResponse) {
             $scope.meeting          = meetingResponse;
+            angular.copy($scope.meeting, meetingOld);
             // Page and content titles
             $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
             Page.setTitle('Meeting '+ meetingResponse.id);
             meetingRequestUrl       = meetingResponse.getRequestedUrl();
 
-            // Parse dates to working Angular-Strap date strings (somehow Date-objects do not work with min/max date/time)
-            $scope.startDateString  = new moment(meetingResponse.startDate).format('YYYY/MM/DD');
-            $scope.startTimeString  = new moment(meetingResponse.startDate).format('HH:mm');
-            $scope.endDateString    = new moment(meetingResponse.endDate).format('YYYY/MM/DD');
-            $scope.endTimeString    = new moment(meetingResponse.endDate).format('HH:mm');
+            // Set the dates and times
+            setDateTimes();
 
             // Get additional information about the Grids
             RestangularCache.all('grids').getList().then(function(gridsResponse) {
@@ -513,6 +632,9 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
 
             // Get additional meeting rooms
             $scope.getMeetingRooms();
+
+            // Remove loading screen
+            jQuery('#loading').hide();
         });
     }]
 );
@@ -524,10 +646,16 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
         var requestUsersUrl     = '';
         $scope.usersList        = {};
 
+        // Remove loading screen
+        jQuery('#loading').show();
+
         RestangularCache.all('users').getList().then(function(usersResponse) {
             $scope.usersList = usersResponse;
             Page.setTitle('Users');
             requestUsersUrl = usersResponse.getRequestedUrl();
+
+            // Remove loading screen
+            jQuery('#loading').hide();
         });
 
         $scope.collapseFilter = true;
@@ -537,6 +665,9 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
         };
 
         $scope.saveUser = function() {
+            // Show loading screen
+            jQuery('#loading').show();
+
             Restangular.all('user').post($scope.user).then(function(resp) {
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
@@ -549,6 +680,8 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
                     modal.hide();
                     $route.reload();
                 }
+                // Remove loading screen
+                jQuery('#loading').hide();
             });
         };
 
@@ -567,6 +700,9 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
         // Remove a user
         $scope.deleteUser = function(index) {
+            // Show loading screen
+            jQuery('#loading').show();
+
             Restangular.one('user', $scope.usersList[index].id).remove().then(function(resp) {
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
@@ -576,6 +712,8 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
                     Cache.clearCachedUrl(requestUsersUrl);
                     $route.reload();
                 }
+                // Remove loading screen
+                jQuery('#loading').hide();
             });
         };
 
@@ -625,12 +763,18 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
         var userRequestUrl   = '';
         var userOld          = {};
 
+        // Show loading screen
+        jQuery('#loading').show();
+
         RestangularCache.one('user', $routeParams.userId).get().then(function(userResponse) {
             Page.setTitle(userResponse.username);
             $scope.user             = userResponse;
             angular.copy($scope.user, userOld);
             $scope.user.avatarCount = Object.keys(userResponse.avatars).length;
             userRequestUrl          = userResponse.getRequestedUrl();
+
+            // Remove loading screen
+            jQuery('#loading').hide();
         });
 
         // Allow changing general user information
@@ -654,6 +798,9 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
         };
 
         $scope.updateUser = function() {
+            // Show loading screen
+            jQuery('#loading').show();
+
             $scope.user.put().then(function(putResponse) {
                 angular.copy($scope.user, $scope.userOld);
                 if(!putResponse.success) {
@@ -662,6 +809,8 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                     $alert({title: 'User updated!', content: $sce.trustAsHtml('The user information has been updated.'), type: 'success'});
                     Cache.clearCachedUrl(userRequestUrl);
                 }
+                // Remove loading screen
+                jQuery('#loading').hide();
             });
         };
 
@@ -674,7 +823,10 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
         };
 
         $scope.confirmAvatar = function(index, avatar) {
-            var confirm = Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).put().then(function(confirmationResponse) {
+            // Show loading screen
+            jQuery('#loading').show();
+
+            Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).put().then(function(confirmationResponse) {
                 if(!confirmationResponse.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(confirmationResponse.error), type: 'danger'});
                 } else {
@@ -682,10 +834,16 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                     $alert({title: 'Avatar confirmed!', content: $sce.trustAsHtml('The avatar is confirmed user.'), type: 'success'});
                     Cache.clearCachedUrl(userRequestUrl);
                 }
+
+                // Remove loading screen
+                jQuery('#loading').hide();
             });
         };
 
         $scope.unlinkAvatar = function(index, avatar) {
+            // Show loading screen
+            jQuery('#loading').show();
+
             Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).remove().then(function(unlinkResponse) {
                 if(!unlinkResponse.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(unlinkResponse.error), type: 'danger'});
@@ -696,6 +854,8 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                     Cache.clearCachedUrl(userRequestUrl);
                     $route.reload();
                 }
+                // Remove loading screen
+                jQuery('#loading').hide();
             });
         };
     }]
