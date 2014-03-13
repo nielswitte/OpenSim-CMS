@@ -190,8 +190,8 @@ class User extends Module {
      */
     public function getUsersByUsername($args) {
         $db             = \Helper::getDB();
-        $params         = array("%". $db->escape($args[1]) ."%");
-        $results        = $db->rawQuery('SELECT * FROM users WHERE username LIKE ? ORDER BY LOWER(username) ASC', $params);
+        $params         = array("%". strtolower($db->escape($args[1])) ."%");
+        $results        = $db->rawQuery('SELECT * FROM users WHERE LOWER(username) LIKE ? ORDER BY LOWER(username) ASC', $params);
         $data           = array();
         foreach($results as $result) {
             $user       = new \Models\User($result['id']);

@@ -17,8 +17,8 @@ class Auth {
     private static $user;
 
     const NONE      = 0b000; // 0 - No rights
-    const READ      = 0b100; // 4 - Read access
-    const EXECUTE   = 0b101; // 5 - Allows to read and execute functions (i.e. confirm avatar links, clear cache)
+    const READ      = 0b001; // 4 - Read access
+    const EXECUTE   = 0b101; // 5 - Allows to read and execute functions (i.e. create events, confirm avatar links, clear cache)
     const WRITE     = 0b110; // 6 - Allows to read and modify data
     const ALL       = 0b111; // 7 - All above
 

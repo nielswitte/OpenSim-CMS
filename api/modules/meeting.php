@@ -157,17 +157,15 @@ class Meeting extends Module{
                 'description'   => $meeting->getRoom()->getDescription()
             );
 
-            $i = 1;
             $participants = array();
             foreach($meeting->getParticipants()->getParticipants() as $user) {
-                $participants[$i] = array(
+                $participants[] = array(
                     'id'            => $user->getId(),
                     'username'      => $user->getUsername(),
                     'firstName'     => $user->getFirstName(),
                     'lastName'      => $user->getLastName(),
                     'email'         => $user->getEmail()
                 );
-                $i++;
             }
             $data['participants'] = $participants;
         } else {
