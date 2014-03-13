@@ -337,10 +337,22 @@ GET /api/meetings/<YYYY-MM-DD>/ HTTP/1.1
 ```http
 GET /api/meetings/<YYYY-MM-DD>/calendar/ HTTP/1.1
 ```
+### Specific meeting
 
 ```http
 GET /api/meeting/<MEETING-ID>/ HTTP/1.1
 ```
+
+```http
+PUT /api/meeting/<MEETING-ID>/ HTTP/1.1
+```
+
+| Parameter         | Type             | Description                                                      |
+|-------------------|------------------|------------------------------------------------------------------|
+| startDate         | string           | The start date time of the meeting (format: YYYY-MM-DD HH:mm:ss) |
+| endDate           | string           | The end date time of the meeting (format: YYYY-MM-DD HH:mm:ss)   |
+| room              | integer or array | Room ID, can be submitted as integer `room=#` or as json array `[{id: 1, (...)}, {id: 2, (...)}, (...) }]` |
+| participants      | array            | A array with user IDs. Can be `{1, 2, 3, 4, (...)}` or a json array with users that contain an id field  `[{id: 1, (...)}, {id: 2, (...)}, (...) }]`                      |
 
 ## Meeting Rooms
 
