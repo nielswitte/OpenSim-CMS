@@ -71,14 +71,23 @@ class Auth extends Module {
         $userCtrl               = new \Controllers\UserController($user);
         $validRequest           = $userCtrl->checkPassword($password);
         $data['userId']         = $db->escape($user->getId());
+
+        // Can't login?
         if(!$validRequest) {
             throw new \Exception("Invalid username/password combination used", 1);
+        // Can login
         } else {
-            // Store token
-            $result = !$db->insert('tokens', $data);
-            // Query should affect one row, if not something went wrong
-            if($result != 1) {
-                throw new \Exception('Storing token at the server side failed', 3);
+            // User has permission to use Auth?
+            if($user->checkRights($this->getName(), \Auth::READ)) {
+                // Store token
+                $result = !$db->insert('tokens', $data);
+                // Query should affect one row, if not something went wrong
+                if($result != 1) {
+                    throw new \Exception('Storing token at the server side failed', 3);
+                }
+            // User lacks permission
+            } else {
+                throw new \Exception("You do not have permission to use the API", 2);
             }
         }
 
