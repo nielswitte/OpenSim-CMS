@@ -351,11 +351,8 @@ PUT /api/meeting/<MEETING-ID>/ HTTP/1.1
 |-------------------|------------------|------------------------------------------------------------------|
 | startDate         | string           | The start date time of the meeting (format: YYYY-MM-DD HH:mm:ss) |
 | endDate           | string           | The end date time of the meeting (format: YYYY-MM-DD HH:mm:ss)   |
-| room              | integer or array | Room ID, can be submitted as integer `room=#`
-                                         or as json array `[{id: 1, (...)}, {id: 2, (...)}, (...) }]`     |
-| participants      | array            | A array with user IDs. Can be `{1, 2, 3, 4, (...)}`
-                                         or a json array with users that contain an id field
-                                         `[{id: 1, (...)}, {id: 2, (...)}, (...) }]`                      |
+| room              | integer or array | Room ID, can be submitted as an integer or as a json array `[{id: 1, (...)}, {id: 2, (...)}, (...) }]` |
+| participants      | array            | A array with user IDs. Can be an array `{1, 2, 3, 4, (...)}` or a json array with users that contain an id field  `[{id: 1, (...)}, {id: 2, (...)}, (...) }]`                      |
 
 ## Meeting Rooms
 
