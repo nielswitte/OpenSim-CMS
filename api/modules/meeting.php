@@ -43,6 +43,7 @@ class Meeting extends Module{
         $this->api->addRoute("/meeting\/?$/",                                               "createMeeting",       $this, "POST", \AUTH::EXECUTE); //Create a new meeting
         $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "getMeetingById",      $this, "GET",  \Auth::READ);  // Select a specific meeting
         $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "updateMeetingById",   $this, "PUT",  \Auth::EXECUTE); // Update a specific meeting
+        $this->api->addRoute("/meeting\/(\d+)\/log\/?$/",                                   "saveLogMeetingById",  $this, "POST", \Auth::WRITE); // Select a specific meeting
     }
 
     /**
@@ -166,6 +167,34 @@ class Meeting extends Module{
 
         if($meetingCtrl->validateParametersUpdate($input)) {
             $data = $meetingCtrl->updateMeeting($input);
+        }
+
+        // Format the result
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE),
+        );
+
+        return $result;
+    }
+
+    /**
+     * Processes the chatlogs
+     *
+     * @param array $args
+     * @return array
+     */
+    public function saveLogMeetingById($args) {
+        $data           = FALSE;
+        $meeting        = new \Models\Meeting($args[1]);
+        $meetingCtrl    = new \Controllers\MeetingController($meeting);
+        $input          = \Helper::getInput(TRUE);
+
+        // @todo: Handle input
+        print_r($input);
+        die();
+
+        if($meetingCtrl->validateParametersChat($input)) {
+            $data = $meetingCtrl->saveChat($input);
         }
 
         // Format the result
