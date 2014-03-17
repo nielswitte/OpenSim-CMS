@@ -372,6 +372,7 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
         var eventId;
         var meetingRequestUrl;
 
+        // Process Modal function calls
         $scope.call = function(func) {
             if(func == 'hide') {
                 modal.hide();
@@ -382,12 +383,14 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
             }
         };
 
+        // Create a new modal dialog
         function BootstrapModalDialog(event) {
             eventId = jQuery(this).data('event-id');
 
             // Show loading screen
             jQuery('#loading').show();
 
+            // Get one meeting
             meeting = RestangularCache.one('meeting', eventId).get().then(function(meetingResponse) {
                 meetingRequestUrl       = meetingResponse.getRequestedUrl();
 
@@ -420,6 +423,7 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
             return false;
         }
 
+        // Get all meetings for the calendar
         RestangularCache.one('meetings', date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).all('calendar').getList().then(function(meetingsResponse) {
             // Show loading screen
             jQuery('#loading').show();
@@ -427,6 +431,7 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
             $scope.meetings = meetingsResponse;
             Page.setTitle('Meetings');
 
+            // Create the calendar
             var calendar = jQuery('#calendar').calendar({
                 language:       'en-US',
                 events_source:  meetingsResponse,
