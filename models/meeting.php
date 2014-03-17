@@ -11,11 +11,12 @@ require_once dirname(__FILE__) . '/meetingParticipants.php';
  * This class represents a meeting
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date February 25th, 2014
  */
 class Meeting implements simpleModel {
     private $id;
+    private $name;
     private $room;
     private $creator;
     private $startDate;
@@ -30,13 +31,15 @@ class Meeting implements simpleModel {
      * @param timestamp $endDate - [Optional]
      * @param \Models\User $creator - [Optional]
      * @param \Models\MeetingRoom $room - [Optional]
+     * @param string $name - [Optional]
      */
-    public function __construct($id, $startDate = '0000-00-00 00:00:00', $endDate = '0000-00-00 00:00:00', \Models\User $creator = NULL, \Models\MeetingRoom $room = NULL) {
+    public function __construct($id, $startDate = '0000-00-00 00:00:00', $endDate = '0000-00-00 00:00:00', \Models\User $creator = NULL, \Models\MeetingRoom $room = NULL, $name = '') {
         $this->id           = $id;
         $this->creator      = $creator;
         $this->startDate    = $startDate;
         $this->endDate      = $endDate;
         $this->room         = $room;
+        $this->name         = $name;
     }
 
     /**
@@ -56,6 +59,7 @@ class Meeting implements simpleModel {
             $this->creator      = new \Models\User($meeting['0']['userId'], $meeting['0']['username'], $meeting['0']['email'], $meeting['0']['firstName'], $meeting['0']['lastName']);
             $this->startDate    = $meeting[0]['startDate'];
             $this->endDate      = $meeting[0]['endDate'];
+            $this->name         = $meeting[0]['name'];
         } else {
             throw new Exception("Meeting not found", 1);
         }
@@ -90,6 +94,15 @@ class Meeting implements simpleModel {
      */
     public function getId() {
         return $this->id;
+    }
+
+    /**
+     * Returns the name of this meeting
+     *
+     * @return string
+     */
+    public function getName() {
+        return $this->name;
     }
 
     /**

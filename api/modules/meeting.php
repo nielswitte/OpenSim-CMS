@@ -64,7 +64,7 @@ class Meeting extends Module{
         foreach($resutls as $result) {
             $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
             $room       = new \Models\MeetingRoom($result['roomId']);
-            $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room);
+            $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room, $result['name']);
             $data[]     = $this->getMeetingData($meeting, FALSE);
         }
         return $data;
@@ -87,7 +87,7 @@ class Meeting extends Module{
         foreach($resutls as $result) {
             $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
             $room       = new \Models\MeetingRoom($result['roomId']);
-            $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room);
+            $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room, $result['name']);
             if(strpos($args[0], 'calendar') !== FALSE) {
                 $startTimestamp = strtotime($meeting->getStartDate());
                 $endTimestamp   = strtotime($meeting->getEndDate());
@@ -102,7 +102,7 @@ class Meeting extends Module{
                     // Meeting has ended ? => event-default
                     // Meeting still has to start => event-info
                     'class'         => ($startTimestamp < time() && $endTimestamp > time() ? 'event-success' : ($startTimestamp > time() ? 'event-info' : 'event-default')),
-                    'title'         => 'Room: '. $meeting->getRoom()->getId(),
+                    'title'         => $meeting->getName() .' (Room: '. $meeting->getRoom()->getId() .')',
                     'description'   => 'Reservation made by: '. $meeting->getCreator()->getUsername()
                 );
             } else {
@@ -231,6 +231,7 @@ class Meeting extends Module{
     public function getMeetingData(\Models\Meeting $meeting, $full = TRUE) {
         $data       = array(
             'id'        => $meeting->getId(),
+            'name'      => $meeting->getName(),
             'startDate' => $meeting->getStartDate(),
             'endDate'   => $meeting->getEndDate(),
             'creator'   => array(
