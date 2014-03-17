@@ -397,10 +397,10 @@ angularRest.controller('meetingsController', ['Restangular', 'RestangularCache',
                 $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
                 $scope.template         = partial_path +'/meeting/meetingDetails.html';
                 $scope.meeting          = meetingResponse;
+                $scope.meeting.agenda   = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
                 $scope.startDateString  = new moment(meetingResponse.startDate).format('dddd D MMMM YYYY');
                 $scope.startTimeString  = new moment(meetingResponse.startDate).format('HH:mm');
                 $scope.endTimeString    = new moment(meetingResponse.endDate).format('HH:mm');
-                $scope.agendaHTML       = $sce.trustAsHtml(recursiveAgenda(meetingResponse.agenda));
 
                 // Modal buttons
                 $scope.buttons          = [{
@@ -480,20 +480,6 @@ angularRest.controller('meetingsController', ['Restangular', 'RestangularCache',
             // Remove loading screen
             jQuery('#loading').hide();
         });
-
-        // Recursive function to process the array with agenda items
-        function recursiveAgenda(agenda) {
-            var agendaHTML = '<ol>';
-            for(var i = 0; i < agenda.length; i++) {
-                agendaHTML += '<li>'+ agenda[i].value;
-                if(agenda[i].items) {
-                    agendaHTML += recursiveAgenda(agenda[i].items);
-                }
-                agendaHTML += '</li>';
-            }
-            agendaHTML += '</ol>';
-            return agendaHTML;
-        };
     }]
 );
 
@@ -652,6 +638,16 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
                 }
             }
             return false;
+        };
+
+        // Show or hide agenda help
+        $scope.agendaHelp = false;
+        $scope.toggleAgendaHelp = function() {
+            $scope.agendaHelp = !$scope.agendaHelp;
+        };
+
+        $scope.showAgendaHelp = function() {
+            return $scope.agendaHelp;
         };
 
         // Show loading screen
