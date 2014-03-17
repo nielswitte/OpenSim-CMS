@@ -239,4 +239,20 @@ class Helper {
             } rmdir($dir);
         }
     }
+
+    /**
+     * Insert an element at a given position into the array
+     *
+     * @param array $array - The array to insert the new element in
+     * @param type $index - The position to insert the element
+     * @param type $element - The element to insert
+     * @return array - The new array
+     */
+    public static function insertArrayIndex($array, $index, $element) {
+        $start      = array_slice($array, 0, $index);
+        $end        = array_slice($array, $index);
+        $start[]    = $element;
+
+        return array_merge($start, $end);
+    }
 }
