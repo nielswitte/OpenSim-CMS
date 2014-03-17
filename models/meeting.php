@@ -1,12 +1,11 @@
 <?php
 namespace Models;
 
-if (EXEC != 1) {
-    die('Invalid request');
-}
+defined('EXEC') or die('Config not loaded');
 
 require_once dirname(__FILE__) . '/simpleModel.php';
 require_once dirname(__FILE__) . '/meetingParticipants.php';
+require_once dirname(__FILE__) . '/meetingAgenda.php';
 /**
  * This class represents a meeting
  *
@@ -22,6 +21,7 @@ class Meeting implements simpleModel {
     private $startDate;
     private $endDate;
     private $participants;
+    private $agenda;
 
     /**
      * Constructs a new meeting with the given ID
@@ -32,14 +32,16 @@ class Meeting implements simpleModel {
      * @param \Models\User $creator - [Optional]
      * @param \Models\MeetingRoom $room - [Optional]
      * @param string $name - [Optional]
+     * @param \Models\MeetingAgenda $agenda - [Optional]
      */
-    public function __construct($id, $startDate = '0000-00-00 00:00:00', $endDate = '0000-00-00 00:00:00', \Models\User $creator = NULL, \Models\MeetingRoom $room = NULL, $name = '') {
+    public function __construct($id, $startDate = '0000-00-00 00:00:00', $endDate = '0000-00-00 00:00:00', \Models\User $creator = NULL, \Models\MeetingRoom $room = NULL, $name = '', \Models\MeetingAgenda $agenda = NULL) {
         $this->id           = $id;
         $this->creator      = $creator;
         $this->startDate    = $startDate;
         $this->endDate      = $endDate;
         $this->room         = $room;
         $this->name         = $name;
+        $this->agenda       = $agenda;
     }
 
     /**
@@ -84,6 +86,25 @@ class Meeting implements simpleModel {
         foreach($results as $result) {
             $participant    = new \Models\User($result['id'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
             $participants->addParticipant($participant);
+        }
+    }
+
+    /**
+     * Gets the agenda for this meeting from the database
+     */
+    public function getAgendaFromDabatase() {
+        $db = \Helper::getDB();
+        $db->where('meetingId', $db->escape($this->getId()));
+        $db->orderBy('parentId', 'ASC');
+        $db->orderBy('sort', 'ASC');
+        $results = $db->get('meeting_agenda_items');
+
+        $agenda = new \Models\MeetingAgenda($this);
+        $this->setAgenda($agenda);
+
+        // Add all items to the agenda
+        foreach($results as $result) {
+            $agenda->addAgendaItem($result['id'], $result['value'], $result['sort'], $result['parentId']);
         }
     }
 
@@ -166,6 +187,36 @@ class Meeting implements simpleModel {
      */
     public function getParticipants(){
         return $this->participants;
+    }
+
+    /**
+     * Returns the agenda for this meeting
+     *
+     * @return \Models\MeetingAgenda
+     */
+    public function getAgenda() {
+        return $this->agenda;
+    }
+
+    /**
+     * Adds the given item to the agenda for this meeting
+     *
+     * @param integer $id
+     * @param string $item
+     * @param integer $order
+     * @param integer $parentId
+     */
+    public function addAgendaItem($id, $item, $order, $parentId = 0) {
+        $this->getAgenda()->addAgendaItem($id, $item, $order, $parentId);
+    }
+
+    /**
+     * Sets the agenda for this meeting
+     *
+     * @param \Models\MeetingAgenda $agenda
+     */
+    public function setAgenda(\Models\MeetingAgenda $agenda) {
+        $this->agenda = $agenda;
     }
 
     /**

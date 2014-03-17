@@ -40,6 +40,7 @@ class Meeting extends Module{
         $this->api->addRoute("/meetings\/(\d+)\/?$/",                                       "getMeetings",         $this, "GET",  \Auth::READ);  // Get list with 50 meetings ordered by startdate DESC starting at the given offset
         $this->api->addRoute("/meeting\/?$/",                                               "createMeeting",       $this, "POST", \AUTH::EXECUTE); //Create a new meeting
         $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "getMeetingById",      $this, "GET",  \Auth::READ);  // Select a specific meeting
+        $this->api->addRoute("/meeting\/(\d+)\/agenda\/?$/",                                "getMeetingAgendaById",$this, "GET",  \Auth::READ);  // Select a specific meeting and only get the agenda
         $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "updateMeetingById",   $this, "PUT",  \Auth::EXECUTE); // Update a specific meeting
         $this->api->addRoute("/meeting\/(\d+)\/log\/?$/",                                   "saveLogMeetingById",  $this, "POST", \Auth::WRITE); // Select a specific meeting
     }
@@ -120,11 +121,26 @@ class Meeting extends Module{
     public function getMeetingById($args) {
         $meeting = new \Models\Meeting($args[1]);
         $meeting->getInfoFromDatabase();
+        $meeting->getAgendaFromDabatase();
         $meeting->getCreator()->getInfoFromDatabase();
         $meeting->getRoom()->getInfoFromDatabase();
         $meeting->getParticipantsFromDatabase();
 
         return $this->getMeetingData($meeting, TRUE);
+    }
+
+    /**
+     * Gets the meeting agenda for the given meeting
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getMeetingAgendaById($args) {
+        $meeting = new \Models\Meeting($args[1]);
+        $meeting->getInfoFromDatabase();
+        $meeting->getAgendaFromDabatase();
+
+        return $this->getMeetingAgendaData($meeting);
     }
 
     /**
@@ -265,6 +281,7 @@ class Meeting extends Module{
                 );
             }
             $data['participants'] = $participants;
+            $data['agenda']       = $this->getMeetingAgendaData($meeting);
         } else {
             $data['roomId']     = $meeting->getRoom()->getId();
             // URL to full view
@@ -272,5 +289,15 @@ class Meeting extends Module{
         }
 
         return $data;
+    }
+
+    /**
+     * Returns the agenda for the meeting
+     *
+     * @param \Models\Meeting $meeting
+     * @return array
+     */
+    public function getMeetingAgendaData(\Models\Meeting $meeting) {
+        return $meeting->getAgenda()->buildAgenda();
     }
 }
