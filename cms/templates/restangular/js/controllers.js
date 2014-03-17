@@ -222,8 +222,8 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                 } else {
                     $alert({title: 'Document removed!', content: $sce.trustAsHtml('The document '+ $scope.documentsList[index].title +' has been removed from the CMS.'), type: 'success'});
-                    delete $scope.documentsList[index];
-                    Cache.clearCachedUrl($scope.requestDocumentsUrl);
+                    $scope.documentsList.splice(index, 1);
+                    Cache.clearCachedUrl(requestDocumentsUrl);
                     $route.reload();
                 }
 
@@ -269,6 +269,7 @@ angularRest.controller('documentController', ['Restangular', '$scope', '$routePa
         // Show loading screen
         jQuery('#loading').show();
 
+        // Get document from API
         Restangular.one('document', $routeParams.documentId).get().then(function(documentResponse) {
             $scope.document = documentResponse;
             Page.setTitle(documentResponse.title);
