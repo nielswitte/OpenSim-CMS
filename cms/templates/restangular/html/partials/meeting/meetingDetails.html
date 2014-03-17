@@ -1,7 +1,11 @@
 <table class="table table-striped table-responsive table-hover">
     <tr>
-        <th class="col-sm-3"><strong>Meeting ID:</strong></th>
+        <th class="col-sm-3"><strong>Meeting ID</strong></th>
         <td class="col-sm-9">{{meeting.id}}</td>
+    </tr>
+    <tr>
+        <th><strong>Name:</strong></th>
+        <td>{{meeting.name}}</td>
     </tr>
     <tr>
         <th><strong>Start/End</strong></th>
@@ -10,22 +14,22 @@
         </td>
     </tr>
     <tr>
-        <th><strong>Created by:</strong></th>
+        <th><strong>Created by</strong></th>
         <td><a href="#!/user/{{meeting.creator.id}}">{{meeting.creator.username}} ({{meeting.creator.firstName}} {{meeting.creator.lastName}})</a></td>
     </tr>
     <tr>
-        <th><strong>Location:</strong></th>
+        <th><strong>Location</strong></th>
         <td>
             <p>
-                <strong>Room:</strong> {{meeting.room.id}}
+                <strong>Room</strong> {{meeting.room.id}}
                 <br>{{meeting.room.description}}
             </p>
-            <p><strong>Region:</strong> {{meeting.room.region.name}}</p>
-            <p><strong>Grid:</strong> <a href="#!/grid/{{meeting.room.grid.id}}">{{meeting.room.grid.name}}</a></p>
+            <p><strong>Region</strong> {{meeting.room.region.name}}</p>
+            <p><strong>Grid</strong> <a href="#!/grid/{{meeting.room.grid.id}}">{{meeting.room.grid.name}}</a></p>
         </td>
     </tr>
     <tr>
-        <th><strong>Participants:</strong></th>
+        <th><strong>Participants</strong></th>
         <td>
             <ul>
                 <li ng-repeat="participant in meeting.participants">
