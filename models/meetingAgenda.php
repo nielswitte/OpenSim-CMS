@@ -63,7 +63,7 @@ class MeetingAgenda {
             }
         }
 
-        // Sort the arry by the over value
+        // Sort the arry by the sort value
         usort($branch, function($a, $b) {
             return $a['sort'] - $b['sort'];
         });
