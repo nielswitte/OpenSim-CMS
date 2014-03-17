@@ -1,10 +1,13 @@
 <?php
 namespace API\Modules;
 
-if(EXEC != 1) {
-	die('Invalid request');
-}
+defined('EXEC') or die('Config not loaded');
+
 require_once dirname(__FILE__) .'/module.php';
+require_once dirname(__FILE__) .'/../../models/grid.php';
+require_once dirname(__FILE__) .'/../../models/region.php';
+require_once dirname(__FILE__) .'/../../controllers/regionController.php';
+
 
 /**
  * Implements the functions called on the Grid
@@ -104,7 +107,7 @@ class Grid extends Module{
         $data['defaultRegionUuid']  = $grid->getDefaultRegionUuid();
         $data['regionCount']        = count($grid->getRegions());
         foreach($grid->getRegions() as $region) {
-            $data['regions'][$region->getUuid()] = $this->getRegionData($region);
+            $data['regions'][] = $this->getRegionData($region);
         }
 
         return $data;

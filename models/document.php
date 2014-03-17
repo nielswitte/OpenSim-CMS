@@ -1,9 +1,7 @@
 <?php
 namespace Models;
 
-if(EXEC != 1) {
-	die('Invalid request');
-}
+defined('EXEC') or die('Invalid request');
 
 require_once dirname(__FILE__) .'/document.php';
 require_once dirname(__FILE__) .'/simpleModel.php';

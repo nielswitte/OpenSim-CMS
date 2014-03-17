@@ -56,9 +56,9 @@ CREATE TABLE IF NOT EXISTS `documents` (
 
 -- Structuur van  tabel OpenSim-CMS.document_slides wordt geschreven
 CREATE TABLE IF NOT EXISTS `document_slides` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `documentId` int(11) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`,`documentId`),
+  PRIMARY KEY (`id`),
   KEY `FK_presentation_slides_presentations` (`documentId`),
   CONSTRAINT `FK_document_slides_documents` FOREIGN KEY (`documentId`) REFERENCES `documents` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
@@ -120,11 +120,12 @@ CREATE TABLE IF NOT EXISTS `grid_regions` (
 
 -- Structuur van  tabel OpenSim-CMS.meetings wordt geschreven
 CREATE TABLE IF NOT EXISTS `meetings` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
   `userId` int(11) DEFAULT NULL,
   `startDate` timestamp NULL DEFAULT NULL,
   `endDate` timestamp NULL DEFAULT NULL,
   `roomId` int(11) DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_meetings_users` (`userId`),
   KEY `FK_meetings_meeting_rooms` (`roomId`),

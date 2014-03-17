@@ -5,10 +5,12 @@
                 <button type="button" class="close" ng-click="$hide()">&times;</button>
                 <h4 class="modal-title" ng-bind-html="title"></h4>
             </div>
-            <div class="modal-body" ng-include src="template"></div>
-            <div class="modal-footer" ng-show="buttons">
-                <button type="button" class="btn btn-{{button.type}}" ng-click="call(button.func)" ng-repeat="button in buttons">{{button.text}}</button>
-            </div>
+            <form class="form-horizontal" role="form" id="userForm" ng-submit="call(formSubmit)">
+                <div class="modal-body" ng-include src="template"></div>
+                <div class="modal-footer" ng-show="buttons">
+                    <button type="{{button.type}}" class="btn btn-{{button.class}}" ng-click="call(button.func)" ng-repeat="button in buttons">{{button.text}}</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

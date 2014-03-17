@@ -1,9 +1,7 @@
 <?php
 namespace Models;
 
-if (EXEC != 1) {
-    die('Invalid request');
-}
+defined('EXEC') or die('Invalid request');
 
 require_once dirname(__FILE__) . '/simpleModel.php';
 
@@ -11,7 +9,7 @@ require_once dirname(__FILE__) . '/simpleModel.php';
  * This class provides information about the user's avatar
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date February 21th, 2014
  */
 class Avatar implements simpleModel {
@@ -46,17 +44,18 @@ class Avatar implements simpleModel {
         // Get additional information if possible
         if($this->grid->getDbUrl() && $this->grid->getOnlineStatus() && \Helper::isValidUuid($this->getUuid())) {
             $osdb = new \MysqliDb($this->grid->getDbUrl(), $this->grid->getDbUsername(), $this->grid->getDbPassword(), $this->grid->getDbName(), $this->grid->getDbPort());
-            $osdb->join('UserAccounts u', 'u.PrincipalID = g.UserID', 'LEFT');
-            $osdb->where("g.UserID", $osdb->escape($this->getUuid()));
-            $results = $osdb->getOne("GridUser g");
-            if(!empty($results)) {
-                $this->firstName        = $results['FirstName'];
-                $this->lastName         = $results['LastName'];
-                $this->email            = $results['Email'];
-                $this->online           = $results['Online'];
-                $this->lastLogin        = $results['Login'];
-                $this->lastPosition     = $results['LastPosition'];
-                $this->lastRegionUuid   = $results['LastRegionID'];
+            $osdb->join('GridUser g', 'u.PrincipalID = g.UserID', 'LEFT');
+            $osdb->where('u.PrincipalID', $osdb->escape($this->getUuid()));
+            $results = $osdb->get('UserAccounts u', 1);
+
+            if(isset($results[0])) {
+                $this->firstName        = $results[0]['FirstName'];
+                $this->lastName         = $results[0]['LastName'];
+                $this->email            = $results[0]['Email'];
+                $this->online           = $results[0]['Online'];
+                $this->lastLogin        = $results[0]['Login'];
+                $this->lastPosition     = $results[0]['LastPosition'];
+                $this->lastRegionUuid   = $results[0]['LastRegionID'];
             }
         }
     }

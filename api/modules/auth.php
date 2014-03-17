@@ -1,9 +1,8 @@
 <?php
 namespace API\Modules;
 
-if(EXEC != 1) {
-	die('Invalid request');
-}
+defined('EXEC') or die('Config not loaded');
+
 require_once dirname(__FILE__) .'/module.php';
 
 /**
@@ -43,42 +42,23 @@ class Auth extends Module {
      * @returns array
      */
     public function authUser($args) {
-        $headers                = getallheaders();
         $db                     = \Helper::getDB();
+        // Input parameters
         $input                  = \Helper::getInput(TRUE);
-
         $username               = isset($input['username']) ? $input['username'] : '';
         $password               = isset($input['password']) ? $input['password'] : '';
         $ip                     = isset($input['ip']) ? $input['ip'] : FALSE;
 
         // Default settings
         $userId = ($username == "OpenSim" ? 0 : -1);
-        $isGrid = FALSE;
 
         // Basic output data
         $data['token']          = $db->escape(\Helper::generateToken(48));
         $data['ip']             = ($ip !== FALSE && $ip !== NULL) ? $ip : $_SERVER['REMOTE_ADDR'];
-        $data['expires']        = $db->escape(date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES)));
-
-        // Request from OpenSim? Add this additional check because of the access rights of OpenSim
-        if(isset($headers["X-SecondLife-Shard"]) && $userId == 0) {
-            // Check server IP to grid list
-            $grids  = $db->get('grids');
-
-            // Check all grids
-            foreach($grids as $grid) {
-                $osIp = $grid['osIp'];
-                // Check if grid uses IP or hostname
-                if(!filter_var($osIp, FILTER_VALIDATE_IP)) {
-                    $osIp = gethostbyname($osIp);
-                }
-                // Match found? Stop!
-                if($osIp == $data['ip'] || $osIp == "127.0.0.1") {
-                    $isGrid = TRUE;
-                    break;
-                }
-            }
-        }
+        $isGrid                 = \Auth::isGrid($userId, $data['ip']);
+        // OpenSim sessions are valid longer
+        $expireTime             = $isGrid ? SERVER_API_TOKEN_EXPIRES2 : SERVER_API_TOKEN_EXPIRES;
+        $data['expires']        = $db->escape(date('Y-m-d H:i:s', strtotime('+'. $expireTime)));
 
         // Attempt to access with OpenSim from outside the Grid
         if($userId == 0 && !$isGrid) {
@@ -90,16 +70,23 @@ class Auth extends Module {
         $userCtrl               = new \Controllers\UserController($user);
         $validRequest           = $userCtrl->checkPassword($password);
         $data['userId']         = $db->escape($user->getId());
+
+        // Can't login?
         if(!$validRequest) {
             throw new \Exception("Invalid username/password combination used", 1);
-        }
-
-        if($validRequest) {
-            // Store token
-            $result = !$db->insert('tokens', $data);
-            // Query should affect one row, if not something went wrong
-            if($result != 1) {
-                throw new \Exception('Storing token at the server side failed', 3);
+        // Can login
+        } else {
+            // User has permission to use Auth?
+            if($user->checkRights($this->getName(), \Auth::READ)) {
+                // Store token
+                $result = !$db->insert('tokens', $data);
+                // Query should affect one row, if not something went wrong
+                if($result != 1) {
+                    throw new \Exception('Storing token at the server side failed', 3);
+                }
+            // User lacks permission
+            } else {
+                throw new \Exception("You do not have permission to use the API", 2);
             }
         }
 

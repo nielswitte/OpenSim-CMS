@@ -207,6 +207,17 @@ body {
     }
 }
 
+.calendar-container {
+    overflow-y: scroll;
+    height: 550px;
+
+    #calendar {
+        div.day-event {
+            position: absolute;
+        }
+    }
+}
+
 // Modal dialogs
 .modal-backdrop.am-fade {
     opacity: .5;
@@ -232,5 +243,39 @@ body {
         button.btn-default {
             border: none;
         }
+    }
+}
+
+.list-group {
+    &.list-group-hover {
+        .list-group-item:hover {
+            background-color: #e8e8e8;
+        }
+    }
+
+    .list-group-item {
+        button { float: right; }
+    }
+}
+
+// Agenda list
+ol {
+    counter-reset: item;
+    margin: 0;
+    padding: 0;
+    font-weight: bold;
+
+    li {
+        display: block;
+
+        &:before {
+            content: counters(item, ".") " ";
+            counter-increment: item;
+        }
+    }
+
+    ol {
+        font-weight: normal;
+        margin-left: 20px;
     }
 }

@@ -1,9 +1,7 @@
 <?php
 namespace Models;
 
-if(EXEC != 1) {
-	die('Invalid request');
-}
+defined('EXEC') or die('Config not loaded');
 
 require_once dirname(__FILE__) .'/simpleModel.php';
 
@@ -103,8 +101,8 @@ class User implements SimpleModel {
         $avatars = $db->get('avatars');
         $i = 1;
         foreach($avatars as $avatar) {
-            $grid = new \Models\Grid($avatar['gridId']);
-            $newAvatar = new \Models\Avatar($grid, $avatar['uuid']);
+            $grid       = new \Models\Grid($avatar['gridId']);
+            $newAvatar  = new \Models\Avatar($grid, $avatar['uuid']);
             $newAvatar->setConfirmation($avatar['confirmed']);
             // Get additional data from Grid?
             if($full) {

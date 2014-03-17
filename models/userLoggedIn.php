@@ -1,9 +1,7 @@
 <?php
 namespace Models;
 
-if(EXEC != 1) {
-	die('Invalid request');
-}
+defined('EXEC') or die('Config not loaded');
 
 require_once dirname(__FILE__) .'/user.php';
 

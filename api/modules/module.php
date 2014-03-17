@@ -1,9 +1,7 @@
 <?php
 namespace API\Modules;
 
-if(EXEC != 1) {
-	die('Invalid request');
-}
+defined('EXEC') or die('Config not loaded');
 
 /**
  * Basic module

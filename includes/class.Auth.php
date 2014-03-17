@@ -1,12 +1,11 @@
 <?php
-if(EXEC != 1) {
-	die('Invalid request');
-}
+defined('EXEC') or die('Config not loaded');
+
 /**
  * This class is used to check authorization tokens
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date February 19th, 2014
  */
 class Auth {
@@ -17,10 +16,40 @@ class Auth {
     private static $user;
 
     const NONE      = 0b000; // 0 - No rights
-    const READ      = 0b100; // 4 - Read access
-    const EXECUTE   = 0b101; // 5 - Allows to read and execute functions (i.e. confirm avatar links, clear cache)
+    const READ      = 0b001; // 4 - Read access
+    const EXECUTE   = 0b101; // 5 - Allows to read and execute functions (i.e. create events, confirm avatar links, clear cache)
     const WRITE     = 0b110; // 6 - Allows to read and modify data
     const ALL       = 0b111; // 7 - All above
+
+    /**
+     * Request from OpenSim? Add this additional check because of the access rights of OpenSim
+     *
+     * @return boolean TRUE when IP matches a grid
+     */
+    public static function isGrid($id, $ip) {
+        $result     = FALSE;
+        $headers    = getallheaders();
+        if(isset($headers["X-SecondLife-Shard"]) && $id == 0) {
+            // Check server IP to grid list
+            $db     = \Helper::getDB();
+            $grids  = $db->get('grids');
+
+            // Check all grids
+            foreach($grids as $grid) {
+                $osIp = $grid['osIp'];
+                // Check if grid uses IP or hostname
+                if(!filter_var($osIp, FILTER_VALIDATE_IP)) {
+                    $osIp = gethostbyname($osIp);
+                }
+                // Match found? Stop!
+                if($osIp == $ip || $osIp == "127.0.0.1") {
+                    $result = TRUE;
+                    break;
+                }
+            }
+        }
+        return $result;
+    }
 
     /**
      * Sets the token to be used in this class
@@ -94,13 +123,18 @@ class Auth {
             $db->escape(self::$ip),
             $db->escape(self::$timestamp)
         );
-        $result = $db->rawQuery('SELECT COUNT(*) AS count, userId FROM tokens WHERE token = ? AND ip = ? AND expires >= ? LIMIT 1', $params);
+        $result = $db->rawQuery('SELECT count(*) AS count, userId FROM tokens WHERE token = ? AND ip = ? AND expires >= ? LIMIT 1', $params);
 
         // Extend token expiration time
         if($result[0]['count'] == 1) {
             self::$userId       = $result[0]['userId'];
             $db->where('token', $db->escape(self::$token));
-            $data['expires']    = $db->escape(date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES)));
+            // OpenSim uses EXPIRES2
+            if($result[0]['userId'] == 0) {
+                $data['expires']    = $db->escape(date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES2)));
+            } else {
+                $data['expires']    = $db->escape(date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES)));
+            }
             $db->update('tokens', $data);
         }
 

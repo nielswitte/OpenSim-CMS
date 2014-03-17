@@ -12,19 +12,19 @@ var angularRest = angular.module('OpenSim-CMS', [
 ]).config(function($routeProvider, $locationProvider) {
     $routeProvider
     .when('/documents', {
-        templateUrl: partial_path +'/documents.html',
+        templateUrl: partial_path +'/document/documents.html',
         controller: 'documentsController',
         requireLogin: true
     }).when('/document/:documentId', {
-        templateUrl: partial_path +'/document.html',
+        templateUrl: partial_path +'/document/document.html',
         controller: 'documentController',
         requireLogin: true
     }).when('/grids', {
-        templateUrl: partial_path +'/grids.html',
+        templateUrl: partial_path +'/grid/grids.html',
         controller: 'gridsController',
         requireLogin: true
     }).when('/grid/:gridId', {
-        templateUrl: partial_path +'/grid.html',
+        templateUrl: partial_path +'/grid/grid.html',
         controller: 'gridController',
         requireLogin: true
     }).when('/login', {
@@ -32,16 +32,26 @@ var angularRest = angular.module('OpenSim-CMS', [
         controller: 'loginController',
         requireLogin: false
     }).when('/meetings', {
-        templateUrl: partial_path +'/meetingsCalendar.html',
+        templateUrl: partial_path +'/meeting/meetingsCalendar.html',
         controller: 'meetingsController',
         css: 'templates/restangular/css/bootstrap-calendar.min.css',
         requireLogin: true
+    }).when('/meetings/new', {
+        templateUrl: partial_path +'/meeting/meetingNew.html',
+        controller: 'meetingNewController',
+        css: 'templates/restangular/css/bootstrap-calendar.min.css',
+        requireLogin: true
+    }).when('/meeting/:meetingId', {
+        templateUrl: partial_path +'/meeting/meeting.html',
+        controller: 'meetingController',
+        css: 'templates/restangular/css/bootstrap-calendar.min.css',
+        requireLogin: true
     }).when('/user/:userId', {
-        templateUrl: partial_path +'/user.html',
+        templateUrl: partial_path +'/user/user.html',
         controller: 'userController',
         requireLogin: true
     }).when('/users', {
-        templateUrl: partial_path +'/users.html',
+        templateUrl: partial_path +'/user/users.html',
         controller: 'usersController',
         requireLogin: true
     }).when('/', {
@@ -58,7 +68,7 @@ var angularRest = angular.module('OpenSim-CMS', [
 });
 
 // Authentication check on run
-angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', function ($rootScope, Restangular, $location, $alert, $sce) {
+angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', 'Cache', function ($rootScope, Restangular, $location, $alert, $sce, Cache) {
         $rootScope.$on("$routeChangeStart", function(event, next, current) {
             if (next.requireLogin && !sessionStorage.token) {
                 $alert({title: 'Error!', content: $sce.trustAsHtml('This page requires authentication.'), type: 'danger'});
@@ -73,6 +83,7 @@ angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', fun
             // Session check? Logout if expired
             if(sessionStorage.tokenTimeOut < moment().unix()) {
                 sessionStorage.clear();
+                Cache.clearCache();
                 $alert({title: 'Session Expired!', content: $sce.trustAsHtml('You have been logged out because your session has expired'), type: 'warning'});
             }
             // Unauthorized
@@ -123,7 +134,6 @@ angularRest.factory('Page', function() {
 // Restangular settings
 angularRest.config(['RestangularProvider', function(RestangularProvider) {
         RestangularProvider.setBaseUrl('' + server_address + base_url + '/api');
-        //RestangularProvider.setDefaultHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
         RestangularProvider.setDefaultHttpFields({cache: false});
 
         // Add token to request when available (this line is required for page refreshes to keep the token)
@@ -136,25 +146,9 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
             if(sessionStorage.tokenTimeOut < moment().unix()) {
                 sessionStorage.clear();
             }
-
-            jQuery('#loading').hide();
-        });
-
-        RestangularProvider.addRequestInterceptor(function(element) {
-            // Show loading screen
-            if(loading == 0) {
-                jQuery('#loading').show();
-            }
-            loading++;
-            return element;
         });
 
         RestangularProvider.addResponseInterceptor(function(data) {
-            loading--;
-            // Hide loading screen when all requests are finished
-            if(loading == 0) {
-                jQuery('#loading').hide();
-            }
             // Increase token validaty
             sessionStorage.tokenTimeOut = moment().add(30, 'minutes').unix();
 
@@ -170,9 +164,8 @@ angularRest.factory('RestangularCache', function(Restangular) {
     });
 });
 
-
 // AngularStrap configuration
-angularRest.config(function($alertProvider, $tooltipProvider, $timepickerProvider, $datepickerProvider) {
+angularRest.config(function($alertProvider, $tooltipProvider, $timepickerProvider, $datepickerProvider, $typeaheadProvider) {
     angular.extend($alertProvider.defaults, {
         animation: 'am-fade-and-slide-top',
         placement: 'top-right',
@@ -187,12 +180,21 @@ angularRest.config(function($alertProvider, $tooltipProvider, $timepickerProvide
 
     angular.extend($timepickerProvider.defaults, {
         timeFormat: 'HH:mm',
-        length: 5
+        length: 5,
+        dateType: 'date'
     });
 
     angular.extend($datepickerProvider.defaults, {
-        dateFormat: 'dd/MM/yyyy',
-        startWeek: 1
+        dateFormat: 'yyyy/MM/dd',
+        startWeek: 1,
+        dateType: 'date'
+    });
+
+    angular.extend($typeaheadProvider.defaults, {
+        minLength: 3,
+        limit: 8,
+        animation: 'am-flip-x',
+        delay: { show: 500, hide: 100 }
     });
 });
 
@@ -207,6 +209,9 @@ angularRest.config(["$compileProvider", function($compileProvider) {
  * Lazy loading of CSS files
  *
  * @source http://stackoverflow.com/a/20404559
+ *
+ * @param $rootScope
+ * @param $compile
  */
 angularRest.directive('head', ['$rootScope','$compile',
     function($rootScope, $compile){

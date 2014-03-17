@@ -360,8 +360,11 @@ state presentation {
             string slides_body  = JsonGetJson(json_body, "slides");
             // Parse the slides section
             key json_slides     = JsonCreateStore(slides_body);
-            // Empty slides list
-            slides              = [];
+            // Empty slides and cache list
+            list empty          = [];
+            textureCache        = empty;
+            slides              = empty;
+            if(debug) llInstantMessage(userUuid, "[Debug] Slide list is currently: "+ (string) slides);
             integer x;
             integer length      = (integer) JsonGetValue(json_body, "slidesCount");
             // Get from each slide the URL or the UUID

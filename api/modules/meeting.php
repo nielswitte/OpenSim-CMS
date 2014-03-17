@@ -1,16 +1,17 @@
 <?php
 namespace API\Modules;
 
-if(EXEC != 1) {
-	die('Invalid request');
-}
+defined('EXEC') or die('Config not loaded');
+
 require_once dirname(__FILE__) .'/module.php';
+require_once dirname(__FILE__) .'/../../models/meeting.php';
+require_once dirname(__FILE__) .'/../../controllers/meetingController.php';
 
 /**
  * Implements the functions for meetings
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date February 25th, 2014
  */
 class Meeting extends Module{
@@ -37,7 +38,11 @@ class Meeting extends Module{
         $this->api->addRoute("/meetings\/([0-9]{4}-[0-9]{1,2}-[0-9]{1,2})\/calendar\/?$/",  "getMeetingsByDate",   $this, "GET",  \Auth::READ);  // Get all meetings that start after the given date
         $this->api->addRoute("/meetings\/?$/",                                              "getMeetings",         $this, "GET",  \Auth::READ);  // Get list with 50 meetings ordered by startdate DESC
         $this->api->addRoute("/meetings\/(\d+)\/?$/",                                       "getMeetings",         $this, "GET",  \Auth::READ);  // Get list with 50 meetings ordered by startdate DESC starting at the given offset
-        $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "getMeetingById",      $this, "GET",  \Auth::READ);  // Select specific meeting
+        $this->api->addRoute("/meeting\/?$/",                                               "createMeeting",       $this, "POST", \AUTH::EXECUTE); //Create a new meeting
+        $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "getMeetingById",      $this, "GET",  \Auth::READ);  // Select a specific meeting
+        $this->api->addRoute("/meeting\/(\d+)\/agenda\/?$/",                                "getMeetingAgendaById",$this, "GET",  \Auth::READ);  // Select a specific meeting and only get the agenda
+        $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "updateMeetingById",   $this, "PUT",  \Auth::EXECUTE); // Update a specific meeting
+        $this->api->addRoute("/meeting\/(\d+)\/log\/?$/",                                   "saveLogMeetingById",  $this, "POST", \Auth::WRITE); // Select a specific meeting
     }
 
     /**
@@ -58,7 +63,7 @@ class Meeting extends Module{
         foreach($resutls as $result) {
             $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
             $room       = new \Models\MeetingRoom($result['roomId']);
-            $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room);
+            $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room, $result['name']);
             $data[]     = $this->getMeetingData($meeting, FALSE);
         }
         return $data;
@@ -81,7 +86,7 @@ class Meeting extends Module{
         foreach($resutls as $result) {
             $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
             $room       = new \Models\MeetingRoom($result['roomId']);
-            $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room);
+            $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room, $result['name']);
             if(strpos($args[0], 'calendar') !== FALSE) {
                 $startTimestamp = strtotime($meeting->getStartDate());
                 $endTimestamp   = strtotime($meeting->getEndDate());
@@ -96,7 +101,7 @@ class Meeting extends Module{
                     // Meeting has ended ? => event-default
                     // Meeting still has to start => event-info
                     'class'         => ($startTimestamp < time() && $endTimestamp > time() ? 'event-success' : ($startTimestamp > time() ? 'event-info' : 'event-default')),
-                    'title'         => 'Room: '. $meeting->getRoom()->getId(),
+                    'title'         => $meeting->getName() .' (Room: '. $meeting->getRoom()->getId() .')',
                     'description'   => 'Reservation made by: '. $meeting->getCreator()->getUsername()
                 );
             } else {
@@ -116,11 +121,118 @@ class Meeting extends Module{
     public function getMeetingById($args) {
         $meeting = new \Models\Meeting($args[1]);
         $meeting->getInfoFromDatabase();
+        $meeting->getAgendaFromDabatase();
         $meeting->getCreator()->getInfoFromDatabase();
         $meeting->getRoom()->getInfoFromDatabase();
         $meeting->getParticipantsFromDatabase();
 
         return $this->getMeetingData($meeting, TRUE);
+    }
+
+    /**
+     * Gets the meeting agenda for the given meeting
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getMeetingAgendaById($args) {
+        $meeting = new \Models\Meeting($args[1]);
+        $meeting->getInfoFromDatabase();
+        $meeting->getAgendaFromDabatase();
+
+        return $this->getMeetingAgendaData($meeting);
+    }
+
+    /**
+     * Creates a new meeting
+     *
+     * @param array $args
+     * @return array
+     * @throws \Exception
+     */
+    public function createMeeting($args) {
+        $data           = FALSE;
+        $meetingCtrl    = new \Controllers\MeetingController();
+        $input          = \Helper::getInput(TRUE);
+
+        if($meetingCtrl->validateParametersCreate($input)) {
+            // Get room ID from input
+            $roomId = isset($input['room']['id']) ? $input['room']['id'] : $input['room'];
+            // Check to see if there is no overlap
+            if(!$meetingCtrl->meetingOverlap($input['startDate'], $input['endDate'], $roomId)) {
+                $data = $meetingCtrl->createMeeting($input);
+            } else {
+                throw new \Exception('Meeting overlaps with an existing meeting', 1);
+            }
+        }
+
+        // Format the result
+        $result = array(
+            'success'   => ($data !== FALSE ? TRUE : FALSE),
+            'meetingId' => ($data !== FALSE ? $data : 0)
+        );
+
+        return $result;
+    }
+
+    /**
+     * Updates the given meeting
+     *
+     * @param array $args
+     * @return array
+     * @throws \Exception
+     */
+    public function updateMeetingById($args) {
+        $data           = FALSE;
+        $meeting        = new \Models\Meeting($args[1]);
+        $meetingCtrl    = new \Controllers\MeetingController($meeting);
+        $input          = \Helper::getInput(TRUE);
+
+        if($meetingCtrl->validateParametersUpdate($input)) {
+            // Get room ID from input
+            $roomId = isset($input['room']['id']) ? $input['room']['id'] : $input['room'];
+            // Check to see if there is no overlap
+            if(!$meetingCtrl->meetingOverlap($input['startDate'], $input['endDate'], $roomId, $args[1])) {
+                $data = $meetingCtrl->updateMeeting($input);
+            } else {
+                throw new \Exception('Meeting overlaps with an existing meeting', 1);
+            }
+        }
+
+        // Format the result
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE),
+        );
+
+        return $result;
+    }
+
+    /**
+     * Processes the chatlogs
+     *
+     * @param array $args
+     * @return array
+     */
+    public function saveLogMeetingById($args) {
+        $data           = FALSE;
+        $meeting        = new \Models\Meeting($args[1]);
+        $meetingCtrl    = new \Controllers\MeetingController($meeting);
+        $input          = \Helper::getInput(TRUE);
+
+        // @todo: Handle input
+        print_r($input);
+        die();
+
+        if($meetingCtrl->validateParametersChat($input)) {
+            $data = $meetingCtrl->saveChat($input);
+        }
+
+        // Format the result
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE),
+        );
+
+        return $result;
     }
 
     /**
@@ -133,6 +245,7 @@ class Meeting extends Module{
     public function getMeetingData(\Models\Meeting $meeting, $full = TRUE) {
         $data       = array(
             'id'        => $meeting->getId(),
+            'name'      => $meeting->getName(),
             'startDate' => $meeting->getStartDate(),
             'endDate'   => $meeting->getEndDate(),
             'creator'   => array(
@@ -157,19 +270,18 @@ class Meeting extends Module{
                 'description'   => $meeting->getRoom()->getDescription()
             );
 
-            $i = 1;
             $participants = array();
             foreach($meeting->getParticipants()->getParticipants() as $user) {
-                $participants[$i] = array(
+                $participants[] = array(
                     'id'            => $user->getId(),
                     'username'      => $user->getUsername(),
                     'firstName'     => $user->getFirstName(),
                     'lastName'      => $user->getLastName(),
                     'email'         => $user->getEmail()
                 );
-                $i++;
             }
             $data['participants'] = $participants;
+            $data['agenda']       = $meeting->getAgenda()->toString();
         } else {
             $data['roomId']     = $meeting->getRoom()->getId();
             // URL to full view
@@ -177,5 +289,15 @@ class Meeting extends Module{
         }
 
         return $data;
+    }
+
+    /**
+     * Returns the agenda for the meeting as an json array
+     *
+     * @param \Models\Meeting $meeting
+     * @return array
+     */
+    public function getMeetingAgendaData(\Models\Meeting $meeting) {
+        return $meeting->getAgenda()->buildAgenda();
     }
 }

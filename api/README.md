@@ -38,6 +38,31 @@ The user OpenSim with user ID -1 can only accessed from the IP/Hostname which is
 to the grid list. In addition the `X-SecondLife-Shard` header needs to be set to access this user, this is
 done by default for OpenSim.
 
+### Permissions
+
+For each API there are permissions for the user account. The user requires a specific level for accessing certain
+functions. The levels are represented by integers that represent a binary permission.
+
+| Level         | Binary    | Integer |
+|---------------|-----------|---------|
+| NONE          | 000       | 0       |
+| READ          | 100       | 4       |
+| EXECUTE       | 101       | 5       |
+| WRITE         | 110       | 6       |
+| ALL           | 111       | 7       |
+
+These numbers can be used for the following parameters:
+
+| Parameter         | Type      | Description                                                   |
+|-------------------|-----------|---------------------------------------------------------------|
+| auth              | Integer   | Permission level regarding Authorization API                  |
+| document          | Integer   | Permission level regarding Documents API                      |
+| grid              | Integer   | Permission level regarding Grids API                          |
+| meeting           | Integer   | Permission level regarding Meetings API                       |
+| meetingroom       | Integer   | Permission level regarding Meeting rooms API                  |
+| presentation      | Integer   | Permission level regarding Presentations API                  |
+| user              | Integer   | Permission level regarding Users API                          |
+
 ## Users
 To get a list of 50 users, use:
 
@@ -102,15 +127,21 @@ Example of output
         "5",
         "8"
     ],
-    "avatars": {
-        "1": {
+    "permissions" : {
+        "auth": 7,
+        "document": 5,
+        "grid": 4,
+        (...)
+    },
+    "avatars": [
+         {
             "uuid": "0a1811f4-7174-4e42-8bb5-26ef78335407",
             "gridId": 1,
             "gridName": "OpenSim-CMS' test grid"
         },
-        "2": { (...) },
-        "3": { (...) }
-    }
+        { (...) },
+        { (...) }
+    ]
 }
 ```
 
@@ -152,6 +183,7 @@ PUT /api/user/<ID>/ HTTP/1.1
 | email             | String    | The email address for the new user                                |
 | firstName         | String    | The first name of the new user                                    |
 | lastName          | String    | The last name of the new user                                     |
+| permissions       | Array     | The permission levels for the user (see permissions)              |
 
 ### Change password
 
@@ -310,6 +342,21 @@ GET /api/meetings/<YYYY-MM-DD>/calendar/ HTTP/1.1
 GET /api/meeting/<MEETING-ID>/ HTTP/1.1
 ```
 
+```http
+PUT /api/meeting/<MEETING-ID>/ HTTP/1.1
+```
+
+| Parameter         | Type             | Description                                                      |
+|-------------------|------------------|------------------------------------------------------------------|
+| startDate         | string           | The start date time of the meeting (format: YYYY-MM-DD HH:mm:ss) |
+| endDate           | string           | The end date time of the meeting (format: YYYY-MM-DD HH:mm:ss)   |
+| room              | integer or array | Room ID, can be submitted as an integer or as a json array `[{id: 1, (...)}, {id: 2, (...)}, (...) }]` |
+| participants      | array            | A array with user IDs. Can be an array `{1, 2, 3, 4, (...)}` or a json array with users that contain an id field  `[{id: 1, (...)}, {id: 2, (...)}, (...) }]`                      |
+
+```http
+GET /api/meeting/<MEETING-ID>/agenda HTTP/1.1
+```
+
 ## Meeting Rooms
 
 ```http
@@ -342,7 +389,6 @@ DELETE /api/documents/cache/ HTTP/1.1
 GET /api/document/<DOCUMENT-ID>/ HTTP/1.1
 ```
 
-```
 ### Add a new document
 
 ```http
@@ -522,16 +568,18 @@ specific grid when possible.
         },
         "cacheTime": "48 hours",
         "defaultRegionUuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
-        "regionCount": 1,
+        "regionCount": 3,
         "regions": {
-            "72efcc78-2b1a-4571-8704-fea352998c0c": {
+            {
                 "uuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
                 "name": "The Grid",
                 "image": "http://localhost:80/OpenSim-CMS/api/grid/1/region/72efcc78-2b1a-4571-8704-fea352998c0c/image/",
                 "serverStatus": 1,
                 "totalUsers": 2,
                 "activeUsers": 1
-            }
+            },
+            { (...) },
+            { (...) }
         }
     },
     { (...) },
@@ -565,15 +613,16 @@ This will return a summary of the grid and regions, excluding the passwords.
         "port": 9001
     },
     "cacheTime": "48 hours",
+    "defaultRegionUuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
+    "regionCount": 3,
     "regions": {
-        "72efcc78-2b1a-4571-8704-fea352998c0c": {
+        {
             "uuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
             "name": "The Grid",
             "image": "http://localhost:80/OpenSim-CMS/api/grid/1/region/72efcc78-2b1a-4571-8704-fea352998c0c/image/"
         },
-        "(...)": {
-            (...)
-        }
+        { (...) },
+        { (...) }
     }
 }
 

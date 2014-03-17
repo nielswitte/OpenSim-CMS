@@ -1,0 +1,46 @@
+<table class="table table-striped table-responsive table-hover">
+    <tr>
+        <th class="col-sm-3"><strong>Meeting ID</strong></th>
+        <td class="col-sm-9">{{meeting.id}}</td>
+    </tr>
+    <tr>
+        <th><strong>Name:</strong></th>
+        <td>{{meeting.name}}</td>
+    </tr>
+    <tr>
+        <th><strong>Start/End</strong></th>
+        <td>
+            {{startTimeString}} - {{endTimeString}} @ {{startDateString}}
+        </td>
+    </tr>
+    <tr>
+        <th><strong>Created by</strong></th>
+        <td><a href="#!/user/{{meeting.creator.id}}">{{meeting.creator.username}} ({{meeting.creator.firstName}} {{meeting.creator.lastName}})</a></td>
+    </tr>
+    <tr>
+        <th><strong>Location</strong></th>
+        <td>
+            <p>
+                <strong>Room</strong> {{meeting.room.id}}
+                <br>{{meeting.room.description}}
+            </p>
+            <p><strong>Region</strong> {{meeting.room.region.name}}</p>
+            <p><strong>Grid</strong> <a href="#!/grid/{{meeting.room.grid.id}}">{{meeting.room.grid.name}}</a></p>
+        </td>
+    </tr>
+    <tr>
+        <th><strong>Agenda</strong></th>
+        <td ng-bind-html="meeting.agenda"></td>
+    </tr>
+    <tr>
+        <th><strong>Participants</strong></th>
+        <td>
+            <ul>
+                <li ng-repeat="participant in meeting.participants">
+                    <a href="#!/user/{{participant.id}}">{{participant.username}} ({{participant.firstName}} {{participant.lastName}})</a>
+                </li>
+                <li ng-show="meeting.participants.length === 0">None</li>
+            </ul>
+        </td>
+    </tr>
+</table>

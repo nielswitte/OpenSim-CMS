@@ -1,16 +1,19 @@
 <?php
 namespace API\Modules;
 
-if(EXEC != 1) {
-	die('Invalid request');
-}
+defined('EXEC') or die('Config not loaded');
+
 require_once dirname(__FILE__) .'/module.php';
+require_once dirname(__FILE__) .'/../../models/slide.php';
+require_once dirname(__FILE__) .'/../../controllers/slideController.php';
+require_once dirname(__FILE__) .'/../../models/presentation.php';
+require_once dirname(__FILE__) .'/../../controllers/presentationController.php';
 
 /**
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date February 24th, 2014
  */
 class Presentation extends Module{
@@ -35,7 +38,7 @@ class Presentation extends Module{
     public function setRoutes() {
         $this->api->addRoute("/presentations\/?$/",                                     "getPresentations",         $this, "GET",  \Auth::READ);  // Get list with 50 presentations
         $this->api->addRoute("/presentations\/(\d+)\/?$/",                              "getPresentations",         $this, "GET",  \Auth::READ);  // Get list with 50 presentations starting at the given offset
-        $this->api->addRoute("/presentation\/?$/",                                      "createPresentation",       $this, "POST", \Auth::WRITE); // Create a presentation
+        $this->api->addRoute("/presentation\/?$/",                                      "createPresentation",       $this, "POST", \Auth::EXECUTE); // Create a presentation
         $this->api->addRoute("/presentation\/(\d+)\/?$/",                               "getPresentationById",      $this, "GET",  \Auth::READ);  // Select specific presentation
         $this->api->addRoute("/presentation\/(\d+)\/slide\/(\d+)\/?$/",                 "getSlideById",             $this, "GET",  \Auth::READ);  // Get slide from presentation
         $this->api->addRoute("/presentation\/(\d+)\/slide\/number\/(\d+)\/?$/",         "getSlideByNumber",         $this, "GET",  \Auth::READ);  // Get slide from presentation
@@ -194,7 +197,8 @@ class Presentation extends Module{
     public function getSlideImageByNumber($args) {
         // Get presentation and slide details
         $presentation   = new \Models\Presentation($args[1], $args[2]);
-        $slidePath      = $presentation->getPath() . DS .'slide-'. ($presentation->getCurrentSlide() < 10 ? '0'. $presentation->getCurrentSlide() : $presentation->getCurrentSlide()) .'.'. IMAGE_TYPE;
+        $presentation->getSlides();
+        $slidePath      = $presentation->getPath() . DS .'slide-'. ($presentation->getCurrentSlide() < 10 && $presentation->getNumberOfSlides() >= 10 ? '0'. $presentation->getCurrentSlide() : $presentation->getCurrentSlide()) .'.'. IMAGE_TYPE;
 
         // Show image if exists
         if(file_exists($slidePath)) {
@@ -203,7 +207,7 @@ class Presentation extends Module{
             // resize when needed
             if($resize->getWidth() > IMAGE_WIDTH || $resize->getHeight() > IMAGE_HEIGHT) {
                 $resize->resize(IMAGE_WIDTH,IMAGE_HEIGHT,'fit');
-                $resize->save('slide-'. ($presentation->getCurrentSlide() < 10 ? '0'. $presentation->getCurrentSlide() : $presentation->getCurrentSlide()), $presentation->getPath(), IMAGE_TYPE);
+                $resize->save('slide-'. ($presentation->getCurrentSlide() < 10 && $presentation->getNumberOfSlides() >= 10 ? '0'. $presentation->getCurrentSlide() : $presentation->getCurrentSlide()), $presentation->getPath(), IMAGE_TYPE);
             }
             unset($resize);
 
@@ -214,7 +218,7 @@ class Presentation extends Module{
             $image->writeWatermark(100, 0, 0, 'c', 'c');
             $image->display();
         } else {
-            throw new Exception("Requested slide does not exists", 5);
+            throw new \Exception("Requested slide does not exists", 5);
         }
     }
 
