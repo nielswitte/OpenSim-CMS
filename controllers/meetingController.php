@@ -173,16 +173,18 @@ class MeetingController {
             $db->escape($endDate),
             $db->escape($roomId)
         );
-        if($meetingId > 0) {
+        if($meetingId == 0) {
             $result = $db->rawQuery('
                     SELECT
                         COUNT(*) AS count
                     FROM
                         meetings
                     WHERE (
-                        startDate BETWEEN ? AND ?
-                    OR
-                        endDate BETWEEN ? AND ?
+                            startDate BETWEEN ? AND ?
+                        OR
+                            ? BETWEEN startDate AND endDate
+                        OR
+                            ? BETWEEN startDate AND endDate
                     ) AND
                         roomId = ?', $params);
         } else {
@@ -193,9 +195,11 @@ class MeetingController {
                     FROM
                         meetings
                     WHERE (
-                        startDate BETWEEN ? AND ?
-                    OR
-                        endDate BETWEEN ? AND ?
+                            startDate BETWEEN ? AND ?
+                        OR
+                            ? BETWEEN startDate AND endDate
+                        OR
+                            ? BETWEEN startDate AND endDate
                     ) AND
                         roomId = ?
                     AND
