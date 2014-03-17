@@ -257,3 +257,25 @@ body {
         button { float: right; }
     }
 }
+
+// Agenda list
+ol {
+    counter-reset: item;
+    margin: 0;
+    padding: 0;
+    font-weight: bold;
+
+    li {
+        display: block;
+
+        &:before {
+            content: counters(item, ".") " ";
+            counter-increment: item;
+        }
+    }
+
+    ol {
+        font-weight: normal;
+        margin-left: 20px;
+    }
+}
