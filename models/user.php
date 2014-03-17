@@ -103,8 +103,8 @@ class User implements SimpleModel {
         $avatars = $db->get('avatars');
         $i = 1;
         foreach($avatars as $avatar) {
-            $grid = new \Models\Grid($avatar['gridId']);
-            $newAvatar = new \Models\Avatar($grid, $avatar['uuid']);
+            $grid       = new \Models\Grid($avatar['gridId']);
+            $newAvatar  = new \Models\Avatar($grid, $avatar['uuid']);
             $newAvatar->setConfirmation($avatar['confirmed']);
             // Get additional data from Grid?
             if($full) {
