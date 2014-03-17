@@ -86,6 +86,7 @@ if (EXEC != 1) {
         <script src="templates/restangular/js/libs/restangular.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/underscore.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/moment.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/bootstrap-calendar.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/select2.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/less.min.js" type="text/javascript"></script>
 

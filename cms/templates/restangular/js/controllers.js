@@ -365,7 +365,7 @@ angularRest.controller('gridController', ['Restangular', '$scope', '$routeParams
 );
 
 // meetingsController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Page', '$modal', '$tooltip', '$sce', 'Cache', '$location',  function(RestangularCache, $scope, Page, $modal, $tooltip, $sce, Cache, $location) {
+angularRest.controller('meetingsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$modal', '$tooltip', '$sce', 'Cache', '$location',  function(Restangular, RestangularCache, $scope, Page, $modal, $tooltip, $sce, Cache, $location) {
         var date = new Date(new Date - (1000*60*60*24*14));
         var modal;
         var meeting;
@@ -424,7 +424,7 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
         }
 
         // Get all meetings for the calendar
-        RestangularCache.one('meetings', date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).all('calendar').getList().then(function(meetingsResponse) {
+        Restangular.one('meetings', date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).all('calendar').getList().then(function(meetingsResponse) {
             // Show loading screen
             jQuery('#loading').show();
 
@@ -483,7 +483,7 @@ angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Pag
 );
 
 // meetingController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('meetingController', ['RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', function(RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache) {
+angularRest.controller('meetingController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache) {
         var meetingRequestUrl;
         var gridsRequestUrl;
         var calendar;
@@ -668,7 +668,7 @@ angularRest.controller('meetingController', ['RestangularCache', '$scope', '$rou
 
             // Load meetings on same day
             var date = new moment($scope.meeting.startDate).format('YYYY-MM-DD');
-            RestangularCache.one('meetings', date).all('calendar').getList().then(function(meetingsResponse) {
+            Restangular.one('meetings', date).all('calendar').getList().then(function(meetingsResponse) {
                 calendar = jQuery('#calendar').calendar({
                     language:       'en-US',
                     events_source:  meetingsResponse,
@@ -833,7 +833,7 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                 } else {
-                    $alert({title: 'User created!', content: $sce.trustAsHtml('The meeting for '+ $scope.meeting.startDate +' has been created with ID: '+ resp.meetingId +'.'), type: 'success'});
+                    $alert({title: 'Meeting scheduled!', content: $sce.trustAsHtml('The meeting for '+ $scope.meeting.startDate +' has been created with ID: '+ resp.meetingId +'.'), type: 'success'});
                     Cache.clearCache();
                     $location.path('meetings');
                 }
@@ -844,8 +844,8 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
         jQuery('#loading').show();
 
         // Load meetings on same day
-        var date = new moment($scope.meeting.startDate).format('YYYY-MM-DD');
-        RestangularCache.one('meetings', date).all('calendar').getList().then(function(meetingsResponse) {
+        var date = new moment().format('YYYY-MM-DD');
+        Restangular.one('meetings', date).all('calendar').getList().then(function(meetingsResponse) {
             calendar = jQuery('#calendar').calendar({
                 language:       'en-US',
                 events_source:  meetingsResponse,
