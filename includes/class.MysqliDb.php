@@ -1,5 +1,4 @@
 <?php
-
 /**
  * MysqliDb Class
  *
@@ -10,68 +9,59 @@
  * @copyright Copyright (c) 2010
  * @license   http://opensource.org/licenses/gpl-3.0.html GNU Public License
  * @version   1.1
- * */
-class MysqliDb {
-
+ **/
+class MysqliDb
+{
     /**
      * Static instance of self
      *
      * @var MysqliDb
      */
     protected static $_instance;
-
     /**
      * MySQLi instance
      *
      * @var mysqli
      */
     protected $_mysqli;
-
     /**
      * The SQL query to be prepared and executed
      *
      * @var string
      */
     protected $_query;
-
     /**
      * An array that holds where joins
      *
      * @var array
      */
     protected $_join = array();
-
     /**
      * An array that holds where conditions 'fieldname' => 'value'
      *
      * @var array
      */
     protected $_where = array();
-
     /**
      * Dynamic type list for where condition values
      *
      * @var array
      */
     protected $_whereTypeList;
-
     /**
      * Dynamic type list for order by condition value
      */
     protected $_orderBy = array();
-
     /**
      * Dynamic type list for group by condition value
      */
     protected $_groupBy = array();
-
     /**
      * Dynamic type list for table data values
      *
      * @var array
      */
     protected $_paramTypeList;
-
     /**
      * Dynamic array that holds a combination of where condition/table data value types and parameter referances
      *
@@ -86,12 +76,13 @@ class MysqliDb {
      * @param string $db
      * @param int $port
      */
-
-    public function __construct($host, $username, $password, $db, $port = NULL) {
-        if ($port == NULL)
+    public function __construct($host, $username, $password, $db, $port = NULL)
+    {
+        if($port == NULL)
             $port = ini_get('mysqli.default_port');
 
-        $this->_mysqli = new mysqli($host, $username, $password, $db, $port) or die('There was a problem connecting to the database');
+        $this->_mysqli = new mysqli($host, $username, $password, $db, $port)
+            or die('There was a problem connecting to the database');
 
         $this->_mysqli->set_charset('utf8');
 
@@ -107,7 +98,8 @@ class MysqliDb {
      *
      * @return object Returns the current instance.
      */
-    public static function getInstance() {
+    public static function getInstance()
+    {
         return self::$_instance;
     }
 
@@ -116,7 +108,8 @@ class MysqliDb {
      *
      * @return object Returns the current instance.
      */
-    protected function reset() {
+    protected function reset()
+    {
         $this->_where = array();
         $this->_join = array();
         $this->_orderBy = array();
@@ -135,7 +128,8 @@ class MysqliDb {
      *
      * @return array Contains the returned rows from the query.
      */
-    public function rawQuery($query, $bindParams = null) {
+    public function rawQuery($query, $bindParams = null)
+    {
         $this->_query = filter_var($query, FILTER_SANITIZE_STRING);
         $stmt = $this->_prepareQuery();
 
@@ -147,6 +141,7 @@ class MysqliDb {
             }
 
             call_user_func_array(array($stmt, 'bind_param'), $this->refValues($params));
+
         }
 
         $stmt->execute();
@@ -162,7 +157,8 @@ class MysqliDb {
      *
      * @return array Contains the returned rows from the query.
      */
-    public function query($query, $numRows = null) {
+    public function query($query, $numRows = null)
+    {
         $this->_query = filter_var($query, FILTER_SANITIZE_STRING);
         $stmt = $this->_buildQuery($numRows);
         $stmt->execute();
@@ -179,8 +175,9 @@ class MysqliDb {
      *
      * @return array Contains the returned rows from the select query.
      */
-    public function get($tableName, $numRows = null, $columns = '*') {
-        if (empty($columns))
+    public function get($tableName, $numRows = null, $columns = '*')
+    {
+        if (empty ($columns))
             $columns = '*';
 
         $column = is_array($columns) ? implode(', ', $columns) : $columns;
@@ -199,10 +196,11 @@ class MysqliDb {
      *
      * @return array Contains the returned rows from the select query.
      */
-    public function getOne($tableName, $columns = '*') {
-        $res = $this->get($tableName, 1, $columns);
-        return $res[0];
-    }
+     public function getOne($tableName, $columns = '*')
+     {
+         $res = $this->get ($tableName, 1, $columns);
+         return $res[0];
+     }
 
     /**
      *
@@ -211,7 +209,8 @@ class MysqliDb {
      *
      * @return boolean Boolean indicating whether the insert query was completed succesfully.
      */
-    public function insert($tableName, $insertData) {
+    public function insert($tableName, $insertData)
+    {
         $this->_query = "INSERT into $tableName";
         $stmt = $this->_buildQuery(null, $insertData);
         $stmt->execute();
@@ -228,7 +227,8 @@ class MysqliDb {
      *
      * @return boolean
      */
-    public function update($tableName, $tableData) {
+    public function update($tableName, $tableData)
+    {
         $this->_query = "UPDATE $tableName SET ";
 
         $stmt = $this->_buildQuery(null, $tableData);
@@ -246,7 +246,8 @@ class MysqliDb {
      *
      * @return boolean Indicates success. 0 or 1.
      */
-    public function delete($tableName, $numRows = null) {
+    public function delete($tableName, $numRows = null)
+    {
         $this->_query = "DELETE FROM $tableName";
 
         $stmt = $this->_buildQuery($numRows);
@@ -266,7 +267,8 @@ class MysqliDb {
      *
      * @return MysqliDb
      */
-    public function where($whereProp, $whereValue) {
+    public function where($whereProp, $whereValue)
+    {
         $this->_where[$whereProp] = $whereValue;
         return $this;
     }
@@ -282,19 +284,19 @@ class MysqliDb {
      *
      * @return MysqliDb
      */
-    public function join($joinTable, $joinCondition, $joinType = '') {
+     public function join($joinTable, $joinCondition, $joinType = '')
+     {
         $allowedTypes = array('LEFT', 'RIGHT', 'OUTER', 'INNER', 'LEFT OUTER', 'RIGHT OUTER');
-        $joinType = strtoupper(trim($joinType));
+        $joinType = strtoupper (trim ($joinType));
         $joinTable = filter_var($joinTable, FILTER_SANITIZE_STRING);
 
-        if ($joinType && !in_array($joinType, $allowedTypes))
-            die('Wrong JOIN type: ' . $joinType);
+        if ($joinType && !in_array ($joinType, $allowedTypes))
+            die ('Wrong JOIN type: '.$joinType);
 
         $this->_join[$joinType . " JOIN " . $joinTable] = $joinCondition;
 
         return $this;
     }
-
     /**
      * This method allows you to specify multiple (method chaining optional) ORDER BY statements for SQL queries.
      *
@@ -305,13 +307,14 @@ class MysqliDb {
      *
      * @return MysqliDb
      */
-    public function orderBy($orderByField, $orderbyDirection = "DESC") {
-        $allowedDirection = Array("ASC", "DESC");
-        $orderbyDirection = strtoupper(trim($orderbyDirection));
+    public function orderBy($orderByField, $orderbyDirection = "DESC")
+    {
+        $allowedDirection = Array ("ASC", "DESC");
+        $orderbyDirection = strtoupper (trim ($orderbyDirection));
         $orderByField = filter_var($orderByField, FILTER_SANITIZE_STRING);
 
-        if (empty($orderbyDirection) || !in_array($orderbyDirection, $allowedDirection))
-            die('Wrong order direction: ' . $orderbyDirection);
+        if (empty($orderbyDirection) || !in_array ($orderbyDirection, $allowedDirection))
+            die ('Wrong order direction: '.$orderbyDirection);
 
         $this->_orderBy[$orderByField] = $orderbyDirection;
         return $this;
@@ -326,7 +329,8 @@ class MysqliDb {
      *
      * @return MysqliDb
      */
-    public function groupBy($groupByField) {
+    public function groupBy($groupByField)
+    {
         $groupByField = filter_var($groupByField, FILTER_SANITIZE_STRING);
 
         $this->_groupBy[] = $groupByField;
@@ -338,7 +342,8 @@ class MysqliDb {
      *
      * @return integer The last inserted item ID.
      */
-    public function getInsertId() {
+    public function getInsertId()
+    {
         return $this->_mysqli->insert_id;
     }
 
@@ -349,7 +354,8 @@ class MysqliDb {
      *
      * @return string The escaped string.
      */
-    public function escape($str) {
+    public function escape($str)
+    {
         return $this->_mysqli->real_escape_string($str);
     }
 
@@ -363,7 +369,8 @@ class MysqliDb {
      *
      * @return string The joined parameter types.
      */
-    protected function _determineType($item) {
+    protected function _determineType($item)
+    {
         switch (gettype($item)) {
             case 'NULL':
             case 'string':
@@ -395,7 +402,8 @@ class MysqliDb {
      *
      * @return mysqli_stmt Returns the $stmt object.
      */
-    protected function _buildQuery($numRows = null, $tableData = null) {
+    protected function _buildQuery($numRows = null, $tableData = null)
+    {
         $hasTableData = is_array($tableData);
         $hasConditional = !empty($this->_where);
 
@@ -414,6 +422,14 @@ class MysqliDb {
                 $pos = strpos($this->_query, 'UPDATE');
                 if ($pos !== false) {
                     foreach ($tableData as $prop => $value) {
+                        if (is_array($value)) {
+                            $this->_query .= $prop ." = ";
+                            if (!empty($value['[I]']))
+                                $this->_query .= $prop.$value['[I]'].", ";
+                            else
+                                $this->_query .= $value['[F]'].", ";
+                            continue;
+                        }
                         // determines what data type the item is, for binding purposes.
                         $this->_paramTypeList .= $this->_determineType($value);
 
@@ -428,36 +444,36 @@ class MysqliDb {
             $this->_query .= ' WHERE ';
             foreach ($this->_where as $column => $value) {
                 $comparison = ' = ? ';
-                if (is_array($value)) {
+                if( is_array( $value ) ) {
                     // if the value is an array, then this isn't a basic = comparison
-                    $key = key($value);
+                    $key = key( $value );
                     $val = $value[$key];
-                    switch (strtolower($key)) {
+                    switch( strtolower($key) ) {
                         case 'in':
                             $comparison = ' IN (';
-                            foreach ($val as $v) {
+                            foreach($val as $v){
                                 $comparison .= ' ?,';
-                                $this->_whereTypeList .= $this->_determineType($v);
+                                $this->_whereTypeList .= $this->_determineType( $v );
                             }
-                            $comparison = rtrim($comparison, ',') . ' ) ';
+                            $comparison = rtrim($comparison, ',').' ) ';
                             break;
                         case 'between':
                             $comparison = ' BETWEEN ? AND ? ';
-                            $this->_whereTypeList .= $this->_determineType($val[0]);
-                            $this->_whereTypeList .= $this->_determineType($val[1]);
+                            $this->_whereTypeList .= $this->_determineType( $val[0] );
+                            $this->_whereTypeList .= $this->_determineType( $val[1] );
                             break;
                         default:
                             // We are using a comparison operator with only one parameter after it
-                            $comparison = ' ' . $key . ' ? ';
+                            $comparison = ' '.$key.' ? ';
                             // Determines what data type the where column is, for binding purposes.
-                            $this->_whereTypeList .= $this->_determineType($val);
+                            $this->_whereTypeList .= $this->_determineType( $val );
                     }
                 } else {
                     // Determines what data type the where column is, for binding purposes.
                     $this->_whereTypeList .= $this->_determineType($value);
                 }
                 // Prepares the reset of the SQL query.
-                $this->_query .= ($column . $comparison . ' AND ');
+                $this->_query .= ($column.$comparison.' AND ');
             }
             $this->_query = rtrim($this->_query, ' AND ');
         }
@@ -473,13 +489,13 @@ class MysqliDb {
         }
 
         // Did the user call the "orderBy" method?
-        if (!empty($this->_orderBy)) {
+        if (!empty ($this->_orderBy)) {
             $this->_query .= " ORDER BY ";
             foreach ($this->_orderBy as $prop => $value) {
                 // prepares the reset of the SQL query.
                 $this->_query .= $prop . " " . $value . ", ";
             }
-            $this->_query = rtrim($this->_query, ', ') . " ";
+            $this->_query = rtrim ($this->_query, ', ') . " ";
         }
 
         // Determine if is INSERT query
@@ -490,19 +506,22 @@ class MysqliDb {
                 //is insert statement
                 $keys = array_keys($tableData);
                 $values = array_values($tableData);
-                $num = count($keys);
-
-                // wrap values in quotes
-                foreach ($values as $key => $val) {
-                    $values[$key] = "'{$val}'";
-                    $this->_paramTypeList .= $this->_determineType($val);
-                }
 
                 $this->_query .= '(' . implode($keys, ', ') . ')';
                 $this->_query .= ' VALUES(';
-                while ($num !== 0) {
+                // wrap values in quotes if needed
+                foreach ($values as $key => $val) {
+                    if (is_array($val)) {
+                        if (!empty($val['[I]']))
+                            $this->_query .= $keys[$key].$val['[I]'].", ";
+                        else
+                            $this->_query .= $val['[F]'].", ";
+                        continue;
+                    }
+
+                    $values[$key] = "'{$val}'";
+                    $this->_paramTypeList .= $this->_determineType($val);
                     $this->_query .= '?, ';
-                    $num--;
                 }
                 $this->_query = rtrim($this->_query, ', ');
                 $this->_query .= ')';
@@ -511,7 +530,7 @@ class MysqliDb {
 
         // Did the user set a limit
         if (isset($numRows)) {
-            $this->_query .= ' LIMIT ' . (int) $numRows;
+            $this->_query .= ' LIMIT ' . (int)$numRows;
         }
 
         // Prepare query
@@ -521,7 +540,8 @@ class MysqliDb {
         if ($hasTableData) {
             $this->_bindParams[0] = $this->_paramTypeList;
             foreach ($tableData as $prop => $val) {
-                array_push($this->_bindParams, $tableData[$prop]);
+                if (!is_array($tableData[$prop]))
+                    array_push($this->_bindParams, $tableData[$prop]);
             }
         }
         // Prepare where condition bind parameters
@@ -529,8 +549,8 @@ class MysqliDb {
             if ($this->_where) {
                 $this->_bindParams[0] .= $this->_whereTypeList;
                 foreach ($this->_where as $prop => $val) {
-                    if (!is_array($val)) {
-                        array_push($this->_bindParams, $this->_where[$prop]);
+                    if (!is_array ($val)) {
+                        array_push ($this->_bindParams, $this->_where[$prop]);
                         continue;
                     }
                     // if val is an array, this is not a basic = comparison operator
@@ -543,7 +563,7 @@ class MysqliDb {
                         }
                     } else {
                         // otherwise this comparison operator takes only one parameter
-                        array_push($this->_bindParams, $this->_where[$prop][$key]);
+                        array_push ($this->_bindParams, $this->_where[$prop][$key]);
                     }
                 }
             }
@@ -564,7 +584,8 @@ class MysqliDb {
      *
      * @return array The results of the SQL fetch.
      */
-    protected function _dynamicBindResults(mysqli_stmt $stmt) {
+    protected function _dynamicBindResults(mysqli_stmt $stmt)
+    {
         $parameters = array();
         $results = array();
 
@@ -572,7 +593,7 @@ class MysqliDb {
 
         // if $meta is false yet sqlstate is true, there's no sql error but the query is
         // most likely an update/insert/delete which doesn't produce any results
-        if (!$meta && $stmt->sqlstate) {
+        if(!$meta && $stmt->sqlstate) {
             return array();
         }
 
@@ -600,7 +621,8 @@ class MysqliDb {
      *
      * @return mysqli_stmt
      */
-    protected function _prepareQuery() {
+    protected function _prepareQuery()
+    {
         if (!$stmt = $this->_mysqli->prepare($this->_query)) {
             trigger_error("Problem preparing query ($this->_query) " . $this->_mysqli->error, E_USER_ERROR);
         }
@@ -610,7 +632,8 @@ class MysqliDb {
     /**
      * Close connection
      */
-    public function __destruct() {
+    public function __destruct()
+    {
         $this->_mysqli->close();
     }
 
@@ -619,7 +642,8 @@ class MysqliDb {
      *
      * @return array
      */
-    protected function refValues($arr) {
+    protected function refValues($arr)
+    {
         //Reference is required for PHP 5.3+
         if (strnatcmp(phpversion(), '5.3') >= 0) {
             $refs = array();
@@ -636,10 +660,76 @@ class MysqliDb {
      *
      * @return string
      */
-    public function getLastError() {
+    public function getLastError () {
         return $this->_mysqli->error;
     }
 
-}
+    /* Helper functions */
+    /**
+     * Method returns generated interval function as a string
+     *
+     * @param string interval in the formats:
+     *        "1", "-1d" or "- 1 day" -- For interval - 1 day
+     *        Supported intervals [s]econd, [m]inute, [h]hour, [d]day, [M]onth, [Y]ear
+     *        Default null;
+     * @param string Initial date
+     *
+     * @return string
+    */
+    public function interval ($diff, $func = "NOW()") {
+        $types = Array ("s" => "second", "m" => "minute", "h" => "hour", "d" => "day", "M" => "month", "Y" => "year");
+        $incr = '+';
+        $items = '';
+        $type = 'd';
 
-// END class
+        if ($diff && preg_match('/([+-]?) ?([0-9]+) ?([a-zA-Z]?)/',$diff, $matches)) {
+            if (!empty ($matches[1])) $incr = $matches[1];
+            if (!empty ($matches[2])) $items = $matches[2];
+            if (!empty ($matches[3])) $type = $matches[3];
+            if (!in_array($type, array_keys($types)))
+                trigger_error ("invalid interval type in '{$diff}'");
+            $func .= " ".$incr ." interval ". $items ." ".$types[$type] . " ";
+        }
+        return $func;
+
+    }
+    /**
+     * Method returns generated interval function as an insert/update function
+     *
+     * @param string interval in the formats:
+     *        "1", "-1d" or "- 1 day" -- For interval - 1 day
+     *        Supported intervals [s]econd, [m]inute, [h]hour, [d]day, [M]onth, [Y]ear
+     *        Default null;
+     * @param string Initial date
+     *
+     * @return array
+    */
+    public function now ($diff = null, $func = "NOW()") {
+        return Array ("[F]" => $this->interval($diff, $func));
+    }
+
+    /**
+     * Method generates incremental function call
+     * @param int increment amount. 1 by default
+     */
+    public function inc($num = 1) {
+        return Array ("[I]" => "+" . (int)$num);
+    }
+
+    /**
+     * Method generates decrimental function call
+     * @param int increment amount. 1 by default
+     */
+    public function dec ($num = 1) {
+        return Array ("[I]" => "-" . (int)$num);
+    }
+
+    /**
+     * Method generates user defined function call
+     * @param string user function body
+     */
+    public function func ($expr) {
+        return Array ("[F]" => $expr);
+    }
+
+} // END class
