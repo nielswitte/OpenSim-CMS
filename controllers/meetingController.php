@@ -155,6 +155,57 @@ class MeetingController {
     }
 
     /**
+     * Checks to see if the given room is available during the given interval
+     * Optionally specify a meetingId to exclude the selected meeting (for example when performing an update)
+     *
+     * @param timestamp $startDate - Start date time of the meeting (YYYY-MM-DD HH:mm:ss)
+     * @param timestamp $endDate - End date time of the meeting (YYYY-MM-DD HH:mm:ss)
+     * @param integer $roomId - Meeting Room ID
+     * @param integer $meetingId - [Optional]
+     * @return boolean
+     */
+    public function meetingOverlap($startDate, $endDate, $roomId, $meetingId = 0) {
+        $db = \Helper::getDB();
+        $params = array(
+            $db->escape($startDate),
+            $db->escape($endDate),
+            $db->escape($startDate),
+            $db->escape($endDate),
+            $db->escape($roomId)
+        );
+        if($meetingId > 0) {
+            $result = $db->rawQuery('
+                    SELECT
+                        COUNT(*) AS count
+                    FROM
+                        meetings
+                    WHERE (
+                        startDate BETWEEN ? AND ?
+                    OR
+                        endDate BETWEEN ? AND ?
+                    ) AND
+                        roomId = ?', $params);
+        } else {
+            $params[] = $db->escape($meetingId);
+            $result = $db->rawQuery('
+                    SELECT
+                        COUNT(*) AS count
+                    FROM
+                        meetings
+                    WHERE (
+                        startDate BETWEEN ? AND ?
+                    OR
+                        endDate BETWEEN ? AND ?
+                    ) AND
+                        roomId = ?
+                    AND
+                        id != ?', $params);
+        }
+
+        return $result[0]['count'] > 0 ? TRUE : FALSE;
+    }
+
+    /**
      * Validates the parameters for creating a meeting
      *
      * @param array $parameters

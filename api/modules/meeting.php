@@ -134,6 +134,7 @@ class Meeting extends Module{
      *
      * @param array $args
      * @return array
+     * @throws \Exception
      */
     public function createMeeting($args) {
         $data           = FALSE;
@@ -141,7 +142,14 @@ class Meeting extends Module{
         $input          = \Helper::getInput(TRUE);
 
         if($meetingCtrl->validateParametersCreate($input)) {
-            $data = $meetingCtrl->createMeeting($input);
+            // Get room ID from input
+            $roomId = isset($input['room']['id']) ? $input['room']['id'] : $input['room'];
+            // Check to see if there is no overlap
+            if(!$meetingCtrl->meetingOverlap($input['startDate'], $input['endDate'], $roomId)) {
+                $data = $meetingCtrl->createMeeting($input);
+            } else {
+                throw new \Exception('Meeting overlaps with an existing meeting', 1);
+            }
         }
 
         // Format the result
@@ -158,6 +166,7 @@ class Meeting extends Module{
      *
      * @param array $args
      * @return array
+     * @throws \Exception
      */
     public function updateMeetingById($args) {
         $data           = FALSE;
@@ -166,7 +175,14 @@ class Meeting extends Module{
         $input          = \Helper::getInput(TRUE);
 
         if($meetingCtrl->validateParametersUpdate($input)) {
-            $data = $meetingCtrl->updateMeeting($input);
+            // Get room ID from input
+            $roomId = isset($input['room']['id']) ? $input['room']['id'] : $input['room'];
+            // Check to see if there is no overlap
+            if(!$meetingCtrl->meetingOverlap($input['startDate'], $input['endDate'], $roomId, $args[1])) {
+                $data = $meetingCtrl->updateMeeting($input);
+            } else {
+                throw new \Exception('Meeting overlaps with an existing meeting', 1);
+            }
         }
 
         // Format the result
