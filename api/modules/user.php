@@ -270,9 +270,8 @@ class User extends Module {
         }
         if($full) {
             $avatars                    = array();
-            $x = 1;
             foreach($user->getAvatars() as $avatar) {
-                $avatars[$x] = array(
+                $avatars[] = array(
                     'uuid'          => $avatar->getUuid(),
                     'firstName'     => $avatar->getFirstName(),
                     'lastName'      => $avatar->getLastName(),
@@ -285,7 +284,6 @@ class User extends Module {
                     'lastLogin'     => $avatar->getLastLogin(),
                     'lastPosition'  => $avatar->getLastPosition()
                 );
-                $x++;
             }
             $data['avatars']            = $avatars;
         }
@@ -387,9 +385,9 @@ class User extends Module {
         // use UUID from GET request
         $parsedPutData['agentUuid'] = $args[1];
         $result                     = '';
+        $avatarCtrl                 = new \Controllers\AvatarController();
         // Teleport an avatar
-        if(\Controllers\AvatarController::validateParametersTeleport($parsedPutData)) {
-            $avatarCtrl             = new \Controllers\AvatarController();
+        if($avatarCtrl->validateParametersTeleport($parsedPutData)) {
             // Do request and fetch result
             $data                   = $avatarCtrl->teleportUser($parsedPutData);
             // Set result
@@ -407,20 +405,41 @@ class User extends Module {
     public function createAvatar($args) {
         $result                     = '';
         $avatarData                 = \Helper::getInput(TRUE);
-        //$avatarData['email']        = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
-        //$avatarData['password']     = filter_input(INPUT_POST, 'password', FILTER_UNSAFE_RAW);
-        //$avatarData['firstName']    = filter_input(INPUT_POST, 'firstName', FILTER_SANITIZE_STRING);
-        //$avatarData['lastName']     = filter_input(INPUT_POST, 'lastName', FILTER_SANITIZE_STRING);
-        //$avatarData['startRegionX'] = filter_input(INPUT_POST, 'startRegionX', FILTER_SANITIZE_NUMBER_FLOAT);
-        //$avatarData['startRegionY'] = filter_input(INPUT_POST, 'startRegionY', FILTER_SANITIZE_NUMBER_FLOAT);
         $avatarData['gridId']       = $args[1];
-
+        $avatarCtrl                 = new \Controllers\AvatarController();
         // Check if the parameters are valid for creating a user
-        if(\Controllers\AvatarController::validateParametersCreate($avatarData)) {
-            $avatarCtrl       = new \Controllers\AvatarController();
+        if($avatarCtrl->validateParametersCreate($avatarData)) {
+            $avatarExists = $avatarCtrl->AvatarExists(array('gridId' => $avatarData['gridId'], 'firstName' => $avatarData['firstName'], 'lastName' => $avatarData['lastName']));
+
+            // No existsing avatar found?
+            if(!$avatarExists['success']) {
+                // Do request and fetch result
+                $data = $avatarCtrl->createAvatar($avatarData);
+                // Set result
+                $result = $data;
+            } else {
+                throw new \Exception('An avatar already exists on this grid with the given first and last name', 1);
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Checks the grid to see if the avatar already exists
+     *
+     * @param array $args
+     * @return array
+     */
+    public function avatarExists($args) {
+        $result                     = '';
+        $avatarData                 = \Helper::getInput(TRUE);
+        $avatarData['gridId']       = $args[1];
+        $avatarCtrl                 = new \Controllers\AvatarController();
+        // Check if the parameters are valid for creating a user
+        if($avatarCtrl->validateParametersAvatarExists($avatarData)) {
+
             // Do request and fetch result
-            $data = $avatarCtrl->createAvatar($avatarData);
-            echo $avatarData['password'];
+            $data = $avatarCtrl->avatarExists($avatarData);
             // Set result
             $result = $data;
         }

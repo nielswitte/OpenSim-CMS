@@ -9,7 +9,7 @@ if(EXEC != 1) {
  * This class is the user controller
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date February 27th, 2014
  */
 class AvatarController {
@@ -46,7 +46,7 @@ class AvatarController {
 
         // Call the Grid's remote admin
         $raXML = new \OpenSimRPC($grid->getRaUrl(), $grid->getRaPort(), $grid->getRaPassword());
-        $parameters = array(
+        $callData = array(
             'user_firstname'    => $parameters['firstName'],
             'user_lastname'     => $parameters['lastName'],
             'user_password'     => $parameters['password'],
@@ -55,7 +55,7 @@ class AvatarController {
             'start_region_y'    => (isset($parameters['startRegionY']) ? $parameters['startRegionY'] : 0)
         );
 
-        $result = $raXML->call('admin_create_user', $parameters);
+        $result = $raXML->call('admin_create_user', $callData);
 
         return $result;
     }
@@ -67,7 +67,7 @@ class AvatarController {
      * @return boolean
      * @throws \Exception
      */
-    public static function validateParametersCreate($parameters) {
+    public function validateParametersCreate($parameters) {
         $result = FALSE;
         if(count($parameters) < 5 && count($parameters) > 7) {
             throw new \Exception("Invalid number of parameters, uses 5 to 7 parameters", 4);
@@ -116,7 +116,7 @@ class AvatarController {
 
         // Call the Grid's remote admin
         $raXML = new \OpenSimRPC($grid->getRaUrl(), $grid->getRaPort(), $grid->getRaPassword());
-        $parameters = array(
+        $callData = array(
             // Get default's region name when no region is given
             'region_name'       => (isset($parameters['regionName']) ? $parameters['regionName'] : $grid->getDefaultRegion()->getName()),
             'agent_id'          => $parameters['agentUuid'],
@@ -130,12 +130,12 @@ class AvatarController {
         );
 
         // Only when set
-        if(isset($parameters['$firstName']) && isset($parameters['$lastName'])) {
-            $parameters['agent_first_name']  = $parameters['$firstName'];
-            $parameters['agent_last_name']   = $parameters['$lastName'];
+        if(isset($parameters['firstName']) && isset($parameters['lastName'])) {
+            $callData['agent_first_name']  = $parameters['firstName'];
+            $callData['agent_last_name']   = $parameters['lastName'];
         }
 
-        $result = $raXML->call('admin_teleport_agent', $parameters);
+        $result = $raXML->call('admin_teleport_agent', $callData);
 
         return $result;
     }
@@ -147,7 +147,7 @@ class AvatarController {
      * @return boolean
      * @throws \Exception
      */
-    public static function validateParametersTeleport($parameters) {
+    public function validateParametersTeleport($parameters) {
         $result = FALSE;
         if(count($parameters) < 2 && count($parameters) > 11) {
             throw new \Exception('Invalid number of parameters, uses 1 to 10 parameters', 12);
@@ -177,4 +177,50 @@ class AvatarController {
         return $result;
     }
 
+    /**
+     * Checks to see if the given fistName and lastName are already in use on the selected grid
+     *
+     * @param array $parameters
+     *              * string firstName - Avatars first name
+     *              * string lastName - Avatars last name
+     * @return array
+     */
+    public function avatarExists($parameters) {
+        // Retrieve grid information for remote admin
+        $gridId = $parameters['gridId'];
+        $grid   = new \Models\Grid($gridId);
+        $grid->getInfoFromDatabase();
+
+        // Call the Grid's remote admin
+        $raXML = new \OpenSimRPC($grid->getRaUrl(), $grid->getRaPort(), $grid->getRaPassword());
+        $callData = array(
+            'user_firstname'    => $parameters['firstName'],
+            'user_lastname'     => $parameters['lastName'],
+        );
+
+        $result = $raXML->call('admin_exists_user', $callData);
+
+        return $result;
+    }
+
+    /**
+     * Validates the parameters for the avatar exists check
+     *
+     * @param array $parameters
+     * @return boolean
+     * @throws \Exception
+     */
+    public function validateParametersAvatarExists($parameters) {
+        $result = FALSE;
+        if(count($parameters) != 2) {
+            throw new \Exception('Expected 2 parameters, only got '. count($parameters), 23);
+        } elseif(!isset($parameters['firstName']) && strlen($parameters['firstName']) > 0) {
+            throw new \Exception('Missing parameter (string) "firstName"', 24);
+        } elseif(!isset($parameters['lastName']) && strlen($parameters['lastName']) > 0) {
+            throw new \Exception('Missing parameter (string) "lastName"', 25);
+        } else {
+            $result = TRUE;
+        }
+        return $result;
+    }
 }
