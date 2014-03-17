@@ -12,6 +12,7 @@ defined('EXEC') or die('Config not loaded');
  */
 class AvatarController {
     private $avatar;
+    private $notAllowedChars =  array('?', '{', '}', '<', '>', ';', '"', ' ', '\'', '[', ']', '/', '\\');
 
     /**
      * Constructs a new AvatarController
@@ -77,6 +78,8 @@ class AvatarController {
             throw new \Exception("Missing parameter (string) lastName", 7);
         } elseif(!isset($parameters['password'])) {
             throw new \Exception("Missing parameter (string) password", 8);
+        } elseif(isset($parameters['password']) && $this->checkPasswordForIlligalCharacters($parameters['password'])) {
+            throw new \Exception("Parameter (string) password contains one of the following characters: ". implode('', $this->notAllowedChars), 8);
         } elseif(!isset($parameters['email'])) {
             throw new \Exception("Missing parameter (string) email", 9);
         } elseif(isset($parameters['startRegionY']) && (!isset($parameters['startRegionX']) || !is_numeric($parameters['startRegionX']))) {
@@ -220,5 +223,20 @@ class AvatarController {
             $result = TRUE;
         }
         return $result;
+    }
+
+    /**
+     * Checks the given string for not allowed characters
+     *
+     * @param string $password
+     * @return boolean
+     */
+    public function checkPasswordForIlligalCharacters($password) {
+        foreach($this->notAllowedChars as $char) {
+            if (stripos($password, $char) !== false) {
+                return true;
+            }
+        }
+        return false;
     }
 }
