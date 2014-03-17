@@ -927,6 +927,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
             }
          };
 
+         // User is allowed to add new users
          $scope.allowCreate = function() {
              return sessionStorage.userPermission >= WRITE;
          };
@@ -992,13 +993,15 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 );
 
 // userController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('userController', ['Restangular', 'RestangularCache', '$scope', '$route', '$routeParams', 'Page', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, $route, $routeParams, Page, $alert, $sce, Cache) {
+angularRest.controller('userController', ['Restangular', 'RestangularCache', '$scope', '$route', '$routeParams', 'Page', '$alert', '$modal', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, $route, $routeParams, Page, $alert, $modal, $sce, Cache) {
         var userRequestUrl   = '';
         var userOld          = {};
+        $scope.grids         = [];
 
         // Show loading screen
         jQuery('#loading').show();
 
+        // Get all information about this user
         RestangularCache.one('user', $routeParams.userId).get().then(function(userResponse) {
             Page.setTitle(userResponse.username);
             $scope.user             = userResponse;
@@ -1009,6 +1012,11 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             // Remove loading screen
             jQuery('#loading').hide();
         });
+
+        // User is allowed to add new avatars
+        $scope.allowCreate = function() {
+            return sessionStorage.userPermission >= WRITE;
+        };
 
         // Allow changing general user information
         $scope.allowUpdate = function() {
@@ -1030,6 +1038,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             }
         };
 
+        // Save scope changes by submitting them to the API
         $scope.updateUser = function() {
             // Show loading screen
             jQuery('#loading').show();
@@ -1047,14 +1056,107 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             });
         };
 
+        // Reset changes
         $scope.resetUser = function() {
             angular.copy(userOld, $scope.user);
         };
 
+        // Check if an avatar is confirmed
         $scope.isConfirmed = function(index) {
             return $scope.user.avatars[index].confirmed == 1 ? true : false;
         };
 
+        // Compare passwords
+        $scope.passwordDoNotMatch = function() {
+            if($scope.avatar.password != $scope.avatar.password2) {
+                jQuery('#inputAvatarPassword, #inputAvatarPassword2').parents('div.form-group').addClass('has-error');
+            } else {
+                jQuery('#inputAvatarPassword, #inputAvatarPassword2').parents('div.form-group').removeClass('has-error');
+            }
+        };
+
+        // Check to see if creation is enabled on this grid
+        $scope.createEnabled = function() {
+            for(var i = 0; i < $scope.grids.length; i++) {
+                if($scope.grids[i].id == $scope.avatar.gridId) {
+                    if($scope.grids[i].isOnline == 0) {
+                        $alert({title: 'Error!', content: $sce.trustAsHtml('The selected Grid ('+ $scope.grids[i].name +') is offline, therefore it is not possible to create an avatar for the selected Grid.'), type: 'danger'});
+                    } else if($scope.grids[i].remoteAdmin.url == null) {
+                        $alert({title: 'Error!', content: $sce.trustAsHtml('The selected Grid\'s ('+ $scope.grids[i].name +') remoteadmin is not configured, therefore it is not possible to create an avatar for the selected Grid.'), type: 'danger'});
+                    } else {
+                        $alert({title: 'Info!', content: $sce.trustAsHtml('Avatars can be created on the selected grid ('+ $scope.grids[i].name +').'), type: 'info'});
+                    }
+                    return true;
+                }
+            }
+        };
+
+        // Dialog function handler
+        $scope.call = function(func) {
+            if(func == 'hide') {
+                modal.hide();
+            } else if(func == 'createAvatar') {
+                $scope.saveAvatar();
+            }
+        };
+
+        // Open the form for creating a new avatar
+        $scope.newAvatar = function() {
+            $scope.template         = partial_path +'/user/userNewAvatarForm.html';
+            $scope.avatar           = {};
+            $scope.formSubmit       = 'createAvatar';
+            $scope.buttons          = [{
+                        text: 'Create',
+                        func: '',
+                        class: 'primary',
+                        type: 'submit'
+                    },
+                    {
+                        text: 'Cancel',
+                        func: 'hide',
+                        class: 'danger',
+                        type: 'button'
+                    }
+                ];
+            modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
+
+            // Get additional information about the Grids
+            RestangularCache.all('grids').getList().then(function(gridsResponse) {
+                $scope.grids    = gridsResponse;
+            });
+        };
+
+        // Save the avatar
+        $scope.saveAvatar = function() {
+            // Show loading screen
+            jQuery('#loading').show();
+
+            // Create the avatar
+            Restangular.one('grid', $scope.avatar.gridId).all('avatar').post($scope.avatar).then(function(avatarCreateResponse) {
+                if(!avatarCreateResponse.success) {
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(avatarCreateResponse.error), type: 'danger'});
+                } else {
+                    $alert({title: 'Avatar created!', content: $sce.trustAsHtml('The avatar '+ $scope.avatar.firstName +' '+ $scope.avatar.lastName +' has been created.'), type: 'success'});
+                    Cache.clearCachedUrl(userRequestUrl);
+
+                    // Link the avatar to this user
+                    Restangular.one('grid', $scope.avatar.gridId).one('avatar', avatarCreateResponse.avatar_uuid).post('', {username: $scope.user.username}).then(function(avatarLinkResponse) {
+                        if(!avatarLinkResponse.success) {
+                            $alert({title: 'Error!', content: $sce.trustAsHtml(avatarLinkResponse.error), type: 'danger'});
+                        } else {
+                            $alert({title: 'Avatar linked!', content: $sce.trustAsHtml('The avatar '+ $scope.avatar.firstName +' '+ $scope.avatar.lastName +' has been linked to this user.'), type: 'success'});
+                        }
+                    });
+                    modal.hide();
+                    $route.reload();
+                }
+
+                // Remove loading screen
+                jQuery('#loading').hide();
+            });
+        };
+
+        // Confirm the avatar
         $scope.confirmAvatar = function(index, avatar) {
             // Show loading screen
             jQuery('#loading').show();
@@ -1073,6 +1175,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             });
         };
 
+        // Unlinking the avatar
         $scope.unlinkAvatar = function(index, avatar) {
             // Show loading screen
             jQuery('#loading').show();

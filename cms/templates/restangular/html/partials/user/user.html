@@ -59,8 +59,11 @@
     </div>
     <fieldset id="avatars">
         <legend>Avatars (<span id="avatarCount">{{user.avatarCount}}</span>)</legend>
-        <div class="row" ng-repeat="(index, avatar) in user.avatars">
-            <div class="col-sm-6 col-md-6 avatar">
+        <div class="toolbar toolbar-top" ng-show="allowCreate()">
+            <button ng-click="newAvatar()" type="button" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> New avatar</button>
+        </div>
+        <div class="row">
+            <div class="col-sm-6 col-md-6 avatar" ng-repeat="(index, avatar) in user.avatars">
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h3 class="panel-title">

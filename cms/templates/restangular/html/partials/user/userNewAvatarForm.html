@@ -1,0 +1,40 @@
+<div class="page-header">
+    <h1>User <small>Create an avatar</small></h1>
+</div>
+
+<div class="form-group">
+    <label for="inputAvatarGrid" class="col-sm-4 control-label">Grid</label>
+    <div class="col-sm-8">
+        <select class="form-control" id="inputAvatarGrid" ng-model="avatar.gridId" ng-options="grid.id as grid.name for grid in grids" ng-change="createEnabled()"></select>
+    </div>
+</div>
+<div class="form-group has-feedback">
+    <label for="inputAvatarFirstName" class="col-sm-4 control-label">First name</label>
+    <div class="col-sm-8">
+        <input type="text" class="form-control" id="inputAvatarFirstName" ng-model="avatar.firstName" required placeholder="First name">
+    </div>
+</div>
+<div class="form-group">
+    <label for="inputAvatarLastName" class="col-sm-4 control-label">Last name</label>
+    <div class="col-sm-8">
+        <input type="text" class="form-control" id="inputAvatarLastName" ng-model="avatar.lastName" required placeholder="Last name">
+    </div>
+</div>
+<div class="form-group">
+    <label for="inputAvatarEmail" class="col-sm-4 control-label">E-mail address</label>
+    <div class="col-sm-8">
+        <input type="email" class="form-control" id="inputAvatarEmail" ng-model="avatar.email" required placeholder="E-mail address">
+    </div>
+</div>
+<div class="form-group">
+    <label for="inputAvatarPassword" class="col-sm-4 control-label">Password</label>
+    <div class="col-sm-8">
+        <input type="password" class="form-control" id="inputAvatarPassword" ng-model="avatar.password" ng-change="passwordDoNotMatch()" required placeholder="Password">
+    </div>
+</div>
+<div class="form-group">
+    <label for="inputAvatarPassword2" class="col-sm-4 control-label">Password (repeat)</label>
+    <div class="col-sm-8">
+        <input type="password" class="form-control" id="inputAvatarPassword2" ng-model="avatar.password2" ng-change="passwordDoNotMatch()" required placeholder="Repeat password">
+    </div>
+</div>
