@@ -1,4 +1,5 @@
 <?php
+defined('EXEC') or die('Config not loaded');
 
 /**
  * This is the slightly modified RPC-class of the BSD-licensed WiXTD webportal

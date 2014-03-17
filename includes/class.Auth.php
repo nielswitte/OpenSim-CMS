@@ -1,7 +1,6 @@
 <?php
-if(EXEC != 1) {
-	die('Invalid request');
-}
+defined('EXEC') or die('Config not loaded');
+
 /**
  * This class is used to check authorization tokens
  *

@@ -1,4 +1,6 @@
 <?php
+defined('EXEC') or die('Config not loaded');
+
 /**
  * MysqliDb Class
  *

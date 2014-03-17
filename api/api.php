@@ -1,9 +1,7 @@
 <?php
 namespace API;
 
-if(EXEC != 1) {
-	die('Invalid request');
-}
+defined('EXEC') or die('Config not loaded');
 
 /**
  * This class is hosts all API calls and matches them to the corresponding model/controller functions
