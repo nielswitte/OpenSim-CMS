@@ -281,7 +281,7 @@ class Meeting extends Module{
                 );
             }
             $data['participants'] = $participants;
-            $data['agenda']       = $this->getMeetingAgendaData($meeting);
+            $data['agenda']       = $meeting->getAgenda()->toString();
         } else {
             $data['roomId']     = $meeting->getRoom()->getId();
             // URL to full view
@@ -292,7 +292,7 @@ class Meeting extends Module{
     }
 
     /**
-     * Returns the agenda for the meeting
+     * Returns the agenda for the meeting as an json array
      *
      * @param \Models\Meeting $meeting
      * @return array

@@ -70,4 +70,29 @@ class MeetingAgenda {
 
         return $branch;
     }
+
+    /**
+     * Recusively parse the array to a string
+     *
+     * @param array $agenda - [optional]
+     * @param integer $depth - [optional]
+     * @param integer $parentId - [optional]
+     * @return string
+     */
+    public function toString($agenda = null, $depth = 0, $parentId = 0) {
+        if($agenda == null) {
+            $agenda = $this->buildAgenda();
+        }
+
+        $string = '';
+        for($i = 0; $i < count($agenda); $i++) {
+            // Depth starts at 0, but only between elements an # is added
+            $string .= str_repeat('  ', $depth);
+            $string .= ($depth > 0 ? $parentId .'.' : '' ) . ($i+1) .'. '. $agenda[$i]['value'] . "\n";
+            if(isset($agenda[$i]['items'])) {
+                $string .= $this->toString($agenda[$i]['items'], $depth+1, $i+1);
+            }
+        }
+        return $string;
+    }
 }

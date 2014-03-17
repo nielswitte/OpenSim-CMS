@@ -190,7 +190,7 @@ class Meeting implements simpleModel {
     }
 
     /**
-     * Returns the agenda for this meeting
+     * Returns the agenda instance for this meeting
      *
      * @return \Models\MeetingAgenda
      */
