@@ -255,4 +255,64 @@ class Helper {
 
         return array_merge($start, $end);
     }
+
+    /**
+     * Creates a resized image of the given source and saves it at the destination
+     *
+     * @param string $source - The file to use as a source
+     * @param string $destination - The destination to save the file, including filename and extension
+     * @param integer $height - [Optional] Height in pixels
+     * @param integer $width - [Optional] Width in pixels
+     * @return boolean
+     */
+    public static function imageResize($source, $destination, $height = IMAGE_HEIGHT, $width = IMAGE_WIDTH) {
+        $destinationDir     = dirname($destination);
+        $destinationExt     = @end(explode('.', $destination));
+        $destinationFile    = @end(explode(DS, preg_replace("/\\.[^.\\s]{3,4}$/", "", $destination)));
+        $resizeRequired     = FALSE;
+
+        // Create thumbnail directory
+        if(!file_exists($destinationDir)) {
+            mkdir($destinationDir, 0777, TRUE);
+        }
+
+        // Create thumbnail if not exist
+        if(file_exists($source)) {
+            require_once dirname(__FILE__) .'/class.Images.php';
+            // Load the required image
+            $resize = new \Image($source);
+
+            // Image needs to be resized and overwritten
+            if($source == $destination) {
+                if($resize->getHeight() != $height || $resize->getWidth() != $width) {
+                    $resizeRequired = TRUE;
+                }
+            }
+
+            // Resize is required?
+            if(!file_exists($destination) || $resizeRequired) {
+                // Load the background
+                $image = new \Image(FILES_LOCATION . DS . 'presentation' . DS .'background.jpg');
+
+                // resize when needed
+                if($resize->getWidth() > $width || $resize->getHeight() > $height) {
+                    $resize->resize($width, $height, 'fit');
+                    $resize->save($destinationFile, $destinationDir, $destinationExt);
+                }
+                unset($resize);
+
+                // Fill remaining of image with black
+                $image->resize($width, $height, 'fit');
+                $image->addWatermark($destination);
+                $image->writeWatermark(100, 0, 0, 'c', 'c');
+                return $image->save($destinationFile, $destinationDir, $destinationExt);
+            // Thumbnail already exists?
+            } else {
+                return true;
+            }
+        // Source and destination files do not exist
+        } else {
+            return false;
+        }
+    }
 }
