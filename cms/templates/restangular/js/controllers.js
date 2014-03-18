@@ -103,6 +103,13 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
         // Get the right toolbar (right area of navbar)
         $scope.getUserToolbar = function() {
             if(sessionStorage.token){
+                // Create dropdown menu
+                $scope.accountDropdown = [
+                    {text: 'Profile', href: '#!/user/'+ $scope.user.userId},
+                    {divider: true},
+                    {text: 'Log Out', click: 'logout()'}
+                ];
+
                 return partial_path +'/navbar/userToolbarLoggedIn.html';
             } else {
                 return partial_path +'/navbar/userToolbarLoggedOut.html';
@@ -127,13 +134,6 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
             };
             $scope.getUserToolbar();
         }
-
-        // Create dropdown menu
-        $scope.accountDropdown = [
-            {text: 'Profile', href: '#!/user/'+ $scope.user.userId},
-            {divider: true},
-            {text: 'Log Out', click: 'logout()'}
-        ];
     }]
 );
 
