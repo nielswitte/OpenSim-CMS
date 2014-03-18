@@ -352,7 +352,7 @@ if(!String.prototype.formatNum) {
 
 	function warn(message) {
 		if($.type(window.console) == 'object' && $.type(window.console.warn) == 'function') {
-			window.console.warn('[Bootstrap-Calendar] ' + message);
+			//window.console.warn('[Bootstrap-Calendar] ' + message);
 		}
 	}
 
