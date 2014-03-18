@@ -60,11 +60,14 @@
         <tbody>
             <tr ng-repeat="(index, user) in usersList | orderBy:orderByField:reverseSort | filter: searchText">
                 <td>{{user.id}}</td>
-                <td><a href="#!/user/{{user.id}}/">{{user.username}}</a></td>
+                <td><a href="#!/user/{{user.id}}">{{user.username}}</a></td>
                 <td>{{user.firstName}}</td>
                 <td>{{user.lastName}}</td>
                 <td>{{user.email}}</td>
-                <td><button class="btn btn-danger btn-xs" ng-click="deleteUser(index)" ng-show="allowDelete(user.id)"><i class="glyphicon glyphicon-remove"></i></button></td>
+                <td>
+                    <a href="#!/user/{{user.id}}/edit" class="btn btn-default btn-xs" title="Edit user"><i class="glyphicon glyphicon-edit"></i></a>
+                    <button class="btn btn-danger btn-xs" confirmed-click="deleteUser(index)" ng-confirm-click="Are you sure you want to delete {{user.username}}?" ng-show="allowDelete(user.id)" title="Delete user"><i class="glyphicon glyphicon-remove"></i></button>
+                </td>
             </tr>
         </tbody>
     </table>

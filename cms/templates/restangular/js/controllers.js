@@ -372,58 +372,6 @@ angularRest.controller('meetingsController', ['Restangular', 'RestangularCache',
         var eventId;
         var meetingRequestUrl;
 
-        // Process Modal function calls
-        $scope.call = function(func) {
-            if(func == 'hide') {
-                modal.hide();
-            } else if(func == 'edit') {
-                Cache.clearCachedUrl(meetingRequestUrl);
-                modal.hide();
-                $location.path('meeting/'+ eventId);
-            }
-        };
-
-        // Create a new modal dialog
-        function BootstrapModalDialog(event) {
-            eventId = jQuery(this).data('event-id');
-
-            // Show loading screen
-            jQuery('#loading').show();
-
-            // Get one meeting
-            meeting = RestangularCache.one('meeting', eventId).get().then(function(meetingResponse) {
-                meetingRequestUrl       = meetingResponse.getRequestedUrl();
-
-                $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
-                $scope.template         = partial_path +'/meeting/meetingDetails.html';
-                $scope.meeting          = meetingResponse;
-                $scope.meeting.agenda   = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
-                $scope.startDateString  = new moment(meetingResponse.startDate).format('dddd D MMMM YYYY');
-                $scope.startTimeString  = new moment(meetingResponse.startDate).format('HH:mm');
-                $scope.endTimeString    = new moment(meetingResponse.endDate).format('HH:mm');
-
-                // Modal buttons
-                $scope.buttons          = [{
-                        text: 'Edit',
-                        func: 'edit',
-                        class: 'primary',
-                        type: 'submit'
-                    },
-                    {
-                        text: 'Ok',
-                        func: 'hide',
-                        class: 'default',
-                        type: 'button'
-                    }
-                ];
-                modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
-
-                // Remove loading screen
-                jQuery('#loading').hide();
-            });
-            return false;
-        }
-
         // Get all meetings for the calendar
         Restangular.one('meetings', date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).all('calendar').getList().then(function(meetingsResponse) {
             // Show loading screen
@@ -461,9 +409,6 @@ angularRest.controller('meetingsController', ['Restangular', 'RestangularCache',
                 }
             });
 
-            // Add these items additionally (somehow they are not catched by the other on selector)
-            jQuery('#calendar').on('mousedown click', 'a.bsDialog', BootstrapModalDialog);
-
             // Navigation and View calendar buttons
             jQuery('.btn-group button[data-calendar-nav]').each(function() {
                 jQuery(this).click(function() {
@@ -484,7 +429,7 @@ angularRest.controller('meetingsController', ['Restangular', 'RestangularCache',
 );
 
 // meetingController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('meetingController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache) {
+angularRest.controller('meetingController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache, $location) {
         var meetingRequestUrl;
         var gridsRequestUrl;
         var calendar;
@@ -661,6 +606,9 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
             $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
             Page.setTitle('Meeting '+ meetingResponse.id);
             meetingRequestUrl       = meetingResponse.getRequestedUrl();
+            if($location.path().indexOf('/edit') == -1) {
+                $scope.meeting.agenda   = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
+            }
 
             // Set the dates and times
             setDateTimes();
