@@ -388,13 +388,13 @@ class UserController {
      */
     public function validateParameterPassword($parameters) {
         $result = FALSE;
-        if(count($parameters) != 3) {
-            throw new \Exception('Expected 3 parameters, '. count($parameters) .' given', 1);
+        if(count($parameters) < 2) {
+            throw new \Exception('Expected atleast 2 parameters, '. count($parameters) .' given', 1);
         } elseif(!isset($parameters['password']) || strlen($parameters['password']) < SERVER_MIN_PASSWORD_LENGTH) {
             throw new \Exception('Missing parameter (string) "password" with a minimum length of '. SERVER_MIN_PASSWORD_LENGTH, 2);
         } elseif(!isset($parameters['password2']) || $parameters['password'] != $parameters['password2']) {
             throw new \Exception('Missing parameter (string) "password2" which should match parameter (string) "password" with a minimum length of '. SERVER_MIN_PASSWORD_LENGTH, 3);
-        } elseif(!isset($parameters['currentPassword']) || !$this->checkPassword($parameters['currentPassword'])) {
+        } elseif(!\Auth::checkRights('user', \AUTH::WRITE) && (!isset($parameters['currentPassword']) || !$this->checkPassword($parameters['currentPassword']))) {
             throw new \Exception('Missing parameter (string) "currentPassword" which should match the current user\'s password', 4);
         } else {
             $result = TRUE;
