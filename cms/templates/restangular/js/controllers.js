@@ -643,14 +643,14 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
             jQuery('#loading').hide();
 
             // Load meetings on same day
-            var date = new moment($scope.meeting.startDate).format('YYYY-MM-DD');
+            var date = new moment().subtract('week', 2).format('YYYY-MM-DD');
             Restangular.one('meetings', date).all('calendar').getList().then(function(meetingsResponse) {
                 calendar = jQuery('#calendar').calendar({
                     language:       'en-US',
                     events_source:  meetingsResponse,
                     tmpl_cache:     true,
                     view:           'day',
-                    day:            date,
+                    day:            new moment($scope.meeting.startDate).format('YYYY-MM-DD'),
                     time_start:     TIME_START,
                     time_end:       TIME_END,
                     tmpl_path:      partial_path +'/../calendar/',
