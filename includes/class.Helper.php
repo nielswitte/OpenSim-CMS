@@ -292,7 +292,12 @@ class Helper {
             // Resize is required?
             if(!file_exists($destination) || $resizeRequired) {
                 // Load the background
-                $image = new \Image(FILES_LOCATION . DS . 'presentation' . DS .'background.jpg');
+                $averageColor = $resize->getAverageColor();
+                if(($averageColor['red'] + $averageColor['green'] + $averageColor['blue'] / 3) >= 128) {
+                    $image = new \Image(FILES_LOCATION . DS . 'presentation' . DS .'background_light.jpg');
+                } else {
+                    $image = new \Image(FILES_LOCATION . DS . 'presentation' . DS .'background_dark.jpg');
+                }
 
                 // resize when needed
                 if($resize->getWidth() > $width || $resize->getHeight() > $height) {
