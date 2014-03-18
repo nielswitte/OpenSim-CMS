@@ -76,12 +76,16 @@ var angularRest = angular.module('OpenSim-CMS', [
 });
 
 // Authentication check on run
-angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', 'Cache', function ($rootScope, Restangular, $location, $alert, $sce, Cache) {
+angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', 'Cache', '$anchorScroll', function ($rootScope, Restangular, $location, $alert, $sce, Cache, $anchorScroll) {
         $rootScope.$on("$routeChangeStart", function(event, next, current) {
             if (next.requireLogin && !sessionStorage.token) {
                 $alert({title: 'Error!', content: $sce.trustAsHtml('This page requires authentication.'), type: 'danger'});
                 $location.path('/login');
             }
+            
+            // Scroll back to the top of the page
+            $location.hash('top');
+            $anchorScroll();
         });
 
         // Set an error interceptor for Restangular
