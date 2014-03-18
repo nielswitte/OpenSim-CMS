@@ -270,13 +270,14 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 );
 
 // documentController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
+angularRest.controller('documentController', ['Restangular', '$scope', '$routeParams', 'Page', '$modal', '$sce', function(Restangular, $scope, $routeParams, Page, $modal, $sce) {
         // Show loading screen
         jQuery('#loading').show();
 
         // Get document from API
         Restangular.one('document', $routeParams.documentId).get().then(function(documentResponse) {
             $scope.document = documentResponse;
+            $scope.token    = sessionStorage.token;
             Page.setTitle(documentResponse.title);
 
             // Init select2
@@ -317,6 +318,17 @@ angularRest.controller('documentController', ['Restangular', '$scope', '$routePa
             jQuery('#loading').hide();
         });
 
+        // Open dialog with the Slide preview
+        $scope.lightbox = function(number, url) {
+            $modal({
+                title: $sce.trustAsHtml('Slide '+ number),
+                content: $sce.trustAsHtml('<img src="'+ url+'?token='+ sessionStorage.token +'" class="img-responsive">'),
+                html: true,
+                show: true,
+                template: 'templates/restangular/html/bootstrap/modalDialogBasic.html',
+                scope: $scope
+            });
+        };
     }]
 );
 

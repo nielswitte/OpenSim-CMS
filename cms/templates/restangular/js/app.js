@@ -82,7 +82,7 @@ angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', 'Ca
                 $alert({title: 'Error!', content: $sce.trustAsHtml('This page requires authentication.'), type: 'danger'});
                 $location.path('/login');
             }
-            
+
             // Scroll back to the top of the page
             $location.hash('top');
             $anchorScroll();
