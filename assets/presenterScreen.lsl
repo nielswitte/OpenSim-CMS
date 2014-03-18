@@ -146,7 +146,7 @@ nav_slide(integer next) {
 
         // Load slide
         string url          = llList2String(slides, next-1);
-        string params       = "width:"+ width +",height:"+ height;
+        string params       = "width:"+width+",height:"+height;
 
         integer res = llListFindList(textureCache, [presentationId, next]);
         // Check if texture is found in cache, only required on first usage
@@ -369,7 +369,7 @@ state presentation {
             integer length      = (integer) JsonGetValue(json_body, "slidesCount");
             // Get from each slide the URL or the UUID
             for (x = 1; x <= length; x++) {
-                string slideUuid        = JsonGetValue(json_slides, "{"+ x +"}.{cache}.{"+ serverId +"}{uuid}");
+                string slideUuid        = JsonGetValue(json_slides, "{"+ x +"}.{cache}.{"+ serverId +"}.{uuid}");
                 string slideUrl         = JsonGetValue(json_slides, "{"+ x +"}.{image}");
                 string slideExpired     = JsonGetValue(json_slides, "{"+ x +"}.{cache}.{"+ serverId +"}.{isExpired}");
 
