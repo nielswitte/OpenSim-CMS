@@ -1010,6 +1010,45 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             }
         };
 
+        // Open modal dialog to change the user's password
+        $scope.changePasswordForm = function() {
+            $scope.template         = partial_path +'/user/userPasswordForm.html';
+            $scope.avatar           = {};
+            $scope.formSubmit       = 'changePassword';
+            $scope.buttons          = [{
+                        text: 'Update',
+                        func: '',
+                        class: 'primary',
+                        type: 'submit'
+                    },
+                    {
+                        text: 'Cancel',
+                        func: 'hide',
+                        class: 'danger',
+                        type: 'button'
+                    }
+                ];
+            modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
+        };
+
+        // Change the user's password
+        $scope.changePassword = function() {
+            // Show loading screen
+            jQuery('#loading').show();
+
+            $scope.user.customPUT($scope.user, 'password').then(function(putResponse) {
+                angular.copy($scope.user, $scope.userOld);
+                if(!putResponse.success) {
+                    $alert({title: 'Change password failed!', content: $sce.trustAsHtml(putResponse.error), type: 'danger'});
+                } else {
+                    $alert({title: 'Password changed!', content: $sce.trustAsHtml('The user\'s password has been updated.'), type: 'success'});
+                    Cache.clearCachedUrl(userRequestUrl);
+                }
+                // Remove loading screen
+                jQuery('#loading').hide();
+            });
+        };
+
         // Allow changing user's permissions
         $scope.allowPermissions = function() {
             if(sessionStorage.userPermission >= WRITE) {
@@ -1048,11 +1087,20 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
         };
 
         // Compare passwords
-        $scope.passwordDoNotMatch = function() {
+        $scope.passwordDoNotMatchAvatar = function() {
             if($scope.avatar.password != $scope.avatar.password2) {
                 jQuery('#inputAvatarPassword, #inputAvatarPassword2').parents('div.form-group').addClass('has-error');
             } else {
                 jQuery('#inputAvatarPassword, #inputAvatarPassword2').parents('div.form-group').removeClass('has-error');
+            }
+        };
+
+        // Compare passwords
+        $scope.passwordDoNotMatchUser = function() {
+            if($scope.user.password != $scope.user.password2) {
+                jQuery('#inputChangePassword, #inputChangePassword2').parents('div.form-group').addClass('has-error');
+            } else {
+                jQuery('#inputChangePassword, #inputChangePassword2').parents('div.form-group').removeClass('has-error');
             }
         };
 
@@ -1078,6 +1126,8 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                 modal.hide();
             } else if(func == 'createAvatar') {
                 $scope.saveAvatar();
+            } else if(func == 'changePassword') {
+                $scope.changePassword();
             }
         };
 
