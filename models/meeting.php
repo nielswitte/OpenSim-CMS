@@ -6,11 +6,12 @@ defined('EXEC') or die('Config not loaded');
 require_once dirname(__FILE__) . '/simpleModel.php';
 require_once dirname(__FILE__) . '/meetingParticipants.php';
 require_once dirname(__FILE__) . '/meetingAgenda.php';
+require_once dirname(__FILE__) . '/meetingDocuments.php';
 /**
  * This class represents a meeting
  *
  * @author Niels Witte
- * @version 0.2
+ * @version 0.3
  * @date February 25th, 2014
  */
 class Meeting implements simpleModel {
@@ -22,6 +23,7 @@ class Meeting implements simpleModel {
     private $endDate;
     private $participants;
     private $agenda;
+    private $documents;
 
     /**
      * Constructs a new meeting with the given ID
@@ -33,8 +35,9 @@ class Meeting implements simpleModel {
      * @param \Models\MeetingRoom $room - [Optional]
      * @param string $name - [Optional]
      * @param \Models\MeetingAgenda $agenda - [Optional]
+     * @param \Models\MeetingDocuments $documents - [Optional]
      */
-    public function __construct($id, $startDate = '0000-00-00 00:00:00', $endDate = '0000-00-00 00:00:00', \Models\User $creator = NULL, \Models\MeetingRoom $room = NULL, $name = '', \Models\MeetingAgenda $agenda = NULL) {
+    public function __construct($id, $startDate = '0000-00-00 00:00:00', $endDate = '0000-00-00 00:00:00', \Models\User $creator = NULL, \Models\MeetingRoom $room = NULL, $name = '', \Models\MeetingAgenda $agenda = NULL, \Models\MeetingDocuments $documents = NULL) {
         $this->id           = $id;
         $this->creator      = $creator;
         $this->startDate    = $startDate;
@@ -42,6 +45,7 @@ class Meeting implements simpleModel {
         $this->room         = $room;
         $this->name         = $name;
         $this->agenda       = $agenda;
+        $this->documents    = $documents;
     }
 
     /**
@@ -109,6 +113,26 @@ class Meeting implements simpleModel {
     }
 
     /**
+     * Gets the documents for this meeting from the database
+     */
+    public function getDocumentsFromDabatase() {
+        $db = \Helper::getDB();
+        $db->join('documents d', 'md.documentId = d.id', 'LEFT');
+        $db->where('meetingId', $db->escape($this->getId()));
+        $db->orderBy('agendaId', 'ASC');
+        $results = $db->get('meeting_documents md');
+
+        $documents = new \Models\MeetingDocuments($this);
+        $this->setDocuments($documents);
+
+        // Add all items to the agenda
+        foreach($results as $result) {
+            $document = new \Models\Document($result['documentId'], $result['type'], $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate']);
+            $documents->addDocument($document);
+        }
+    }
+
+    /**
      * Returns the meeting ID
      *
      * @return integer
@@ -172,7 +196,7 @@ class Meeting implements simpleModel {
     }
 
     /**
-     * Adds the givne user to the list with participants
+     * Adds the given user to the list with participants
      *
      * @param \Models\User $user
      */
@@ -219,6 +243,32 @@ class Meeting implements simpleModel {
         $this->agenda = $agenda;
     }
 
+    /**
+     * Sets the list with documents
+     *
+     * @param \Models\MeetingDocuments $documents
+     */
+    public function setDocuments(\Models\MeetingDocuments $documents) {
+        $this->documents = $documents;
+    }
+
+    /**
+     * Adds the given document to the list with documents
+     *
+     * @param \Models\Document $document
+     */
+    public function addDocument(\Models\Document $document) {
+        $this->getDocuments()->addDocument($document);
+    }
+
+    /**
+     * Returns the MeetingDocuments instance that contains the list with documents
+     *
+     * @return \Models\MeetingDocuments
+     */
+    public function getDocuments(){
+        return $this->documents;
+    }
     /**
      * Returns the API url to the full meeting information
      *

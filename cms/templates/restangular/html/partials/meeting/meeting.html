@@ -39,6 +39,16 @@
         <td ng-bind-html="meeting.agenda"></td>
     </tr>
     <tr>
+        <th><strong>Documents</strong></th>
+        <td>
+            <ul>
+                <li ng-repeat="document in meeting.documents">
+                    <a href="#!/document/{{document.id}}">{{document.title}} ({{document.type}})</a>
+                </li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
         <th><strong>Participants</strong></th>
         <td>
             <ul>
