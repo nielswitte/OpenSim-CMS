@@ -69,6 +69,10 @@ class MeetingController {
 
         $this->setParticipants($participants);
 
+        // Create the agenda
+        $agenda = $this->parseAgendaString($parameters['agenda']);
+        $this->setAgenda($agenda);
+
         return $meetingId;
     }
 
@@ -118,12 +122,43 @@ class MeetingController {
         }
         $participantsAdd = $this->setParticipants($participants);
 
+        // Update the agenda
+        $agenda = $this->parseAgendaString($parameters['agenda']);
+        $this->removeAgenda();
+        $this->setAgenda($agenda);
+
         // Were any updates made?
         if($update || $participantsRemove || $participantsAdd) {
             return TRUE;
         } else {
             throw new \Exception('No changes were made to this meeting', 6);
         }
+    }
+
+    /**
+     * Removes all agenda items from this meeting
+     *
+     * @return boolean
+     */
+    private function removeAgenda() {
+        $db = \Helper::getDB();
+        $db->where('meetingId', $db->escape($this->meeting->getId()));
+        return $db->delete('meeting_agenda_items');
+    }
+
+    /**
+     * Inserts the parsed array into the database
+     *
+     * @param array $agenda
+     * @return boolean
+     */
+    private function setAgenda($agenda) {
+        $db = \Helper::getDB();
+        foreach($agenda as $item) {
+            $item['meetingId'] = $this->meeting->getId();
+            $result = $db->insert('meeting_agenda_items', $item);
+        }
+        return $result;
     }
 
     /**
@@ -212,6 +247,70 @@ class MeetingController {
     }
 
     /**
+     * Parses a numbered list to an array with parent child references
+     *
+     * @example:
+     *  1. Opening
+     *  2. Comments
+     *    2.1. Others
+     *    2.2. From the board
+     *  3. Minutes
+     *    3.1. Test
+     *      3.2.1 Test 3
+     *    3.2. Test 2
+     *
+     * @param string $agendaString
+     * @return array
+     */
+    public function parseAgendaString($agendaString) {
+        // Empty output
+        $agenda     = array();
+        // Split in lines
+        $lines      = explode("\n", trim($agendaString));
+        // Starting ID
+        $id         = 1;
+        // Starting Depth
+        $depth      = 1;
+        // Starting list with parents
+        $parents    = array(0);
+        // Process lines
+        foreach($lines as $line) {
+            // Split index and subject
+            $item = explode(' ', trim($line), 2);
+            // Get index
+            $item[0] = explode('.', trim($item[0], '. '));
+            // See if the element is lower than the previous
+            if(count($item[0]) > $depth) {
+                $depth      = count($item[0]);
+                $parents[]  = $id-1;
+                $parentId   = end($parents);
+            // Element is higher than previous
+            } elseif(count($item[0]) < $depth) {
+                $depth      = count($item[0]);
+                $parents    = array_slice($parents, 0, $depth);
+                $parentId   = end($parents);
+            // Element is on same level
+            } else {
+                $parentId   = end($parents);
+            }
+
+            // Create agenda Item
+            $agendaItem = array(
+                'id'        => $id,
+                'parentId'  => $parentId,
+                'value'     => $item[1],
+                'sort'      => end($item[0])
+            );
+
+            $agenda[] = $agendaItem;
+
+            // Increase ID
+            $id++;
+        }
+        return $agenda;
+    }
+
+    /**
      * Validates the parameters for creating a meeting
      *
      * @param array $parameters
@@ -233,11 +332,12 @@ class MeetingController {
     public function validateParametersUpdate($parameters) {
         $result = FALSE;
 
-        // @todo prevent overlapping meetings in same room
         if(count($parameters) < 5) {
             throw new \Exception('Expected atleast 5 parameters, '. count($parameters) .' given', 1);
         } elseif(!isset($parameters['name']) || strlen($parameters['name']) == 0) {
             throw new \Exception('Missing parameter (string) "name"', 2);
+        } elseif(!isset($parameters['agenda'])) {
+            throw new \Exception('Missing parameter (string) "agenda"', 7);
         } elseif(!isset($parameters['startDate']) || !preg_match("/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/", $parameters['startDate'])) {
             throw new \Exception('Missing parameter (string) "startDate", which should be in the format YYYY-MM-DD HH:mm:ss', 3);
         } elseif(!isset($parameters['endDate']) || !preg_match("/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/", $parameters['endDate']) || strtotime($parameters['endDate']) <=  strtotime($parameters['startDate'])) {
@@ -246,6 +346,8 @@ class MeetingController {
             throw new \Exception('Missing parameter (integer or array) "room", which should be roomId or a room array which contains an roomId ', 5);
         } elseif(!isset($parameters['participants'])) {
             throw new \Exception('Missing parameter (array) "participants", which should be array which contains userIds of the participants ', 6);
+        } elseif($this->meetingOverlap($parameters['startDate'], $parameters['endDate'], (isset($parameters['room']['id']) ? $parameters['room']['id'] : $parameters['room']), (isset($this->meeting) ? $this->meeting->getId() : 0))) {
+            throw new \Exception('Meeting overlaps with an existing meeting', 8);
         } else {
             $result = TRUE;
         }

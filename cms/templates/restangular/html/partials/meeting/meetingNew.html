@@ -47,6 +47,35 @@
                 </div>
             </div>
             <fieldset>
+                <legend>Agenda</legend>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="inputAgenda">
+                        Agenda
+                        <button class="btn btn-link" type="button" ng-click="toggleAgendaHelp()" title="Show help"><i class="glyphicon glyphicon-question-sign"></i></button>
+                    </label>
+                    <div class="col-sm-10">
+                        <div class="alert alert-info" ng-show="showAgendaHelp()">
+                            <strong>Agenda format:</strong>
+                            <p>The agenda needs to be a numbered list, see the example below. The indentations are optional and the items will be automatically sorted, so the order 1,3,2,6 will result in 1,2,3,4.</p>
+
+<pre>
+1. Opening
+2. Minutes
+3. Meeting Item
+  3.1 Sub item
+  3.2 Sub item
+    3.2.1 Sub sub item
+4. Closing
+</pre>
+
+
+
+                        </div>
+                        <textarea id="inputAgenda" rows="10" class="form-control" ng-model="meeting.agenda"></textarea>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
                 <legend>Participants (<span>{{meeting.participants.length}}</span>)</legend>
                 <div class="form-group">
                     <label class="col-sm-2 control-label">Participants</label>

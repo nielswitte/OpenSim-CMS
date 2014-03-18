@@ -786,6 +786,16 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
             }
         };
 
+        // Show or hide agenda help
+        $scope.agendaHelp = false;
+        $scope.toggleAgendaHelp = function() {
+            $scope.agendaHelp = !$scope.agendaHelp;
+        };
+
+        $scope.showAgendaHelp = function() {
+            return $scope.agendaHelp;
+        };
+
         // Search for the given username
         $scope.getUserByUsername = function($viewValue) {
             if($viewValue != null && $viewValue.length >= 3) {
