@@ -725,4 +725,31 @@ class Image {
         }
         return false;
     }
+
+    /**
+     * Gets the average color in the top left corner, in the center and in the bottom right corner
+     * and calculates the average RGB values and returns them in an array
+     * @return array - ('red' => [0,255], 'green' => [0,255], 'blue' => [0,255])
+     */
+    public function getAverageColor() {
+        list($image_create_func, $image_save_func) = $this->getFunctionNames();
+        $source = $image_create_func($this->image);
+
+        $width = imagesx($source);
+        $height = imagesy($source);
+
+        $color1 = imagecolorat ($source, 1, 1);
+        $color2 = imagecolorat ($source, floor($width/2-1), floor($height/2-1));
+        $color3 = imagecolorat ($source, ($width-1), ($height-1));
+
+        $rgb1 = imagecolorsforindex($source, $color1);
+        $rgb2 = imagecolorsforindex($source, $color2);
+        $rgb3 = imagecolorsforindex($source, $color3);
+
+        $rgb['red'] = floor(($rgb1['red'] +  $rgb2['red'] +  $rgb3['red']) / 3);
+        $rgb['green'] = floor(($rgb1['green'] +  $rgb2['green'] +  $rgb3['green']) / 3);
+        $rgb['blue'] = floor(($rgb1['blue'] +  $rgb2['blue'] +  $rgb3['blue']) / 3);
+
+        return $rgb;
+    }
 }
