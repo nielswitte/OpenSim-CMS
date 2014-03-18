@@ -1,9 +1,22 @@
 <div class="page-header">
-    <h1>Meeting <small>Schedule a new meeting</small></h1>
+    <h1>Meeting <small>{{title}}</small></h1>
 </div>
+
 <div class="row">
     <div class="col-sm-9">
-        <form class="form-horizontal" role="form" id="meetingForm" ng-submit="createMeeting()">
+        <form class="form-horizontal" role="form" id="meetingForm" ng-submit="updateMeeting()">
+            <div class="form-group">
+                <label for="inputId" class="col-sm-2 control-label">ID</label>
+                <div class="col-sm-10">
+                    <input type="number" class="form-control" id="inputId" placeholder="ID" value="{{meeting.id}}" readonly="readonly">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="inputCreator" class="col-sm-2 control-label">Creator</label>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" id="inputCreator" placeholder="Username" value="{{meeting.creator.username}}" readonly="readonly">
+                </div>
+            </div>
             <div class="form-group">
                 <label for="inputName" class="col-sm-2 control-label">Name</label>
                 <div class="col-sm-10">
@@ -13,7 +26,7 @@
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="inputStartDate"><i class="glyphicon glyphicon-calendar"></i> Start</label>
                 <div class="col-sm-7">
-                    <input type="text" class="form-control" id="inputStartDate" ng-model="startDateString" data-min-date="{{todayDateString}}"  ng-change="updateCalendar()" data-autoclose="1" data-date-type="string" required pattern="[0-9]{4}/[0-9]{2}/[0-9]{2}" placeholder="Start date (yyyy/mm/dd)" bs-datepicker>
+                    <input type="text" class="form-control" id="inputStartDate" ng-model="startDateString" ng-change="updateCalendar()" data-autoclose="1" data-date-type="string" required pattern="[0-9]{4}/[0-9]{2}/[0-9]{2}" placeholder="Start date (yyyy/mm/dd)" bs-datepicker>
                 </div>
                 <div class="col-sm-3">
                     <input type="text" class="form-control" id="inputStartTime" ng-model="startTimeString" data-autoclose="1" data-time-type="string" required pattern="[0-9]{2}:[0-9]{2}" placeholder="Start time (hh:mm)" bs-timepicker>
@@ -97,8 +110,9 @@
                 </div>
             </fieldset>
             <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10" ng-show="allowCreate()">
-                    <button class="btn btn-primary" type="submit"><i class="glyphicon glyphicon-ok"></i> Schedule meeting</button>
+                <div class="col-sm-offset-2 col-sm-10" ng-show="allowUpdate()">
+                    <button class="btn btn-primary" type="submit"><i class="glyphicon glyphicon-ok"></i> Save Changes</button>
+                    <button class="btn btn-danger" type="button" ng-click="resetMeeting()"><i class="glyphicon glyphicon-remove"></i> Reset</button>
                 </div>
             </div>
         </form>

@@ -176,7 +176,7 @@ POST /api/user/ HTTP/1.1
 Change some information about the user. The username and id are locked. The password is a separate function.
 
 ```http
-PUT /api/user/<ID>/ HTTP/1.1
+PUT /api/user/<USER-ID>/ HTTP/1.1
 ```
 | Parameter         | Type      | Description                                                       |
 |-------------------|-----------|-------------------------------------------------------------------|
@@ -188,14 +188,14 @@ PUT /api/user/<ID>/ HTTP/1.1
 ### Change password
 
 ```http
-PUT /api/user/<USER-ID>/ HTTP/1.1
+PUT /api/user/<USER-ID>/password/ HTTP/1.1
 ```
 
-| Parameter         | Type      | Description                                                       |
-|-------------------|-----------|-------------------------------------------------------------------|
-| currentPassword   | String    | The user's current password                                       |
-| password          | String    | The user's new password                                           |
-| password2         | String    | The user's new password again, to check if no typo has been made  |
+| Parameter         | Type      | Description                                                                               |
+|-------------------|-----------|-------------------------------------------------------------------------------------------|
+| password          | String    | The user's new password                                                                   |
+| password2         | String    | The user's new password again, to check if no typo has been made                          |
+| currentPassword   | String    | [Optional] The user's current password, only required when no WRITE permissions for users |
 
 ### Delete user
 

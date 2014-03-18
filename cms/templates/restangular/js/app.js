@@ -41,10 +41,18 @@ var angularRest = angular.module('OpenSim-CMS', [
         controller: 'meetingNewController',
         css: 'templates/restangular/css/bootstrap-calendar.min.css',
         requireLogin: true
+    }).when('/meeting/:meetingId/edit', {
+        templateUrl: partial_path +'/meeting/meetingEdit.html',
+        controller: 'meetingController',
+        css: 'templates/restangular/css/bootstrap-calendar.min.css',
+        requireLogin: true
     }).when('/meeting/:meetingId', {
         templateUrl: partial_path +'/meeting/meeting.html',
         controller: 'meetingController',
-        css: 'templates/restangular/css/bootstrap-calendar.min.css',
+        requireLogin: true
+    }).when('/user/:userId/edit', {
+        templateUrl: partial_path +'/user/userEdit.html',
+        controller: 'userController',
         requireLogin: true
     }).when('/user/:userId', {
         templateUrl: partial_path +'/user/user.html',
@@ -68,12 +76,15 @@ var angularRest = angular.module('OpenSim-CMS', [
 });
 
 // Authentication check on run
-angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', 'Cache', function ($rootScope, Restangular, $location, $alert, $sce, Cache) {
+angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', 'Cache', '$anchorScroll', function ($rootScope, Restangular, $location, $alert, $sce, Cache, $anchorScroll) {
         $rootScope.$on("$routeChangeStart", function(event, next, current) {
             if (next.requireLogin && !sessionStorage.token) {
                 $alert({title: 'Error!', content: $sce.trustAsHtml('This page requires authentication.'), type: 'danger'});
                 $location.path('/login');
             }
+
+            // Scroll back to the top of the page
+            $anchorScroll();
         });
 
         // Set an error interceptor for Restangular
@@ -237,6 +248,27 @@ angularRest.directive('head', ['$rootScope','$compile',
                         angular.forEach(next.$$route.css, function(sheet){
                             scope.routeStyles[sheet] = sheet;
                         });
+                    }
+                });
+            }
+        };
+    }
+]);
+
+/**
+ * Confirmation on click before executing
+ *
+ * @source: http://stackoverflow.com/a/18313962
+ */
+angularRest.directive('ngConfirmClick', [
+    function(){
+        return {
+            link: function (scope, element, attr) {
+                var msg = attr.ngConfirmClick || "Are you sure?";
+                var clickAction = attr.confirmedClick;
+                element.bind('click',function (event) {
+                    if ( window.confirm(msg) ) {
+                        scope.$eval(clickAction);
                     }
                 });
             }

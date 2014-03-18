@@ -97,7 +97,7 @@ class Auth {
      * Checks if the current user has the required rights for this module
      *
      * @param string $module - Name of the module
-     * @param integer $rightsRequired - The required rights 400 = read only own data to 777 = read,write,execute everything
+     * @param integer $rightsRequired - The required rights 4 = read only own data to 7 = read,write,execute everything
      * @return boolean TRUE when user has rights
      */
     public static function checkRights($module, $rightsRequired) {

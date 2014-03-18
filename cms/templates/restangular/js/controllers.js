@@ -89,14 +89,9 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
 
 // toolbarController --------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$location', '$alert', function($scope, $sce, Cache, $location, $alert) {
-         $scope.accountDropdown = [
-            {text: 'Profile', href: 'profile'},
-            {divider: true},
-            {text: 'Log Out', click: 'logout()'}
-        ];
-
         $scope.currentLocation = $location.path();
 
+        // Handle logout events
         $scope.logout = function() {
             sessionStorage.clear();
             Cache.clearCache();
@@ -105,14 +100,23 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
             $location.path('home');
         };
 
+        // Get the right toolbar (right area of navbar)
         $scope.getUserToolbar = function() {
             if(sessionStorage.token){
+                // Create dropdown menu
+                $scope.accountDropdown = [
+                    {text: 'Profile', href: '#!/user/'+ $scope.user.userId},
+                    {divider: true},
+                    {text: 'Log Out', click: 'logout()'}
+                ];
+
                 return partial_path +'/navbar/userToolbarLoggedIn.html';
             } else {
                 return partial_path +'/navbar/userToolbarLoggedOut.html';
             }
         };
 
+        // Get the right main navigation (left area of navbar)
         $scope.getMainNavigation = function() {
             if(sessionStorage.token){
                 return partial_path +'/navbar/mainNavigationLoggedIn.html';
@@ -172,6 +176,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
             };
         });
 
+        // Save the new document
         function saveDocument() {
             // Show loading screen
             jQuery('#loading').show();
@@ -265,13 +270,14 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 );
 
 // documentController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
+angularRest.controller('documentController', ['Restangular', '$scope', '$routeParams', 'Page', '$modal', '$sce', function(Restangular, $scope, $routeParams, Page, $modal, $sce) {
         // Show loading screen
         jQuery('#loading').show();
 
         // Get document from API
         Restangular.one('document', $routeParams.documentId).get().then(function(documentResponse) {
             $scope.document = documentResponse;
+            $scope.token    = sessionStorage.token;
             Page.setTitle(documentResponse.title);
 
             // Init select2
@@ -312,6 +318,17 @@ angularRest.controller('documentController', ['Restangular', '$scope', '$routePa
             jQuery('#loading').hide();
         });
 
+        // Open dialog with the Slide preview
+        $scope.lightbox = function(number, url) {
+            $modal({
+                title: $sce.trustAsHtml('Slide '+ number),
+                content: $sce.trustAsHtml('<img src="'+ url+'?token='+ sessionStorage.token +'" class="img-responsive">'),
+                html: true,
+                show: true,
+                template: 'templates/restangular/html/bootstrap/modalDialogBasic.html',
+                scope: $scope
+            });
+        };
     }]
 );
 
@@ -372,58 +389,6 @@ angularRest.controller('meetingsController', ['Restangular', 'RestangularCache',
         var eventId;
         var meetingRequestUrl;
 
-        // Process Modal function calls
-        $scope.call = function(func) {
-            if(func == 'hide') {
-                modal.hide();
-            } else if(func == 'edit') {
-                Cache.clearCachedUrl(meetingRequestUrl);
-                modal.hide();
-                $location.path('meeting/'+ eventId);
-            }
-        };
-
-        // Create a new modal dialog
-        function BootstrapModalDialog(event) {
-            eventId = jQuery(this).data('event-id');
-
-            // Show loading screen
-            jQuery('#loading').show();
-
-            // Get one meeting
-            meeting = RestangularCache.one('meeting', eventId).get().then(function(meetingResponse) {
-                meetingRequestUrl       = meetingResponse.getRequestedUrl();
-
-                $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
-                $scope.template         = partial_path +'/meeting/meetingDetails.html';
-                $scope.meeting          = meetingResponse;
-                $scope.meeting.agenda   = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
-                $scope.startDateString  = new moment(meetingResponse.startDate).format('dddd D MMMM YYYY');
-                $scope.startTimeString  = new moment(meetingResponse.startDate).format('HH:mm');
-                $scope.endTimeString    = new moment(meetingResponse.endDate).format('HH:mm');
-
-                // Modal buttons
-                $scope.buttons          = [{
-                        text: 'Edit',
-                        func: 'edit',
-                        class: 'primary',
-                        type: 'submit'
-                    },
-                    {
-                        text: 'Ok',
-                        func: 'hide',
-                        class: 'default',
-                        type: 'button'
-                    }
-                ];
-                modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
-
-                // Remove loading screen
-                jQuery('#loading').hide();
-            });
-            return false;
-        }
-
         // Get all meetings for the calendar
         Restangular.one('meetings', date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).all('calendar').getList().then(function(meetingsResponse) {
             // Show loading screen
@@ -461,9 +426,6 @@ angularRest.controller('meetingsController', ['Restangular', 'RestangularCache',
                 }
             });
 
-            // Add these items additionally (somehow they are not catched by the other on selector)
-            jQuery('#calendar').on('mousedown click', 'a.bsDialog', BootstrapModalDialog);
-
             // Navigation and View calendar buttons
             jQuery('.btn-group button[data-calendar-nav]').each(function() {
                 jQuery(this).click(function() {
@@ -484,7 +446,7 @@ angularRest.controller('meetingsController', ['Restangular', 'RestangularCache',
 );
 
 // meetingController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('meetingController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache) {
+angularRest.controller('meetingController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache, $location) {
         var meetingRequestUrl;
         var gridsRequestUrl;
         var calendar;
@@ -661,6 +623,9 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
             $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
             Page.setTitle('Meeting '+ meetingResponse.id);
             meetingRequestUrl       = meetingResponse.getRequestedUrl();
+            if($location.path().indexOf('/edit') == -1) {
+                $scope.meeting.agenda   = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
+            }
 
             // Set the dates and times
             setDateTimes();
@@ -678,14 +643,14 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
             jQuery('#loading').hide();
 
             // Load meetings on same day
-            var date = new moment($scope.meeting.startDate).format('YYYY-MM-DD');
+            var date = new moment().subtract('week', 2).format('YYYY-MM-DD');
             Restangular.one('meetings', date).all('calendar').getList().then(function(meetingsResponse) {
                 calendar = jQuery('#calendar').calendar({
                     language:       'en-US',
                     events_source:  meetingsResponse,
                     tmpl_cache:     true,
                     view:           'day',
-                    day:            date,
+                    day:            new moment($scope.meeting.startDate).format('YYYY-MM-DD'),
                     time_start:     TIME_START,
                     time_end:       TIME_END,
                     tmpl_path:      partial_path +'/../calendar/',
@@ -784,6 +749,16 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
             } else {
                 return false;
             }
+        };
+
+        // Show or hide agenda help
+        $scope.agendaHelp = false;
+        $scope.toggleAgendaHelp = function() {
+            $scope.agendaHelp = !$scope.agendaHelp;
+        };
+
+        $scope.showAgendaHelp = function() {
+            return $scope.agendaHelp;
         };
 
         // Search for the given username
@@ -1047,6 +1022,45 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             }
         };
 
+        // Open modal dialog to change the user's password
+        $scope.changePasswordForm = function() {
+            $scope.template         = partial_path +'/user/userPasswordForm.html';
+            $scope.avatar           = {};
+            $scope.formSubmit       = 'changePassword';
+            $scope.buttons          = [{
+                        text: 'Update',
+                        func: '',
+                        class: 'primary',
+                        type: 'submit'
+                    },
+                    {
+                        text: 'Cancel',
+                        func: 'hide',
+                        class: 'danger',
+                        type: 'button'
+                    }
+                ];
+            modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
+        };
+
+        // Change the user's password
+        $scope.changePassword = function() {
+            // Show loading screen
+            jQuery('#loading').show();
+
+            $scope.user.customPUT($scope.user, 'password').then(function(putResponse) {
+                angular.copy($scope.user, $scope.userOld);
+                if(!putResponse.success) {
+                    $alert({title: 'Change password failed!', content: $sce.trustAsHtml(putResponse.error), type: 'danger'});
+                } else {
+                    $alert({title: 'Password changed!', content: $sce.trustAsHtml('The user\'s password has been updated.'), type: 'success'});
+                    Cache.clearCachedUrl(userRequestUrl);
+                }
+                // Remove loading screen
+                jQuery('#loading').hide();
+            });
+        };
+
         // Allow changing user's permissions
         $scope.allowPermissions = function() {
             if(sessionStorage.userPermission >= WRITE) {
@@ -1085,11 +1099,20 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
         };
 
         // Compare passwords
-        $scope.passwordDoNotMatch = function() {
+        $scope.passwordDoNotMatchAvatar = function() {
             if($scope.avatar.password != $scope.avatar.password2) {
                 jQuery('#inputAvatarPassword, #inputAvatarPassword2').parents('div.form-group').addClass('has-error');
             } else {
                 jQuery('#inputAvatarPassword, #inputAvatarPassword2').parents('div.form-group').removeClass('has-error');
+            }
+        };
+
+        // Compare passwords
+        $scope.passwordDoNotMatchUser = function() {
+            if($scope.user.password != $scope.user.password2) {
+                jQuery('#inputChangePassword, #inputChangePassword2').parents('div.form-group').addClass('has-error');
+            } else {
+                jQuery('#inputChangePassword, #inputChangePassword2').parents('div.form-group').removeClass('has-error');
             }
         };
 
@@ -1115,6 +1138,8 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                 modal.hide();
             } else if(func == 'createAvatar') {
                 $scope.saveAvatar();
+            } else if(func == 'changePassword') {
+                $scope.changePassword();
             }
         };
 

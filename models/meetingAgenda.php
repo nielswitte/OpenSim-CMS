@@ -90,7 +90,7 @@ class MeetingAgenda {
             $string .= str_repeat('  ', $depth);
             $string .= ($depth > 0 ? $parentId .'.' : '' ) . ($i+1) .'. '. $agenda[$i]['value'] . "\n";
             if(isset($agenda[$i]['items'])) {
-                $string .= $this->toString($agenda[$i]['items'], $depth+1, $i+1);
+                $string .= $this->toString($agenda[$i]['items'], ($depth+1), ($i+1));
             }
         }
         return $string;

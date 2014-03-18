@@ -5,7 +5,7 @@
 			<li>
 				<span class="pull-left event <%= event['class'] %>"></span>&nbsp;
 				<%= moment(event.start).format('HH:mm') %> - <%= moment(event.end).format('HH:mm') %>
-                <a href="<%= event.url ? event.url : 'javascript:void(0)' %>" data-event-id="<%= event.id %>"
+                <a href="#!/meeting/<%= event.id %>" data-event-id="<%= event.id %>"
 					data-event-class="<%= event['class'] %>" class="event-item bsDialog">
 					<%= event.title %>
                 </a>

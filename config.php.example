@@ -23,6 +23,8 @@
 	define('DS',                        '\\');                                  // Directory separator
 
     // Image settings
+    define('IMAGE_THUMBNAIL_WIDTH',     256);                                   // width of thumnails
+	define('IMAGE_THUMBNAIL_HEIGHT',    256);                                   // height of thumnails
 	define('IMAGE_WIDTH',               1024);                                  // Texture width in OpenSim, used to resize presentations
 	define('IMAGE_HEIGHT',              1024);                                  // Texture height in OpenSim, used to resize presentations
     define('IMAGE_TYPE',                'png');                                 // File type to store images in

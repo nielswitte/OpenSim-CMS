@@ -11,7 +11,7 @@ require_once dirname(__FILE__) .'/../../controllers/meetingController.php';
  * Implements the functions for meetings
  *
  * @author Niels Witte
- * @version 0.2
+ * @version 0.3
  * @date February 25th, 2014
  */
 class Meeting extends Module{
@@ -125,6 +125,7 @@ class Meeting extends Module{
         $meeting->getCreator()->getInfoFromDatabase();
         $meeting->getRoom()->getInfoFromDatabase();
         $meeting->getParticipantsFromDatabase();
+        $meeting->getDocumentsFromDabatase();
 
         return $this->getMeetingData($meeting, TRUE);
     }
@@ -156,14 +157,7 @@ class Meeting extends Module{
         $input          = \Helper::getInput(TRUE);
 
         if($meetingCtrl->validateParametersCreate($input)) {
-            // Get room ID from input
-            $roomId = isset($input['room']['id']) ? $input['room']['id'] : $input['room'];
-            // Check to see if there is no overlap
-            if(!$meetingCtrl->meetingOverlap($input['startDate'], $input['endDate'], $roomId)) {
-                $data = $meetingCtrl->createMeeting($input);
-            } else {
-                throw new \Exception('Meeting overlaps with an existing meeting', 1);
-            }
+            $data = $meetingCtrl->createMeeting($input);
         }
 
         // Format the result
@@ -189,14 +183,7 @@ class Meeting extends Module{
         $input          = \Helper::getInput(TRUE);
 
         if($meetingCtrl->validateParametersUpdate($input)) {
-            // Get room ID from input
-            $roomId = isset($input['room']['id']) ? $input['room']['id'] : $input['room'];
-            // Check to see if there is no overlap
-            if(!$meetingCtrl->meetingOverlap($input['startDate'], $input['endDate'], $roomId, $args[1])) {
-                $data = $meetingCtrl->updateMeeting($input);
-            } else {
-                throw new \Exception('Meeting overlaps with an existing meeting', 1);
-            }
+            $data = $meetingCtrl->updateMeeting($input);
         }
 
         // Format the result
@@ -256,6 +243,7 @@ class Meeting extends Module{
                 'email'         => $meeting->getCreator()->getEmail()
                 )
             );
+        // Show detailed information?
         if($full) {
             $data['room'] = array(
                 'id'            => $meeting->getRoom()->getId(),
@@ -269,7 +257,7 @@ class Meeting extends Module{
                 ),
                 'description'   => $meeting->getRoom()->getDescription()
             );
-
+            // Make a list of participants
             $participants = array();
             foreach($meeting->getParticipants()->getParticipants() as $user) {
                 $participants[] = array(
@@ -282,6 +270,21 @@ class Meeting extends Module{
             }
             $data['participants'] = $participants;
             $data['agenda']       = $meeting->getAgenda()->toString();
+            // Make a list of documents
+            $documents = array();
+            foreach($meeting->getDocuments()->getDocuments() as $document) {
+                $documents[] = array(
+                    'id'                => $document->getId(),
+                    'title'             => $document->getTitle(),
+                    'type'              => $document->getType(),
+                    'ownerId'           => $document->getOwnerId(),
+                    'creationDate'      => $document->getCreationDate(),
+                    'modificationDate'  => $document->getModificationDate()
+                );
+            }
+
+            $data['documents']    = $documents;
+        // Show minimal information
         } else {
             $data['roomId']     = $meeting->getRoom()->getId();
             // URL to full view

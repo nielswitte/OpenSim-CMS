@@ -9,7 +9,7 @@ require_once dirname(__FILE__) .'/document.php';
  * This class is the presentation model
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
  * @date February 10th, 2014
  */
 class Presentation extends Document {
@@ -55,7 +55,7 @@ class Presentation extends Document {
 
             $i = 1;
             foreach($results as $result) {
-                $this->slides[$i] = new \Models\Slide($result['id'], $i, $this->getPath(). DS . $i .'.jpg');
+                $this->slides[$i] = new \Models\Slide($result['id'], $i, $this->getPath(). DS . $i .'.'. IMAGE_TYPE);
                 $i++;
             }
         }
@@ -122,5 +122,14 @@ class Presentation extends Document {
             $this->getSlides();
         }
         return count($this->slides);
+    }
+
+    /**
+     * Returns the path to the thumbnails of this presentation
+     *
+     * @return string
+     */
+    public function getThumbnailPath() {
+        return $this->getPath() . DS . 'thumbs';
     }
 }
