@@ -84,7 +84,6 @@ angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', 'Ca
             }
 
             // Scroll back to the top of the page
-            $location.hash('top');
             $anchorScroll();
         });
 
