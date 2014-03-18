@@ -89,14 +89,9 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
 
 // toolbarController --------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$location', '$alert', function($scope, $sce, Cache, $location, $alert) {
-         $scope.accountDropdown = [
-            {text: 'Profile', href: 'profile'},
-            {divider: true},
-            {text: 'Log Out', click: 'logout()'}
-        ];
-
         $scope.currentLocation = $location.path();
 
+        // Handle logout events
         $scope.logout = function() {
             sessionStorage.clear();
             Cache.clearCache();
@@ -105,6 +100,7 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
             $location.path('home');
         };
 
+        // Get the right toolbar (right area of navbar)
         $scope.getUserToolbar = function() {
             if(sessionStorage.token){
                 return partial_path +'/navbar/userToolbarLoggedIn.html';
@@ -113,6 +109,7 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
             }
         };
 
+        // Get the right main navigation (left area of navbar)
         $scope.getMainNavigation = function() {
             if(sessionStorage.token){
                 return partial_path +'/navbar/mainNavigationLoggedIn.html';
@@ -130,6 +127,13 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
             };
             $scope.getUserToolbar();
         }
+
+        // Create dropdown menu
+        $scope.accountDropdown = [
+            {text: 'Profile', href: '#!/user/'+ $scope.user.userId},
+            {divider: true},
+            {text: 'Log Out', click: 'logout()'}
+        ];
     }]
 );
 
@@ -172,6 +176,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
             };
         });
 
+        // Save the new document
         function saveDocument() {
             // Show loading screen
             jQuery('#loading').show();
