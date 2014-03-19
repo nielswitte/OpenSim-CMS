@@ -64,7 +64,7 @@
             <tr ng-repeat="grid in gridsList | orderBy:orderByField:reverseSort | filter:searchText">
                 <td>{{grid.id}}</td>
                 <td><a href="grid/{{grid.id}}/">{{grid.name}}</a></td>
-                <td><a href="opensim://{{grid.openSim.ip}}:{{grid.openSim.port}}/{{urlEncode(grid.regions[grid.defaultRegionUuid].name)}}/128/128/0">{{grid.openSim.protocol}}://{{grid.openSim.ip}}:{{grid.openSim.port}}</a></td>
+                <td><a ng-href="opensim://{{grid.openSim.ip}}:{{grid.openSim.port}}/{{urlEncode(grid.regions[findRegionIndexByUuid(grid, grid.defaultRegionUuid)].name)}}/128/128/0">{{grid.openSim.protocol}}://{{grid.openSim.ip}}:{{grid.openSim.port}}</a></td>
                 <td>{{grid.regionCount}}</td>
                 <td>
                     <span class="label label-success" ng-show="{{grid.isOnline}}">Online</span>

@@ -337,6 +337,7 @@ angularRest.controller('documentController', ['Restangular', '$scope', '$routePa
 angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
         $scope.orderByField     = 'name';
         $scope.reverseSort      = false;
+        $scope.gridsList        = { regions: [] };
 
         // Show loading screen
         jQuery('#loading').show();
@@ -348,6 +349,18 @@ angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page',
             // Remove loading screen
             jQuery('#loading').hide();
         });
+
+        // Searches the list with regions for the given uuid
+        $scope.findRegionIndexByUuid = function(grid, uuid) {
+            if(grid.regions) {
+                for(var i = 0; i < grid.regions.length; i++) {
+                    if(grid.regions[i].uuid == uuid) {
+                        return i;
+                    }
+                }
+            }
+            return false;
+        };
 
         $scope.collapseFilter = true;
         $scope.toggleFilter = function() {
