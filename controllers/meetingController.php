@@ -311,6 +311,30 @@ class MeetingController {
     }
 
     /**
+     * Saves the array with messages in the meeting
+     *
+     * @param array $parameters
+     *              * string timestamp - The timestamp as YYYY-MM-DDThh:mm:ss.ff..fZ
+     *              * string uuid - The sender's UUID
+     *              * string name - The sender's name
+     *              * integer agendaId - The current agenda ID
+     *              * string message - The message
+     * @returns boolean
+     */
+    public function saveChat($parameters) {
+        $result = FALSE;
+        $db = \Helper::getDB();
+
+        // Store all results separate
+        foreach($parameters as $item) {
+            $item['meetingId'] = $this->meeting->getId();
+            $result = $db->insert('meeting_minutes', $item);
+        }
+
+        return $result;
+    }
+
+    /**
      * Validates the parameters for creating a meeting
      *
      * @param array $parameters
@@ -355,7 +379,7 @@ class MeetingController {
     }
 
     /**
-     * Validates the parameters for the savechatlog function
+     * Validates the parameters for the savechat function
      *
      * @param array $parameters
      * @return boolean
@@ -365,16 +389,18 @@ class MeetingController {
         $result = FALSE;
         $count  = 0;
         foreach($parameters as $parameter) {
-            if(count($parameter) != 4) {
-                throw new \Exception('Expected 4 parameters, '. count($parameters) .' given at row '. $count, 1);
-            } elseif(!isset($parameter['timestamp'])) {
-                throw new \Exception('Missing parameter (string) "timestamp" at row '. $count, 2);
+            if(count($parameter) != 5) {
+                throw new \Exception('Expected 5 parameters, '. count($parameter) .' given at row '. $count, 1);
+            } elseif(!isset($parameter['timestamp']) || !preg_match("/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/", $parameter['timestamp'])) {
+                throw new \Exception('Missing parameter (string) "timestamp" at row '. $count .' which should be in the format YYYY-MM-DD HH:mm:ss', 2);
             } elseif(!isset($parameter['uuid']) || (strlen($parameter['uuid']) > 1 && !\Helper::isValidUuid($parameter['uuid']))) {
                 throw new \Exception('Missing parameter (string) "uuid", which needs to be empty, 0 or a valid UUID at row '. $count, 3);
             } elseif(!isset($parameter['name'])) {
                 throw new \Exception('Missing parameter (string) "name" at row '. $count, 4);
+            } elseif(!isset($parameter['agendaId'])) {
+                throw new \Exception('Missing parameter (integer) "agendaId" at row '. $count, 5);
             } elseif(!isset($parameter['message'])) {
-                throw new \Exception('Missing parameter (string) "message" at row '. $count, 5);
+                throw new \Exception('Missing parameter (string) "message" at row '. $count, 6);
             } else {
                 $result = TRUE;
             }
