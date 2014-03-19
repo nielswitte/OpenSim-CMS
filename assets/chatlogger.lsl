@@ -28,9 +28,12 @@ list Listener;                  // The navigation listener
 list messages;                  // List to store the chat in
 key userUuid = NULL_KEY;        // The toucher's UUID (default the owner)
 key objectUuid;                 // The uuid of this object
+integer meetingId = 0;          // The ID of the selected meeting
 key jsonMeeting;                // JSON meeting
 list avatarsPresent;            // List to keep track of all avatars currently present
 integer meetingAreaSize = 25;   // Size of the meeting room to detect avatars in
+list agendaItems;               // List with the agenda items in it
+integer currentAgendaItem = 0;  // The current index of the agenda
 
 // HTTP requests
 key http_request_api_token;     // API token request
@@ -70,9 +73,10 @@ request_meeting(integer id) {
  */
 request_send_chat() {
     if(debug) {
+        // Count the number of messages
         integer count = llGetListLength(messages);
-        if(count >= 3) {
-            count = count / 3;
+        if(count >= 4) {
+            count = count / 4;
         } else {
             count = 0;
         }
@@ -82,22 +86,22 @@ request_send_chat() {
     // Only send when there are messages
     if(llGetListLength(messages) > 0) {
         integer i;
-        string body = "{ \"meetingId\": 1, \"messages\": [";
+        string body = "[";
         string body_messages = "";
         // Parse messages
-        for(i = 0; i < llGetListLength(messages); i=i+3) {
-            body_messages = body_messages + "{ \"timestamp\": \""+ llList2String(messages, i) +"\", \"uuid\": \""+ llList2String(messages, i+1) +"\", \"message\": \""+ llList2String(messages, i+2) +"\"}";
+        for(i = 0; i < llGetListLength(messages); i=i+4) {
+            body_messages = body_messages + "{ \"timestamp\": \""+ llList2String(messages, i) +"\", \"uuid\": \""+ llList2String(messages, i+1) +"\", \"name\": \""+ llList2String(messages, i+2) +"\",  \"message\": \""+ llEscapeURL(llList2String(messages, i+3)) +"\"}";
 
             // Add comma when not last element
-            if(i+3 < llGetListLength(messages)) {
+            if(i+4 < llGetListLength(messages)) {
                 body_messages = body_messages + ",";
             }
         }
         // Close array
-        body = body + body_messages + "]}";
+        body = body + body_messages + "]";
         // Empty list
         messages = [];
-        http_request_send_chat = llHTTPRequest(serverUrl +"/meeting/"+ 1 +"/log/?token="+ APIToken, [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/json"], body);
+        http_request_send_chat = llHTTPRequest(serverUrl +"/meeting/"+ meetingId +"/log/?token="+ APIToken, [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/json"], body);
     }
 }
 
@@ -106,10 +110,11 @@ request_send_chat() {
  *
  * @param string timestamp
  * @param string uuid
+ * @param string name
  * @param string message
  */
-queueMessage(string timestamp, string uuid, string message) {
-    messages += [timestamp, uuid, message];
+queueMessage(string timestamp, string uuid, string name, string message) {
+    messages += [timestamp, uuid, name, message];
 }
 
 /**
@@ -124,6 +129,33 @@ removeListeners() {
 }
 
 /**
+ * Move the meeting to the given agenda item
+ * @param integer index
+ */
+agendaItem(integer index) {
+    if(llGetListLength(agendaItems) > index) {
+        currentAgendaItem  = index;
+        list TimeStamp     = llParseString2List(llGetTimestamp(),["-",":"],["T"]); //Get timestamp and split into parts in a list
+        integer hour       = llList2Integer(TimeStamp,4);
+        // GMT to CET
+        hour++;
+        // Add leading zero
+        string Hours = "";
+        if(hour < 10) {
+            Hours = "0"+ (string)hour;
+        } else {
+            Hours = (string)hour;
+        }
+        string Minutes     = llList2String(TimeStamp,5);
+
+        // Say agenda item and queue it
+        llSetText(llList2String(agendaItems, currentAgendaItem), <0,0,1>, 1.0);
+        llSay(channelChat, "[Meeting] At "+ Hours +":"+ Minutes +" starting with agenda item: "+ llList2String(agendaItems, currentAgendaItem));
+        queueMessage(llGetTimestamp(), "", "Server", "[Meeting] At "+ Hours +":"+ Minutes +" starting with agenda item: "+ llList2String(agendaItems, currentAgendaItem));
+    }
+}
+
+/**
  * The default state
  */
 default {
@@ -131,8 +163,12 @@ default {
      * Actions performed when entering the default state
      */
     state_entry() {
-        jsonMeeting = "";
-        avatarsPresent = [];
+        llSetText("", <0,0,1>, 1.0);
+        // Reset all items
+        jsonMeeting         = "";
+        currentAgendaItem   = 0;
+        agendaItems         = [];
+        avatarsPresent      = [];
 
         // SET COLOR RED
         llSetColor(<255, 0, 0>, ALL_SIDES);
@@ -182,9 +218,9 @@ state startup {
             if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
             // Send a more specific and meaningful response to the user
             if(request_id == http_request_api_token) {
-                llInstantMessage(userUuid, "Invalid username/password combination used.");
+                llInstantMessage(userUuid, "[Meeting] Invalid username/password combination used.");
             } else if(request_id == http_request_meetings) {
-                llInstantMessage(userUuid, "Unable to retrieve meetings from the server.");
+                llInstantMessage(userUuid, "[Meeting] Unable to retrieve meetings from the server.");
             }
 
             return;
@@ -217,10 +253,10 @@ state startup {
                     }
                 }
 
-                llDialog(userUuid, "The following meetings will take place today:", meetingsToday , channelListen);
+                llDialog(userUuid, "[Meeting] The following meetings will take place today:", meetingsToday , channelListen);
             // No meetings
             } else {
-                llInstantMessage(userUuid, "No meetings scheduled for today.");
+                llInstantMessage(userUuid, "[Meeting] No meetings scheduled for today.");
             }
         // Load a specific meeting
         } else if(request_id == http_request_meeting) {
@@ -266,9 +302,19 @@ state logging {
         // Listen to everything
         Listener += llListen(channelChat, "", NULL_KEY, "" );
 
+        // Set meetingId
+        meetingId = (integer) JsonGetValue(jsonMeeting, "id");
+
         // Broadcast meeting Agenda
-        llSay(channelChat, "Meeting Agenda: \n"+ JsonGetValue(jsonMeeting, "agenda"));
+        llSay(channelChat, "[Meeting] Meeting Agenda: \n"+ JsonGetValue(jsonMeeting, "agenda"));
+        // Items to list
+        agendaItems = llParseString2List(JsonGetValue(jsonMeeting, "agenda"), "\n", "");
+
+        // Start looking for avatars in surroundings
         llSensor("", NULL_KEY, AGENT, meetingAreaSize, PI);
+
+        // Set index to first item
+        agendaItem(0);
 
         // Start processing messages
         llSetTimerEvent(10.0);
@@ -287,8 +333,8 @@ state logging {
             string avatarUuid   = (string) llDetectedKey(vIntCounter);
             if(llListFindList(avatarsPresent, [avatarUuid]) == -1) {
                 avatarsPresent += [avatarUuid];
-                llSay(0, "Avatar entered the meeting: "+ avatarName +" ("+ avatarUuid +")");
-                queueMessage(llGetTimestamp(), "", "Avatar entered the meeting: "+ avatarName +" ("+ avatarUuid +")");
+                llSay(0, "[Meeting] Avatar entered the meeting: "+ avatarName +" ("+ avatarUuid +")");
+                queueMessage(llGetTimestamp(), "", "Server", "[Meeting] Avatar entered the meeting: "+ avatarName +" ("+ avatarUuid +")");
             }
         } while (++vIntCounter < vIntFound);
     }
@@ -326,6 +372,7 @@ state logging {
             return;
         }
 
+        // Store messages
         if(request_id = http_request_send_chat) {
             if(debug) llInstantMessage(userUuid, "[Debug] Messages stored: "+ body);
         }
@@ -343,13 +390,13 @@ state logging {
                 state default;
             // Go to the previous agenda item
             } else if(message == "Previous") {
-
+                agendaItem(currentAgendaItem-1);
             // Go to the next agenda item
             } else if(message == "Next") {
-
+                agendaItem(currentAgendaItem+1);
             }
         } else {
-            queueMessage(llGetTimestamp(), (string) id, message);
+            queueMessage(llGetTimestamp(), (string) id, name, message);
         }
     }
 
