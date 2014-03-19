@@ -206,10 +206,15 @@ class Meeting extends Module{
         $meetingCtrl    = new \Controllers\MeetingController($meeting);
         $input          = \Helper::getInput(TRUE);
 
-        // @todo: Handle input
-        print_r($input);
-        die();
+        // Convert UNIX to timestamp, which is used when the request is from the OpenSim Server
+        foreach($input as $key => $row) {
+            if(isset($row['timestamp']) && is_numeric($row['timestamp'])) {
+                $input[$key]['message']   = urldecode($row['message']);
+                $input[$key]['timestamp'] = date('Y-m-d H:i:s', $row['timestamp']);
+            }
+        }
 
+        // Validate parameters and if valid save them
         if($meetingCtrl->validateParametersChat($input)) {
             $data = $meetingCtrl->saveChat($input);
         }
