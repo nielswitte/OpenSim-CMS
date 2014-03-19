@@ -153,7 +153,7 @@ agendaItem(integer index) {
         // Say agenda item and queue it
         llSetText(llList2String(agendaItems, currentAgendaItem), <0,0,1>, 1.0);
         llSay(channelChat, "[Meeting] At "+ Hours +":"+ Minutes +" starting with agenda item: "+ llList2String(agendaItems, currentAgendaItem));
-        queueMessage(llGetUnixTime(), "", "Server", "[Meeting] At "+ Hours +":"+ Minutes +" starting with agenda item: "+ llList2String(agendaItems, currentAgendaItem));
+        queueMessage(llGetUnixTime(), "", "Server", "At "+ Hours +":"+ Minutes +" starting with agenda item: "+ llList2String(agendaItems, currentAgendaItem));
     }
 }
 
@@ -358,7 +358,7 @@ state logging {
             if(llListFindList(avatarsPresent, [avatarUuid]) == -1) {
                 avatarsPresent += [avatarUuid];
                 llSay(0, "[Meeting] Avatar entered the meeting: "+ avatarName +" ("+ avatarUuid +")");
-                queueMessage(llGetUnixTime(), "", "Server", "[Meeting] Avatar entered the meeting: "+ avatarName +" ("+ avatarUuid +")");
+                queueMessage(llGetUnixTime(), "", "Server", "Avatar entered the meeting: "+ avatarName +" ("+ avatarUuid +")");
             }
         } while (++vIntCounter < vIntFound);
     }
