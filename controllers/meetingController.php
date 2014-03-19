@@ -353,4 +353,34 @@ class MeetingController {
         }
         return $result;
     }
+
+    /**
+     * Validates the parameters for the savechatlog function
+     *
+     * @param array $parameters
+     * @return boolean
+     * @throws \Exception
+     */
+    public function validateParametersChat($parameters) {
+        $result = FALSE;
+        $count  = 0;
+        foreach($parameters as $parameter) {
+            if(count($parameter) != 4) {
+                throw new \Exception('Expected 4 parameters, '. count($parameters) .' given at row '. $count, 1);
+            } elseif(!isset($parameter['timestamp'])) {
+                throw new \Exception('Missing parameter (string) "timestamp" at row '. $count, 2);
+            } elseif(!isset($parameter['uuid']) || (strlen($parameter['uuid']) > 1 && !\Helper::isValidUuid($parameter['uuid']))) {
+                throw new \Exception('Missing parameter (string) "uuid", which needs to be empty, 0 or a valid UUID at row '. $count, 3);
+            } elseif(!isset($parameter['name'])) {
+                throw new \Exception('Missing parameter (string) "name" at row '. $count, 4);
+            } elseif(!isset($parameter['message'])) {
+                throw new \Exception('Missing parameter (string) "message" at row '. $count, 5);
+            } else {
+                $result = TRUE;
+            }
+            $count++;
+        }
+
+        return $result;
+    }
 }
