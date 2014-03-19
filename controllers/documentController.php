@@ -38,7 +38,7 @@ class DocumentController {
         $result = $db->delete('documents');
 
         if($result === FALSE) {
-            throw new \Exception('Given Document ('. $this->document->getId() .') could not be removed from the CMS', 1);
+            throw new \Exception('Given Document ('. $this->document->getId() .') could not be removed from the CMS. The document is probably being used in a meeting.', 1);
         } else {
             // Clear files after deletion
             \Helper::removeDirAndContents($this->document->getPath());

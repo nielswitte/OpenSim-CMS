@@ -727,7 +727,7 @@ class Image {
     }
 
     /**
-     * Gets the average color in the top left corner, in the center and in the bottom right corner
+     * Gets the average color in the corners of the image
      * and calculates the average RGB values and returns them in an array
      * @return array - ('red' => [0,255], 'green' => [0,255], 'blue' => [0,255])
      */
@@ -735,20 +735,26 @@ class Image {
         list($image_create_func, $image_save_func) = $this->getFunctionNames();
         $source = $image_create_func($this->image);
 
-        $width = imagesx($source);
+        // Image properties
+        $width  = imagesx($source);
         $height = imagesy($source);
 
-        $color1 = imagecolorat ($source, 1, 1);
-        $color2 = imagecolorat ($source, floor($width/2-1), floor($height/2-1));
-        $color3 = imagecolorat ($source, ($width-1), ($height-1));
+        // Get colors
+        $colorTL = imagecolorat($source, 1, 1);
+        $colorTR = imagecolorat($source, ($width-1), 1);
+        $colorBL = imagecolorat($source, 1, ($height-1));
+        $colorBR = imagecolorat($source, ($width-1), ($height-1));
 
-        $rgb1 = imagecolorsforindex($source, $color1);
-        $rgb2 = imagecolorsforindex($source, $color2);
-        $rgb3 = imagecolorsforindex($source, $color3);
+        // Get RGB color
+        $rgbTL = imagecolorsforindex($source, $colorTL);
+        $rgbTR = imagecolorsforindex($source, $colorTR);
+        $rgbBL = imagecolorsforindex($source, $colorBL);
+        $rgbBR = imagecolorsforindex($source, $colorBR);
 
-        $rgb['red'] = floor(($rgb1['red'] +  $rgb2['red'] +  $rgb3['red']) / 3);
-        $rgb['green'] = floor(($rgb1['green'] +  $rgb2['green'] +  $rgb3['green']) / 3);
-        $rgb['blue'] = floor(($rgb1['blue'] +  $rgb2['blue'] +  $rgb3['blue']) / 3);
+        // Calculate avarage corner RGB
+        $rgb['red']     = floor(($rgbTL['red'] +  $rgbTR['red'] +  $rgbBL['red'] + $rgbBR['red']) / 4);
+        $rgb['green']   = floor(($rgbTL['green'] +  $rgbTR['green'] +  $rgbBL['green'] + $rgbBR['green']) / 4);
+        $rgb['blue']    = floor(($rgbTL['blue'] +  $rgbTR['blue'] +  $rgbBL['blue'] + $rgbBR['blue']) / 4);
 
         return $rgb;
     }

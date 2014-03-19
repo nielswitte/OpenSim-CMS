@@ -258,6 +258,8 @@ class Helper {
 
     /**
      * Creates a resized image of the given source and saves it at the destination
+     * Also fills the background overflow after cropping with black or white depending on
+     * the color of the corners of the image.
      *
      * @param string $source - The file to use as a source
      * @param string $destination - The destination to save the file, including filename and extension
@@ -293,10 +295,10 @@ class Helper {
             if(!file_exists($destination) || $resizeRequired) {
                 // Load the background
                 $averageColor = $resize->getAverageColor();
-                if(($averageColor['red'] + $averageColor['green'] + $averageColor['blue'] / 3) >= 128) {
-                    $image = new \Image(FILES_LOCATION . DS . 'presentation' . DS .'background_light.jpg');
+                if(($averageColor['red'] + $averageColor['green'] + $averageColor['blue'] / 4) >= 128) {
+                    $image = new \Image(FILES_LOCATION . DS . 'background_light.jpg');
                 } else {
-                    $image = new \Image(FILES_LOCATION . DS . 'presentation' . DS .'background_dark.jpg');
+                    $image = new \Image(FILES_LOCATION . DS . 'background_dark.jpg');
                 }
 
                 // resize when needed
