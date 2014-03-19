@@ -13,7 +13,7 @@ angularRest.controller('homeController', ['Restangular', '$scope', 'Page', funct
 );
 
 // loginController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$sce', 'Cache', function(Restangular, $scope, $alert, $sce, Cache) {
+angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$sce', 'Cache', '$route', function(Restangular, $scope, $alert, $sce, Cache, $route) {
         $scope.isLoggedIn = false;
 
         // Check login
@@ -74,6 +74,8 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
                         Cache.clearCache();
                         // Back to previous page
                         window.history.back();
+                        // Reload the page
+                        $route.reload();
                     });
                 // Failed auth
                 } else {
