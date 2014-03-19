@@ -11,7 +11,7 @@
  *
  * @author Niels Witte
  * @date March 14th, 2014
- * @version 0.1
+ * @version 0.2
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
@@ -21,6 +21,7 @@ string APIPassword = "OpenSim"; // API password
 integer serverId = 1;           // The ID of this server in OpenSim-CMS
 
 // Some general parameters
+key viewerUuid = "b7db0f12-21e7-46da-8a9b-468b9d049cb5"; // The UUID of the viewer of the agenda
 integer channelListen = -9;     // Channel to listen to
 integer channelChat = 0;        // Channel to log chat on
 string APIToken;                // The token to be used for the API
@@ -75,8 +76,8 @@ request_send_chat() {
     if(debug) {
         // Count the number of messages
         integer count = llGetListLength(messages);
-        if(count >= 4) {
-            count = count / 4;
+        if(count >= 5) {
+            count = count / 5;
         } else {
             count = 0;
         }
@@ -89,11 +90,11 @@ request_send_chat() {
         string body = "[";
         string body_messages = "";
         // Parse messages
-        for(i = 0; i < llGetListLength(messages); i=i+4) {
-            body_messages = body_messages + "{ \"timestamp\": \""+ llList2String(messages, i) +"\", \"uuid\": \""+ llList2String(messages, i+1) +"\", \"name\": \""+ llList2String(messages, i+2) +"\",  \"message\": \""+ llEscapeURL(llList2String(messages, i+3)) +"\"}";
+        for(i = 0; i < llGetListLength(messages); i=i+5) {
+            body_messages = body_messages + "{ \"timestamp\": \""+ llList2String(messages, i) +"\", \"uuid\": \""+ llList2String(messages, i+1) +"\", \"name\": \""+ llList2String(messages, i+2) +"\", \"agendaId\": \""+ llList2String(messages, i+3) +"\", \"message\": \""+ llEscapeURL(llList2String(messages, i+4)) +"\"}";
 
             // Add comma when not last element
-            if(i+4 < llGetListLength(messages)) {
+            if(i+5 < llGetListLength(messages)) {
                 body_messages = body_messages + ",";
             }
         }
@@ -108,13 +109,13 @@ request_send_chat() {
 /**
  * Adds the message with timestamp and sender uuid to the queue
  *
- * @param string timestamp
+ * @param integer timestamp
  * @param string uuid
  * @param string name
  * @param string message
  */
-queueMessage(string timestamp, string uuid, string name, string message) {
-    messages += [timestamp, uuid, name, message];
+queueMessage(integer timestamp, string uuid, string name, string message) {
+    messages += [timestamp, uuid, name, currentAgendaItem + 1, message];
 }
 
 /**
@@ -134,6 +135,7 @@ removeListeners() {
  */
 agendaItem(integer index) {
     if(llGetListLength(agendaItems) > index) {
+        llMessageLinked(LINK_ALL_OTHERS, 2, ""+ index, "");
         currentAgendaItem  = index;
         list TimeStamp     = llParseString2List(llGetTimestamp(),["-",":"],["T"]); //Get timestamp and split into parts in a list
         integer hour       = llList2Integer(TimeStamp,4);
@@ -151,7 +153,7 @@ agendaItem(integer index) {
         // Say agenda item and queue it
         llSetText(llList2String(agendaItems, currentAgendaItem), <0,0,1>, 1.0);
         llSay(channelChat, "[Meeting] At "+ Hours +":"+ Minutes +" starting with agenda item: "+ llList2String(agendaItems, currentAgendaItem));
-        queueMessage(llGetTimestamp(), "", "Server", "[Meeting] At "+ Hours +":"+ Minutes +" starting with agenda item: "+ llList2String(agendaItems, currentAgendaItem));
+        queueMessage(llGetUnixTime(), "", "Server", "[Meeting] At "+ Hours +":"+ Minutes +" starting with agenda item: "+ llList2String(agendaItems, currentAgendaItem));
     }
 }
 
@@ -177,6 +179,9 @@ default {
 
         // Get the object's UUID
         objectUuid = llGetKey();
+
+        // Clear linked objects
+        llMessageLinked(LINK_ALL_OTHERS, 10, "Clear", "");
     }
 
     touch_start(integer totalNumber) {
@@ -186,7 +191,10 @@ default {
         state startup;
     }
 }
-
+/**
+ * State when starting up a meeting,
+ * used when loading today's meetings
+ */
 state startup {
     state_entry() {
         // SET COLOR ORANGE
@@ -253,7 +261,7 @@ state startup {
                     }
                 }
 
-                llDialog(userUuid, "[Meeting] The following meetings will take place today:", meetingsToday , channelListen);
+                llDialog(userUuid, "The following meetings will take place today:", meetingsToday , channelListen);
             // No meetings
             } else {
                 llInstantMessage(userUuid, "[Meeting] No meetings scheduled for today.");
@@ -278,7 +286,16 @@ state startup {
             } else if(message == "Load") {
                 // Request meetings
                 request_meetings();
-
+            // Re-link object to viewer
+            } else if(message == "Link") {
+                // When the object is touched, make sure we can do this before trying.
+                llRequestPermissions(llGetOwner(), PERMISSION_CHANGE_LINKS);
+                // Wait 5 seconds before linking
+                llSleep(5);
+                llBreakAllLinks();
+                // Link to viewer
+                llCreateLink(viewerUuid, TRUE);
+                if(debug) llInstantMessage(userUuid, "[Debug] Linked to agenda viewer");
             // Load a meeting
             } else {
                 integer endOfId = llSubStringIndex(message, ")");
@@ -292,6 +309,9 @@ state startup {
     }
 }
 
+/**
+ * Active state, where the logging happens
+ */
 state logging {
     /**
      * Actions performed when entering the default state
@@ -309,6 +329,10 @@ state logging {
         llSay(channelChat, "[Meeting] Meeting Agenda: \n"+ JsonGetValue(jsonMeeting, "agenda"));
         // Items to list
         agendaItems = llParseString2List(JsonGetValue(jsonMeeting, "agenda"), "\n", "");
+
+        // Init viewer
+        llMessageLinked(LINK_ALL_OTHERS, 3, JsonGetValue(jsonMeeting, "name"), "");
+        llMessageLinked(LINK_ALL_OTHERS, 1, JsonGetValue(jsonMeeting, "agenda"), "");
 
         // Start looking for avatars in surroundings
         llSensor("", NULL_KEY, AGENT, meetingAreaSize, PI);
@@ -334,13 +358,12 @@ state logging {
             if(llListFindList(avatarsPresent, [avatarUuid]) == -1) {
                 avatarsPresent += [avatarUuid];
                 llSay(0, "[Meeting] Avatar entered the meeting: "+ avatarName +" ("+ avatarUuid +")");
-                queueMessage(llGetTimestamp(), "", "Server", "[Meeting] Avatar entered the meeting: "+ avatarName +" ("+ avatarUuid +")");
+                queueMessage(llGetUnixTime(), "", "Server", "[Meeting] Avatar entered the meeting: "+ avatarName +" ("+ avatarUuid +")");
             }
         } while (++vIntCounter < vIntFound);
     }
 
     // sensor does not detect owner if it's attached
-
     no_sensor() {
         // Nothing
     }
@@ -396,7 +419,7 @@ state logging {
                 agendaItem(currentAgendaItem+1);
             }
         } else {
-            queueMessage(llGetTimestamp(), (string) id, name, message);
+            queueMessage(llGetUnixTime(), (string) id, name, message);
         }
     }
 
