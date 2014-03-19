@@ -13,12 +13,12 @@ angularRest.controller('homeController', ['Restangular', '$scope', 'Page', funct
 );
 
 // loginController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$sce', 'Cache', '$route', function(Restangular, $scope, $alert, $sce, Cache, $route) {
+angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$scope', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, $alert, $sce, Cache) {
         $scope.isLoggedIn = false;
 
         // Check login
         $scope.isLoggedInCheck = function() {
-            if(sessionStorage.token) {
+            if(sessionStorage.token && sessionStorage.id) {
                 $alert({title: 'Already logged in!', content: $sce.trustAsHtml('You are already logged in as '+ sessionStorage.username), type: 'warning'});
                 $scope.isLoggedIn = true;
             } else {
@@ -64,6 +64,7 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
 
                         // Set token as default request parameter
                         Restangular.setDefaultRequestParams({token: sessionStorage.token});
+                        RestangularCache.setDefaultRequestParams({token: sessionStorage.token});
 
                         // Token is valid for half an hour
                         sessionStorage.tokenTimeOut = moment().add(30, 'minutes').unix();
@@ -74,8 +75,6 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
                         Cache.clearCache();
                         // Back to previous page
                         window.history.back();
-                        // Reload the page
-                        $route.reload();
                     });
                 // Failed auth
                 } else {
@@ -104,10 +103,10 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
 
         // Get the right toolbar (right area of navbar)
         $scope.getUserToolbar = function() {
-            if(sessionStorage.token){
+            if(sessionStorage.token && sessionStorage.id){
                 // Create dropdown menu
                 $scope.accountDropdown = [
-                    {text: 'Profile', href: '#!/user/'+ $scope.user.userId},
+                    {text: 'Profile', href: '#!/user/'+ sessionStorage.id},
                     {divider: true},
                     {text: 'Log Out', click: 'logout()'}
                 ];
@@ -120,7 +119,7 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
 
         // Get the right main navigation (left area of navbar)
         $scope.getMainNavigation = function() {
-            if(sessionStorage.token){
+            if(sessionStorage.token && sessionStorage.id){
                 return partial_path +'/navbar/mainNavigationLoggedIn.html';
             } else {
                 return partial_path +'/navbar/mainNavigationLoggedOut.html';
@@ -128,7 +127,7 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
         };
 
         // Restore session from storage
-        if(sessionStorage.token){
+        if(sessionStorage.token && sessionStorage.id){
             $scope.user = {
                 username:   sessionStorage.username,
                 email:      sessionStorage.email,
