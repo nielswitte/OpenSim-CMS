@@ -118,10 +118,8 @@ class Presentation extends Module{
         $data['title']              = $presentation->getTitle();
         $data['ownerId']            = $presentation->getOwnerId();
         $slides     = array();
-        $x          = 1;
         foreach($presentation->getSlides() as $slide) {
-            $slides[$x] = $this->getSlideData($presentation, $slide, $full);
-            $x++;
+            $slides[] = $this->getSlideData($presentation, $slide, $full);
         }
 
 
@@ -214,7 +212,7 @@ class Presentation extends Module{
 
     /**
      * Returns the thumbnail for the given slide
-     * 
+     *
      * @param array $args
      * @throws \Exception
      */

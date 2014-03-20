@@ -356,6 +356,22 @@ PUT /api/meeting/<MEETING-ID>/ HTTP/1.1
 ```http
 GET /api/meeting/<MEETING-ID>/agenda HTTP/1.1
 ```
+### Minutes
+
+```http
+GET /api/meeting/<MEETING-ID>/minutes/ HTTP/1.1
+```
+
+```http
+POST /api/meeting/<MEETING-ID>/minutes/ HTTP/1.1
+```
+| Parameter         | Type             | Description                                                          |
+|-------------------|------------------|----------------------------------------------------------------------|
+| timestamp         | string           | Timestamp (format: YYYY-MM-DD HH:mm:ss) or Unix timestamp in seconds |
+| uuid              | string           | UUID of the avatar that wrote the message                            |
+| name              | string           | Name of the avatar or object that wrote the message                  |
+| agendaId          | integer          | Integer that corresponds to the current agenda ID of the meeting     |
+| message           | string           | The actual message to be stored                                      |
 
 ## Meeting Rooms
 
@@ -431,16 +447,16 @@ Cache information is left out in the list view.
         "title": "Test presentation title",
         "presentationId": "1",
         "ownerId": 1,
-        "slides": {
-            "1": {
+        "slides": [
+            {
                 "number": 1,
                 "image": "http://localhost:80/OpenSim-CMS/api/presentation/1/slide/1/image/"
             },
-            "2": {
+            {
                 (...)
             },
             (...)
-        },
+        ],
         "slidesCount": 14,
         "creationDate": "2014-02-13 14:21:47",
         "modificationDate": "2014-02-13 14:22:09"
@@ -478,25 +494,24 @@ Example of output when request is successful:
     "title": "Test presentation title",
     "presentationId": "1",
     "ownerId": 1,
-    "slides": {
-        "1": {
-                "number": 1,
-                "image": "http:\/\/localhost:80\/OpenSim-CMS\/api\/presentation\/1\/slide\/1\/image\/",
-                "cache": {
-                    "1": {
-                        "uuid": "90591103-6982-4eed-9b31-291f7077194a",
-                        "expires": "2014-02-23 14:29:25",
-                        "isExpired": 0
-                    },
-                    "2": { (...) },
-                    (...)
-                }
-            },
-        "2": {
+    "slides": [
+        {
+            "number": 1,
+            "image": "http:\/\/localhost:80\/OpenSim-CMS\/api\/presentation\/1\/slide\/1\/image\/",
+            "cache": {
+                "1": {
+                    "uuid": "90591103-6982-4eed-9b31-291f7077194a",
+                    "expires": "2014-02-23 14:29:25",
+                    "isExpired": 0
+                },
+                "2": { (...) },
+                (...)
+        },
+        {
             (...)
         },
         (...)
-    },
+    ],
     "slidesCount": 14,
     "creationDate": "2014-02-13 14:21:47",
     "modificationDate": "2014-02-13 14:22:09"
