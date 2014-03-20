@@ -144,13 +144,19 @@ angularRest.factory('Page', function() {
 
 // Restangular settings
 angularRest.config(['RestangularProvider', function(RestangularProvider) {
+        var timeout;
         RestangularProvider.setBaseUrl('' + server_address + base_url + '/api');
-        RestangularProvider.setDefaultHttpFields({cache: false});
+        RestangularProvider.setDefaultHttpFields({cache: false, timeout: 10000});
 
         // Add token to request when available (this line is required for page refreshes to keep the token)
         if(sessionStorage.token && sessionStorage.tokenTimeOut >= moment().unix()) {
             RestangularProvider.setDefaultRequestParams({token: sessionStorage.token});
         }
+
+        RestangularProvider.addRequestInterceptor(function() {
+            // Hide loading screen after 10 seconds
+            timeout = setTimeout(function() { jQuery('#loading').hide(); }, 10000);
+        });
 
         RestangularProvider.setErrorInterceptor(function(resp) {
             // Clear session when expired
@@ -162,7 +168,7 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
         RestangularProvider.addResponseInterceptor(function(data) {
             // Increase token validaty
             sessionStorage.tokenTimeOut = moment().add(30, 'minutes').unix();
-
+            clearTimeout(timeout);
             return data;
         });
     }]
@@ -171,7 +177,7 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
 // Restangular service with cache
 angularRest.factory('RestangularCache', function(Restangular) {
     return Restangular.withConfig(function(RestangularProvider) {
-        RestangularProvider.setDefaultHttpFields({cache: true});
+        RestangularProvider.setDefaultHttpFields({cache: true, timeout: 10000});
     });
 });
 
