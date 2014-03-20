@@ -48,6 +48,9 @@
 </table>
 
 <h2>Avatars (<span id="avatarCount">{{user.avatarCount}}</span>)</h2>
+<div class="toolbar toolbar-top" ng-show="allowCreate()">
+    <button ng-click="newAvatar()" type="button" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> New avatar</button>
+</div>
 <div class="row">
     <div class="col-sm-6 col-md-6 avatar" ng-repeat="(index, avatar) in user.avatars">
         <div class="panel panel-default">
@@ -72,6 +75,10 @@
                     <li><strong>Last Region:</strong> {{avatar.lastRegion}}</li>
                     <li><strong>Last Position:</strong> {{avatar.lastPosition}}</li>
                 </ul>
+            </div>
+            <div class="panel-footer text-center" ng-show="allowUpdate()">
+                <button type="button" class="confirmAvatar btn btn-success btn-sm" ng-click="confirmAvatar(index, avatar)" ng-hide="isConfirmed(index)"><i class="glyphicon glyphicon-ok"></i> Confirm</button>
+                <button type="button" class="removeAvatar btn btn-danger btn-sm" ng-click="unlinkAvatar(index, avatar)"><i class="glyphicon glyphicon-remove"></i> Unlink</button>
             </div>
         </div>
     </div>
