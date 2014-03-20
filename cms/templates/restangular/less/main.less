@@ -279,3 +279,40 @@ ol {
         margin-left: 20px;
     }
 }
+
+// Alternating rows
+.row {
+    &.row-striped {
+        &:nth-child(odd) {
+            background-color: #f9f9f9;
+        }
+        &:nth-child(even) {
+            background-color: #ffffff;
+        }
+    }
+
+    &.row-hover:hover {
+        background-color: #e8e8e8;
+    }
+}
+
+#minutes {
+    div.row div {
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+}
+
+.heading-numbers {
+    counter-reset: h2;
+    h2 { counter-reset: h3; }
+    h3 { counter-reset: h4; }
+    h4 { counter-reset: h5; }
+    h5 { counter-reset: h6; }
+
+    h2:before { counter-increment: h2; content: counter(h2) ". "; }
+    h3:before { counter-increment: h3; content: counter(h2) "." counter(h3) ". "; }
+    h4:before { counter-increment: h4; content: counter(h2) "." counter(h3) "." counter(h4) ". "; }
+    h5:before { counter-increment: h5; content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". "; }
+    h6:before { counter-increment: h6; content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) "." counter(h6) ". "; }
+}

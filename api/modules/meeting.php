@@ -242,10 +242,13 @@ class Meeting extends Module{
         $meeting->getParticipantsFromDatabase();
         $meeting->getDocumentsFromDabatase();
         $meeting->getMinutesFromDatabase();
-        $minutes  = $meeting->getMinutes()->getMinutes();
+        $minutes = $meeting->getMinutes()->getMinutes();
 
         // Process and format results
-        $results  = array();
+        $results            = $this->getMeetingData($meeting, FALSE);
+        $results['agenda']  = $meeting->getAgenda()->toString();
+
+        // Format the Minutes
         $agendaId = 0;
         foreach($minutes as $minute) {
             // Get the agenda item for this minute, but only if changed
@@ -253,11 +256,11 @@ class Meeting extends Module{
                 $agendaItem = $meeting->getAgenda()->getAgendaItemById($minute['agendaId']);
             }
 
-            $results[] = array(
+            $results['minutes'][] = array(
                 'id'         => $minute['id'],
                 'timestamp'  => $minute['timestamp'],
                 'agenda'     => array(
-                    'agendaId'      => $agendaItem['id'],
+                    'id'            => $agendaItem['id'],
                     'parentId'      => $agendaItem['parentId'],
                     'sort'          => $agendaItem['sort'],
                     'value'         => $agendaItem['value']

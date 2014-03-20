@@ -6,7 +6,7 @@ function MainCntl($scope, $route, $routeParams, $location, Page) {
     $scope.Page         = Page;
 };
 
-// homeController ------------------------------------------------------------------------------------------------------------------------------------
+// homeController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('homeController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
         Page.setTitle('Home');
     }]
@@ -138,7 +138,7 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
     }]
 );
 
-// documentsController ----------------------------------------------------------------------------------------------------------------------------------
+// documentsController ------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('documentsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$modal', '$sce', 'Cache', '$route',
     function(Restangular, RestangularCache, $scope, Page, $alert, $modal, $sce, Cache, $route) {
         $scope.orderByField         = 'title';
@@ -270,7 +270,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
     }]
 );
 
-// documentController ----------------------------------------------------------------------------------------------------------------------------------
+// documentController -------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('documentController', ['Restangular', '$scope', '$routeParams', 'Page', '$modal', '$sce', function(Restangular, $scope, $routeParams, Page, $modal, $sce) {
         // Show loading screen
         jQuery('#loading').show();
@@ -374,7 +374,7 @@ angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page',
     }]
 );
 
-// gridController ----------------------------------------------------------------------------------------------------------------------------------
+// gridController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('gridController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
         // Show loading screen
         jQuery('#loading').show();
@@ -395,7 +395,7 @@ angularRest.controller('gridController', ['Restangular', '$scope', '$routeParams
     }]
 );
 
-// meetingsController ----------------------------------------------------------------------------------------------------------------------------------
+// meetingsController -------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('meetingsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$modal', '$tooltip', '$sce', 'Cache', '$location',  function(Restangular, RestangularCache, $scope, Page, $modal, $tooltip, $sce, Cache, $location) {
         var date = new Date(new Date - (1000*60*60*24*14));
         var modal;
@@ -459,7 +459,7 @@ angularRest.controller('meetingsController', ['Restangular', 'RestangularCache',
     }]
 );
 
-// meetingController ----------------------------------------------------------------------------------------------------------------------------------
+// meetingController --------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('meetingController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache, $location) {
         var meetingRequestUrl;
         var gridsRequestUrl;
@@ -683,7 +683,52 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
     }]
 );
 
-// meetingNewController ----------------------------------------------------------------------------------------------------------------------------------
+// meetingMinutesController -------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('meetingMinutesController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache, $location) {
+        $scope.meeting = {};
+        RestangularCache.one('meeting', $routeParams.meetingId).one('minutes').get().then(function(meetingResponse) {
+            meetingResponse.agenda = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
+            $scope.meeting = meetingResponse;
+        });
+
+        $scope.timeOnly = function(string) {
+            return string.substr(11);
+        };
+
+        // Show heading?
+        $scope.showAgendaNextItemHeading = function(index) {
+            if(index == 0 || $scope.meeting.minutes[index].agenda.id != $scope.meeting.minutes[index-1].agenda.id) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        var parents     = [];
+        // Start with 2 for H2
+        parents.push(2);
+        var depth       = 0;
+        // Checks to see if this agenda item is different from the previous
+        $scope.agendaNextItemHeading = function(index, minute) {
+            if(index == 0 || parseInt(minute.agenda.id) != parseInt($scope.meeting.minutes[index-1].agenda.id)) {
+                var parentId  = minute.agenda.parentId;
+
+                // Level deeper
+                if(parents[parentId] == undefined) {
+                    parents[parentId] = (depth+1);
+                } else {
+                    depth = parents[parentId];
+                }
+
+                return $sce.trustAsHtml('<h'+ depth +'>'+ minute.agenda.value +'</h'+ depth +'>');
+            } else {
+                return "";
+            }
+        };
+    }]
+);
+
+// meetingNewController -----------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$location', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, Page, $location, $alert, $sce, Cache) {
         Page.setTitle('Schedule meeting');
         var gridsRequestUrl;
