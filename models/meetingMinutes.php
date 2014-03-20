@@ -8,7 +8,8 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author Niels Witte
  * @version 0.1
- * @date March 19th, 2014
+ * @date March 20th, 2014
+ * @since March 19th, 2014
  */
 class MeetingMinutes {
     private $meeting;

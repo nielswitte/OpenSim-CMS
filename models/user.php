@@ -10,7 +10,8 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  *
  * @author Niels Witte
  * @version 0.1
- * @date February 10th, 2014
+ * @date March 20th, 2014
+ * @since February 10th, 2014
  */
 class User implements SimpleModel {
     private $id;

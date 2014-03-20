@@ -12,7 +12,7 @@ require_once dirname(__FILE__) .'/../../controllers/documentController.php';
  *
  * @author Niels Witte
  * @version 0.2
- * @date March 3rd, 2014
+ * @since March 3rd, 2014
  */
 class Document extends Module{
     private $api;

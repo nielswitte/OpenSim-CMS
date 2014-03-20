@@ -12,7 +12,8 @@ require_once dirname(__FILE__) .'/../../controllers/meetingController.php';
  *
  * @author Niels Witte
  * @version 0.3
- * @date February 25th, 2014
+ * @date March 20th, 2014
+ * @since February 25th, 2014
  */
 class Meeting extends Module{
     private $api;

@@ -11,7 +11,7 @@ require_once dirname(__FILE__) .'/../../models/meetingRoom.php';
  *
  * @author Niels Witte
  * @version 0.2
- * @date February 26th, 2014
+ * @since February 26th, 2014
  */
 class MeetingRoom extends Module{
     private $api;

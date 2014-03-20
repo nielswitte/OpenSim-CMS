@@ -24,7 +24,7 @@ require_once dirname(__FILE__) .'/modules/user.php';
  *
  * @author Niels Witte
  * @version 0.4
- * @date February 10th, 2014
+ * @since February 10th, 2014
  */
 
 // Remove expired tokens

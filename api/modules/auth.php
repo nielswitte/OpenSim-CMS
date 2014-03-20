@@ -10,7 +10,7 @@ require_once dirname(__FILE__) .'/module.php';
  *
  * @author Niels Witte
  * @version 0.1
- * @date February 24th, 2014
+ * @since February 24th, 2014
  */
 class Auth extends Module {
     private $api;

@@ -6,7 +6,8 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author Niels Witte
  * @version 0.1
- * @date February 12th, 2014
+ * @date March 19th, 2014
+ * @since February 12th, 2014
  */
 class Helper {
     private static $db;

@@ -6,7 +6,7 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author Niels Witte
  * @version 0.2
- * @date February 19th, 2014
+ * @since February 19th, 2014
  */
 class Auth {
     private static $token = '';

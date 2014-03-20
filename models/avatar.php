@@ -10,7 +10,7 @@ require_once dirname(__FILE__) . '/simpleModel.php';
  *
  * @author Niels Witte
  * @version 0.2
- * @date February 21th, 2014
+ * @since February 21th, 2014
  */
 class Avatar implements simpleModel {
     private $grid;

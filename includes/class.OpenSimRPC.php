@@ -9,7 +9,7 @@ defined('EXEC') or die('Config not loaded');
  * @author OpenSim (original)
  * @author Niels Witte (modified by)
  * @version 0.1
- * @date February 13th, 2014
+ * @since February 13th, 2014
  */
 class OpenSimRPC {
     private $serverUri;

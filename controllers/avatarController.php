@@ -8,7 +8,7 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author Niels Witte
  * @version 0.2
- * @date February 27th, 2014
+ * @since February 27th, 2014
  */
 class AvatarController {
     private $avatar;

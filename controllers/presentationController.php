@@ -8,7 +8,7 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author Niels Witte
  * @version 0.2
- * @date March 10th, 2014
+ * @since March 10th, 2014
  */
 class PresentationController {
     private $presentation;

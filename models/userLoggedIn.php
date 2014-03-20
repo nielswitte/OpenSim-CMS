@@ -11,7 +11,7 @@ require_once dirname(__FILE__) .'/user.php';
  *
  * @author Niels Witte
  * @version 0.1
- * @date February 19th, 2014
+ * @since February 19th, 2014
  */
 class UserLoggedIn extends User implements SimpleModel {
     /**

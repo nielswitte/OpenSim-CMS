@@ -8,7 +8,7 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author Niels Witte
  * @version 0.1
- * @date March 13th, 2014
+ * @since March 13th, 2014
  */
 class MeetingController {
     private $meeting;
