@@ -18,7 +18,7 @@ class User implements SimpleModel {
     private $firstName, $lastName;
     private $email;
     private $presentationIds = array();
-    private $avatars = array();
+    private $avatars;
     private $rights = array();
 
     /**
@@ -99,7 +99,7 @@ class User implements SimpleModel {
         // Get avatars
         $db->where('userId', $db->escape($this->getId()));
         $avatars = $db->get('avatars');
-        $i = 1;
+
         foreach($avatars as $avatar) {
             $grid       = new \Models\Grid($avatar['gridId']);
             $newAvatar  = new \Models\Avatar($grid, $avatar['uuid']);
@@ -109,8 +109,7 @@ class User implements SimpleModel {
                 $grid->getInfoFromDatabase();
                 $newAvatar->getInfoFromDatabase();
             }
-            $this->avatars[$i] = $newAvatar;
-            $i++;
+            $this->addAvatar($newAvatar);
         }
     }
 
@@ -171,10 +170,19 @@ class User implements SimpleModel {
     /**
      * Returns a list with avatars for this user
      *
-     * @return Avatar
+     * @return array
      */
     public function getAvatars() {
         return $this->avatars;
+    }
+
+    /**
+     * Adds the given avatar to the user
+     *
+     * @param \Models\Avatar $avatar
+     */
+    public function addAvatar(\Models\Avatar $avatar) {
+        $this->avatars[] = $avatar;
     }
 
     /**
@@ -184,9 +192,12 @@ class User implements SimpleModel {
      * @return \Models\Avatar or boolean FALSE when no match is found
      */
     public function getAvatarByUuid($uuid) {
-        foreach($this->getAvatars() as $avatar) {
-            if($avatar->getUuid() == $uuid) {
-                return $avatar;
+        // Only when not NULL or not FALSE
+        if(is_array($this->getAvatars())) {
+            foreach($this->getAvatars() as $avatar) {
+                if($avatar->getUuid() == $uuid) {
+                    return $avatar;
+                }
             }
         }
         return FALSE;

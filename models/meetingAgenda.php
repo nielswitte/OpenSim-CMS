@@ -43,6 +43,21 @@ class MeetingAgenda {
     }
 
     /**
+     * Search for the given ID in the agenda
+     *
+     * @param integer $id
+     * @return array or boolean FALSE when not found
+     */
+    public function getAgendaItemById($id) {
+        foreach($this->agenda as $agenda) {
+            if($agenda['id'] == $id) {
+                return $agenda;
+            }
+        }
+        return FALSE;
+    }
+
+    /**
      * Recursive function to build up the agenda as a multidemensional array
      *
      * @source: http://stackoverflow.com/a/8587437

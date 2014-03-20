@@ -13,6 +13,8 @@ defined('EXEC') or die('Config not loaded');
 class MeetingParticipants {
     private $meeting;
     private $participants;
+    // Array to cache the getParticipantByUuid search results
+    private $participantUuids = array();
 
     /**
      * Constructs a new participants list for the given meeting
@@ -50,5 +52,41 @@ class MeetingParticipants {
      */
     public function getMeeting() {
         return $this->meeting;
+    }
+
+    /**
+     * Searches all users' avatars for a match
+     *
+     * @param string $uuid
+     * @return \Models\User or boolean FALSE when not found
+     */
+    public function getParticipantByUuid($uuid) {
+        // No cached value?
+        if(!isset($this->participantUuids[$uuid])) {
+            foreach($this->getParticipants() as $participant) {
+                // List with avatars has not yet been created?
+                if($participant->getAvatars() === NULL) {
+                    // Only get basic information
+                    $participant->getAvatarsFromDatabase(FALSE);
+                }
+                // Attempt to match avatar to UUID
+                if($participant->getAvatars() !== FALSE && $participant->getAvatarByUuid($uuid) !== FALSE) {
+                    // Save in cache
+                    $this->participantUuids[$uuid] = $participant;
+                    // Return result
+                    return $participant;
+                }
+            }
+            // Save in cache
+            $this->participantUuids[$uuid] = FALSE;
+            return FALSE;
+        // Return from cache
+        } else {
+            return $this->participantUuids[$uuid];
+        }
+    }
+
+    public function getAgendaById() {
+
     }
 }
