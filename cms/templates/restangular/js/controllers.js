@@ -6,6 +6,43 @@ function MainCntl($scope, $route, $routeParams, $location, Page) {
     $scope.Page         = Page;
 };
 
+// chatController -----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('chatController', ['Restangular', '$scope', '$aside', '$sce', function(Restangular, $scope, $aside, $sce) {
+        // Get chat template
+        $scope.getChat = function() {
+            return partial_path +'/chat/chat.html';
+        };
+
+        // Show the chat aside
+        $scope.showChat = function() {
+            $scope.$broadcast('startChat', {title: 'Chat', content: 'Test123'});
+        };
+
+        // Wait for chat to become visible
+        $scope.$on('startChat', function (event, args) {
+            // Create aside sidebar
+            var chatAside = $aside({
+                title: $sce.trustAsHtml(args.title),
+                content: $sce.trustAsHtml(args.content),
+                scope: $scope,
+                template: partial_path +'/chat/aside.html',
+                show: false,
+                backdrop: false
+            });
+
+            Restangular.one('meeting', 15).one('minutes').get().then(function(minutesResponse) {
+                minutesResponse.agenda = $sce.trustAsHtml(minutesResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
+                $scope.meeting = minutesResponse;
+            });
+
+           chatAside.$promise.then(function() {
+                chatAside.show();
+            });
+        });
+
+    }]
+);
+
 // homeController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('homeController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
         Page.setTitle('Home');
