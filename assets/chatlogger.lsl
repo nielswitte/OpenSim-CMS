@@ -102,7 +102,7 @@ request_send_chat() {
         body = body + body_messages + "]";
         // Empty list
         messages = [];
-        http_request_send_chat = llHTTPRequest(serverUrl +"/meeting/"+ meetingId +"/log/?token="+ APIToken, [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/json"], body);
+        http_request_send_chat = llHTTPRequest(serverUrl +"/meeting/"+ meetingId +"/minutes/?token="+ APIToken, [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/json"], body);
     }
 }
 

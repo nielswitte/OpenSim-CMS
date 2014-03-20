@@ -53,7 +53,7 @@ writeAgenda() {
     agendaList += "FontProp R;";
     integer x;
     // Create agenda
-    for(x = 0; x < llGetListLength(agendaItems); x++) {
+    for(x = 0; x <= llGetListLength(agendaItems); x++) {
         // Highlight active item
         if(currentAgendaItem == x) {
             agendaList += "FontProp B;";
