@@ -534,6 +534,7 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
                 } else {
                     $alert({title: 'Meeting updated!', content: $sce.trustAsHtml('The meeting has been updated.'), type: 'success'});
                     Cache.clearCache();
+                    $location.path('meetings');
                 }
             });
         };
