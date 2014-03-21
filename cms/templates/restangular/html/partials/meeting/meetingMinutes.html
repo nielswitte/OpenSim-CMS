@@ -12,10 +12,8 @@
         <div class="col-sm-12" ng-show="showAgendaNextItemHeading(index)" ng-bind-html="agendaNextItemHeading(index, minute)"></div>
 
         <div class="col-sm-2">
-            <small>
-                <span ng-show="minute.name == 'Server'" class="label label-info">{{timeOnly(minute.timestamp)}}</span>
-                <span ng-hide="minute.name == 'Server'" class="label label-default">{{timeOnly(minute.timestamp)}}</span>
-            </small>
+            <span ng-show="minute.name == 'Server'" class="label label-info">{{timeOnly(minute.timestamp)}}</span>
+            <span ng-hide="minute.name == 'Server'" class="label label-default">{{timeOnly(minute.timestamp)}}</span>
             <strong>{{minute.name}}</strong></div>
         <div class="col-sm-10">{{minute.message}}</div>
     </div>

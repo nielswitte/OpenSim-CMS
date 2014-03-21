@@ -7,39 +7,58 @@ function MainCntl($scope, $route, $routeParams, $location, Page) {
 };
 
 // chatController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('chatController', ['Restangular', '$scope', '$aside', '$sce', function(Restangular, $scope, $aside, $sce) {
+angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$scope', '$aside', '$sce', function(Restangular, RestangularCache, $scope, $aside, $sce) {
+        $scope.grids          = [];
+
         // Get chat template
         $scope.getChat = function() {
             return partial_path +'/chat/chat.html';
         };
 
+        // From the datetime string only show the time
+        $scope.timeOnly = function(string) {
+            return string.substr(11);
+        };
+
         // Show the chat aside
         $scope.showChat = function() {
-            $scope.$broadcast('startChat', {title: 'Chat', content: 'Test123'});
+            $scope.$broadcast('startChat');
         };
 
         // Wait for chat to become visible
         $scope.$on('startChat', function (event, args) {
             // Create aside sidebar
             var chatAside = $aside({
-                title: $sce.trustAsHtml(args.title),
-                content: $sce.trustAsHtml(args.content),
                 scope: $scope,
                 template: partial_path +'/chat/aside.html',
                 show: false,
                 backdrop: false
             });
 
-            Restangular.one('meeting', 15).one('minutes').get().then(function(minutesResponse) {
-                minutesResponse.agenda = $sce.trustAsHtml(minutesResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
-                $scope.meeting = minutesResponse;
+            RestangularCache.all('grids').getList().then(function(gridResponse) {
+                $scope.grids = gridResponse;
             });
 
-           chatAside.$promise.then(function() {
+            // Show chat aside when loading is done
+            chatAside.$promise.then(function() {
                 chatAside.show();
             });
         });
 
+        // Send the chat message to the server
+        $scope.sendChat = function(selectedGridId, message) {
+            Restangular.one('grid', selectedGridId).post('chats', { userId: sessionStorage.id, message: message, timestamp: moment().format('YYYY-MM-DD HH:mm:ss') }).then(function(resp) {
+                alert('sent');
+            });
+        };
+
+        // Load chat for the selected Grid
+        $scope.selectGrid = function(selectedGridId) {
+            // Get last chat entries
+            Restangular.one('grid', selectedGridId).all('chats').getList().then(function(chatResponse) {
+                $scope.chats = chatResponse;
+            });
+        };
     }]
 );
 
@@ -543,7 +562,7 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
          * @returns {Number}
          */
         $scope.selectedGridIndex = function() {
-            for (var i = 0; i < $scope.grids.length; i += 1) {
+            for (var i = 0; i < $scope.grids.length; i++) {
                 var grid = $scope.grids[i];
                 if (grid.id == $scope.meeting.room.grid.id) {
                     return i;
@@ -728,6 +747,7 @@ angularRest.controller('meetingMinutesController', ['Restangular', 'RestangularC
             $scope.meeting = meetingResponse;
         });
 
+        // From the datetime string only show the time
         $scope.timeOnly = function(string) {
             return string.substr(11);
         };
@@ -814,7 +834,7 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
          * @returns {Number}
          */
         $scope.selectedGridIndex = function() {
-            for (var i = 0; i < $scope.grids.length; i += 1) {
+            for (var i = 0; i < $scope.grids.length; i++) {
                 var grid = $scope.grids[i];
                 if (grid.id == $scope.meeting.room.grid.id) {
                     return i;

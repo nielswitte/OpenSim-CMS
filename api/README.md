@@ -56,6 +56,7 @@ These numbers can be used for the following parameters:
 | Parameter         | Type      | Description                                                   |
 |-------------------|-----------|---------------------------------------------------------------|
 | auth              | Integer   | Permission level regarding Authorization API                  |
+| chat              | Integer   | Permission level regarding Chats API                          |
 | document          | Integer   | Permission level regarding Documents API                      |
 | grid              | Integer   | Permission level regarding Grids API                          |
 | meeting           | Integer   | Permission level regarding Meetings API                       |
@@ -319,6 +320,34 @@ and on failure it will provide an error message, for example when the agent's uu
     "error": "No agent with agent_id 44172f17-b7a8-4b30-a42e-9698b563789b found in this simulator"
 }
 ```
+
+## Chats
+
+Through the CMS it is possible to chat with users on the Grid. The following line will return the latest
+50 chat messages on the given grid.
+
+```http
+GET /api/grid/<GRID-ID>/chats/ HTTP/1.1
+```
+
+Or get all messages since a given unix timestamp in seconds
+```http
+GET /api/grid/<GRID-ID>/chats/<UNIX-TIMESTAMP>
+```
+
+### Add chat
+To add a line to the chat you require `WRITE` permissions for the chat section. For OpenSim to add a line to
+the chat, the server first needs to match the Avatar to a user. Or when no match can be found, the server could use
+0 as ID, and append the message with the Avatar's name.
+
+```http
+POST /api/grid/<GRID-ID/chats/ HTTP/1.1
+```
+| Parameter         | Type      | Description                                                    |
+|-------------------|-----------|----------------------------------------------------------------|
+| userId            | integer   | The CMS user ID                                                |
+| message           | string    | The message to be saved                                        |
+| timestamp         | string    | The timestamp of the message in the format YYYY-MM-DD HH:mm:ss |
 
 ## Meetings
 

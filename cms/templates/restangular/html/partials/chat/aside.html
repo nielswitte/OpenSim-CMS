@@ -1,23 +1,30 @@
 <div class="aside right am-fade-and-slide-right" tabindex="-1" role="dialog" style="display: block;">
     <div class="aside-dialog">
         <div class="aside-content">
-            <div class="aside-header" ng-show="title">
+            <div class="aside-header">
                 <button type="button" class="close" ng-click="$hide()">×</button>
-                <h4 class="aside-title" ng-bind-html="title">Title</h4>
+                <h4 class="aside-title">Chat</h4>
             </div>
-            <div class="aside-body" ng-bind-html="content">Content</div>
             <div class="aside-body">
-                <p ng-repeat="(index, minute) in meeting.minutes">
-                    <small>
-                        <span ng-show="minute.name == 'Server'" class="label label-info">{{minute.timestamp}}</span>
-                        <span ng-hide="minute.name == 'Server'" class="label label-default">{{minute.timestamp}}</span>
-                    </small>
-                    <strong>{{minute.name}}:</strong>
-                    {{minute.message}}
-                </p>
+                Select the grid from the list to chat with
+                <div class="form-group">
+                    <select class="form-control" ng-options="grid.id as grid.name for grid in grids" ng-model="selectedGridId" ng-change="selectGrid(selectedGridId)"></select>
+                </div>
+                <hr>
+                <div class="messages">
+                    <p ng-repeat="(index, chat) in chats">
+                        <span ng-show="chat.user.id == 0" class="label label-info">{{timeOnly(chat.timestamp)}}</span>
+                        <span ng-hide="chat.user.id == 0" class="label label-default">{{timeOnly(chat.timestamp)}}</span>
+                        <strong>{{chat.user.username}}:</strong><br>
+                        {{chat.message}}
+                    </p>
+                </div>
             </div>
             <div class="aside-footer">
-                <button type="button" class="btn btn-default" ng-click="$hide()">Close</button>
+                <div class="input-group">
+                    <input type="text" class="form-control" value="" placeholder="Message" ng-model="message">
+                    <span class="input-group-btn" ng-click="sendChat(selectedGridId, message)"><button type="button" class="btn btn-primary"><i class="glyphicon glyphicon-cChat"></i> Send</button></span>
+                </div>
             </div>
         </div>
     </div>

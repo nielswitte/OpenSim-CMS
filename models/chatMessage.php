@@ -1,0 +1,80 @@
+<?php
+namespace Models;
+
+defined('EXEC') or die('Invalid request');
+
+/**
+ * This class is a chat message used by chat
+ *
+ * @author Niels Witte
+ * @version 0.1
+ * @since March 21st, 2014
+ */
+class ChatMessage {
+    private $id;
+    private $grid;
+    private $user;
+    private $message;
+    private $timestamp;
+
+    /**
+     * Creates a new chat message with the given values
+     * @param integer $id
+     * @param \Models\Grid $grid
+     * @param \Models\User $user
+     * @param string $message
+     * @param string $timestamp - format: YYYY-MM-DD HH:mm:ss
+     */
+    public function __construct($id, \Models\Grid $grid, \Models\User $user, $message, $timestamp) {
+        $this->id           = $id;
+        $this->grid         = $grid;
+        $this->user         = $user;
+        $this->message      = $message;
+        $this->timestamp    = $timestamp;
+    }
+
+    /**
+     * Returns the ID of the message
+     *
+     * @return integer
+     */
+    public function getId() {
+        return $this->id;
+    }
+
+    /**
+     * Returns the grid of where the message is for/from
+     *
+     * @return \Models\Grid
+     */
+    public function getGrid() {
+        return $this->grid;
+    }
+
+    /**
+     * Returns the user instance of the sender
+     *
+     * @return \Models\User
+     */
+    public function getUser() {
+        return $this->user;
+    }
+
+    /**
+     * Returns the message
+     *
+     * @return string
+     */
+    public function getMessage() {
+        return $this->message;
+    }
+
+    /**
+     * Returns the timestamp
+     *
+     * @return string - format YYYY-MM-DD HH:mm:ss
+     */
+    public function getTimestamp() {
+        return $this->timestamp;
+    }
+}
