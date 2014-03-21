@@ -24,7 +24,11 @@ integer serverId = 1;           // The ID of this server in OpenSim-CMS
 integer channelChat = 0;        // Channel to log chat on
 string APIToken;                // The token to be used for the API
 list messages;                  // List to store the chat in
+key userUuid = NULL_KEY;        // The toucher's UUID
+key objectUuid;                 // The object's UUID
 list userUuidLinks;             // List with the links between CMS users and Avatars
+integer Listener;               // Listen to chat
+integer lastUpdate;             // Unix timestamp from the last update
 
 // HTTP requests
 key http_request_api_token;     // API token request
@@ -79,6 +83,37 @@ request_send_chat() {
 }
 
 /**
+ * Loads the chats from the server
+ */
+request_receive_chat() {
+    http_request_receive_chat = llHTTPRequest(serverUrl +"/grid/"+ serverId +"/chats/"+ lastUpdate +"/?token="+ APIToken, [], "");
+    lastUpdate = llGetTimestamp();
+}
+
+/**
+ * Searches for an user by avatar uuid
+ *
+ * @param key uuid
+ * @return integer
+ */
+integer request_avatar_by_uuid (key uuid) {
+    integer res = llListFindList(userUuidLinks, [uuid]);
+    // Cached match found?
+    if(res > -1) {
+        if(debug) llInstantMessage(userUuid, "[Debug] Looking up UUID: "+ uuid + " and matched to cached result");
+        return res+1;
+    } else {
+        if(debug) llInstantMessage(userUuid, "[Debug] Looking up UUID: "+ uuid + " and need to search server");
+        // Request user by avatar
+        http_request_avatar = llHTTPRequest(serverUrl +"/grid/"+ serverId +"/avatar/"+ uuid +"?token="+ APIToken, [], "");
+
+        // Store UUID
+        userUuidLinks += [uuid];
+        return -1;
+    }
+}
+
+/**
  * Adds the message with timestamp and sender uuid to the queue
  *
  * @param integer timestamp
@@ -86,7 +121,7 @@ request_send_chat() {
  * @param string message
  */
 queueMessage(integer timestamp, integer userId, string message) {
-    messages += [timestamp, userId, , message];
+    messages += [timestamp, userId, message];
 }
 
 /**
@@ -97,23 +132,14 @@ default {
      * Actions performed when entering the default state
      */
     state_entry() {
+        if(debug) llInstantMessage(userUuid, "[Debug] Chatter disabled.");
         llSetText("", <0,0,1>, 1.0);
-        // Reset all items
-        jsonMeeting         = "";
-        currentAgendaItem   = 0;
-        agendaItems         = [];
-        avatarsPresent      = [];
 
         // SET COLOR RED
         llSetColor(<255, 0, 0>, ALL_SIDES);
 
-        removeListeners();
-
         // Get the object's UUID
         objectUuid = llGetKey();
-
-        // Clear linked objects
-        llMessageLinked(LINK_ALL_OTHERS, 10, "Clear", "");
     }
 
     touch_start(integer totalNumber) {
@@ -129,6 +155,7 @@ default {
  */
 state startup {
     state_entry() {
+        if(debug) llInstantMessage(userUuid, "[Debug] Chatter starting up!");
         // SET COLOR ORANGE
         llSetColor(<255, 200, 0>, ALL_SIDES);
 
@@ -140,13 +167,9 @@ state startup {
      * Actions to be performed on touch start
      */
     touch_start(integer totalNumber) {
-        // Get the toucher's UUID
         userUuid = llDetectedKey(0);
-        // Listen for message
-        Listener += llListen(channelListen, "", userUuid, "");
-        // Show options
-        list options = ["Load", "Quit"];
-        llDialog(userUuid, "To start the logging of a meeting, you need to select a meeting.", options, channelListen);
+
+        state default;
     }
 
     /**
@@ -159,8 +182,6 @@ state startup {
             // Send a more specific and meaningful response to the user
             if(request_id == http_request_api_token) {
                 llInstantMessage(userUuid, "[Meeting] Invalid username/password combination used.");
-            } else if(request_id == http_request_meetings) {
-                llInstantMessage(userUuid, "[Meeting] Unable to retrieve meetings from the server.");
             }
 
             return;
@@ -173,70 +194,7 @@ state startup {
             key json_body   = JsonCreateStore(body);
             APIToken        = JsonGetValue(json_body, "token");
             if(debug) llInstantMessage(userUuid, "[Debug] Storing API token: "+ APIToken);
-        // Received meetings
-        } else if(request_id == http_request_meetings) {
-            key json_body   = JsonCreateStore(body);
-            integer meetingsLength = JsonGetArrayLength(json_body, "");
-            if(debug) llInstantMessage(userUuid, "[Debug] Found: "+ meetingsLength +" meetings");
-            integer x;
-            string today = llGetDate();
-            list meetingsToday = [];
-            // At least 1 meeting found?
-            if(meetingsLength >= 1) {
-                // Get from each slide the URL or the UUID
-                for (x = 1; x <= meetingsLength; x++) {
-                    string meetingStartDay = llGetSubString(JsonGetValue(json_body, "["+ (meetingsLength - x) +"].startDate"), 0, 9);
-
-                    // Only load meetings that start today
-                    if(meetingStartDay == today) {
-                        meetingsToday += [ JsonGetValue(json_body, "["+ (meetingsLength - x) +"].id") +") "+ JsonGetValue(json_body, "["+ (meetingsLength - x) +"].name") ];
-                    }
-                }
-
-                llDialog(userUuid, "The following meetings will take place today:", meetingsToday , channelListen);
-            // No meetings
-            } else {
-                llInstantMessage(userUuid, "[Meeting] No meetings scheduled for today.");
-            }
-        // Load a specific meeting
-        } else if(request_id == http_request_meeting) {
-            jsonMeeting = JsonCreateStore(body);
-            llSay(channelChat, "Loaded meeting: "+ JsonGetValue(jsonMeeting, "name"));
-            state logging;
-        }
-    }
-
-    /**
-     * Listen and fetch certain commands
-     */
-    listen(integer channel, string name, key id, string message) {
-        // Get a specific ID
-        if(channel == channelListen) {
-            // Close the logger
-            if(message == "Quit") {
-                state default;
-            } else if(message == "Load") {
-                // Request meetings
-                request_meetings();
-            // Re-link object to viewer
-            } else if(message == "Link") {
-                // When the object is touched, make sure we can do this before trying.
-                llRequestPermissions(llGetOwner(), PERMISSION_CHANGE_LINKS);
-                // Wait 5 seconds before linking
-                llSleep(5);
-                llBreakAllLinks();
-                // Link to viewer
-                llCreateLink(viewerUuid, TRUE);
-                if(debug) llInstantMessage(userUuid, "[Debug] Linked to agenda viewer");
-            // Load a meeting
-            } else {
-                integer endOfId = llSubStringIndex(message, ")");
-                integer meetingId = (integer) llGetSubString(message, 0, endOfId - 1);
-                if(meetingId > 0) {
-                    // Request a meeting
-                    request_meeting(meetingId);
-                }
-            }
+            state chatting;
         }
     }
 }
@@ -244,73 +202,27 @@ state startup {
 /**
  * Active state, where the logging happens
  */
-state logging {
+state chatting {
     /**
      * Actions performed when entering the default state
      */
     state_entry() {
+        if(debug) llInstantMessage(userUuid, "[Debug] Chatting enabled!");
         // SET COLOR GREEN
         llSetColor(<0, 255, 0>, ALL_SIDES);
         // Listen to everything
-        Listener += llListen(channelChat, "", NULL_KEY, "" );
-
-        // Set meetingId
-        meetingId = (integer) JsonGetValue(jsonMeeting, "id");
-
-        // Broadcast meeting Agenda
-        llSay(channelChat, "[Meeting] Meeting Agenda: \n"+ JsonGetValue(jsonMeeting, "agenda"));
-        // Items to list
-        agendaItems = llParseString2List(JsonGetValue(jsonMeeting, "agenda"), "\n", "");
-
-        // Init viewer
-        llMessageLinked(LINK_ALL_OTHERS, 3, JsonGetValue(jsonMeeting, "name"), "");
-        llMessageLinked(LINK_ALL_OTHERS, 1, JsonGetValue(jsonMeeting, "agenda"), "");
-
-        // Start looking for avatars in surroundings
-        llSensor("", NULL_KEY, AGENT, meetingAreaSize, PI);
-
-        // Set index to first item
-        agendaItem(0);
+        Listener = llListen(channelChat, "", NULL_KEY, "" );
 
         // Start processing messages
-        llSetTimerEvent(10.0);
-    }
-
-    /**
-     * Detects avatars within the meeting area
-     * @param vIntFound
-     */
-    sensor(integer vIntFound) {
-        if(debug) llInstantMessage(userUuid, "[Debug] Searching for avatars");
-        integer vIntCounter = 0;
-        //-- loop through all avatars found
-        do {
-            string avatarName   = llDetectedName(vIntCounter);
-            string avatarUuid   = (string) llDetectedKey(vIntCounter);
-            if(llListFindList(avatarsPresent, [avatarUuid]) == -1) {
-                avatarsPresent += [avatarUuid];
-                llSay(0, "[Meeting] Avatar entered the meeting: "+ avatarName +" ("+ avatarUuid +")");
-                queueMessage(llGetUnixTime(), "", "Server", "Avatar entered the meeting: "+ avatarName +" ("+ avatarUuid +")");
-            }
-        } while (++vIntCounter < vIntFound);
-    }
-
-    // sensor does not detect owner if it's attached
-    no_sensor() {
-        // Nothing
+        llSetTimerEvent(2.0);
     }
 
     /**
      * Actions performed when user touches the object
      */
     touch_start(integer totalNumber) {
-        // Get the toucher's UUID
         userUuid = llDetectedKey(0);
-        // Listen for message
-        Listener += llListen(channelListen, "", userUuid, "");
-        // Show options
-        list options = ["Previous", "Next", "Quit"];
-        llDialog(userUuid, "Press Quit to stop logging the meeting. Or use Previous and Next to go to the other agenda items.", options, channelListen);
+        state default;
     }
 
     /**
@@ -320,16 +232,37 @@ state logging {
         // Catch errors
         if(status != 200) {
             if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
-            // Send a more specific and meaningful response to the user
-
-            // @todo
 
             return;
         }
 
         // Store messages
-        if(request_id = http_request_send_chat) {
-            if(debug) llInstantMessage(userUuid, "[Debug] Messages stored: "+ body);
+        if(request_id == http_request_send_chat) {
+            if(debug) llInstantMessage(userUuid, "[Debug] Chat sent, server response: "+ body);
+        } else if(request_id == http_request_avatar) {
+            key json_body   = JsonCreateStore(body);
+            integer userId  = (integer) JsonGetValue(json_body, "id");
+            if(debug) llInstantMessage(userUuid, "[Debug] Requested user by avatar and got response: ID = "+ userId);
+
+            // Got a result?
+            if(userId > 0) {
+                userUuidLinks += [userId];
+            // No match found
+            } else {
+                userUuidLinks += [-1];
+            }
+        } else if(request_id == http_request_receive_chat) {
+            key json_body       = JsonCreateStore(body);
+            integer chatLength  = JsonGetArrayLength(json_body, "");
+            if(meetingsLength >= 1) {
+                // Say all messages
+                for (x = 0; x < chatLength; x++) {
+                    string name = JsonGetValue(json_body, "[x].user.username");
+                    string msg  = JsonGetValue(json_body, "[x].message");
+
+                    llSay(0, "["+ name +"] "+ msg);
+                }
+            }
         }
     }
 
@@ -337,30 +270,19 @@ state logging {
      * Listen and fetch certain commands
      */
     listen(integer channel, string name, key id, string message) {
-        // Get a specific ID
-        if(channel == channelListen) {
-            // Close the logger
-            if(message == "Quit") {
-                request_send_chat();
-                state default;
-            // Go to the previous agenda item
-            } else if(message == "Previous") {
-                agendaItem(currentAgendaItem-1);
-            // Go to the next agenda item
-            } else if(message == "Next") {
-                agendaItem(currentAgendaItem+1);
-            }
-        } else {
-            queueMessage(llGetUnixTime(), (string) id, name, message);
+        integer userId = request_avatar_by_uuid(id);
+        // Prepend message with Avatar name when unknown user
+        if(userId == -1) {
+            message = "[" + name + "] " + message;
         }
+
+        queueMessage(llGetUnixTime(), userId, message);
     }
 
     // Loop through requests
     timer() {
-        if(debug) llInstantMessage(userUuid, "[Debug] Timer fired");
         request_send_chat();
-        llSensor("", NULL_KEY, AGENT, meetingAreaSize, PI);
-
-        llSetTimerEvent(10.0);
+        request_receive_chat();
+        llSetTimerEvent(2.0);
     }
 }
