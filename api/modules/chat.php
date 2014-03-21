@@ -103,11 +103,11 @@ class Chat extends Module{
 
         // Only one item? make it a sub multidemensional array
         if(!isset($input[0])) {
-            $parameters = array($input);
+            $input = array($input);
         }
 
         // Convert UNIX to timestamp, which is used when the request is from the OpenSim Server
-        foreach($parameters as $key => $row) {
+        foreach($input as $key => $row) {
             if(isset($row['timestamp']) && is_numeric($row['timestamp'])) {
                 $input[$key]['message']   = urldecode($row['message']);
                 $input[$key]['timestamp'] = date('Y-m-d H:i:s', $row['timestamp']);
@@ -115,8 +115,8 @@ class Chat extends Module{
         }
 
         // Validate parameters before inserting
-        if($chatCtrl->validateParametersCreate($parameters)) {
-            $data = $chatCtrl->addChats($parameters);
+        if($chatCtrl->validateParametersCreate($input)) {
+            $data = $chatCtrl->addChats($input);
         }
 
         // Format the result
