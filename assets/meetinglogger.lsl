@@ -396,7 +396,7 @@ state logging {
         }
 
         // Store messages
-        if(request_id = http_request_send_chat) {
+        if(request_id == http_request_send_chat) {
             if(debug) llInstantMessage(userUuid, "[Debug] Messages stored: "+ body);
         }
     }
