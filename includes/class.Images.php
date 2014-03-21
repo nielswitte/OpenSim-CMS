@@ -725,4 +725,37 @@ class Image {
         }
         return false;
     }
+
+    /**
+     * Gets the average color in the corners of the image
+     * and calculates the average RGB values and returns them in an array
+     * @return array - ('red' => [0,255], 'green' => [0,255], 'blue' => [0,255])
+     */
+    public function getAverageColor() {
+        list($image_create_func, $image_save_func) = $this->getFunctionNames();
+        $source = $image_create_func($this->image);
+
+        // Image properties
+        $width  = imagesx($source);
+        $height = imagesy($source);
+
+        // Get colors
+        $colorTL = imagecolorat($source, 1, 1);
+        $colorTR = imagecolorat($source, ($width-1), 1);
+        $colorBL = imagecolorat($source, 1, ($height-1));
+        $colorBR = imagecolorat($source, ($width-1), ($height-1));
+
+        // Get RGB color
+        $rgbTL = imagecolorsforindex($source, $colorTL);
+        $rgbTR = imagecolorsforindex($source, $colorTR);
+        $rgbBL = imagecolorsforindex($source, $colorBL);
+        $rgbBR = imagecolorsforindex($source, $colorBR);
+
+        // Calculate avarage corner RGB
+        $rgb['red']     = floor(($rgbTL['red'] +  $rgbTR['red'] +  $rgbBL['red'] + $rgbBR['red']) / 4);
+        $rgb['green']   = floor(($rgbTL['green'] +  $rgbTR['green'] +  $rgbBL['green'] + $rgbBR['green']) / 4);
+        $rgb['blue']    = floor(($rgbTL['blue'] +  $rgbTR['blue'] +  $rgbBL['blue'] + $rgbBR['blue']) / 4);
+
+        return $rgb;
+    }
 }

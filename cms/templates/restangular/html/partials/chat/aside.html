@@ -1,0 +1,36 @@
+<div class="aside right am-fade-and-slide-right" tabindex="-1" role="dialog" style="display: block;" id="chatAside">
+    <div class="aside-dialog">
+        <div class="aside-content">
+            <div class="aside-header">
+                <button type="button" class="close" ng-click="closeChat()">×</button>
+                <button type="button" class="close" ng-click="toggleChat()" ng-hide="minimizedChat">_</button>
+                <button type="button" class="close" ng-click="toggleChat()" ng-show="minimizedChat">[]</button>
+                <h4 ng-click="toggleChat()" class="aside-title">Chat</h4>
+            </div>
+            <div class="aside-body" ng-hide="minimizedChat">
+                Select the grid from the list to chat with
+                <div class="form-group">
+                    <select class="form-control" ng-options="grid.id as grid.name for grid in grids" ng-model="selectedGridId" ng-change="selectGrid(selectedGridId)"></select>
+                </div>
+                <hr>
+                <div class="messages">
+                    <p ng-repeat="(index, chat) in chats | orderBy: 'timestamp':false" class="{{ownMessage(chat.fromCMS, chat.user.id)}}">
+                        <span ng-show="chat.user.id == 0" class="label label-info">{{timeOnly(chat.timestamp)}}</span>
+                        <span ng-hide="chat.user.id == 0" class="label label-default">{{timeOnly(chat.timestamp)}}</span>
+                        <strong>{{chat.user.firstName}} {{chat.user.lastName}}</strong><br>
+                        {{chat.message}}
+                    </p>
+                    <a name="bottomofchat" id="bottomofchat"></a>
+                </div>
+            </div>
+            <div class="aside-footer" ng-hide="minimizedChat">
+                <form ng-submit="sendChat(selectedGridId, message)" class="form-inline">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="chatMessage" value="" placeholder="Message" ng-model="message">
+                        <span class="input-group-btn"><button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-cChat"></i> Send</button></span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

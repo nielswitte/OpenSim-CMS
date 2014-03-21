@@ -15,7 +15,7 @@ require_once dirname(__FILE__) .'/../../controllers/userController.php';
  *
  * @author Niels Witte
  * @version 0.3
- * @date February 24th, 2014
+ * @since February 24th, 2014
  */
 class User extends Module {
     private $api;
@@ -269,20 +269,24 @@ class User extends Module {
         }
         if($full) {
             $avatars                    = array();
-            foreach($user->getAvatars() as $avatar) {
-                $avatars[] = array(
-                    'uuid'          => $avatar->getUuid(),
-                    'firstName'     => $avatar->getFirstName(),
-                    'lastName'      => $avatar->getLastName(),
-                    'email'         => $avatar->getEmail(),
-                    'gridId'        => $avatar->getGrid()->getId(),
-                    'gridName'      => $avatar->getGrid()->getName(),
-                    'confirmed'     => $avatar->getConfirmation(),
-                    'online'        => $avatar->getOnline(),
-                    'lastRegion'    => $avatar->getLastRegionUuid(),
-                    'lastLogin'     => $avatar->getLastLogin(),
-                    'lastPosition'  => $avatar->getLastPosition()
-                );
+
+            // Only when avatars available
+            if($user->getAvatars() !== NULL) {
+                foreach($user->getAvatars() as $avatar) {
+                    $avatars[] = array(
+                        'uuid'          => $avatar->getUuid(),
+                        'firstName'     => $avatar->getFirstName(),
+                        'lastName'      => $avatar->getLastName(),
+                        'email'         => $avatar->getEmail(),
+                        'gridId'        => $avatar->getGrid()->getId(),
+                        'gridName'      => $avatar->getGrid()->getName(),
+                        'confirmed'     => $avatar->getConfirmation(),
+                        'online'        => $avatar->getOnline(),
+                        'lastRegion'    => $avatar->getLastRegionUuid(),
+                        'lastLogin'     => $avatar->getLastLogin(),
+                        'lastPosition'  => $avatar->getLastPosition()
+                    );
+                }
             }
             $data['avatars']            = $avatars;
         }

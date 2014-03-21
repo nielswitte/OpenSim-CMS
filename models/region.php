@@ -10,7 +10,7 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  *
  * @author Niels Witte
  * @version 0.2
- * @date February 17th, 2014
+ * @since February 17th, 2014
  */
 class Region implements SimpleModel {
     private $name;

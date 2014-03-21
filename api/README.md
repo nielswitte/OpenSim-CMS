@@ -56,6 +56,7 @@ These numbers can be used for the following parameters:
 | Parameter         | Type      | Description                                                   |
 |-------------------|-----------|---------------------------------------------------------------|
 | auth              | Integer   | Permission level regarding Authorization API                  |
+| chat              | Integer   | Permission level regarding Chats API                          |
 | document          | Integer   | Permission level regarding Documents API                      |
 | grid              | Integer   | Permission level regarding Grids API                          |
 | meeting           | Integer   | Permission level regarding Meetings API                       |
@@ -320,6 +321,37 @@ and on failure it will provide an error message, for example when the agent's uu
 }
 ```
 
+## Chats
+
+Through the CMS it is possible to chat with users on the Grid. The following line will return the latest
+50 chat messages on the given grid.
+
+```http
+GET /api/grid/<GRID-ID>/chats/ HTTP/1.1
+```
+
+Or get all messages since a given unix timestamp in seconds
+```http
+GET /api/grid/<GRID-ID>/chats/<UNIX-TIMESTAMP>
+```
+
+### Add chat
+To add a line to the chat you require `WRITE` permissions for the chat section. For OpenSim to add a line to
+the chat, the server first needs to match the Avatar to a user. Or when no match can be found, the server could use
+0 as ID, and append the message with the Avatar's name.
+
+The chats can be in an array or a just sent as a single element.
+
+```http
+POST /api/grid/<GRID-ID/chats/ HTTP/1.1
+```
+| Parameter         | Type      | Description                                                               |
+|-------------------|-----------|---------------------------------------------------------------------------|
+| userId            | integer   | The CMS user ID                                                           |
+| message           | string    | The message to be saved                                                   |
+| timestamp         | string    | The timestamp of the message in the format YYYY-MM-DD HH:mm:ss            |
+| fromCMS           | integer   | 1 (True) if the message is from the CMS, 0 (false) if from OpenSim Server |
+
 ## Meetings
 
 ```http
@@ -356,6 +388,24 @@ PUT /api/meeting/<MEETING-ID>/ HTTP/1.1
 ```http
 GET /api/meeting/<MEETING-ID>/agenda HTTP/1.1
 ```
+### Minutes
+
+```http
+GET /api/meeting/<MEETING-ID>/minutes/ HTTP/1.1
+```
+#### Add minutes to meeting
+Can be a single element or an array of elements
+
+```http
+POST /api/meeting/<MEETING-ID>/minutes/ HTTP/1.1
+```
+| Parameter         | Type             | Description                                                          |
+|-------------------|------------------|----------------------------------------------------------------------|
+| timestamp         | string           | Timestamp (format: YYYY-MM-DD HH:mm:ss) or Unix timestamp in seconds |
+| uuid              | string           | UUID of the avatar that wrote the message                            |
+| name              | string           | Name of the avatar or object that wrote the message                  |
+| agendaId          | integer          | Integer that corresponds to the current agenda ID of the meeting     |
+| message           | string           | The actual message to be stored                                      |
 
 ## Meeting Rooms
 
@@ -431,16 +481,16 @@ Cache information is left out in the list view.
         "title": "Test presentation title",
         "presentationId": "1",
         "ownerId": 1,
-        "slides": {
-            "1": {
+        "slides": [
+            {
                 "number": 1,
                 "image": "http://localhost:80/OpenSim-CMS/api/presentation/1/slide/1/image/"
             },
-            "2": {
+            {
                 (...)
             },
             (...)
-        },
+        ],
         "slidesCount": 14,
         "creationDate": "2014-02-13 14:21:47",
         "modificationDate": "2014-02-13 14:22:09"
@@ -478,25 +528,24 @@ Example of output when request is successful:
     "title": "Test presentation title",
     "presentationId": "1",
     "ownerId": 1,
-    "slides": {
-        "1": {
-                "number": 1,
-                "image": "http:\/\/localhost:80\/OpenSim-CMS\/api\/presentation\/1\/slide\/1\/image\/",
-                "cache": {
-                    "1": {
-                        "uuid": "90591103-6982-4eed-9b31-291f7077194a",
-                        "expires": "2014-02-23 14:29:25",
-                        "isExpired": 0
-                    },
-                    "2": { (...) },
-                    (...)
-                }
-            },
-        "2": {
+    "slides": [
+        {
+            "number": 1,
+            "image": "http:\/\/localhost:80\/OpenSim-CMS\/api\/presentation\/1\/slide\/1\/image\/",
+            "cache": {
+                "1": {
+                    "uuid": "90591103-6982-4eed-9b31-291f7077194a",
+                    "expires": "2014-02-23 14:29:25",
+                    "isExpired": 0
+                },
+                "2": { (...) },
+                (...)
+        },
+        {
             (...)
         },
         (...)
-    },
+    ],
     "slidesCount": 14,
     "creationDate": "2014-02-13 14:21:47",
     "modificationDate": "2014-02-13 14:22:09"

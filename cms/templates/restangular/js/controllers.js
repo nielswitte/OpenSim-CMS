@@ -6,19 +6,169 @@ function MainCntl($scope, $route, $routeParams, $location, Page) {
     $scope.Page         = Page;
 };
 
-// homeController ------------------------------------------------------------------------------------------------------------------------------------
+// chatController -----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$scope', '$aside', '$sce', '$timeout', '$alert', function(Restangular, RestangularCache, $scope, $aside, $sce, $timeout, $alert) {
+        $scope.grids          = [];
+        var lastMsgTimestamp;
+        $scope.chats          = [];
+        $scope.minimizedChat  = false;
+        var autoScroll        = true;
+        var timer;
+        var chatAside;
+        var selectedGridId;
+
+        // Get chat template
+        $scope.getChat = function() {
+            return partial_path +'/chat/chat.html';
+        };
+
+        // From the datetime string only show the time
+        $scope.timeOnly = function(string) {
+            return string.substr(11);
+        };
+
+        // Check if message is own message or not
+        $scope.ownMessage = function(fromCMS, userId) {
+            if(fromCMS == 1 && userId == sessionStorage.id) {
+                return 'text-right';
+            } else {
+                return '';
+            }
+        };
+
+        // Show the chat aside
+        $scope.showChat = function() {
+            $scope.$broadcast('startChat');
+        };
+
+        // Wait for chat to become visible
+        $scope.$on('startChat', function (event, args) {
+            // Create aside sidebar
+            chatAside = $aside({
+                scope: $scope,
+                template: partial_path +'/chat/aside.html',
+                show: false,
+                backdrop: false
+            });
+
+            RestangularCache.all('grids').getList().then(function(gridResponse) {
+                $scope.grids = gridResponse;
+            });
+
+            // Show chat aside when loading is done
+            chatAside.$promise.then(function() {
+                chatAside.show();
+
+                // Disable autoscroll when user starts to scroll
+                var messagesDiv = jQuery('#chatAside .messages');
+                messagesDiv.scroll(function() {
+                    if(messagesDiv.scrollTop() >= (messagesDiv[0].scrollHeight - messagesDiv.height())) {
+                        autoScroll = true;
+                    } else {
+                        autoScroll = false;
+                    }
+                });
+            });
+        });
+
+        // Send the chat message to the server
+        $scope.sendChat = function(selectedGridId, message) {
+            // Clear chat message field
+            jQuery('#chatMessage').val('');
+            // Send message
+            Restangular.one('grid', selectedGridId).post('chats', { userId: sessionStorage.id, message: message, timestamp: moment().format('YYYY-MM-DD HH:mm:ss'), fromCMS: 1 }).then(function(resp) {
+                // On error show message
+                if(!resp.success) {
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                }
+            });
+        };
+
+        // Load chat for the selected Grid
+        $scope.selectGrid = function(gridId) {
+            // Clear existing timers
+            clearInterval(timer);
+            // Set the grid
+            selectedGridId   = gridId;
+            // Empty chat when switching grids
+            $scope.chats     = [];
+            // Reset last msg timestmap
+            lastMsgTimestamp = moment().subtract('minutes', 30).unix();
+            // Get last chat entries for past one hour
+            updateChat();
+            // Set autoscroll to true (overwrites it when switching grid)
+            autoScroll       = true;
+            // Start auto refreshing chat
+            timer            = setInterval(updateChat, 2000);
+        };
+
+        // Update the chat
+        var updateChat = function() {
+            // Append the chat with all chats send after the previous message
+            Restangular.one('grid', selectedGridId).one('chats', (lastMsgTimestamp + 1)).get().then(function(chatResponse) {
+                // Update last timestamp and append array if any new results
+                if(chatResponse.length >= 1) {
+                    lastMsgTimestamp = moment(chatResponse[0].timestamp, 'YYYY-MM-DD HH:mm:ss').unix();
+
+                    // Add all new chats to scope
+                    angular.forEach(chatResponse, function(chat) {
+                        $scope.chats.push(chat);
+                    });
+                    // Scroll the chat
+                    $timeout(scrollChat, 100);
+
+                    // Highlight the header when minimized and new messages are loaded
+                    if($scope.minimizedChat) {
+                        jQuery('#chatAside .aside-header').addClass('highlight');
+                    }
+                }
+            });
+        };
+
+        // Function to scroll the chat Down
+        var scrollChat = function() {
+            // See if user is currently at bottem of messages div
+            var messagesDiv = jQuery('#chatAside .messages');
+
+            // Need to auto scroll?
+            if(autoScroll) {
+                messagesDiv.scrollTop(messagesDiv[0].scrollHeight * 2);
+            }
+        };
+
+        // Close the chat Aside
+        $scope.closeChat = function() {
+            clearInterval(timer);
+            chatAside.hide();
+        };
+
+        // Toggle visiblity of chat
+        $scope.toggleChat = function() {
+            $scope.minimizedChat = !$scope.minimizedChat;
+
+            // scroll back to bottom on show
+            if(!$scope.minimizedChat) {
+                autoScroll = true;
+                scrollChat();
+                jQuery('#chatAside .aside-header').removeClass('highlight');
+            }
+        };
+    }]
+);
+
+// homeController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('homeController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
         Page.setTitle('Home');
     }]
 );
 
 // loginController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$sce', 'Cache', function(Restangular, $scope, $alert, $sce, Cache) {
+angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$scope', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, $alert, $sce, Cache) {
         $scope.isLoggedIn = false;
 
         // Check login
         $scope.isLoggedInCheck = function() {
-            if(sessionStorage.token) {
+            if(sessionStorage.token && sessionStorage.id) {
                 $alert({title: 'Already logged in!', content: $sce.trustAsHtml('You are already logged in as '+ sessionStorage.username), type: 'warning'});
                 $scope.isLoggedIn = true;
             } else {
@@ -64,6 +214,7 @@ angularRest.controller('loginController', ['Restangular', '$scope', '$alert', '$
 
                         // Set token as default request parameter
                         Restangular.setDefaultRequestParams({token: sessionStorage.token});
+                        RestangularCache.setDefaultRequestParams({token: sessionStorage.token});
 
                         // Token is valid for half an hour
                         sessionStorage.tokenTimeOut = moment().add(30, 'minutes').unix();
@@ -102,10 +253,10 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
 
         // Get the right toolbar (right area of navbar)
         $scope.getUserToolbar = function() {
-            if(sessionStorage.token){
+            if(sessionStorage.token && sessionStorage.id){
                 // Create dropdown menu
                 $scope.accountDropdown = [
-                    {text: 'Profile', href: '#!/user/'+ $scope.user.userId},
+                    {text: 'Profile', href: '#!/user/'+ sessionStorage.id},
                     {divider: true},
                     {text: 'Log Out', click: 'logout()'}
                 ];
@@ -118,7 +269,7 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
 
         // Get the right main navigation (left area of navbar)
         $scope.getMainNavigation = function() {
-            if(sessionStorage.token){
+            if(sessionStorage.token && sessionStorage.id){
                 return partial_path +'/navbar/mainNavigationLoggedIn.html';
             } else {
                 return partial_path +'/navbar/mainNavigationLoggedOut.html';
@@ -126,7 +277,7 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
         };
 
         // Restore session from storage
-        if(sessionStorage.token){
+        if(sessionStorage.token && sessionStorage.id){
             $scope.user = {
                 username:   sessionStorage.username,
                 email:      sessionStorage.email,
@@ -137,7 +288,7 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
     }]
 );
 
-// documentsController ----------------------------------------------------------------------------------------------------------------------------------
+// documentsController ------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('documentsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$modal', '$sce', 'Cache', '$route',
     function(Restangular, RestangularCache, $scope, Page, $alert, $modal, $sce, Cache, $route) {
         $scope.orderByField         = 'title';
@@ -269,7 +420,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
     }]
 );
 
-// documentController ----------------------------------------------------------------------------------------------------------------------------------
+// documentController -------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('documentController', ['Restangular', '$scope', '$routeParams', 'Page', '$modal', '$sce', function(Restangular, $scope, $routeParams, Page, $modal, $sce) {
         // Show loading screen
         jQuery('#loading').show();
@@ -336,6 +487,7 @@ angularRest.controller('documentController', ['Restangular', '$scope', '$routePa
 angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
         $scope.orderByField     = 'name';
         $scope.reverseSort      = false;
+        $scope.gridsList        = { regions: [] };
 
         // Show loading screen
         jQuery('#loading').show();
@@ -347,6 +499,18 @@ angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page',
             // Remove loading screen
             jQuery('#loading').hide();
         });
+
+        // Searches the list with regions for the given uuid
+        $scope.findRegionIndexByUuid = function(grid, uuid) {
+            if(grid.regions) {
+                for(var i = 0; i < grid.regions.length; i++) {
+                    if(grid.regions[i].uuid == uuid) {
+                        return i;
+                    }
+                }
+            }
+            return false;
+        };
 
         $scope.collapseFilter = true;
         $scope.toggleFilter = function() {
@@ -360,7 +524,7 @@ angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page',
     }]
 );
 
-// gridController ----------------------------------------------------------------------------------------------------------------------------------
+// gridController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('gridController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
         // Show loading screen
         jQuery('#loading').show();
@@ -381,7 +545,7 @@ angularRest.controller('gridController', ['Restangular', '$scope', '$routeParams
     }]
 );
 
-// meetingsController ----------------------------------------------------------------------------------------------------------------------------------
+// meetingsController -------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('meetingsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$modal', '$tooltip', '$sce', 'Cache', '$location',  function(Restangular, RestangularCache, $scope, Page, $modal, $tooltip, $sce, Cache, $location) {
         var date = new Date(new Date - (1000*60*60*24*14));
         var modal;
@@ -445,7 +609,7 @@ angularRest.controller('meetingsController', ['Restangular', 'RestangularCache',
     }]
 );
 
-// meetingController ----------------------------------------------------------------------------------------------------------------------------------
+// meetingController --------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('meetingController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache, $location) {
         var meetingRequestUrl;
         var gridsRequestUrl;
@@ -492,7 +656,7 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
          * @returns {Number}
          */
         $scope.selectedGridIndex = function() {
-            for (var i = 0; i < $scope.grids.length; i += 1) {
+            for (var i = 0; i < $scope.grids.length; i++) {
                 var grid = $scope.grids[i];
                 if (grid.id == $scope.meeting.room.grid.id) {
                     return i;
@@ -520,6 +684,7 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
                 } else {
                     $alert({title: 'Meeting updated!', content: $sce.trustAsHtml('The meeting has been updated.'), type: 'success'});
                     Cache.clearCache();
+                    $location.path('meetings');
                 }
             });
         };
@@ -668,7 +833,53 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
     }]
 );
 
-// meetingNewController ----------------------------------------------------------------------------------------------------------------------------------
+// meetingMinutesController -------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('meetingMinutesController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache, $location) {
+        $scope.meeting = {};
+        RestangularCache.one('meeting', $routeParams.meetingId).one('minutes').get().then(function(meetingResponse) {
+            meetingResponse.agenda = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
+            $scope.meeting = meetingResponse;
+        });
+
+        // From the datetime string only show the time
+        $scope.timeOnly = function(string) {
+            return string.substr(11);
+        };
+
+        // Show heading?
+        $scope.showAgendaNextItemHeading = function(index) {
+            if(index == 0 || $scope.meeting.minutes[index].agenda.id != $scope.meeting.minutes[index-1].agenda.id) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        var parents     = [];
+        // Start with 2 for H2
+        parents.push(2);
+        var depth       = 0;
+        // Checks to see if this agenda item is different from the previous
+        $scope.agendaNextItemHeading = function(index, minute) {
+            if(index == 0 || parseInt(minute.agenda.id) != parseInt($scope.meeting.minutes[index-1].agenda.id)) {
+                var parentId  = minute.agenda.parentId;
+
+                // Level deeper
+                if(parents[parentId] == undefined) {
+                    parents[parentId] = (depth+1);
+                } else {
+                    depth = parents[parentId];
+                }
+
+                return $sce.trustAsHtml('<h'+ depth +'>'+ minute.agenda.value +'</h'+ depth +'>');
+            } else {
+                return "";
+            }
+        };
+    }]
+);
+
+// meetingNewController -----------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$location', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, Page, $location, $alert, $sce, Cache) {
         Page.setTitle('Schedule meeting');
         var gridsRequestUrl;
@@ -717,7 +928,7 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
          * @returns {Number}
          */
         $scope.selectedGridIndex = function() {
-            for (var i = 0; i < $scope.grids.length; i += 1) {
+            for (var i = 0; i < $scope.grids.length; i++) {
                 var grid = $scope.grids[i];
                 if (grid.id == $scope.meeting.room.grid.id) {
                     return i;

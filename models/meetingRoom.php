@@ -10,7 +10,7 @@ require_once dirname(__FILE__) . '/simpleModel.php';
  *
  * @author Niels Witte
  * @version 0.1
- * @date February 25th, 2014
+ * @since February 25th, 2014
  */
 class MeetingRoom implements simpleModel {
     private $id;

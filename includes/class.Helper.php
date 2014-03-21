@@ -6,7 +6,8 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author Niels Witte
  * @version 0.1
- * @date February 12th, 2014
+ * @date March 19th, 2014
+ * @since February 12th, 2014
  */
 class Helper {
     private static $db;
@@ -258,6 +259,8 @@ class Helper {
 
     /**
      * Creates a resized image of the given source and saves it at the destination
+     * Also fills the background overflow after cropping with black or white depending on
+     * the color of the corners of the image.
      *
      * @param string $source - The file to use as a source
      * @param string $destination - The destination to save the file, including filename and extension
@@ -292,7 +295,12 @@ class Helper {
             // Resize is required?
             if(!file_exists($destination) || $resizeRequired) {
                 // Load the background
-                $image = new \Image(FILES_LOCATION . DS . 'presentation' . DS .'background.jpg');
+                $averageColor = $resize->getAverageColor();
+                if(($averageColor['red'] + $averageColor['green'] + $averageColor['blue'] / 4) >= 128) {
+                    $image = new \Image(FILES_LOCATION . DS . 'background_light.jpg');
+                } else {
+                    $image = new \Image(FILES_LOCATION . DS . 'background_dark.jpg');
+                }
 
                 // resize when needed
                 if($resize->getWidth() > $width || $resize->getHeight() > $height) {

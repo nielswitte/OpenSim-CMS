@@ -368,19 +368,19 @@ state presentation {
             integer x;
             integer length      = (integer) JsonGetValue(json_body, "slidesCount");
             // Get from each slide the URL or the UUID
-            for (x = 1; x <= length; x++) {
-                string slideUuid        = JsonGetValue(json_slides, "{"+ x +"}.{cache}.{"+ serverId +"}.{uuid}");
-                string slideUrl         = JsonGetValue(json_slides, "{"+ x +"}.{image}");
-                string slideExpired     = JsonGetValue(json_slides, "{"+ x +"}.{cache}.{"+ serverId +"}.{isExpired}");
+            for (x = 0; x < length; x++) {
+                string slideUuid        = JsonGetValue(json_slides, "["+ x +"].{cache}.{"+ serverId +"}.{uuid}");
+                string slideUrl         = JsonGetValue(json_slides, "["+ x +"].{image}");
+                string slideExpired     = JsonGetValue(json_slides, "["+ x +"].{cache}.{"+ serverId +"}.{isExpired}");
 
                 // UUID set and not expired?
                 if(slideUuid != "" && slideExpired == "0") {
                     slides += [(key) slideUuid];
-                    if(debug) llInstantMessage(userUuid, "[Debug] use UUID ("+ slideUuid +") for slide: "+ x);
+                    if(debug) llInstantMessage(userUuid, "[Debug] use UUID ("+ slideUuid +") for slide: "+ (x+1));
                 // Use URL
                 } else {
                     slides += [slideUrl];
-                    if(debug) llInstantMessage(userUuid, "[Debug] use URL ("+ slideUrl +") for slide: "+ x);
+                    if(debug) llInstantMessage(userUuid, "[Debug] use URL ("+ slideUrl +") for slide: "+ (x+1));
                 }
             }
 

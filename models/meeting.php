@@ -7,12 +7,14 @@ require_once dirname(__FILE__) . '/simpleModel.php';
 require_once dirname(__FILE__) . '/meetingParticipants.php';
 require_once dirname(__FILE__) . '/meetingAgenda.php';
 require_once dirname(__FILE__) . '/meetingDocuments.php';
+require_once dirname(__FILE__) . '/meetingMinutes.php';
 /**
  * This class represents a meeting
  *
  * @author Niels Witte
- * @version 0.3
- * @date February 25th, 2014
+ * @version 0.4
+ * @date March 20th, 2014
+ * @since February 25th, 2014
  */
 class Meeting implements simpleModel {
     private $id;
@@ -24,6 +26,7 @@ class Meeting implements simpleModel {
     private $participants;
     private $agenda;
     private $documents;
+    private $minutes;
 
     /**
      * Constructs a new meeting with the given ID
@@ -36,8 +39,9 @@ class Meeting implements simpleModel {
      * @param string $name - [Optional]
      * @param \Models\MeetingAgenda $agenda - [Optional]
      * @param \Models\MeetingDocuments $documents - [Optional]
+     * @param \Models\MeetingMinutes $minutes - [Optional]
      */
-    public function __construct($id, $startDate = '0000-00-00 00:00:00', $endDate = '0000-00-00 00:00:00', \Models\User $creator = NULL, \Models\MeetingRoom $room = NULL, $name = '', \Models\MeetingAgenda $agenda = NULL, \Models\MeetingDocuments $documents = NULL) {
+    public function __construct($id, $startDate = '0000-00-00 00:00:00', $endDate = '0000-00-00 00:00:00', \Models\User $creator = NULL, \Models\MeetingRoom $room = NULL, $name = '', \Models\MeetingAgenda $agenda = NULL, \Models\MeetingDocuments $documents = NULL, \Models\MeetingMinutes $minutes = NULL) {
         $this->id           = $id;
         $this->creator      = $creator;
         $this->startDate    = $startDate;
@@ -46,6 +50,7 @@ class Meeting implements simpleModel {
         $this->name         = $name;
         $this->agenda       = $agenda;
         $this->documents    = $documents;
+        $this->minutes      = $minutes;
     }
 
     /**
@@ -133,6 +138,29 @@ class Meeting implements simpleModel {
     }
 
     /**
+     * Gets the minutes for this meeting from the database
+     */
+    public function getMinutesFromDatabase() {
+        $db = \Helper::getDB();
+        $db->where('meetingId', $db->escape($this->getId()));
+        $db->orderBy('timestamp', 'ASC');
+        $results = $db->get('meeting_minutes');
+
+        // New meetings instance
+        $minutes = new \Models\MeetingMinutes($this);
+        $this->setMinutes($minutes);
+
+        // Save results
+        foreach($results as $result) {
+            // Match UUID to a user
+            $user       = $this->getParticipants()->getParticipantByUuid($result['uuid']);
+            $user       = $user !== FALSE ? $user : NULL;
+
+            $minutes->addMinute($result['id'], $result['timestamp'], $result['agendaId'], $result['uuid'], $result['name'], $result['message'], $user);
+        }
+    }
+
+    /**
      * Returns the meeting ID
      *
      * @return integer
@@ -196,15 +224,6 @@ class Meeting implements simpleModel {
     }
 
     /**
-     * Adds the given user to the list with participants
-     *
-     * @param \Models\User $user
-     */
-    public function addParticipant(\Models\User $user) {
-        $this->getParticipants()->addParticipant($user);
-    }
-
-    /**
      * Returns the MeetingParticipants instance that contains the list with participants
      *
      * @return \Models\MeetingParticipants
@@ -253,22 +272,32 @@ class Meeting implements simpleModel {
     }
 
     /**
-     * Adds the given document to the list with documents
-     *
-     * @param \Models\Document $document
-     */
-    public function addDocument(\Models\Document $document) {
-        $this->getDocuments()->addDocument($document);
-    }
-
-    /**
      * Returns the MeetingDocuments instance that contains the list with documents
      *
      * @return \Models\MeetingDocuments
      */
-    public function getDocuments(){
+    public function getDocuments() {
         return $this->documents;
     }
+
+    /**
+     * Retuns the meeting minutes instance that contains the minutes for this meeting
+     *
+     * @return \Models\MeetingMinutes
+     */
+    public function getMinutes() {
+        return $this->minutes;
+    }
+
+    /**
+     * Sets the minutes instance for this meeting
+     *
+     * @param \Models\MeetingMinutes $minutes
+     */
+    public function setMinutes(\Models\MeetingMinutes $minutes) {
+        $this->minutes = $minutes;
+    }
+
     /**
      * Returns the API url to the full meeting information
      *

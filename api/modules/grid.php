@@ -14,7 +14,7 @@ require_once dirname(__FILE__) .'/../../controllers/regionController.php';
  *
  * @author Niels Witte
  * @version 0.1
- * @date February 24th, 2014
+ * @since February 24th, 2014
  */
 class Grid extends Module{
     private $api;

@@ -10,7 +10,7 @@ require_once dirname(__FILE__) .'/document.php';
  *
  * @author Niels Witte
  * @version 0.2
- * @date February 10th, 2014
+ * @since February 10th, 2014
  */
 class Presentation extends Document {
 	private $currentSlide;

@@ -8,7 +8,7 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author Niels Witte
  * @version 0.2
- * @date February 12th, 2014
+ * @since February 12th, 2014
  */
 class UserController {
     private $user;
@@ -201,6 +201,7 @@ class UserController {
             // Add default permissions
             $permissions = array(
                 'userId'        => $db->escape($userId),
+                'chat'          => $db->escape(\Auth::READ),
                 'auth'          => $db->escape(\Auth::READ),
                 'document'      => $db->escape(\Auth::READ),
                 'grid'          => $db->escape(\Auth::READ),
@@ -252,6 +253,7 @@ class UserController {
         $db     = \Helper::getDB();
         $data   = array(
             'auth'          => $db->escape($parameters['auth']),
+            'chat'          => $db->escape($parameters['chat']),
             'document'      => $db->escape($parameters['document']),
             'grid'          => $db->escape($parameters['grid']),
             'meeting'       => $db->escape($parameters['meeting']),
@@ -361,6 +363,8 @@ class UserController {
             throw new \Exception('Expected 7 parameters, '. count($parameters) .' given', 1);
         } elseif(!isset($parameters['auth']) || !in_array($parameters['auth'], $permissions)) {
             throw new \Exception('Missing parameter (integer) "auth", with value in ('. implode(', ', $permissions) .')', 2);
+        } elseif(!isset($parameters['chat']) || !in_array($parameters['chat'], $permissions)) {
+            throw new \Exception('Missing parameter (integer) "chat", with value in ('. implode(', ', $permissions) .')', 2);
         } elseif(!isset($parameters['document']) || !in_array($parameters['document'], $permissions)) {
             throw new \Exception('Missing parameter (integer) "document", with value in ('. implode(', ', $permissions) .')', 2);
         } elseif(!isset($parameters['grid']) || !in_array($parameters['grid'], $permissions)) {

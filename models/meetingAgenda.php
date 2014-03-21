@@ -8,7 +8,8 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author Niels Witte
  * @version 0.1
- * @date March 17th, 2014
+ * @date March 20th, 2014
+ * @since March 17th, 2014
  */
 class MeetingAgenda {
     private $meeting;
@@ -40,6 +41,21 @@ class MeetingAgenda {
             'sort'      => $order,
             'parentId'  => $parentId
         );
+    }
+
+    /**
+     * Search for the given ID in the agenda
+     *
+     * @param integer $id
+     * @return array or boolean FALSE when not found
+     */
+    public function getAgendaItemById($id) {
+        foreach($this->agenda as $agenda) {
+            if($agenda['id'] == $id) {
+                return $agenda;
+            }
+        }
+        return FALSE;
     }
 
     /**
@@ -76,21 +92,35 @@ class MeetingAgenda {
      *
      * @param array $agenda - [optional]
      * @param integer $depth - [optional]
-     * @param integer $parentId - [optional]
+     * @param mixed $parentId - [optional] integer if only one parent, array if more
      * @return string
      */
     public function toString($agenda = null, $depth = 0, $parentId = 0) {
+        // Agenda is not set? Use this agenda
         if($agenda == null) {
             $agenda = $this->buildAgenda();
         }
 
+        // Parent ID is not an array?
+        if(!is_array($parentId)) {
+            $parentId = array($parentId);
+        }
+        // Remove the main level from the list
+        if($parentId[0] == 0) {
+            array_shift($parentId);
+        }
+
         $string = '';
         for($i = 0; $i < count($agenda); $i++) {
-            // Depth starts at 0, but only between elements an # is added
+            // Depth starts at 0, so only sub levels are indented
             $string .= str_repeat('  ', $depth);
-            $string .= ($depth > 0 ? $parentId .'.' : '' ) . ($i+1) .'. '. $agenda[$i]['value'] . "\n";
+            $string .= ($depth > 0 ? implode('.', $parentId) .'.' : '' ) . ($i+1) .'. '. $agenda[$i]['value'] . "\n";
+            // Item has more sub levels?
             if(isset($agenda[$i]['items'])) {
-                $string .= $this->toString($agenda[$i]['items'], ($depth+1), ($i+1));
+                // Set the next list with parentIds
+                $newParentId   = $parentId;
+                $newParentId[] = $i+1;
+                $string .= $this->toString($agenda[$i]['items'], ($depth+1), $newParentId);
             }
         }
         return $string;

@@ -8,7 +8,7 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author Niels Witte
  * @version 0.1
- * @date March 10th, 2014
+ * @since March 10th, 2014
  */
 class DocumentController {
     private $document;
@@ -38,7 +38,7 @@ class DocumentController {
         $result = $db->delete('documents');
 
         if($result === FALSE) {
-            throw new \Exception('Given Document ('. $this->document->getId() .') could not be removed from the CMS', 1);
+            throw new \Exception('Given Document ('. $this->document->getId() .') could not be removed from the CMS. The document is probably being used in a meeting.', 1);
         } else {
             // Clear files after deletion
             \Helper::removeDirAndContents($this->document->getPath());

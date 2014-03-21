@@ -14,6 +14,7 @@ if (EXEC != 1) {
 
         <!-- Bootstrap CSS -->
         <link href="templates/restangular/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+        <link href="templates/restangular/css/bootstrap-additions.min.css" rel="stylesheet" type="text/css">
         <link href="templates/restangular/css/angular-motion.min.css" rel="stylesheet" type="text/css">
         <link href="templates/restangular/css/select2.css" rel="stylesheet" type="text/css">
         <link href="templates/restangular/css/select2-bootstrap.css" rel="stylesheet" type="text/css">
@@ -67,6 +68,7 @@ if (EXEC != 1) {
 
             <!-- Main content -->
             <div id="main" ng-view></div>
+            <div id="chat" ng-controller="chatController" ng-include src="getChat()"></div>
             <hr>
             <footer class="footer">
                 <p>&copy; OpenSim-CMS 2014</p>

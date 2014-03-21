@@ -12,7 +12,8 @@ require_once dirname(__FILE__) .'/../../controllers/meetingController.php';
  *
  * @author Niels Witte
  * @version 0.3
- * @date February 25th, 2014
+ * @date March 20th, 2014
+ * @since February 25th, 2014
  */
 class Meeting extends Module{
     private $api;
@@ -34,15 +35,16 @@ class Meeting extends Module{
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/meetings\/([0-9]{4}-[0-9]{1,2}-[0-9]{1,2})\/?$/",            "getMeetingsByDate",   $this, "GET",  \Auth::READ);  // Get all meetings that start after the given date
-        $this->api->addRoute("/meetings\/([0-9]{4}-[0-9]{1,2}-[0-9]{1,2})\/calendar\/?$/",  "getMeetingsByDate",   $this, "GET",  \Auth::READ);  // Get all meetings that start after the given date
-        $this->api->addRoute("/meetings\/?$/",                                              "getMeetings",         $this, "GET",  \Auth::READ);  // Get list with 50 meetings ordered by startdate DESC
-        $this->api->addRoute("/meetings\/(\d+)\/?$/",                                       "getMeetings",         $this, "GET",  \Auth::READ);  // Get list with 50 meetings ordered by startdate DESC starting at the given offset
-        $this->api->addRoute("/meeting\/?$/",                                               "createMeeting",       $this, "POST", \AUTH::EXECUTE); //Create a new meeting
-        $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "getMeetingById",      $this, "GET",  \Auth::READ);  // Select a specific meeting
-        $this->api->addRoute("/meeting\/(\d+)\/agenda\/?$/",                                "getMeetingAgendaById",$this, "GET",  \Auth::READ);  // Select a specific meeting and only get the agenda
-        $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "updateMeetingById",   $this, "PUT",  \Auth::EXECUTE); // Update a specific meeting
-        $this->api->addRoute("/meeting\/(\d+)\/log\/?$/",                                   "saveLogMeetingById",  $this, "POST", \Auth::WRITE); // Select a specific meeting
+        $this->api->addRoute("/meetings\/([0-9]{4}-[0-9]{1,2}-[0-9]{1,2})\/?$/",            "getMeetingsByDate",        $this, "GET",  \Auth::READ);  // Get all meetings that start after the given date
+        $this->api->addRoute("/meetings\/([0-9]{4}-[0-9]{1,2}-[0-9]{1,2})\/calendar\/?$/",  "getMeetingsByDate",        $this, "GET",  \Auth::READ);  // Get all meetings that start after the given date
+        $this->api->addRoute("/meetings\/?$/",                                              "getMeetings",              $this, "GET",  \Auth::READ);  // Get list with 50 meetings ordered by startdate DESC
+        $this->api->addRoute("/meetings\/(\d+)\/?$/",                                       "getMeetings",              $this, "GET",  \Auth::READ);  // Get list with 50 meetings ordered by startdate DESC starting at the given offset
+        $this->api->addRoute("/meeting\/?$/",                                               "createMeeting",            $this, "POST", \AUTH::EXECUTE); //Create a new meeting
+        $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "getMeetingById",           $this, "GET",  \Auth::READ);  // Select a specific meeting
+        $this->api->addRoute("/meeting\/(\d+)\/agenda\/?$/",                                "getMeetingAgendaById",     $this, "GET",  \Auth::READ);  // Select a specific meeting and only get the agenda
+        $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "updateMeetingById",        $this, "PUT",  \Auth::EXECUTE); // Update a specific meeting
+        $this->api->addRoute("/meeting\/(\d+)\/minutes\/?$/",                               "saveMinutesByMeetingId",   $this, "POST", \Auth::WRITE); // Save meeting minutes
+        $this->api->addRoute("/meeting\/(\d+)\/minutes\/?$/",                               "getMinutesByMeetingId",    $this, "GET",  \Auth::READ); // Get meeting minutes
     }
 
     /**
@@ -200,16 +202,26 @@ class Meeting extends Module{
      * @param array $args
      * @return array
      */
-    public function saveLogMeetingById($args) {
+    public function saveMinutesByMeetingId($args) {
         $data           = FALSE;
         $meeting        = new \Models\Meeting($args[1]);
         $meetingCtrl    = new \Controllers\MeetingController($meeting);
         $input          = \Helper::getInput(TRUE);
 
-        // @todo: Handle input
-        print_r($input);
-        die();
+        // Only one item? make it a sub multidemensional array
+        if(!isset($input[0])) {
+            $input = array($input);
+        }
 
+        // Convert UNIX to timestamp, which is used when the request is from the OpenSim Server
+        foreach($input as $key => $row) {
+            if(isset($row['timestamp']) && is_numeric($row['timestamp'])) {
+                $input[$key]['message']   = urldecode($row['message']);
+                $input[$key]['timestamp'] = date('Y-m-d H:i:s', $row['timestamp']);
+            }
+        }
+
+        // Validate parameters and if valid save them
         if($meetingCtrl->validateParametersChat($input)) {
             $data = $meetingCtrl->saveChat($input);
         }
@@ -220,6 +232,61 @@ class Meeting extends Module{
         );
 
         return $result;
+    }
+
+    /**
+     * Gets the minutes meetings
+     *
+     * @param array $args
+     */
+    public function getMinutesByMeetingId($args){
+        $meeting  = new \Models\Meeting($args[1]);
+        $meeting->getInfoFromDatabase();
+        //$meeting->getRoom()->getInfoFromDatabase();
+        $meeting->getAgendaFromDabatase();
+        $meeting->getParticipantsFromDatabase();
+        $meeting->getDocumentsFromDabatase();
+        $meeting->getMinutesFromDatabase();
+        $minutes = $meeting->getMinutes()->getMinutes();
+
+        // Process and format results
+        $results            = $this->getMeetingData($meeting, FALSE);
+        $results['agenda']  = $meeting->getAgenda()->toString();
+
+        // Format the Minutes
+        $agendaId = 0;
+        foreach($minutes as $minute) {
+            // Get the agenda item for this minute, but only if changed
+            if($agendaId != $minute['agendaId']) {
+                $agendaItem = $meeting->getAgenda()->getAgendaItemById($minute['agendaId']);
+            }
+
+            $results['minutes'][] = array(
+                'id'         => $minute['id'],
+                'timestamp'  => $minute['timestamp'],
+                'agenda'     => array(
+                    'id'            => $agendaItem['id'],
+                    'parentId'      => $agendaItem['parentId'],
+                    'sort'          => $agendaItem['sort'],
+                    'value'         => $agendaItem['value']
+                ),
+                'uuid'       => $minute['uuid'],
+                'name'       => $minute['name'],
+                'message'    => $minute['message'],
+                'user'       => ($minute['user'] ? array(
+                    // When a user is found
+                    'id'        => $minute['user']->getId(),
+                    'firstName' => $minute['user']->getFirstName(),
+                    'lastName'  => $minute['user']->getLastName(),
+                    'username'  => $minute['user']->getUsername()
+                    )
+                    // No user found
+                    : ''
+                )
+            );
+        }
+
+        return $results;
     }
 
     /**

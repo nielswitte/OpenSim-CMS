@@ -12,6 +12,7 @@ require_once dirname(__FILE__) .'/../config.php';
 require_once dirname(__FILE__) .'/../includes/class.Auth.php';
 require_once dirname(__FILE__) .'/api.php';
 require_once dirname(__FILE__) .'/modules/auth.php';
+require_once dirname(__FILE__) .'/modules/chat.php';
 require_once dirname(__FILE__) .'/modules/document.php';
 require_once dirname(__FILE__) .'/modules/grid.php';
 require_once dirname(__FILE__) .'/modules/meeting.php';
@@ -24,7 +25,7 @@ require_once dirname(__FILE__) .'/modules/user.php';
  *
  * @author Niels Witte
  * @version 0.4
- * @date February 10th, 2014
+ * @since February 10th, 2014
  */
 
 // Remove expired tokens
@@ -46,6 +47,7 @@ try {
     $api                = new \API\API();
 
     // Add modules
+    $chatApi            = new \API\Modules\Chat($api);
     $gridApi            = new \API\Modules\Grid($api);
     $documentApi        = new \API\Modules\Document($api);
     $meetingsApi        = new \API\Modules\Meeting($api);
