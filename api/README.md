@@ -340,6 +340,8 @@ To add a line to the chat you require `WRITE` permissions for the chat section. 
 the chat, the server first needs to match the Avatar to a user. Or when no match can be found, the server could use
 0 as ID, and append the message with the Avatar's name.
 
+The chats can be in an array or a just sent as a single element.
+
 ```http
 POST /api/grid/<GRID-ID/chats/ HTTP/1.1
 ```
@@ -390,6 +392,8 @@ GET /api/meeting/<MEETING-ID>/agenda HTTP/1.1
 ```http
 GET /api/meeting/<MEETING-ID>/minutes/ HTTP/1.1
 ```
+#### Add minutes to meeting
+Can be a single element or an array of elements
 
 ```http
 POST /api/meeting/<MEETING-ID>/minutes/ HTTP/1.1

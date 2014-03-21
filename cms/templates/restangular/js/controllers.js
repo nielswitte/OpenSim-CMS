@@ -84,7 +84,7 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
             // Empty chat when switching grids
             $scope.chats     = [];
             // Reset last msg timestmap
-            lastMsgTimestamp = moment().subtract('minutes', 30).format('YYYY-MM-DD HH:mm:ss');
+            lastMsgTimestamp = moment().subtract('minutes', 30).unix();
             // Get last chat entries for past one hour
             updateChat();
             // Set autoscroll to true (overwrites it when switching grid)
@@ -96,10 +96,10 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
         // Update the chat
         var updateChat = function() {
             // Append the chat with all chats send after the previous message
-            Restangular.one('grid', selectedGridId).one('chats', (moment(lastMsgTimestamp, 'YYYY-MM-DD HH:mm:ss').unix() + 1)).get().then(function(chatResponse) {
+            Restangular.one('grid', selectedGridId).one('chats', (lastMsgTimestamp + 1)).get().then(function(chatResponse) {
                 // Update last timestamp and append array if any new results
                 if(chatResponse.length >= 1) {
-                    lastMsgTimestamp = chatResponse[0].timestamp;
+                    lastMsgTimestamp = moment(chatResponse[0].timestamp, 'YYYY-MM-DD HH:mm:ss').unix();
 
                     // Add all new chats to scope
                     angular.forEach(chatResponse, function(chat) {

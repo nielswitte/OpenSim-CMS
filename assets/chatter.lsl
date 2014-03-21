@@ -1,5 +1,5 @@
 /**
- * When touching this prim the chats will be logged
+ * When touching this prim the chat will be linked to the CMS
  *
  * Do not forget to enable the following settings in your OpenSim configuration
  * For loading dynamic textures and enable JSON support:
@@ -10,8 +10,8 @@
  *      Enabled = true
  *
  * @author Niels Witte
- * @date March 14th, 2014
- * @version 0.2
+ * @date March 21st, 2014
+ * @version 0.1
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
@@ -21,26 +21,16 @@ string APIPassword = "OpenSim"; // API password
 integer serverId = 1;           // The ID of this server in OpenSim-CMS
 
 // Some general parameters
-key viewerUuid = "b7db0f12-21e7-46da-8a9b-468b9d049cb5"; // The UUID of the viewer of the agenda
-integer channelListen = -9;     // Channel to listen to
 integer channelChat = 0;        // Channel to log chat on
 string APIToken;                // The token to be used for the API
-list Listener;                  // The navigation listener
 list messages;                  // List to store the chat in
-key userUuid = NULL_KEY;        // The toucher's UUID (default the owner)
-key objectUuid;                 // The uuid of this object
-integer meetingId = 0;          // The ID of the selected meeting
-key jsonMeeting;                // JSON meeting
-list avatarsPresent;            // List to keep track of all avatars currently present
-integer meetingAreaSize = 25;   // Size of the meeting room to detect avatars in
-list agendaItems;               // List with the agenda items in it
-integer currentAgendaItem = 0;  // The current index of the agenda
+list userUuidLinks;             // List with the links between CMS users and Avatars
 
 // HTTP requests
 key http_request_api_token;     // API token request
-key http_request_send_chat;     // Response on linking avatar to user
-key http_request_meetings;      // Get the overview from coming meetings
-key http_request_meeting;       // Get a specific meeting
+key http_request_send_chat;     // Response on sending chat messages to the server
+key http_request_receive_chat;  // Response on requesting chat messages from the server
+key http_request_avatar;        // The user linked to the requested avatar
 
 /**
  * Requesting a new API token for this session
@@ -52,32 +42,14 @@ request_api_token() {
 }
 
 /**
- * Requests the meetings for today
- */
-request_meetings() {
-    if(debug) llInstantMessage(userUuid, "[Debug] Requesting meetings");
-    string date = llGetDate();
-    http_request_meetings = llHTTPRequest(serverUrl +"/meetings/"+ date +"/?token="+ APIToken, [], "");
-}
-
-/**
- * Request a specific meeting
- * @param intger id
- */
-request_meeting(integer id) {
-    if(debug) llInstantMessage(userUuid, "[Debug] Requesting meeting with id: "+ id);
-    http_request_meeting = llHTTPRequest(serverUrl +"/meeting/"+ id +"/?token="+ APIToken, [], "");
-}
-
-/**
  * Links the message to the meeting
  */
 request_send_chat() {
     if(debug) {
         // Count the number of messages
         integer count = llGetListLength(messages);
-        if(count >= 5) {
-            count = count / 5;
+        if(count >= 3) {
+            count = count / 3;
         } else {
             count = 0;
         }
@@ -90,11 +62,11 @@ request_send_chat() {
         string body = "[";
         string body_messages = "";
         // Parse messages
-        for(i = 0; i < llGetListLength(messages); i=i+5) {
-            body_messages = body_messages + "{ \"timestamp\": \""+ llList2String(messages, i) +"\", \"uuid\": \""+ llList2String(messages, i+1) +"\", \"name\": \""+ llList2String(messages, i+2) +"\", \"agendaId\": \""+ llList2String(messages, i+3) +"\", \"message\": \""+ llEscapeURL(llList2String(messages, i+4)) +"\"}";
+        for(i = 0; i < llGetListLength(messages); i=i+3) {
+            body_messages = body_messages + "{ \"timestamp\": \""+ llList2String(messages, i) +"\", \"userId\": \""+ llList2String(messages, i+1) +"\", \"message\": \""+ llEscapeURL(llList2String(messages, i+2)) +"\"}";
 
             // Add comma when not last element
-            if(i+5 < llGetListLength(messages)) {
+            if(i+3 < llGetListLength(messages)) {
                 body_messages = body_messages + ",";
             }
         }
@@ -102,7 +74,7 @@ request_send_chat() {
         body = body + body_messages + "]";
         // Empty list
         messages = [];
-        http_request_send_chat = llHTTPRequest(serverUrl +"/meeting/"+ meetingId +"/minutes/?token="+ APIToken, [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/json"], body);
+        http_request_send_chat = llHTTPRequest(serverUrl +"/grid/"+ serverId +"/chats/?token="+ APIToken, [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/json"], body);
     }
 }
 
@@ -110,51 +82,11 @@ request_send_chat() {
  * Adds the message with timestamp and sender uuid to the queue
  *
  * @param integer timestamp
- * @param string uuid
- * @param string name
+ * @param integer userId
  * @param string message
  */
-queueMessage(integer timestamp, string uuid, string name, string message) {
-    messages += [timestamp, uuid, name, currentAgendaItem + 1, message];
-}
-
-/**
- * Removes all listeners
- */
-removeListeners() {
-    integer i;
-    for (i = 0; i < llGetListLength(Listener); i++ ) {
-        llListenRemove(llList2Integer(Listener, i));
-    }
-    Listener = [];
-}
-
-/**
- * Move the meeting to the given agenda item
- * @param integer index
- */
-agendaItem(integer index) {
-    if(llGetListLength(agendaItems) > index) {
-        llMessageLinked(LINK_ALL_OTHERS, 2, ""+ index, "");
-        currentAgendaItem  = index;
-        list TimeStamp     = llParseString2List(llGetTimestamp(),["-",":"],["T"]); //Get timestamp and split into parts in a list
-        integer hour       = llList2Integer(TimeStamp,4);
-        // GMT to CET
-        hour++;
-        // Add leading zero
-        string Hours = "";
-        if(hour < 10) {
-            Hours = "0"+ (string)hour;
-        } else {
-            Hours = (string)hour;
-        }
-        string Minutes     = llList2String(TimeStamp,5);
-
-        // Say agenda item and queue it
-        llSetText(llList2String(agendaItems, currentAgendaItem), <0,0,1>, 1.0);
-        llSay(channelChat, "[Meeting] At "+ Hours +":"+ Minutes +" starting with agenda item: "+ llList2String(agendaItems, currentAgendaItem));
-        queueMessage(llGetUnixTime(), "", "Server", "At "+ Hours +":"+ Minutes +" starting with agenda item: "+ llList2String(agendaItems, currentAgendaItem));
-    }
+queueMessage(integer timestamp, integer userId, string message) {
+    messages += [timestamp, userId, , message];
 }
 
 /**

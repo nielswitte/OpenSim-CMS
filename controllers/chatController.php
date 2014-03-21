@@ -34,10 +34,7 @@ class ChatController {
     public function addChats($parameters) {
         $db     = \Helper::getDB();
         $result = FALSE;
-        // Only one item? make it a sub multidemensional array
-        if(!isset($parameters[0])) {
-            $parameters = array($parameters);
-        }
+
         // Process individual parameters
         foreach($parameters as $parameter) {
             $parameter['gridId'] = $this->chat->getGrid()->getId();
@@ -56,10 +53,7 @@ class ChatController {
      */
     public function validateParametersCreate($parameters) {
         $result = FALSE;
-        // Only one item? make it a sub multidemensional array
-        if(!isset($parameters[0])) {
-            $parameters = array($parameters);
-        }
+
         // Process individual parameters
         foreach($parameters as $parameter) {
             if(count($parameter) < 3) {

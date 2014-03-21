@@ -101,9 +101,22 @@ class Chat extends Module{
         $chatCtrl   = new \Controllers\ChatController($chat);
         $input      = \Helper::getInput(TRUE);
 
+        // Only one item? make it a sub multidemensional array
+        if(!isset($input[0])) {
+            $parameters = array($input);
+        }
+
+        // Convert UNIX to timestamp, which is used when the request is from the OpenSim Server
+        foreach($parameters as $key => $row) {
+            if(isset($row['timestamp']) && is_numeric($row['timestamp'])) {
+                $input[$key]['message']   = urldecode($row['message']);
+                $input[$key]['timestamp'] = date('Y-m-d H:i:s', $row['timestamp']);
+            }
+        }
+
         // Validate parameters before inserting
-        if($chatCtrl->validateParametersCreate($input)) {
-            $data = $chatCtrl->addChats($input);
+        if($chatCtrl->validateParametersCreate($parameters)) {
+            $data = $chatCtrl->addChats($parameters);
         }
 
         // Format the result
