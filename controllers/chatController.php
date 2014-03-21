@@ -26,7 +26,7 @@ class ChatController {
      * Adds a new chat to the database with the given data
      *
      * @param array $parameters
-     *              * integer $userId
+     *              * integer $userId (-1 = anonymous)
      *              * string $message
      *              * string $timestamp - format YYYY-MM-DD HH:mm:ss
      * @return integer - The ID of the last inserted item
@@ -37,6 +37,11 @@ class ChatController {
 
         // Process individual parameters
         foreach($parameters as $parameter) {
+            // Anonymouse user
+            if($parameter['userId'] == -1) {
+                $parameter['userId'] = null;
+            }
+
             $parameter['gridId'] = $this->chat->getGrid()->getId();
             $result = $db->insert('chats', $parameter);
         }
@@ -58,7 +63,7 @@ class ChatController {
         foreach($parameters as $parameter) {
             if(count($parameter) < 3) {
                 throw new \Exception('Expected 3 parameters, '. count($parameter) .' given', 1);
-            } elseif(!isset($parameter['userId'])) {
+            } elseif(!isset($parameter['userId']) && is_numeric($parameter['userId'])) {
                 throw new \Exception('Missing parameter (integer) "userId"', 2);
             } elseif(!isset($parameter['message']) && strlen($parameter['message']) > 0) {
                 throw new \Exception('Missing parameter (string) "message" with a minumum length of 1 character', 3);

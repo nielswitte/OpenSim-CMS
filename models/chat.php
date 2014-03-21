@@ -80,7 +80,13 @@ class Chat implements SimpleModel {
         // Get results
         $chats = $db->get('chats c', $limit, 'c.*, u.*, c.id as id');
         foreach($chats as $chat) {
-            $user       = new \Models\User($chat['userId'], $chat['username'], $chat['email'], $chat['firstName'], $chat['lastName']);
+            // User is known?
+            if($chat['userId'] != NULL) {
+                $user   = new \Models\User($chat['userId'], $chat['username'], $chat['email'], $chat['firstName'], $chat['lastName']);
+            // Unknown user
+            } else {
+                $user   = $user = new \Models\User(-1, 'Anonymous', 'Anonymous', '', '');
+            }
             $message    = new \Models\ChatMessage($chat['id'], $this->getGrid(), $user, $chat['message'], $chat['timestamp']);
             $this->addChatMessage($message);
         }
