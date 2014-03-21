@@ -70,7 +70,13 @@ class Chat implements SimpleModel {
             $db->where('c.timestamp', array('>=' => $db->escape($this->startingTimestamp)));
             $limit = NULL;
         }
+
+        // Only from selected Grid
         $db->where('c.gridId', $db->escape($this->getGrid()->getId()));
+
+        // Newest first
+        $db->orderBy('c.timestamp', 'DESC');
+
         // Get results
         $chats = $db->get('chats c', $limit, 'c.*, u.*, c.id as id');
         foreach($chats as $chat) {

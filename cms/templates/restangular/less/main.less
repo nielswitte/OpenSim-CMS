@@ -1,5 +1,5 @@
 body {
-    min-height: 1000px;
+    min-height: 500px;
     padding-top: 70px;
 }
 
@@ -317,13 +317,23 @@ ol {
     h6:before { counter-increment: h6; content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) "." counter(h6) ". "; }
 }
 
-.aside {
+#chatAside {
+    max-height: 500px;
+    top: auto;
+    bottom: 0;
     max-width: 320px;
+    box-shadow: 0px 0px 10px #999999;
+
+    .aside-header {
+        &.highlight {
+            background-color: #5cb85c;
+        }
+    }
 
     .aside-body {
         .messages {
             overflow-y: scroll;
-            height: 75%;
+            height: 220px;
         }
     }
 }

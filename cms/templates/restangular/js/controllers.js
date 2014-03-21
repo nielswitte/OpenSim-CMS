@@ -7,8 +7,15 @@ function MainCntl($scope, $route, $routeParams, $location, Page) {
 };
 
 // chatController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$scope', '$aside', '$sce', function(Restangular, RestangularCache, $scope, $aside, $sce) {
+angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$scope', '$aside', '$sce', '$timeout', function(Restangular, RestangularCache, $scope, $aside, $sce, $timeout) {
         $scope.grids          = [];
+        var lastMsgTimestamp;
+        $scope.chats          = [];
+        $scope.minimizedChat  = false;
+        var autoScroll        = true;
+        var timer;
+        var chatAside;
+        var selectedGridId;
 
         // Get chat template
         $scope.getChat = function() {
@@ -28,7 +35,7 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
         // Wait for chat to become visible
         $scope.$on('startChat', function (event, args) {
             // Create aside sidebar
-            var chatAside = $aside({
+            chatAside = $aside({
                 scope: $scope,
                 template: partial_path +'/chat/aside.html',
                 show: false,
@@ -42,22 +49,100 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
             // Show chat aside when loading is done
             chatAside.$promise.then(function() {
                 chatAside.show();
+
+                // Disable autoscroll when user starts to scroll
+                var messagesDiv = jQuery('#chatAside .messages');
+                messagesDiv.scroll(function() {
+                    if(messagesDiv.scrollTop() >= (messagesDiv[0].scrollHeight - messagesDiv.height())) {
+                        autoScroll = true;
+                    } else {
+                        autoScroll = false;
+                    }
+                });
             });
         });
 
         // Send the chat message to the server
         $scope.sendChat = function(selectedGridId, message) {
+            // Clear chat message field
+            jQuery('#chatMessage').val('');
+            // Send message
             Restangular.one('grid', selectedGridId).post('chats', { userId: sessionStorage.id, message: message, timestamp: moment().format('YYYY-MM-DD HH:mm:ss') }).then(function(resp) {
-                alert('sent');
+                // On error show message
+                if(!resp.success) {
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                }
             });
         };
 
         // Load chat for the selected Grid
-        $scope.selectGrid = function(selectedGridId) {
-            // Get last chat entries
-            Restangular.one('grid', selectedGridId).all('chats').getList().then(function(chatResponse) {
-                $scope.chats = chatResponse;
+        $scope.selectGrid = function(gridId) {
+            // Clear existing timers
+            clearInterval(timer);
+            // Set the grid
+            selectedGridId   = gridId;
+            // Empty chat when switching grids
+            $scope.chats     = [];
+            // Reset last msg timestmap
+            lastMsgTimestamp = moment().subtract('minutes', 30).format('YYYY-MM-DD HH:mm:ss');
+            // Get last chat entries for past one hour
+            updateChat();
+            // Set autoscroll to true (overwrites it when switching grid)
+            autoScroll       = true;
+            // Start auto refreshing chat
+            timer            = setInterval(updateChat, 2000);
+        };
+
+        // Update the chat
+        var updateChat = function() {
+            // Append the chat with all chats send after the previous message
+            Restangular.one('grid', selectedGridId).one('chats', (moment(lastMsgTimestamp, 'YYYY-MM-DD HH:mm:ss').unix() + 1)).get().then(function(chatResponse) {
+                // Update last timestamp and append array if any new results
+                if(chatResponse.length >= 1) {
+                    lastMsgTimestamp = chatResponse[0].timestamp;
+
+                    // Add all new chats to scope
+                    angular.forEach(chatResponse, function(chat) {
+                        $scope.chats.push(chat);
+                    });
+                    // Scroll the chat
+                    $timeout(scrollChat, 100);
+
+                    // Highlight the header when minimized and new messages are loaded
+                    if($scope.minimizedChat) {
+                        jQuery('#chatAside .aside-header').addClass('highlight');
+                    }
+                }
             });
+        };
+
+        // Function to scroll the chat Down
+        var scrollChat = function() {
+            // See if user is currently at bottem of messages div
+            var messagesDiv = jQuery('#chatAside .messages');
+
+            // Need to auto scroll?
+            if(autoScroll) {
+                messagesDiv.scrollTop(messagesDiv[0].scrollHeight * 2);
+            }
+        };
+
+        // Close the chat Aside
+        $scope.closeChat = function() {
+            clearInterval(timer);
+            chatAside.hide();
+        };
+
+        // Toggle visiblity of chat
+        $scope.toggleChat = function() {
+            $scope.minimizedChat = !$scope.minimizedChat;
+
+            // scroll back to bottom on show
+            if(!$scope.minimizedChat) {
+                autoScroll = true;
+                scrollChat();
+                jQuery('#chatAside .aside-header').removeClass('highlight');
+            }
         };
     }]
 );

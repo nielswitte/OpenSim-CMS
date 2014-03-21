@@ -54,7 +54,7 @@ class Chat extends Module{
         $chat       = new \Models\Chat($grid);
         // Set offset if used
         if($args[1] > 0) {
-            $chat->setStartingTimestamp(date('Y-m-d H:i:s', $args[1]));
+            $chat->setStartingTimestamp(date('Y-m-d H:i:s', $args[2]));
         }
         $chat->getInfoFromDatabase();
 
