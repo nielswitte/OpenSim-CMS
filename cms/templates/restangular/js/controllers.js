@@ -149,8 +149,15 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
             // scroll back to bottom on show
             if(!$scope.minimizedChat) {
                 autoScroll = true;
-                scrollChat();
+                $timeout(scrollChat, 100);
                 jQuery('#chatAside .aside-header').removeClass('highlight');
+                // Back to 2 seconds
+                clearInterval(timer);
+                timer            = setInterval(updateChat, 2000);
+            } else {
+                // Change update to 5 seconds when in background
+                clearInterval(timer);
+                timer            = setInterval(updateChat, 5000);
             }
         };
     }]
