@@ -345,11 +345,12 @@ The chats can be in an array or a just sent as a single element.
 ```http
 POST /api/grid/<GRID-ID/chats/ HTTP/1.1
 ```
-| Parameter         | Type      | Description                                                    |
-|-------------------|-----------|----------------------------------------------------------------|
-| userId            | integer   | The CMS user ID                                                |
-| message           | string    | The message to be saved                                        |
-| timestamp         | string    | The timestamp of the message in the format YYYY-MM-DD HH:mm:ss |
+| Parameter         | Type      | Description                                                               |
+|-------------------|-----------|---------------------------------------------------------------------------|
+| userId            | integer   | The CMS user ID                                                           |
+| message           | string    | The message to be saved                                                   |
+| timestamp         | string    | The timestamp of the message in the format YYYY-MM-DD HH:mm:ss            |
+| fromCMS           | integer   | 1 (True) if the message is from the CMS, 0 (false) if from OpenSim Server |
 
 ## Meetings
 

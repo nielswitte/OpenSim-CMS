@@ -69,6 +69,8 @@ class ChatController {
                 throw new \Exception('Missing parameter (string) "message" with a minumum length of 1 character', 3);
             } elseif(!isset($parameter['timestamp']) || !preg_match("/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/", $parameter['timestamp'])) {
                 throw new \Exception('Missing parameter (string) "timestamp", which should be in the format YYYY-MM-DD HH:mm:ss', 4);
+            } elseif(isset($parameter['fromCMS']) && $parameter['fromCMS'] != 1 && $parameter['fromCMS'] != 0) {
+                throw new \Exception('Invalid parameter (integer) "fromCMS", which should be a 1 (for TRUE) or 0 (for FALSE)', 5);
             } else {
                 $result = TRUE;
             }

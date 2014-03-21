@@ -7,7 +7,7 @@ function MainCntl($scope, $route, $routeParams, $location, Page) {
 };
 
 // chatController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$scope', '$aside', '$sce', '$timeout', function(Restangular, RestangularCache, $scope, $aside, $sce, $timeout) {
+angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$scope', '$aside', '$sce', '$timeout', '$alert', function(Restangular, RestangularCache, $scope, $aside, $sce, $timeout, $alert) {
         $scope.grids          = [];
         var lastMsgTimestamp;
         $scope.chats          = [];
@@ -67,7 +67,7 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
             // Clear chat message field
             jQuery('#chatMessage').val('');
             // Send message
-            Restangular.one('grid', selectedGridId).post('chats', { userId: sessionStorage.id, message: message, timestamp: moment().format('YYYY-MM-DD HH:mm:ss') }).then(function(resp) {
+            Restangular.one('grid', selectedGridId).post('chats', { userId: sessionStorage.id, message: message, timestamp: moment().format('YYYY-MM-DD HH:mm:ss'), fromCMS: 1 }).then(function(resp) {
                 // On error show message
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});

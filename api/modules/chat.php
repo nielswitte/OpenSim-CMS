@@ -83,6 +83,7 @@ class Chat extends Module{
                 ),
                 'message'   => $message->getMessage(),
                 'timestamp' => $message->getTimestamp(),
+                'fromCMS'   => $message->isFromCMS()
             );
         }
         return $results;

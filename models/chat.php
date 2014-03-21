@@ -87,7 +87,7 @@ class Chat implements SimpleModel {
             } else {
                 $user   = $user = new \Models\User(-1, 'Anonymous', 'Anonymous', '', '');
             }
-            $message    = new \Models\ChatMessage($chat['id'], $this->getGrid(), $user, $chat['message'], $chat['timestamp']);
+            $message    = new \Models\ChatMessage($chat['id'], $this->getGrid(), $user, $chat['message'], $chat['timestamp'], $chat['fromCMS']);
             $this->addChatMessage($message);
         }
     }

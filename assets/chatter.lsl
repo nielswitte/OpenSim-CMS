@@ -67,7 +67,8 @@ request_send_chat() {
         string body_messages = "";
         // Parse messages
         for(i = 0; i < llGetListLength(messages); i=i+3) {
-            body_messages = body_messages + "{ \"timestamp\": \""+ llList2String(messages, i) +"\", \"userId\": \""+ llList2String(messages, i+1) +"\", \"message\": \""+ llEscapeURL(llList2String(messages, i+2)) +"\"}";
+            body_messages = body_messages + "{ "+
+                    "\"timestamp\": \""+ llList2String(messages, i) +"\", \"userId\": "+ llList2Integer(messages, i+1) +", \"message\": \""+ llEscapeURL(llList2String(messages, i+2)) +"\", \"fromCMS\": 0}";
 
             // Add comma when not last element
             if(i+3 < llGetListLength(messages)) {
@@ -87,7 +88,7 @@ request_send_chat() {
  */
 request_receive_chat() {
     http_request_receive_chat = llHTTPRequest(serverUrl +"/grid/"+ serverId +"/chats/"+ lastUpdate +"/?token="+ APIToken, [], "");
-    lastUpdate = llGetTimestamp();
+    if(debug) llInstantMessage(userUuid, "[Debug] Requesting new messages, newer than: "+ lastUpdate);
 }
 
 /**
@@ -210,6 +211,10 @@ state chatting {
         if(debug) llInstantMessage(userUuid, "[Debug] Chatting enabled!");
         // SET COLOR GREEN
         llSetColor(<0, 255, 0>, ALL_SIDES);
+
+        // Update timestamp
+        lastUpdate = llGetUnixTime()-1;
+
         // Listen to everything
         Listener = llListen(channelChat, "", NULL_KEY, "" );
 
@@ -229,6 +234,8 @@ state chatting {
      * Actions to be taken when a HTTP request gets a response
      */
     http_response(key request_id, integer status, list metadata, string body) {
+        if(debug) llInstantMessage(userUuid, "[Debug] Got response from server, "+ body);
+
         // Catch errors
         if(status != 200) {
             if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
@@ -239,6 +246,7 @@ state chatting {
         // Store messages
         if(request_id == http_request_send_chat) {
             if(debug) llInstantMessage(userUuid, "[Debug] Chat sent, server response: "+ body);
+        // Found avatar match
         } else if(request_id == http_request_avatar) {
             key json_body   = JsonCreateStore(body);
             integer userId  = (integer) JsonGetValue(json_body, "id");
@@ -251,16 +259,25 @@ state chatting {
             } else {
                 userUuidLinks += [-1];
             }
+        // Received new messages
         } else if(request_id == http_request_receive_chat) {
             key json_body       = JsonCreateStore(body);
             integer chatLength  = JsonGetArrayLength(json_body, "");
-            if(meetingsLength >= 1) {
-                // Say all messages
-                for (x = 0; x < chatLength; x++) {
-                    string name = JsonGetValue(json_body, "[x].user.username");
-                    string msg  = JsonGetValue(json_body, "[x].message");
+            if(debug) llInstantMessage(userUuid, "[Debug] Got response from server, "+ chatLength +" new messages.");
 
-                    llSay(0, "["+ name +"] "+ msg);
+            if(chatLength >= 1) {
+                // Update timestamp
+                lastUpdate = llGetUnixTime()-1;
+                integer i = chatLength;
+                // Say all messages in reverse order, oldest first
+                while(i--) {
+                    // Only show chats sent from CMS
+                    string fromCMS = JsonGetValue(json_body, "["+ i +"].{fromCMS}");
+                    if(fromCMS == "1") {
+                        string name = JsonGetValue(json_body, "["+ i +"].{user}.{firstName}") +" "+ JsonGetValue(json_body, "["+ i +"].{user}.{lastName}");
+                        string msg  = JsonGetValue(json_body, "["+ i +"].{message}");
+                        llSay(0, "["+ name +"] "+ msg);
+                    }
                 }
             }
         }
@@ -281,8 +298,8 @@ state chatting {
 
     // Loop through requests
     timer() {
-        request_send_chat();
         request_receive_chat();
+        request_send_chat();
         llSetTimerEvent(2.0);
     }
 }
