@@ -14,10 +14,10 @@
                 </div>
                 <hr>
                 <div class="messages">
-                    <p ng-repeat="(index, chat) in chats | orderBy: 'timestamp':false">
+                    <p ng-repeat="(index, chat) in chats | orderBy: 'timestamp':false" class="{{ownMessage(chat.fromCMS, chat.user.id)}}">
                         <span ng-show="chat.user.id == 0" class="label label-info">{{timeOnly(chat.timestamp)}}</span>
                         <span ng-hide="chat.user.id == 0" class="label label-default">{{timeOnly(chat.timestamp)}}</span>
-                        <strong>{{chat.user.username}}:</strong><br>
+                        <strong>{{chat.user.firstName}} {{chat.user.lastName}}</strong><br>
                         {{chat.message}}
                     </p>
                     <a name="bottomofchat" id="bottomofchat"></a>

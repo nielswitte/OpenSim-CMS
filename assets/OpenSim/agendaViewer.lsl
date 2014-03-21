@@ -1,6 +1,8 @@
 /**
  * This screen shows the current agenda of the active meeting
  *
+ * LINKED TO meetinglogger.lsl
+ *
  * Do not forget to enable the following settings in your OpenSim configuration
  * For loading dynamic textures and enable JSON support:
  * [XEngine]

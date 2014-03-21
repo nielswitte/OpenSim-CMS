@@ -27,6 +27,15 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
             return string.substr(11);
         };
 
+        // Check if message is own message or not
+        $scope.ownMessage = function(fromCMS, userId) {
+            if(fromCMS == 1 && userId == sessionStorage.id) {
+                return 'text-right';
+            } else {
+                return '';
+            }
+        };
+
         // Show the chat aside
         $scope.showChat = function() {
             $scope.$broadcast('startChat');
