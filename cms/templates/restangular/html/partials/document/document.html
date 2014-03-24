@@ -50,7 +50,9 @@
     <hr>
     <div class="row">
         <div class="col-sm-3" ng-repeat="slide in document.slides">
-            <a href="javascript:void(0);" ng-click="lightbox(slide.number, slide.image)" title="Click for larger version of slide {{slide.number}}"><img src="templates/restangular/img/img-placeholder.png" ng-src="{{slide.thumbnail}}?token={{token}}" class="img-thumbnail"></a>
+            <div class="thumbnail">
+                <a href="javascript:void(0);" ng-click="lightbox(slide.number, slide.image)" title="Click for larger version of slide {{slide.number}}"><img src="templates/restangular/img/img-placeholder.png" ng-src="{{slide.thumbnail}}?token={{token}}"></a>
+            </div>
         </div>
     </div>
 </div>
