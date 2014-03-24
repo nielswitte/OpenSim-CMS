@@ -13,6 +13,7 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
         $scope.chats          = [];
         $scope.minimizedChat  = false;
         var autoScroll        = true;
+        var showChatButton    = true;
         var timer;
         var chatAside;
         var selectedGridId;
@@ -41,15 +42,29 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
             $scope.$broadcast('startChat');
         };
 
+        // Show the chat button?
+        $scope.showChatbutton = function() {
+            return showChatButton && sessionStorage.chatPermission >= 4;
+        };
+
         // Wait for chat to become visible
         $scope.$on('startChat', function (event, args) {
-            // Create aside sidebar
-            chatAside = $aside({
-                scope: $scope,
-                template: partial_path +'/chat/aside.html',
-                show: false,
-                backdrop: false
-            });
+            // Only start new chat when not defined
+            if(chatAside === undefined) {
+                // Create aside sidebar
+                chatAside = $aside({
+                    scope: $scope,
+                    template: partial_path +'/chat/aside.html',
+                    show: false,
+                    backdrop: false
+                });
+            // Reinit previous chat
+            } else {
+                // Set autoscroll to true (overwrites it when switching grid)
+                autoScroll       = true;
+                // Start auto refreshing chat
+                timer            = setInterval(updateChat, 2000);
+            }
 
             RestangularCache.all('grids').getList().then(function(gridResponse) {
                 $scope.grids = gridResponse;
@@ -58,6 +73,7 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
             // Show chat aside when loading is done
             chatAside.$promise.then(function() {
                 chatAside.show();
+                showChatButton = false;
 
                 // Disable autoscroll when user starts to scroll
                 var messagesDiv = jQuery('#chatAside .messages');
@@ -140,6 +156,7 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
         $scope.closeChat = function() {
             clearInterval(timer);
             chatAside.hide();
+            showChatButton = true;
         };
 
         // Toggle visiblity of chat
@@ -209,6 +226,7 @@ angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$
 
                         // Store permissions
                         sessionStorage.authPermission          = userResponse.permissions.auth;
+                        sessionStorage.chatPermission          = userResponse.permissions.chat;
                         sessionStorage.documentPermission      = userResponse.permissions.document;
                         sessionStorage.gridPermission          = userResponse.permissions.grid;
                         sessionStorage.meetingPermission       = userResponse.permissions.meeting;
