@@ -23,6 +23,15 @@ class MeetingController {
     }
 
     /**
+     * Returns the meeting instance for this controller
+     *
+     * @return \Models\Meeting
+     */
+    public function getMeeting() {
+        return $this->meeting;
+    }
+
+    /**
      * Creates a new meeting
      *
      * @param array $parameters
@@ -56,6 +65,9 @@ class MeetingController {
 
         // Create a new meeting object for this meeting
         $this->meeting = new \Models\Meeting($meetingId);
+        // Attach a new meeting participants list
+        $participants  = new \Models\MeetingParticipants($this->getMeeting());
+        $this->getMeeting()->setParticipants($participants);
 
         // Participants are a array of ids or an array of users?
         if(isset($parameters['participants'][0]) && is_numeric($parameters['participants'][0])) {
@@ -67,7 +79,11 @@ class MeetingController {
             }
         }
 
+        // Sets the participants for this meeting
         $this->setParticipants($participants);
+
+        // Mail participants for this meeting
+        $this->mailParticipants();
 
         // Create the agenda
         $agenda = $this->parseAgendaString($parameters['agenda']);
@@ -105,7 +121,7 @@ class MeetingController {
             'roomId'    => $db->escape($room),
             'name'      => $db->escape($parameters['name'])
         );
-        $db->where('id', $db->escape($this->meeting->getId()));
+        $db->where('id', $db->escape($this->getMeeting()->getId()));
         $update = $db->update('meetings', $data);
 
         // Update the participants list
@@ -142,7 +158,7 @@ class MeetingController {
      */
     private function removeAgenda() {
         $db = \Helper::getDB();
-        $db->where('meetingId', $db->escape($this->meeting->getId()));
+        $db->where('meetingId', $db->escape($this->getMeeting()->getId()));
         return $db->delete('meeting_agenda_items');
     }
 
@@ -154,8 +170,9 @@ class MeetingController {
      */
     private function setAgenda($agenda) {
         $db = \Helper::getDB();
+        $result = FALSE;
         foreach($agenda as $item) {
-            $item['meetingId'] = $this->meeting->getId();
+            $item['meetingId'] = $this->getMeeting()->getId();
             $result = $db->insert('meeting_agenda_items', $item);
         }
         return $result;
@@ -167,8 +184,13 @@ class MeetingController {
      * @return boolean
      */
     private function removeParticipants() {
+        // Create new empty participants list
+        $participants = new \Models\MeetingParticipants($this->getMeeting());
+        $this->getMeeting()->setParticipants($participants);
+
+        // Add participants to DB
         $db = \Helper::getDB();
-        $db->where('meetingId', $db->escape($this->meeting->getId()));
+        $db->where('meetingId', $db->escape($this->getMeeting()->getId()));
         return $db->delete('meeting_participants');
     }
 
@@ -182,13 +204,26 @@ class MeetingController {
         $result = FALSE;
         $db     = \Helper::getDB();
         foreach($participants as $participant) {
+            // Add user instances to meeting
+            $user = new \Models\User($participant);
+            $this->getMeeting()->getParticipants()->addParticipant($user);
+
+            // DB data
             $data = array(
-                'meetingId'     => $db->escape($this->meeting->getId()),
-                'userId'        => $db->escape($participant)
+                'meetingId'     => $db->escape($this->getMeeting()->getId()),
+                'userId'        => $db->escape($user->getId())
             );
             $result = $db->insert('meeting_participants', $data);
         }
         return $result !== FALSE ? TRUE : FALSE;
+    }
+
+    /**
+     * Sends a mail to all participants of this meeting with the
+     * name, date, agenda, participants, documents of this meeting
+     */
+    public function mailParticipants() {
+
     }
 
     /**
@@ -294,18 +329,20 @@ class MeetingController {
                 $parentId   = end($parents);
             }
 
-            // Create agenda Item
-            $agendaItem = array(
-                'id'        => $id,
-                'parentId'  => $parentId,
-                'value'     => $item[1],
-                'sort'      => end($item[0])
-            );
+            // Can find an agenda item on this line?
+            if(count($item) >= 2) {
+                // Create agenda Item
+                $agendaItem = array(
+                    'id'        => $id,
+                    'parentId'  => $parentId,
+                    'value'     => $item[1],
+                    'sort'      => end($item[0])
+                );
 
-            $agenda[] = $agendaItem;
-
-            // Increase ID
-            $id++;
+                $agenda[] = $agendaItem;
+                // Increase ID
+                $id++;
+            }
         }
         return $agenda;
     }
@@ -327,7 +364,7 @@ class MeetingController {
 
         // Store all results separate
         foreach($parameters as $item) {
-            $item['meetingId'] = $this->meeting->getId();
+            $item['meetingId'] = $this->getMeeting()->getId();
             $result = $db->insert('meeting_minutes', $item);
         }
 
@@ -370,7 +407,7 @@ class MeetingController {
             throw new \Exception('Missing parameter (integer or array) "room", which should be roomId or a room array which contains an roomId ', 5);
         } elseif(!isset($parameters['participants'])) {
             throw new \Exception('Missing parameter (array) "participants", which should be array which contains userIds of the participants ', 6);
-        } elseif($this->meetingOverlap($parameters['startDate'], $parameters['endDate'], (isset($parameters['room']['id']) ? $parameters['room']['id'] : $parameters['room']), (isset($this->meeting) ? $this->meeting->getId() : 0))) {
+        } elseif($this->meetingOverlap($parameters['startDate'], $parameters['endDate'], (isset($parameters['room']['id']) ? $parameters['room']['id'] : $parameters['room']), ($this->getMeeting() !== NULL ? $this->getMeeting()->getId() : 0))) {
             throw new \Exception('Meeting overlaps with an existing meeting', 8);
         } else {
             $result = TRUE;

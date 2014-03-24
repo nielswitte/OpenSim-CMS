@@ -38,7 +38,7 @@
 
     // MySQL settings
     $db = new Mysqlidb($DB_ADDRESS, $DB_USERNAME, $DB_PASSWORD, $DB_NAME, $DB_PORT);// Connect to MySQL database
-    Helper::setDB($db);                                                         // Save database to static class to be accessed by the rest of the program
+    \Helper::setDB($db);                                                         // Save database to static class to be accessed by the rest of the program
 
     // Show php errors
     if(SERVER_DEBUG) {
