@@ -630,6 +630,15 @@ angularRest.controller('meetingsController', ['Restangular', 'RestangularCache',
             // Remove loading screen
             jQuery('#loading').hide();
         });
+
+        // Does the user have permission to create a new meeting?
+        $scope.allowCreate = function() {
+            if(sessionStorage.meetingPermission >= EXECUTE) {
+                return true;
+            } else {
+                return false;
+            }
+        };
     }]
 );
 

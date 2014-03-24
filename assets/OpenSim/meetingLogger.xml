@@ -5,7 +5,7 @@
             <map>
             <key>group_body</key>
                 <map>
-                <key>3220679529</key>
+                <key>1468502688</key>
                     <map>
                     <key>description</key>
                         <string>Logs meetings and show the agenda on the agenda viewer</string>
@@ -53,7 +53,7 @@
                             <key>glow</key>
                                 <real>0</real>
                             <key>imageid</key>
-                                <uuid>5748decc-f629-461c-9a36-a35a221fe21f</uuid>
+                                <uuid>90c7eaca-31ab-49f4-92cb-49c9a663e370</uuid>
                             <key>imagerot</key>
                                 <real>0</real>
                             <key>media_flags</key>
@@ -65,7 +65,7 @@
                             <key>scales</key>
                                 <real>1</real>
                             <key>scalet</key>
-                                <real>1</real>
+                                <real>0.010000000707805157</real>
                             </map>
                             <map>
                             <key>bump</key>
@@ -82,7 +82,7 @@
                             <key>glow</key>
                                 <real>0</real>
                             <key>imageid</key>
-                                <uuid>5748decc-f629-461c-9a36-a35a221fe21f</uuid>
+                                <uuid>90c7eaca-31ab-49f4-92cb-49c9a663e370</uuid>
                             <key>imagerot</key>
                                 <real>0</real>
                             <key>media_flags</key>
@@ -94,7 +94,7 @@
                             <key>scales</key>
                                 <real>1</real>
                             <key>scalet</key>
-                                <real>1</real>
+                                <real>0.75</real>
                             </map>
                             <map>
                             <key>bump</key>
@@ -111,7 +111,7 @@
                             <key>glow</key>
                                 <real>0</real>
                             <key>imageid</key>
-                                <uuid>5748decc-f629-461c-9a36-a35a221fe21f</uuid>
+                                <uuid>90c7eaca-31ab-49f4-92cb-49c9a663e370</uuid>
                             <key>imagerot</key>
                                 <real>0</real>
                             <key>media_flags</key>
@@ -121,9 +121,9 @@
                             <key>offsett</key>
                                 <real>0</real>
                             <key>scales</key>
-                                <real>1</real>
+                                <real>0.010000000707805157</real>
                             <key>scalet</key>
-                                <real>1</real>
+                                <real>0.75</real>
                             </map>
                             <map>
                             <key>bump</key>
@@ -140,7 +140,7 @@
                             <key>glow</key>
                                 <real>0</real>
                             <key>imageid</key>
-                                <uuid>5748decc-f629-461c-9a36-a35a221fe21f</uuid>
+                                <uuid>90c7eaca-31ab-49f4-92cb-49c9a663e370</uuid>
                             <key>imagerot</key>
                                 <real>0</real>
                             <key>media_flags</key>
@@ -152,7 +152,7 @@
                             <key>scales</key>
                                 <real>1</real>
                             <key>scalet</key>
-                                <real>1</real>
+                                <real>0.75</real>
                             </map>
                             <map>
                             <key>bump</key>
@@ -169,7 +169,7 @@
                             <key>glow</key>
                                 <real>0</real>
                             <key>imageid</key>
-                                <uuid>5748decc-f629-461c-9a36-a35a221fe21f</uuid>
+                                <uuid>90c7eaca-31ab-49f4-92cb-49c9a663e370</uuid>
                             <key>imagerot</key>
                                 <real>0</real>
                             <key>media_flags</key>
@@ -179,9 +179,9 @@
                             <key>offsett</key>
                                 <real>0</real>
                             <key>scales</key>
-                                <real>1</real>
+                                <real>0.010000000707805157</real>
                             <key>scalet</key>
-                                <real>1</real>
+                                <real>0.75</real>
                             </map>
                             <map>
                             <key>bump</key>
@@ -198,7 +198,7 @@
                             <key>glow</key>
                                 <real>0</real>
                             <key>imageid</key>
-                                <uuid>5748decc-f629-461c-9a36-a35a221fe21f</uuid>
+                                <uuid>90c7eaca-31ab-49f4-92cb-49c9a663e370</uuid>
                             <key>imagerot</key>
                                 <real>0</real>
                             <key>media_flags</key>
@@ -210,7 +210,7 @@
                             <key>scales</key>
                                 <real>1</real>
                             <key>scalet</key>
-                                <real>1</real>
+                                <real>0.010000000707805157</real>
                             </map>
                         </array>
                     <key>volume</key>
@@ -266,14 +266,14 @@
                             </map>
                         </map>
                     </map>
-                <key>3220679532</key>
+                <key>1468502689</key>
                     <map>
                     <key>description</key>
                         <string />
                     <key>name</key>
                         <string>meetingLogger</string>
                     <key>parent</key>
-                        <string>3220679529</string>
+                        <string>1468502688</string>
                     <key>phantom</key>
                         <integer>0</integer>
                     <key>physical</key>
@@ -306,37 +306,8 @@
                                 <integer>0</integer>
                             <key>colors</key>
                                 <array>
-                                    <real>1</real>
-                                    <real>0</real>
                                     <real>0</real>
                                     <real>1</real>
-                                </array>
-                            <key>fullbright</key>
-                                <integer>0</integer>
-                            <key>glow</key>
-                                <real>0</real>
-                            <key>imageid</key>
-                                <uuid>89556747-24cb-43ed-920b-47caed15465f</uuid>
-                            <key>imagerot</key>
-                                <real>0</real>
-                            <key>media_flags</key>
-                                <integer>0</integer>
-                            <key>offsets</key>
-                                <real>0</real>
-                            <key>offsett</key>
-                                <real>0</real>
-                            <key>scales</key>
-                                <real>1</real>
-                            <key>scalet</key>
-                                <real>1</real>
-                            </map>
-                            <map>
-                            <key>bump</key>
-                                <integer>0</integer>
-                            <key>colors</key>
-                                <array>
-                                    <real>1</real>
-                                    <real>0</real>
                                     <real>0</real>
                                     <real>1</real>
                                 </array>
@@ -364,37 +335,8 @@
                                 <integer>0</integer>
                             <key>colors</key>
                                 <array>
-                                    <real>1</real>
-                                    <real>0</real>
                                     <real>0</real>
                                     <real>1</real>
-                                </array>
-                            <key>fullbright</key>
-                                <integer>0</integer>
-                            <key>glow</key>
-                                <real>0</real>
-                            <key>imageid</key>
-                                <uuid>89556747-24cb-43ed-920b-47caed15465f</uuid>
-                            <key>imagerot</key>
-                                <real>0</real>
-                            <key>media_flags</key>
-                                <integer>0</integer>
-                            <key>offsets</key>
-                                <real>0</real>
-                            <key>offsett</key>
-                                <real>0</real>
-                            <key>scales</key>
-                                <real>1</real>
-                            <key>scalet</key>
-                                <real>1</real>
-                            </map>
-                            <map>
-                            <key>bump</key>
-                                <integer>0</integer>
-                            <key>colors</key>
-                                <array>
-                                    <real>1</real>
-                                    <real>0</real>
                                     <real>0</real>
                                     <real>1</real>
                                 </array>
@@ -422,8 +364,8 @@
                                 <integer>0</integer>
                             <key>colors</key>
                                 <array>
-                                    <real>1</real>
                                     <real>0</real>
+                                    <real>1</real>
                                     <real>0</real>
                                     <real>1</real>
                                 </array>
@@ -451,8 +393,66 @@
                                 <integer>0</integer>
                             <key>colors</key>
                                 <array>
+                                    <real>0</real>
                                     <real>1</real>
                                     <real>0</real>
+                                    <real>1</real>
+                                </array>
+                            <key>fullbright</key>
+                                <integer>0</integer>
+                            <key>glow</key>
+                                <real>0</real>
+                            <key>imageid</key>
+                                <uuid>89556747-24cb-43ed-920b-47caed15465f</uuid>
+                            <key>imagerot</key>
+                                <real>0</real>
+                            <key>media_flags</key>
+                                <integer>0</integer>
+                            <key>offsets</key>
+                                <real>0</real>
+                            <key>offsett</key>
+                                <real>0</real>
+                            <key>scales</key>
+                                <real>1</real>
+                            <key>scalet</key>
+                                <real>1</real>
+                            </map>
+                            <map>
+                            <key>bump</key>
+                                <integer>0</integer>
+                            <key>colors</key>
+                                <array>
+                                    <real>0</real>
+                                    <real>1</real>
+                                    <real>0</real>
+                                    <real>1</real>
+                                </array>
+                            <key>fullbright</key>
+                                <integer>0</integer>
+                            <key>glow</key>
+                                <real>0</real>
+                            <key>imageid</key>
+                                <uuid>89556747-24cb-43ed-920b-47caed15465f</uuid>
+                            <key>imagerot</key>
+                                <real>0</real>
+                            <key>media_flags</key>
+                                <integer>0</integer>
+                            <key>offsets</key>
+                                <real>0</real>
+                            <key>offsett</key>
+                                <real>0</real>
+                            <key>scales</key>
+                                <real>1</real>
+                            <key>scalet</key>
+                                <real>1</real>
+                            </map>
+                            <map>
+                            <key>bump</key>
+                                <integer>0</integer>
+                            <key>colors</key>
+                                <array>
+                                    <real>0</real>
+                                    <real>1</real>
                                     <real>0</real>
                                     <real>1</real>
                                 </array>
