@@ -62,7 +62,6 @@ class MeetingController {
             'name'      => $db->escape($parameters['name'])
         );
         $meetingId = $db->insert('meetings', $data);
-
         // Create a new meeting object for this meeting
         $this->meeting = new \Models\Meeting($meetingId);
         // Attach a new meeting participants list
@@ -84,7 +83,9 @@ class MeetingController {
 
         // Mail participants for this meeting
         $this->mailParticipants();
-
+        $db->where('id', $meetingId);
+        $db->delete('meetings');
+        die();
         // Create the agenda
         $agenda = $this->parseAgendaString($parameters['agenda']);
         $this->setAgenda($agenda);
@@ -223,7 +224,19 @@ class MeetingController {
      * name, date, agenda, participants, documents of this meeting
      */
     public function mailParticipants() {
+        // Get the actual up-to-date list of participants
+        $this->getMeeting()->getParticipantsFromDatabase();
+        $participants = $this->getMeeting()->getParticipants()->getParticipants();
+        require_once dirname(__FILE__) .'../includes/class.SimpleMail.php';
+        $mail = new \SimpleMail();
+        foreach($participants as $participant) {
+            $mail->setTo($participant->getEmail(), $participant->getFirstName() .' '. $participant->getLastName());
+            $mail->setFrom(CMS_ADMIN_EMAIL, CMS_ADMIN_NAME);
+            $mail->addGenericHeader('Content-Type', 'text/html; charset="utf-8"');
 
+            // @todo continue implementation
+
+        }
     }
 
     /**

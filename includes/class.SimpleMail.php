@@ -1,5 +1,5 @@
 <?php
-
+defined('EXEC') or die('Config not loaded');
 /**
 * Simple Mail class.
 *
@@ -427,7 +427,7 @@ class SimpleMail
   public function assembleAttachmentHeaders()
   {
     $u = md5(uniqid(time()));
-    
+
     $h = '';
     $h .= "\r\nMIME-Version: 1.0\r\n";
     $h .= "Content-Type: multipart/mixed; boundary=\"".$u."\"\r\n\r\n";
@@ -437,7 +437,7 @@ class SimpleMail
     $h .= "Content-Transfer-Encoding: 7bit\r\n\r\n";
     $h .= $this->_message."\r\n\r\n";
     $h .= "--".$u."\r\n";
-    
+
     foreach ($this->_attachmentsFilename as $k => $v) {
       $h .= "Content-Type: application/octet-stream; name=\"".$v."\"\r\n";
       $h .= "Content-Transfer-Encoding: base64\r\n";
