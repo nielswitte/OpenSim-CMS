@@ -44,7 +44,7 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
 
         // Show the chat button?
         $scope.showChatbutton = function() {
-            return showChatButton && sessionStorage.chatPermission >= 4;
+            return showChatButton && sessionStorage.chatPermission >= READ;
         };
 
         // Wait for chat to become visible
@@ -1159,7 +1159,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
         $scope.allowUpdate = function(userId) {
             if(sessionStorage.userPermission >= WRITE) {
                 return true;
-            } else if(sessionStorage.userPermission >= 4 && userId == sessionStorage.id) {
+            } else if(sessionStorage.userPermission >= READ && userId == sessionStorage.id) {
                 return true;
             } else {
                 return false;
@@ -1270,7 +1270,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
         $scope.allowUpdate = function() {
             if(sessionStorage.userPermission >= WRITE) {
                 return true;
-            } else if(sessionStorage.userPermission >= 4 && $routeParams.userId == sessionStorage.id) {
+            } else if(sessionStorage.userPermission >= READ && $routeParams.userId == sessionStorage.id) {
                 return true;
             } else {
                 return false;
