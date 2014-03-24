@@ -3,8 +3,8 @@
         <div class="aside-content">
             <div class="aside-header">
                 <button type="button" class="close" ng-click="closeChat()">×</button>
-                <button type="button" class="close" ng-click="toggleChat()" ng-hide="minimizedChat">_</button>
-                <button type="button" class="close" ng-click="toggleChat()" ng-show="minimizedChat">[]</button>
+                <button type="button" class="minimize" ng-click="toggleChat()" ng-hide="minimizedChat"><i class="glyphicon glyphicon-chevron-down"></i></button>
+                <button type="button" class="minimize" ng-click="toggleChat()" ng-show="minimizedChat"><i class="glyphicon glyphicon-chevron-up"></i></button>
                 <h4 ng-click="toggleChat()" class="aside-title">Chat</h4>
             </div>
             <div class="aside-body" ng-hide="minimizedChat">

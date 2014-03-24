@@ -58,12 +58,6 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
                     show: false,
                     backdrop: false
                 });
-            // Reinit previous chat
-            } else {
-                // Set autoscroll to true (overwrites it when switching grid)
-                autoScroll       = true;
-                // Start auto refreshing chat
-                timer            = setInterval(updateChat, 2000);
             }
 
             RestangularCache.all('grids').getList().then(function(gridResponse) {
