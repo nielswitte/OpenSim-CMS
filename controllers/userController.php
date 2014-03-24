@@ -160,7 +160,7 @@ class UserController {
     /**
      * Updates the password and hash it for this user
      *
-     * @param string $hash - The unhashed password
+     * @param string $password - The unhashed password
      * @return boolean
      */
     public function setPassword($password) {

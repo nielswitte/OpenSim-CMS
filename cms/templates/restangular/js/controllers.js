@@ -65,6 +65,7 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
                 }
             }
 
+            // Get a list of grids
             RestangularCache.all('grids').getList().then(function(gridResponse) {
                 $scope.grids = gridResponse;
             });
