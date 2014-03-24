@@ -1146,6 +1146,17 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
             });
         };
 
+        // Allow changing general user information
+        $scope.allowUpdate = function(userId) {
+            if(sessionStorage.userPermission >= WRITE) {
+                return true;
+            } else if(sessionStorage.userPermission >= 4 && userId == sessionStorage.id) {
+                return true;
+            } else {
+                return false;
+            }
+        };
+
         // Show delete button only when allowed to delete
         $scope.allowDelete = function(userId) {
             if(userId != sessionStorage.id && userId != 0 && sessionStorage.userPermission >= WRITE) {
