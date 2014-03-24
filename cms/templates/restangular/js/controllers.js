@@ -58,6 +58,11 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
                     show: false,
                     backdrop: false
                 });
+            // Check if grid is known and re-init chat
+            } else {
+                if(selectedGridId !== undefined) {
+                    timer = setInterval(updateChat, 2000);
+                }
             }
 
             RestangularCache.all('grids').getList().then(function(gridResponse) {
