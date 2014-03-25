@@ -2,6 +2,5 @@
     RewriteEngine On
     RewriteCond %{REQUEST_FILENAME} !-f
     Options -MultiViews
-    RewriteRule ^(.*)/?token=([a-zA-Z0-9]+)$ index.php?_url=/$1&token$2 [QSA,L]
     RewriteRule ^(.*)$ index.php?_url=/$1 [QSA,L]
 </IfModule>
