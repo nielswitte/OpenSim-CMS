@@ -32,7 +32,7 @@ class MeetingController {
     }
 
     /**
-     * Creates a new meeting
+     * Creates a new meeting and sends an email to all participants including an ICS invite
      *
      * @param array $parameters
      *              * string startDate - YYYY-MM-DD HH:mm:ss
@@ -81,14 +81,12 @@ class MeetingController {
         // Sets the participants for this meeting
         $this->setParticipants($participants);
 
-        // Mail participants for this meeting
-        $this->mailParticipants();
-        $db->where('id', $meetingId);
-        $db->delete('meetings');
-        die();
         // Create the agenda
         $agenda = $this->parseAgendaString($parameters['agenda']);
         $this->setAgenda($agenda);
+        
+        // Mail participants for this meeting
+        $this->mailParticipants();
 
         return $meetingId;
     }
@@ -224,53 +222,66 @@ class MeetingController {
      * name, date, agenda, participants, documents of this meeting
      */
     public function mailParticipants() {
+        $meeting = $this->getMeeting();
         // Get actual meeting data from database (so only final data is used)
-        $this->getMeeting()->getInfoFromDatabase();
-        $startDate = strtotime($this->getMeeting()->getStartDate());
-        $endDate   = strtotime($this->getMeeting()->getEndDate());
+        $meeting->getInfoFromDatabase();
+        $startDate = strtotime($meeting->getStartDate());
+        $endDate   = strtotime($meeting->getEndDate());
+
+        // Get Grid/Region/Room details
+        $meeting->getRoom()->getInfoFromDatabase();
 
         // Get the actual up-to-date list of participants
-        $this->getMeeting()->getParticipantsFromDatabase();
-        $participants = $this->getMeeting()->getParticipants()->getParticipants();
+        $meeting->getParticipantsFromDatabase();
+        $participants = $meeting->getParticipants()->getParticipants();
 
         // Get the actual up-to-date agenda
-        $this->getMeeting()->getAgendaFromDabatase();
+        $meeting->getAgendaFromDabatase();
 
         // Get the actual up-to-date documents list
-        $this->getMeeting()->getDocumentsFromDabatase();
+        $meeting->getDocumentsFromDabatase();
 
         // Include the mail helper class
-        require_once dirname(__FILE__) .'/../includes/class.SimpleMail.php';
-        $mail = new \SimpleMail();
+        require_once dirname(__FILE__) .'/../includes/PHPMailer/PHPMailerAutoload.php';
 
         // Prepare email-template
         $html = file_get_contents(dirname(__FILE__) .'/../templates/email/default.html');
+
         $data = array(
-            '{{title}}'     => $this->getMeeting()->getName(),
+            '{{title}}'     => $meeting->getName(),
             '{{body}}'      => \Helper::linkIt(
-                'An meeting has been scheduled for '. date('l F j', $startDate) .' at '. date('H:i', $startDate) .' until '. date('H:i', $endDate) .'.
-                <h2>Agenda</h2>'.
-                str_replace(' ', '&nbsp;', nl2br($this->getMeeting()->getAgenda()->toString(), FALSE)) .'
-                <h2>Participants</h2>'.
-                nl2br($this->getMeeting()->getParticipants()->toString(), FALSE)
+                '<p>An meeting has been scheduled for '. date('l F j', $startDate) .' at '. date('H:i', $startDate) .' until '. date('H:i', $endDate) .'.</p>'
+                .'<h2>Agenda</h2>'
+                . str_replace(' ', '&nbsp;', nl2br($meeting->getAgenda()->toString(), FALSE))
+                .'<h2>Participants</h2>'
+                .'<p>'. nl2br($meeting->getParticipants()->toString(), FALSE) .'</p>'
+                .'<div style="text-align: center;"><a href="opensim://'.
+                    $meeting->getRoom()->getRegion()->getGrid()->getOsIp() .':'.
+                    $meeting->getRoom()->getRegion()->getGrid()->getOsPort() .'/'.
+                    urlencode($meeting->getRoom()->getRegion()->getName()) .'/'.
+                    $meeting->getRoom()->getX() .'/'.
+                    $meeting->getRoom()->getY() .'/'.
+                    $meeting->getRoom()->getZ() .'" class="btn btn-lg">Go to Meeting</a></div>'
             )
         );
         $html = str_replace(array_keys($data), array_values($data), $html);
 
-        echo $html;
-        die();
-
         // Mail all participants
         foreach($participants as $participant) {
-            $mail->setTo($participant->getEmail(), $participant->getFirstName() .' '. $participant->getLastName());
+            $mail = new \PHPMailer();
+            $mail->addAddress($participant->getEmail(), $participant->getFirstName() .' '. $participant->getLastName());
+            $mail->Subject = '[OpenSim-CMS] Meeting: '. $meeting->getName();
             $mail->setFrom(CMS_ADMIN_EMAIL, CMS_ADMIN_NAME);
-            $mail->addGenericHeader('Content-Type', 'text/html; charset="utf-8"');
+            // Create ICS
+            $pathToICS = \Helper::getICS($meeting->getStartDate(), $meeting->getEndDate(), $meeting->getName(), $meeting->getAgenda()->toString(), $meeting->getRoom()->getRegion()->getName(), $participant->getFirstName() .' '. $participant->getLastName(), $participant->getEmail());
+            // Attach ICS
+            $mail->addAttachment($pathToICS, 'invite.ics', 'base64', 'application/ics');
             // Add template
-            $mail->setMessage($html);
-            // Attach iCal
-            $mail->addAttachment($path);
-
+            $mail->msgHTML($html, '', TRUE);
+            // Send the email
             $result = $mail->send();
+            // Remove the ICS file when done
+            unlink($pathToICS);
         }
         return $result;
     }
