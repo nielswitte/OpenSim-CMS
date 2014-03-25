@@ -4,8 +4,8 @@ namespace API\Modules;
 defined('EXEC') or die('Config not loaded');
 
 require_once dirname(__FILE__) .'/module.php';
-require_once dirname(__FILE__) .'/../../models/chat.php';
-require_once dirname(__FILE__) .'/../../controllers/chatController.php';
+require_once dirname(__FILE__) .'/../models/chat.php';
+require_once dirname(__FILE__) .'/../controllers/chatController.php';
 
 /**
  * Implements the functions called on the Grid
@@ -36,7 +36,7 @@ class Chat extends Module{
     public function setRoutes() {
         $this->api->addRoute("/grid\/(\d+)\/chats\/?$/",             "getChats",      $this, "GET",  \Auth::READ);  // Get last 50 entries of chatlog
         $this->api->addRoute("/grid\/(\d+)\/chats\/(\d+)\/?$/",      "getChats",      $this, "GET",  \Auth::READ);  // Get first 50 entries of chatlog past the given unix timestamp
-        $this->api->addRoute("/grid\/(\d+)\/chats\/?$/",             "addChats",      $this, "POST", \Auth::WRITE); // Add the given chat or array of chats to the database
+        $this->api->addRoute("/grid\/(\d+)\/chats\/?$/",             "addChats",      $this, "POST", \Auth::EXECUTE); // Add the given chat or array of chats to the database
     }
 
     /**

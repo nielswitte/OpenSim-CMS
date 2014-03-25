@@ -213,7 +213,7 @@ state chatting {
         llSetColor(<0, 255, 0>, ALL_SIDES);
 
         // Update timestamp
-        lastUpdate = llGetUnixTime()-1;
+        lastUpdate = llGetUnixTime();
 
         // Listen to everything
         Listener = llListen(channelChat, "", NULL_KEY, "" );
@@ -267,7 +267,7 @@ state chatting {
 
             if(chatLength >= 1) {
                 // Update timestamp
-                lastUpdate = llGetUnixTime()-1;
+                lastUpdate = llGetUnixTime();
                 integer i = chatLength;
                 // Say all messages in reverse order, oldest first
                 while(i--) {

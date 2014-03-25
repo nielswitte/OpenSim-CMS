@@ -14,7 +14,9 @@
         <div class="col-sm-2">
             <span ng-show="minute.name == 'Server'" class="label label-info">{{timeOnly(minute.timestamp)}}</span>
             <span ng-hide="minute.name == 'Server'" class="label label-default">{{timeOnly(minute.timestamp)}}</span>
-            <strong>{{minute.name}}</strong></div>
+            <strong ng-show="minute.user"><a ng-href="#!/user/{{minute.user.id}}" title="View profile of user {{minute.user.username}}">{{minute.name}}</a></strong>
+            <strong ng-hide="minute.user">{{minute.name}}</strong>
+        </div>
         <div class="col-sm-10">{{minute.message}}</div>
     </div>
 </section>

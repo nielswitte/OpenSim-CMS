@@ -13,6 +13,7 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
         $scope.chats          = [];
         $scope.minimizedChat  = false;
         var autoScroll        = true;
+        var showChatButton    = true;
         var timer;
         var chatAside;
         var selectedGridId;
@@ -41,16 +42,30 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
             $scope.$broadcast('startChat');
         };
 
+        // Show the chat button?
+        $scope.showChatbutton = function() {
+            return showChatButton && sessionStorage.chatPermission >= READ;
+        };
+
         // Wait for chat to become visible
         $scope.$on('startChat', function (event, args) {
-            // Create aside sidebar
-            chatAside = $aside({
-                scope: $scope,
-                template: partial_path +'/chat/aside.html',
-                show: false,
-                backdrop: false
-            });
+            // Only start new chat when not defined
+            if(chatAside === undefined) {
+                // Create aside sidebar
+                chatAside = $aside({
+                    scope: $scope,
+                    template: partial_path +'/chat/aside.html',
+                    show: false,
+                    backdrop: false
+                });
+            // Check if grid is known and re-init chat
+            } else {
+                if(selectedGridId !== undefined) {
+                    timer = setInterval(updateChat, 2000);
+                }
+            }
 
+            // Get a list of grids
             RestangularCache.all('grids').getList().then(function(gridResponse) {
                 $scope.grids = gridResponse;
             });
@@ -58,6 +73,7 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
             // Show chat aside when loading is done
             chatAside.$promise.then(function() {
                 chatAside.show();
+                showChatButton = false;
 
                 // Disable autoscroll when user starts to scroll
                 var messagesDiv = jQuery('#chatAside .messages');
@@ -90,8 +106,17 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
             clearInterval(timer);
             // Set the grid
             selectedGridId   = gridId;
-            // Empty chat when switching grids
-            $scope.chats     = [];
+            // Empty chat when switching grids and show message chat enabled
+            $scope.chats     = [{
+                    timestamp: moment().format('YYYY-MM-DD HH:mm:ss'),
+                    fromCMS: 0,
+                    user: {
+                        id: 0,
+                        firstName: 'Server',
+                        lastName: ''
+                    },
+                    message: 'Chat enabled'
+            }];
             // Reset last msg timestmap
             lastMsgTimestamp = moment().subtract('minutes', 30).unix();
             // Get last chat entries for past one hour
@@ -140,6 +165,7 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
         $scope.closeChat = function() {
             clearInterval(timer);
             chatAside.hide();
+            showChatButton = true;
         };
 
         // Toggle visiblity of chat
@@ -149,8 +175,15 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
             // scroll back to bottom on show
             if(!$scope.minimizedChat) {
                 autoScroll = true;
-                scrollChat();
+                $timeout(scrollChat, 100);
                 jQuery('#chatAside .aside-header').removeClass('highlight');
+                // Back to 2 seconds
+                clearInterval(timer);
+                timer            = setInterval(updateChat, 2000);
+            } else {
+                // Change update to 5 seconds when in background
+                clearInterval(timer);
+                timer            = setInterval(updateChat, 5000);
             }
         };
     }]
@@ -202,6 +235,7 @@ angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$
 
                         // Store permissions
                         sessionStorage.authPermission          = userResponse.permissions.auth;
+                        sessionStorage.chatPermission          = userResponse.permissions.chat;
                         sessionStorage.documentPermission      = userResponse.permissions.document;
                         sessionStorage.gridPermission          = userResponse.permissions.grid;
                         sessionStorage.meetingPermission       = userResponse.permissions.meeting;
@@ -265,6 +299,11 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
             } else {
                 return partial_path +'/navbar/userToolbarLoggedOut.html';
             }
+        };
+
+        // Toggle collapse of the navigation bar
+        $scope.toggleNavigation = function() {
+            jQuery('#bs-navbar').toggleClass('collapse');
         };
 
         // Get the right main navigation (left area of navbar)
@@ -606,6 +645,15 @@ angularRest.controller('meetingsController', ['Restangular', 'RestangularCache',
             // Remove loading screen
             jQuery('#loading').hide();
         });
+
+        // Does the user have permission to create a new meeting?
+        $scope.allowCreate = function() {
+            if(sessionStorage.meetingPermission >= EXECUTE) {
+                return true;
+            } else {
+                return false;
+            }
+        };
     }]
 );
 
@@ -1122,6 +1170,17 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
             });
         };
 
+        // Allow changing general user information
+        $scope.allowUpdate = function(userId) {
+            if(sessionStorage.userPermission >= WRITE) {
+                return true;
+            } else if(sessionStorage.userPermission >= READ && userId == sessionStorage.id) {
+                return true;
+            } else {
+                return false;
+            }
+        };
+
         // Show delete button only when allowed to delete
         $scope.allowDelete = function(userId) {
             if(userId != sessionStorage.id && userId != 0 && sessionStorage.userPermission >= WRITE) {
@@ -1226,7 +1285,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
         $scope.allowUpdate = function() {
             if(sessionStorage.userPermission >= WRITE) {
                 return true;
-            } else if(sessionStorage.userPermission >= 4 && $routeParams.userId == sessionStorage.id) {
+            } else if(sessionStorage.userPermission >= READ && $routeParams.userId == sessionStorage.id) {
                 return true;
             } else {
                 return false;

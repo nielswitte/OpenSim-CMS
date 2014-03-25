@@ -4,9 +4,9 @@ namespace API\Modules;
 defined('EXEC') or die('Config not loaded');
 
 require_once dirname(__FILE__) .'/module.php';
-require_once dirname(__FILE__) .'/../../models/grid.php';
-require_once dirname(__FILE__) .'/../../models/region.php';
-require_once dirname(__FILE__) .'/../../controllers/regionController.php';
+require_once dirname(__FILE__) .'/../models/grid.php';
+require_once dirname(__FILE__) .'/../models/region.php';
+require_once dirname(__FILE__) .'/../controllers/regionController.php';
 
 
 /**
@@ -95,7 +95,7 @@ class Grid extends Module{
         $data['openSim'] = array(
             'protocol'              => $grid->getOsProtocol(),
             'ip'                    => $grid->getOsIp(),
-            'port'                  => $grid->getOSPort()
+            'port'                  => $grid->getOsPort()
         );
         // Remote Admin info
         $data['remoteAdmin'] = array(
@@ -169,7 +169,7 @@ class Grid extends Module{
             $grid->getInfoFromDatabase();
             if($grid->getRegionByUuid($args[2]) !== FALSE) {
                 header('Content-Type: image/jpeg');
-                echo file_get_contents($grid->getOsProtocol() .'://'. $grid->getOsIp() .':'. $grid->getOSPort() .'/index.php?method=regionImage'. str_replace('-', '', $args[2]));
+                echo file_get_contents($grid->getOsProtocol() .'://'. $grid->getOsIp() .':'. $grid->getOsPort() .'/index.php?method=regionImage'. str_replace('-', '', $args[2]));
             } else {
                 throw new \Exception("UUID isn't a region on this server", 2);
             }

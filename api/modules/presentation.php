@@ -4,10 +4,10 @@ namespace API\Modules;
 defined('EXEC') or die('Config not loaded');
 
 require_once dirname(__FILE__) .'/module.php';
-require_once dirname(__FILE__) .'/../../models/slide.php';
-require_once dirname(__FILE__) .'/../../controllers/slideController.php';
-require_once dirname(__FILE__) .'/../../models/presentation.php';
-require_once dirname(__FILE__) .'/../../controllers/presentationController.php';
+require_once dirname(__FILE__) .'/../models/slide.php';
+require_once dirname(__FILE__) .'/../controllers/slideController.php';
+require_once dirname(__FILE__) .'/../models/presentation.php';
+require_once dirname(__FILE__) .'/../controllers/presentationController.php';
 
 /**
  * Implements the functions for presentations
@@ -204,7 +204,7 @@ class Presentation extends Module{
         if(!\Helper::imageResize($slidePath, $slidePath, IMAGE_HEIGHT, IMAGE_WIDTH)) {
             throw new \Exception("Requested slide does not exists", 5);
         } else {
-            require_once dirname(__FILE__) .'/../../includes/class.Images.php';
+            require_once dirname(__FILE__) .'/../includes/class.Images.php';
             $image = new \Image($slidePath);
             $image->display();
         }
@@ -225,7 +225,7 @@ class Presentation extends Module{
         if(!\Helper::imageResize($slidePath, $thumbPath, IMAGE_THUMBNAIL_HEIGHT, IMAGE_THUMBNAIL_WIDTH)) {
             throw new \Exception("Requested slide does not exists", 5);
         } else {
-            require_once dirname(__FILE__) .'/../../includes/class.Images.php';
+            require_once dirname(__FILE__) .'/../includes/class.Images.php';
             $image = new \Image($thumbPath);
             $image->display();
         }

@@ -39,6 +39,24 @@ CREATE TABLE IF NOT EXISTS `cached_assets` (
 -- Data exporteren was gedeselecteerd
 
 
+-- Structuur van  tabel OpenSim-CMS.chats wordt geschreven
+CREATE TABLE IF NOT EXISTS `chats` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `gridId` int(11) DEFAULT NULL,
+  `userId` int(11) DEFAULT NULL,
+  `message` text,
+  `timestamp` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `fromCMS` tinyint(1) DEFAULT '1',
+  PRIMARY KEY (`id`),
+  KEY `FK__users` (`userId`),
+  KEY `FK_chats_grids` (`gridId`),
+  CONSTRAINT `FK_chats_grids` FOREIGN KEY (`gridId`) REFERENCES `grids` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK__users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Data exporteren was gedeselecteerd
+
+
 -- Structuur van  tabel OpenSim-CMS.documents wordt geschreven
 CREATE TABLE IF NOT EXISTS `documents` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -139,14 +157,13 @@ CREATE TABLE IF NOT EXISTS `meetings` (
 -- Structuur van  tabel OpenSim-CMS.meeting_agenda_items wordt geschreven
 CREATE TABLE IF NOT EXISTS `meeting_agenda_items` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `meetingId` int(11) DEFAULT NULL,
+  `meetingId` int(11) NOT NULL,
   `parentId` int(11) DEFAULT NULL,
-  `order` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`),
+  `sort` int(11) DEFAULT NULL,
+  `value` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  PRIMARY KEY (`id`,`meetingId`),
   KEY `FK_meeting_agenda_items_meetings` (`meetingId`),
-  KEY `FK_meeting_agenda_items_meeting_agenda_items` (`parentId`),
-  CONSTRAINT `FK_meeting_agenda_items_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`),
-  CONSTRAINT `FK_meeting_agenda_items_meeting_agenda_items` FOREIGN KEY (`parentId`) REFERENCES `meeting_agenda_items` (`id`)
+  CONSTRAINT `FK_meeting_agenda_items_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
@@ -157,13 +174,28 @@ CREATE TABLE IF NOT EXISTS `meeting_documents` (
   `meetingId` int(11) NOT NULL,
   `documentId` int(11) NOT NULL,
   `agendaId` int(11) NOT NULL,
-  PRIMARY KEY (`meetingId`,`documentId`,`agendaId`),
+  PRIMARY KEY (`meetingId`,`documentId`),
   KEY `FK__documents` (`documentId`),
-  KEY `FK__meeting_agenda_items` (`agendaId`),
   CONSTRAINT `FK__documents` FOREIGN KEY (`documentId`) REFERENCES `documents` (`id`),
-  CONSTRAINT `FK__meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`),
-  CONSTRAINT `FK__meeting_agenda_items` FOREIGN KEY (`agendaId`) REFERENCES `meeting_agenda_items` (`id`)
+  CONSTRAINT `FK__meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.meeting_minutes wordt geschreven
+CREATE TABLE IF NOT EXISTS `meeting_minutes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `meetingId` int(11) DEFAULT '0',
+  `agendaId` int(11) DEFAULT '0',
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `uuid` varchar(50) DEFAULT '0',
+  `name` varchar(255) DEFAULT NULL,
+  `message` text,
+  PRIMARY KEY (`id`),
+  KEY `FK_meeting_minutes_meetings` (`meetingId`),
+  CONSTRAINT `FK_meeting_minutes_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- Data exporteren was gedeselecteerd
 
@@ -234,6 +266,7 @@ CREATE TABLE IF NOT EXISTS `users` (
 CREATE TABLE IF NOT EXISTS `user_permissions` (
   `userId` int(11) NOT NULL AUTO_INCREMENT,
   `auth` tinyint(1) unsigned NOT NULL,
+  `chat` tinyint(1) unsigned NOT NULL,
   `document` tinyint(1) unsigned NOT NULL,
   `grid` tinyint(1) unsigned NOT NULL,
   `meeting` tinyint(1) unsigned NOT NULL,

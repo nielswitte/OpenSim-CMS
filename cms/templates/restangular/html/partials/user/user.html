@@ -1,7 +1,7 @@
 <div class="page-header">
     <h1>User <small>{{user.username}}</small></h1>
 </div>
-<div class="toolbar toolbar-top" ng-show="allowCreate()">
+<div class="toolbar toolbar-top" ng-show="allowUpdate()">
     <a ng-href="#!/user/{{user.id}}/edit" type="button" class="btn btn-default"><i class="glyphicon glyphicon-edit"></i> Edit user</a>
     <a ng-click="changePasswordForm()" type="button" class="btn btn-default"><i class="glyphicon glyphicon-lock"></i> Change password</a>
 </div>
