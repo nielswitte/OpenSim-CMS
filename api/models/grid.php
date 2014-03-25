@@ -179,7 +179,7 @@ class Grid implements SimpleModel {
      *
      * @return integer
      */
-    public function getOSPort() {
+    public function getOsPort() {
         return $this->osPort;
     }
 
