@@ -90,14 +90,14 @@ class MeetingAgenda {
     /**
      * Recusively parse the array to a string
      *
-     * @param array $agenda - [optional]
-     * @param integer $depth - [optional]
-     * @param mixed $parentId - [optional] integer if only one parent, array if more
+     * @param array $agenda - [Optional]
+     * @param integer $depth - [Optional]
+     * @param mixed $parentId - [Optional] integer if only one parent, array if more
      * @return string
      */
-    public function toString($agenda = null, $depth = 0, $parentId = 0) {
+    public function toString($agenda = NULL, $depth = 0, $parentId = 0) {
         // Agenda is not set? Use this agenda
-        if($agenda == null) {
+        if($agenda === NULL) {
             $agenda = $this->buildAgenda();
         }
 
