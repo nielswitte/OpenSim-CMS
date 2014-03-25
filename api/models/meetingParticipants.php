@@ -47,6 +47,19 @@ class MeetingParticipants {
     }
 
     /**
+     * Returns an array with the email addresses of the participants
+     *
+     * @return array
+     */
+    public function getEmails() {
+        $emails = array();
+        foreach($this->getParticipants() as $participant) {
+            $emails[] = $participant->getEmail();
+        }
+        return $emails;
+    }
+
+    /**
      * Returns the meeting instance for this list
      *
      * @return \Models\Meeting
