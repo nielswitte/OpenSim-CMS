@@ -85,6 +85,7 @@ Used in the Models/Controllers and API:
  * Ajillion and Avbdr for PHP-MySQLi-Database-Class (https://github.com/avbdr/PHP-MySQLi-Database-Class/)
  * Sprain for class.Images.php (https://github.com/sprain/class.Images.php)
  * Eoghanobrien for php-simple-mail (https://github.com/eoghanobrien/php-simple-mail)
+ * iCalcreator (https://github.com/iCalcreator/iCalcreator)
 
 Used in the CMS:
  * Mgonto for Restangular (https://github.com/mgonto/restangular)
