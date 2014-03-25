@@ -341,4 +341,48 @@ class Helper {
         return($text);
     }
 
+    /**
+     * Constructs an iCal file with the given parameters
+     *
+     * @source: https://gist.github.com/jakebellacera/635416
+     * @param string $startDate - YYYY-MM-DD HH:mm:ss
+     * @param string $endDate - YYYY-MM-DD HH:mm:ss
+     * @param string $subject - Subject
+     * @param string $description - Description of the event
+     * @param string $location - Location where the event takes place
+     * @param string $attendeeName - The name of the attendee
+     * @param string $attendeeEmail - The e-mail address of the attendee
+     * @return string $filename
+     */
+    public static function getICS($startDate, $endDate, $subject, $description, $location, $attendeeName, $attendeeEmail) {
+        $start  = strtotime($startDate);
+        $end    = strtotime($endDate);
+        $ical   =
+"BEGIN:VCALENDAR
+PRODID:-//OpenSim-CMS v0.1//EN
+VERSION:2.0
+CALSCALE:GREGORIAN
+METHOD:REQUEST
+BEGIN:VEVENT
+DTSTART:". date('Ymd\THis\Z', $start) ."
+DTEND:". date('Ymd\THis\Z', $end) ."
+DTSTAMP:". date('Ymd\THis\Z') ."
+ORGANIZER;CN=". CMS_ADMIN_NAME .":mailto:". CMS_ADMIN_EMAIL ."
+UID:". uniqid() ."
+ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=". $attendeeName .";X-NUM-GUESTS=0:mailto:". $attendeeEmail ."
+DESCRIPTION:". str_replace("\n", "\n ", preg_replace('/([\,;])/','\\\$1', $description)) ."
+LOCATION:". preg_replace('/([\,;])/','\\\$1', $location) ."
+SEQUENCE:0
+STATUS:NEEDS-ACTION
+SUMMARY:". preg_replace('/([\,;])/','\\\$1', $subject) ."
+TRANSP:OPAQUE
+END:VEVENT
+END:VCALENDAR";
+
+        // Generate a random filename
+        $filename = \Helper::generateToken(16) .'.ics';
+        file_put_contents(FILES_LOCATION . DS .'ical'. DS . $filename, $ical);
+
+        return FILES_LOCATION . DS .'ical'. DS . $filename;
+    }
 }
