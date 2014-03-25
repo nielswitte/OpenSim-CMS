@@ -204,7 +204,7 @@ class Presentation extends Module{
         if(!\Helper::imageResize($slidePath, $slidePath, IMAGE_HEIGHT, IMAGE_WIDTH)) {
             throw new \Exception("Requested slide does not exists", 5);
         } else {
-            require_once dirname(__FILE__) .'/../../includes/class.Images.php';
+            require_once dirname(__FILE__) .'/../includes/class.Images.php';
             $image = new \Image($slidePath);
             $image->display();
         }
@@ -225,7 +225,7 @@ class Presentation extends Module{
         if(!\Helper::imageResize($slidePath, $thumbPath, IMAGE_THUMBNAIL_HEIGHT, IMAGE_THUMBNAIL_WIDTH)) {
             throw new \Exception("Requested slide does not exists", 5);
         } else {
-            require_once dirname(__FILE__) .'/../../includes/class.Images.php';
+            require_once dirname(__FILE__) .'/../includes/class.Images.php';
             $image = new \Image($thumbPath);
             $image->display();
         }
