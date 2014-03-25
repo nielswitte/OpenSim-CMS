@@ -90,12 +90,13 @@ class MeetingParticipants {
     /**
      * Converts the list with participants to a string
      *
+     *
      * @return string
      */
     public function toString() {
         $string = '';
         foreach($this->getParticipants() as $participant) {
-            $string .= $participant->getFirstName() .' '. $participant->getLastName() .' ( '. $participant->getEmail() .' )' . "\n";
+            $string .= $participant->getUsername() .' ('. $participant->getFirstName() .' '. $participant->getLastName() .') [ '. $participant->getEmail() .' ]' . "\n";
         }
 
         return $string;
