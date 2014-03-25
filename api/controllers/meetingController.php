@@ -224,19 +224,55 @@ class MeetingController {
      * name, date, agenda, participants, documents of this meeting
      */
     public function mailParticipants() {
+        // Get actual meeting data from database (so only final data is used)
+        $this->getMeeting()->getInfoFromDatabase();
+        $startDate = strtotime($this->getMeeting()->getStartDate());
+        $endDate   = strtotime($this->getMeeting()->getEndDate());
+
         // Get the actual up-to-date list of participants
         $this->getMeeting()->getParticipantsFromDatabase();
         $participants = $this->getMeeting()->getParticipants()->getParticipants();
-        require_once dirname(__FILE__) .'../includes/class.SimpleMail.php';
+
+        // Get the actual up-to-date agenda
+        $this->getMeeting()->getAgendaFromDabatase();
+
+        // Get the actual up-to-date documents list
+        $this->getMeeting()->getDocumentsFromDabatase();
+
+        // Include the mail helper class
+        require_once dirname(__FILE__) .'/../includes/class.SimpleMail.php';
         $mail = new \SimpleMail();
+
+        // Prepare email-template
+        $html = file_get_contents(dirname(__FILE__) .'/../templates/email/default.html');
+        $data = array(
+            '{{title}}'     => $this->getMeeting()->getName(),
+            '{{body}}'      => \Helper::linkIt(
+                'An meeting has been scheduled for '. date('l F j', $startDate) .' at '. date('H:i', $startDate) .' until '. date('H:i', $endDate) .'.
+                <h2>Agenda</h2>'.
+                str_replace(' ', '&nbsp;', nl2br($this->getMeeting()->getAgenda()->toString(), FALSE)) .'
+                <h2>Participants</h2>'.
+                nl2br($this->getMeeting()->getParticipants()->toString(), FALSE)
+            )
+        );
+        $html = str_replace(array_keys($data), array_values($data), $html);
+
+        echo $html;
+        die();
+
+        // Mail all participants
         foreach($participants as $participant) {
             $mail->setTo($participant->getEmail(), $participant->getFirstName() .' '. $participant->getLastName());
             $mail->setFrom(CMS_ADMIN_EMAIL, CMS_ADMIN_NAME);
             $mail->addGenericHeader('Content-Type', 'text/html; charset="utf-8"');
+            // Add template
+            $mail->setMessage($html);
+            // Attach iCal
+            $mail->addAttachment($path);
 
-            // @todo continue implementation
-
+            $result = $mail->send();
         }
+        return $result;
     }
 
     /**

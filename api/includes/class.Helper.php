@@ -323,4 +323,22 @@ class Helper {
             return false;
         }
     }
+
+    /**
+     * Converts all URLs in the given text to HTML links
+     *
+     * @source: http://buildinternet.com/2010/05/how-to-automatically-linkify-text-with-php-regular-expressions/
+     * @param string $text
+     * @return string
+     */
+    public static function linkIt($text) {
+        // Convert full links starting with http, https, ftp, ftps
+        $text = preg_replace("/(^|[\n ])([\w]*?)((ht|f)tp(s)?:\/\/[\w]+[^ \,\"\n\r\t&lt;]*)/is", "$1$2<a href=\"$3\">$3</a>", $text);
+        // Convert links starting with www. or ftp.
+        $text = preg_replace("/(^|[\n ])([\w]*?)((www|ftp)\.[^ \,\"\t\n\r&lt;]*)/is", "$1$2<a href=\"http://$3\">$3</a>", $text);
+        // Convert mail links, containing an @
+        $text = preg_replace("/(^|[\n ])([a-z0-9&\-_\.]+?)@([\w\-]+\.([\w\-\.]+)+)/i", "$1<a href=\"mailto:$2@$3\">$2@$3</a>", $text);
+        return($text);
+    }
+
 }
