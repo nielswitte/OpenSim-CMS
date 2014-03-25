@@ -4,8 +4,8 @@ namespace API\Modules;
 defined('EXEC') or die('Config not loaded');
 
 require_once dirname(__FILE__) .'/module.php';
-require_once dirname(__FILE__) .'/../../models/meeting.php';
-require_once dirname(__FILE__) .'/../../controllers/meetingController.php';
+require_once dirname(__FILE__) .'/../models/meeting.php';
+require_once dirname(__FILE__) .'/../controllers/meetingController.php';
 
 /**
  * Implements the functions for meetings

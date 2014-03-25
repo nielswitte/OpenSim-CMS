@@ -4,10 +4,10 @@ namespace API\Modules;
 defined('EXEC') or die('Config not loaded');
 
 require_once dirname(__FILE__) .'/module.php';
-require_once dirname(__FILE__) .'/../../models/slide.php';
-require_once dirname(__FILE__) .'/../../controllers/slideController.php';
-require_once dirname(__FILE__) .'/../../models/presentation.php';
-require_once dirname(__FILE__) .'/../../controllers/presentationController.php';
+require_once dirname(__FILE__) .'/../models/slide.php';
+require_once dirname(__FILE__) .'/../controllers/slideController.php';
+require_once dirname(__FILE__) .'/../models/presentation.php';
+require_once dirname(__FILE__) .'/../controllers/presentationController.php';
 
 /**
  * Implements the functions for presentations

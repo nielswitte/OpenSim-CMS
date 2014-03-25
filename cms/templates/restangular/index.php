@@ -1,7 +1,5 @@
 <?php
-if (EXEC != 1) {
-    die('Invalid request');
-}
+defined('EXEC') or die('Config not loaded');
 ?>
 <!DOCTYPE html>
 <html lang="en" ng-app="OpenSim-CMS" ng-controller="MainCntl">
@@ -27,7 +25,7 @@ if (EXEC != 1) {
           <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
         <![endif]-->
 
-        <!-- Important JS files that need to be loaded before body -->
+        <!-- Important JavaScript files that need to be loaded before body -->
         <script type="text/javascript">
             var server_address = "<?php echo SERVER_PROTOCOL; ?>://<?php echo SERVER_ADDRESS; ?>";
             var base_url = "<?php echo SERVER_ROOT; ?>";
@@ -78,7 +76,7 @@ if (EXEC != 1) {
         <!-- Alert container -->
         <div id="alerts"></div>
 
-        <!-- Additional JS files -->
+        <!-- Additional JavaScript libraries -->
         <script src="templates/restangular/js/libs/jquery.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/angular.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/angular-animate.min.js" type="text/javascript"></script>
@@ -91,7 +89,7 @@ if (EXEC != 1) {
         <script src="templates/restangular/js/libs/bootstrap-calendar.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/select2.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/less.min.js" type="text/javascript"></script>
-
+        <!-- Angular implementations -->
         <script src="templates/restangular/js/main.js" type="text/javascript"></script>
         <script src="templates/restangular/js/app.js" type="text/javascript"></script>
         <script src="templates/restangular/js/controllers.js" type="text/javascript"></script>

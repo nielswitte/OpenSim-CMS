@@ -4,8 +4,8 @@ namespace API\Modules;
 defined('EXEC') or die('Config not loaded');
 
 require_once dirname(__FILE__) .'/module.php';
-require_once dirname(__FILE__) .'/../../models/chat.php';
-require_once dirname(__FILE__) .'/../../controllers/chatController.php';
+require_once dirname(__FILE__) .'/../models/chat.php';
+require_once dirname(__FILE__) .'/../controllers/chatController.php';
 
 /**
  * Implements the functions called on the Grid

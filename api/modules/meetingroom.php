@@ -4,7 +4,7 @@ namespace API\Modules;
 defined('EXEC') or die('Config not loaded');
 
 require_once dirname(__FILE__) .'/module.php';
-require_once dirname(__FILE__) .'/../../models/meetingRoom.php';
+require_once dirname(__FILE__) .'/../models/meetingRoom.php';
 
 /**
  * Implements the functions for rooms

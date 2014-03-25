@@ -3,7 +3,7 @@ namespace Models;
 
 defined('EXEC') or die('Config not loaded');
 
-require_once dirname(__FILE__) . '/simpleModel.php';
+require_once dirname(__FILE__) .'/simpleModel.php';
 
 /**
  * This class represents a meeting room

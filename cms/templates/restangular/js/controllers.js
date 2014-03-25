@@ -106,8 +106,17 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
             clearInterval(timer);
             // Set the grid
             selectedGridId   = gridId;
-            // Empty chat when switching grids
-            $scope.chats     = [];
+            // Empty chat when switching grids and show message chat enabled
+            $scope.chats     = [{
+                    timestamp: moment().format('YYYY-MM-DD HH:mm:ss'),
+                    fromCMS: 0,
+                    user: {
+                        id: 0,
+                        firstName: 'Server',
+                        lastName: ''
+                    },
+                    message: 'Chat enabled'
+            }];
             // Reset last msg timestmap
             lastMsgTimestamp = moment().subtract('minutes', 30).unix();
             // Get last chat entries for past one hour

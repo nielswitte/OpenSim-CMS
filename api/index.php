@@ -8,8 +8,8 @@ header("Cache-Control: no-store, no-cache, must-revalidate");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 
-require_once dirname(__FILE__) .'/../config.php';
-require_once dirname(__FILE__) .'/../includes/class.Auth.php';
+require_once dirname(__FILE__) .'/config.php';
+require_once dirname(__FILE__) .'/includes/class.Auth.php';
 require_once dirname(__FILE__) .'/api.php';
 require_once dirname(__FILE__) .'/modules/auth.php';
 require_once dirname(__FILE__) .'/modules/chat.php';
