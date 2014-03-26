@@ -271,7 +271,7 @@ angularRest.directive('head', ['$rootScope','$compile',
  * @source: http://stackoverflow.com/a/18313962
  */
 angularRest.directive('ngConfirmClick', [
-    function(){
+    function() {
         return {
             link: function (scope, element, attr) {
                 var msg = attr.ngConfirmClick || "Are you sure?";

@@ -884,7 +884,7 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
             angular.copy($scope.meeting, meetingOld);
             // Page and content titles
             $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
-            Page.setTitle('Meeting '+ meetingResponse.id);
+            Page.setTitle('Meeting '+ meetingResponse.name);
             meetingRequestUrl       = meetingResponse.getRequestedUrl();
             if($location.path().indexOf('/edit') == -1) {
                 $scope.meeting.agenda   = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
@@ -932,16 +932,17 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
 );
 
 // meetingMinutesController -------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('meetingMinutesController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache, $location) {
+angularRest.controller('meetingMinutesController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', '$location', '$compile', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache, $location, $compile) {
         $scope.meeting = {};
         RestangularCache.one('meeting', $routeParams.meetingId).one('minutes').get().then(function(meetingResponse) {
             meetingResponse.agenda = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
             $scope.meeting = meetingResponse;
+            Page.setTitle('Minutes '+ meetingResponse.name);
         });
 
         // From the datetime string only show the time
         $scope.timeOnly = function(string) {
-            return string.substr(11);
+            return $sce.trustAsHtml(string.substr(11));
         };
 
         // Show heading?
@@ -951,7 +952,42 @@ angularRest.controller('meetingMinutesController', ['Restangular', 'RestangularC
             } else {
                 return false;
             }
-        }
+        };
+
+        // Checks who said something
+        $scope.labelClass = function(index) {
+            var minute = $scope.meeting.minutes[index]
+            // Current user is sender?
+            if(minute.user !== undefined && minute.user.id == sessionStorage.id) {
+                return 'success';
+            // Server is sender?
+            } else if(minute.name == 'Server') {
+                return 'default';
+            // Other
+            } else {
+                return 'info';
+            }
+        };
+
+        // Parse the message for example to show voting results
+        $scope.parseMessage = function(msg) {
+            // Voting results?
+            if(msg.substring(0, 17) == '[Voting Results] ') {
+                var votes       = msg.substring(17).split(',');
+                var totalVotes  = 0;
+                for(var i = 0; i < votes.length; i++) {
+                    totalVotes = (totalVotes + parseInt(votes[i]));
+                }
+                var html        = '<strong>Votes: '+ totalVotes +'</strong><br>';
+                html += '<div class="progress"><div title="Approved" class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[0]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[0]) / totalVotes) * 100) +'%;">'+ parseInt(votes[0]) +'</div></div>';
+                html += '<div class="progress"><div title="Rejected" class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[1]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[1]) / totalVotes) * 100) +'%;">'+ parseInt(votes[1]) +'</div></div>';
+                html += '<div class="progress"><div title="Blank" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[2]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[2]) / totalVotes) * 100) +'%;">'+ parseInt(votes[2]) +'</div></div>';
+                html += '<div class="progress"><div title="None" class="progress-bar progress-bar-default" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[3]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[3]) / totalVotes) * 100) +'%;">'+ parseInt(votes[3]) +'</div></div>';
+                return $sce.trustAsHtml(html);
+            } else {
+                return $sce.trustAsHtml(msg);
+            }
+        };
 
         var parents     = [];
         // Start with 2 for H2

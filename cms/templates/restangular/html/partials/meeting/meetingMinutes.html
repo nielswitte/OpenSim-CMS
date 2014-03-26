@@ -11,12 +11,11 @@
     <div class="row row-striped row-hover" ng-repeat="(index, minute) in meeting.minutes">
         <div class="col-sm-12" ng-show="showAgendaNextItemHeading(index)" ng-bind-html="agendaNextItemHeading(index, minute)"></div>
 
-        <div class="col-sm-2">
-            <span ng-show="minute.name == 'Server'" class="label label-info">{{timeOnly(minute.timestamp)}}</span>
-            <span ng-hide="minute.name == 'Server'" class="label label-default">{{timeOnly(minute.timestamp)}}</span>
+        <div class="col-sm-2 minute">
+            <span class="label label-{{labelClass(index)}}" ng-bind-html="timeOnly(minute.timestamp)"></span>
             <strong ng-show="minute.user"><a ng-href="#!/user/{{minute.user.id}}" title="View profile of user {{minute.user.username}}">{{minute.name}}</a></strong>
             <strong ng-hide="minute.user">{{minute.name}}</strong>
         </div>
-        <div class="col-sm-10">{{minute.message}}</div>
+        <div class="col-sm-10 minute" ng-bind-html="parseMessage(minute.message)" dynamic></div>
     </div>
 </section>
