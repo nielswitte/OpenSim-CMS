@@ -36,6 +36,14 @@ integer meetingAreaSize = 25;   // Size of the meeting room to detect avatars in
 list agendaItems;               // List with the agenda items in it
 integer currentAgendaItem = 0;  // The current index of the agenda
 integer timerfiredcount = 0;    // Only send messages every 6th cycle (so every minute)
+// Voting
+integer voting = FALSE;         // Currently voting?
+integer votes_approve = 0;      // Vote count in favor
+integer votes_reject = 0;       // vote count against
+integer votes_blank = 0;        // vote count blank
+integer votes_none = 0;         // vote count none
+list avatarsVoted = [];         // List of avatars that have voted
+list voteListeners = [];        // List with vote listeners (which needs to be cleared when voting is over)
 
 // HTTP requests
 key http_request_api_token;     // API token request
@@ -156,6 +164,54 @@ agendaItem(integer index) {
         llSay(channelChat, "[Meeting] At "+ Hours +":"+ Minutes +" starting with agenda item: "+ llList2String(agendaItems, currentAgendaItem));
         queueMessage(llGetUnixTime(), "", "Server", "At "+ Hours +":"+ Minutes +" starting with agenda item: "+ llList2String(agendaItems, currentAgendaItem));
     }
+}
+
+/**
+ * Shows all present avatars the voting dialog
+ */
+start_voting() {
+    llSay(0, "[Meeting] Voting started");
+
+    // Reset voting parameters
+    votes_approve   = 0;
+    votes_reject    = 0;
+    votes_blank     = 0;
+    votes_none      = 0;
+    avatarsVoted    = [];
+
+    voting = TRUE;
+    integer i;
+    list options = ["Approve", "Reject", "Blank", "None"];
+    for(i = 0; i < llGetListLength(avatarsPresent); i++) {
+        key uuid = llList2Key(avatarsPresent, i);
+        voteListeners += llListen(channelListen, "", uuid, "");
+        llDialog(uuid, "Give your vote by choosing one of the options below.", options, channelListen);
+    }
+}
+
+/**
+ * Show results when voting ends and remove listeners
+ */
+end_voting() {
+    voting = FALSE;
+    // Number of avatars which has not voted
+    integer allowedToVito = llGetListLength(voteListeners);
+    integer notVoted = allowedToVito - llGetListLength(avatarsVoted);
+    // Remove all vote listeners
+    integer i;
+    for (i = 0; i < allowedToVito; i++ ) {
+        llListenRemove(llList2Integer(voteListeners, i));
+    }
+    voteListeners = [];
+
+    // Say results
+    llSay(0, "[Meeting] A total of "+ llGetListLength(avatarsVoted) +" out of "+ allowedToVito +" avatars voted:");
+    llSay(0, "[Meeting]    Approve: "+ votes_approve);
+    llSay(0, "[Meeting]    Reject: "+ votes_reject);
+    llSay(0, "[Meeting]    Blank: "+ votes_blank);
+    llSay(0, "[Meeting]    None: "+ (votes_none + notVoted));
+    // Also send results to API
+    queueMessage(llGetUnixTime(), "", "Server", "[Voting Results] "+ votes_approve +","+ votes_reject +","+ votes_blank +","+ votes_none);
 }
 
 /**
@@ -379,7 +435,12 @@ state logging {
         // Listen for message
         Listener += llListen(channelListen, "", userUuid, "");
         // Show options
-        list options = ["Previous", "Next", "Quit"];
+        list options = [];
+        if(voting) {
+            options = ["Previous", "Next", "End Vote", "Quit"];
+        } else {
+            options = ["Previous", "Next", "Start Vote", "Quit"];
+        }
         llDialog(userUuid, "Press Quit to stop logging the meeting. Or use Previous and Next to go to the other agenda items.", options, channelListen);
     }
 
@@ -419,6 +480,42 @@ state logging {
             // Go to the next agenda item
             } else if(message == "Next") {
                 agendaItem(currentAgendaItem+1);
+            } else if(message == "Start Vote") {
+                start_voting();
+            } else if(voting == TRUE && message == "Approve") {
+                if(llListFindList(avatarsVoted, [id]) == -1) {
+                    votes_approve++;
+                    avatarsVoted += [id];
+                    if(debug) llInstantMessage(userUuid, "[Debug] Voted approve ("+ id +")");
+                } else {
+                    llInstantMessage(id, "[Meeting] You have already voted!");
+                }
+            } else if(voting == TRUE && message == "Reject") {
+                if(llListFindList(avatarsVoted, [id]) == -1) {
+                    votes_reject++;
+                    avatarsVoted += [id];
+                    if(debug) llInstantMessage(userUuid, "[Debug] Voted reject ("+ id +")");
+                } else {
+                    llInstantMessage(id, "[Meeting] You have already voted!");
+                }
+            } else if(voting == TRUE && message == "Blank") {
+                if(llListFindList(avatarsVoted, [id]) == -1) {
+                    votes_blank++;
+                    avatarsVoted += [id];
+                    if(debug) llInstantMessage(userUuid, "[Debug] Voted blank ("+ id +")");
+                } else {
+                    llInstantMessage(id, "[Meeting] You have already voted!");
+                }
+            } else if(voting == TRUE && message == "None") {
+                if(llListFindList(avatarsVoted, [id]) == -1) {
+                    votes_none++;
+                    avatarsVoted += [id];
+                    if(debug) llInstantMessage(userUuid, "[Debug] Voted none ("+ id +")");
+                } else {
+                    llInstantMessage(id, "[Meeting] You have already voted!");
+                }
+            } else if(voting == TRUE && message == "End Vote") {
+                end_voting();
             }
         } else {
             queueMessage(llGetUnixTime(), (string) id, name, message);
