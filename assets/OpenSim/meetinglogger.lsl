@@ -35,6 +35,7 @@ list avatarsPresent;            // List to keep track of all avatars currently p
 integer meetingAreaSize = 25;   // Size of the meeting room to detect avatars in
 list agendaItems;               // List with the agenda items in it
 integer currentAgendaItem = 0;  // The current index of the agenda
+integer timerfiredcount = 0;    // Only send messages every 6th cycle (so every minute)
 
 // HTTP requests
 key http_request_api_token;     // API token request
@@ -171,6 +172,7 @@ default {
         currentAgendaItem   = 0;
         agendaItems         = [];
         avatarsPresent      = [];
+        timerfiredcount     = 0;
 
         // SET COLOR RED
         llSetColor(<255, 0, 0>, ALL_SIDES);
@@ -245,7 +247,7 @@ state startup {
         } else if(request_id == http_request_meetings) {
             key json_body   = JsonCreateStore(body);
             integer meetingsLength = JsonGetArrayLength(json_body, "");
-            if(debug) llInstantMessage(userUuid, "[Debug] Found: "+ meetingsLength +" meetings");
+            if(debug) llInstantMessage(userUuid, "[Debug] Found: "+ meetingsLength +" meetings which are today or in the future");
             integer x;
             string today = llGetDate();
             list meetingsToday = [];
@@ -257,7 +259,7 @@ state startup {
 
                     // Only load meetings that start today
                     if(meetingStartDay == today) {
-                        meetingsToday += [ JsonGetValue(json_body, "["+ (meetingsLength - x) +"].id") +") "+ JsonGetValue(json_body, "["+ (meetingsLength - x) +"].name") ];
+                        meetingsToday += [ llGetSubString(JsonGetValue(json_body, "["+ (meetingsLength - x) +"].id") +") "+ JsonGetValue(json_body, "["+ (meetingsLength - x) +"].name"), 0, 23) ];
                     }
                 }
 
@@ -425,8 +427,14 @@ state logging {
 
     // Loop through requests
     timer() {
-        if(debug) llInstantMessage(userUuid, "[Debug] Timer fired");
-        request_send_chat();
+        if(debug) llInstantMessage(userUuid, "[Debug] Timer fired ("+ timerfiredcount +")");
+        // Only send chat every 6th cycle (starting at 0)
+        if(timerfiredcount >= 5) {
+            timerfiredcount = 0;
+            request_send_chat();
+        }
+        timerfiredcount++;
+        // Detect avatars
         llSensor("", NULL_KEY, AGENT, meetingAreaSize, PI);
 
         llSetTimerEvent(10.0);
