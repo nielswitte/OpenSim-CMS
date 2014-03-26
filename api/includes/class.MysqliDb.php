@@ -1,6 +1,4 @@
 <?php
-defined('EXEC') or die('Config not loaded');
-
 /**
  * MysqliDb Class
  *
@@ -32,6 +30,12 @@ class MysqliDb
      * @var string
      */
     protected $_query;
+    /**
+     * The previously executed SQL query
+     *
+     * @var string
+     */
+    protected $_lastQuery;
     /**
      * An array that holds where joins
      *
@@ -70,7 +74,18 @@ class MysqliDb
      * @var array
      */
     protected $_bindParams = array(''); // Create the empty 0 index
-
+    /**
+     * Variable which holds an amount of returned rows during get/getOne/select queries
+     *
+     * @var string
+     */
+    public $count = 0;
+    /**
+     * Variable which holds last statement error
+     *
+     * @var string
+     */
+    protected $_stmtError;
     /**
      * @param string $host
      * @param string $username
@@ -115,11 +130,12 @@ class MysqliDb
         $this->_where = array();
         $this->_join = array();
         $this->_orderBy = array();
-        $this->groupBy = array();
+        $this->_groupBy = array();
         $this->_bindParams = array(''); // Create the empty 0 index
         $this->_query = null;
         $this->_whereTypeList = null;
         $this->_paramTypeList = null;
+        $this->count = 0;
     }
 
     /**
@@ -147,6 +163,7 @@ class MysqliDb
         }
 
         $stmt->execute();
+        $this->_stmtError = $stmt->error;
         $this->reset();
 
         return $this->_dynamicBindResults($stmt);
@@ -164,6 +181,7 @@ class MysqliDb
         $this->_query = filter_var($query, FILTER_SANITIZE_STRING);
         $stmt = $this->_buildQuery($numRows);
         $stmt->execute();
+        $this->_stmtError = $stmt->error;
         $this->reset();
 
         return $this->_dynamicBindResults($stmt);
@@ -186,6 +204,7 @@ class MysqliDb
         $this->_query = "SELECT $column FROM $tableName";
         $stmt = $this->_buildQuery($numRows);
         $stmt->execute();
+        $this->_stmtError = $stmt->error;
         $this->reset();
 
         return $this->_dynamicBindResults($stmt);
@@ -216,6 +235,7 @@ class MysqliDb
         $this->_query = "INSERT into $tableName";
         $stmt = $this->_buildQuery(null, $insertData);
         $stmt->execute();
+        $this->_stmtError = $stmt->error;
         $this->reset();
 
         return ($stmt->affected_rows > 0 ? $stmt->insert_id : false);
@@ -235,6 +255,7 @@ class MysqliDb
 
         $stmt = $this->_buildQuery(null, $tableData);
         $stmt->execute();
+        $this->_stmtError = $stmt->error;
         $this->reset();
 
         return ($stmt->affected_rows > 0);
@@ -254,6 +275,7 @@ class MysqliDb
 
         $stmt = $this->_buildQuery($numRows);
         $stmt->execute();
+        $this->_stmtError = $stmt->error;
         $this->reset();
 
         return ($stmt->affected_rows > 0);
@@ -427,16 +449,22 @@ class MysqliDb
                         if (is_array($value)) {
                             $this->_query .= $prop ." = ";
                             if (!empty($value['[I]']))
-                                $this->_query .= $prop.$value['[I]'].", ";
-                            else
-                                $this->_query .= $value['[F]'].", ";
-                            continue;
-                        }
-                        // determines what data type the item is, for binding purposes.
-                        $this->_paramTypeList .= $this->_determineType($value);
+                                $this->_query .= $prop . $value['[I]'] . ", ";
+                            else {
+                                $this->_query .= $value['[F]'][0] . ", ";
+                                if (is_array ($value['[F]'][1])) {
+                                    foreach ($value['[F]'][1] as $key => $val) {
+                                        $this->_paramTypeList .= $this->_determineType($val);
+                                    }
+                                }
+                            }
+                        } else {
+                            // determines what data type the item is, for binding purposes.
+                            $this->_paramTypeList .= $this->_determineType($value);
 
-                        // prepares the reset of the SQL query.
-                        $this->_query .= ($prop . ' = ?, ');
+                            // prepares the reset of the SQL query.
+                            $this->_query .= ($prop . ' = ?, ');
+                        }
                     }
                     $this->_query = rtrim($this->_query, ', ');
                 }
@@ -516,8 +544,14 @@ class MysqliDb
                     if (is_array($val)) {
                         if (!empty($val['[I]']))
                             $this->_query .= $keys[$key].$val['[I]'].", ";
-                        else
-                            $this->_query .= $val['[F]'].", ";
+                        else {
+                            $this->_query .= $val['[F]'][0].", ";
+                            if (is_array ($val['[F]'][1])) {
+                                foreach ($val['[F]'][1] as $key => $value) {
+                                    $this->_paramTypeList .= $this->_determineType($value);
+                                }
+                            }
+                        }
                         continue;
                     }
 
@@ -532,7 +566,10 @@ class MysqliDb
 
         // Did the user set a limit
         if (isset($numRows)) {
-            $this->_query .= ' LIMIT ' . (int)$numRows;
+            if (is_array ($numRows))
+                $this->_query .= ' LIMIT ' . (int)$numRows[0] . ', ' . (int)$numRows[1];
+            else
+                $this->_query .= ' LIMIT ' . (int)$numRows;
         }
 
         // Prepare query
@@ -542,8 +579,15 @@ class MysqliDb
         if ($hasTableData) {
             $this->_bindParams[0] = $this->_paramTypeList;
             foreach ($tableData as $prop => $val) {
-                if (!is_array($tableData[$prop]))
+                if (!is_array($tableData[$prop])) {
                     array_push($this->_bindParams, $tableData[$prop]);
+                    continue;
+                }
+
+                if (is_array($tableData[$prop]['[F]'][1])) {
+                    foreach ($tableData[$prop]['[F]'][1] as $val)
+                        array_push($this->_bindParams, $val);
+                }
             }
         }
         // Prepare where condition bind parameters
@@ -575,6 +619,7 @@ class MysqliDb
             call_user_func_array(array($stmt, 'bind_param'), $this->refValues($this->_bindParams));
         }
 
+        $this->_lastQuery = $this->replacePlaceHolders($this->_query, $this->_bindParams);
         return $stmt;
     }
 
@@ -614,6 +659,8 @@ class MysqliDb
             }
             array_push($results, $x);
         }
+        $this->count = $stmt->num_rows;
+
         return $results;
     }
 
@@ -658,12 +705,36 @@ class MysqliDb
     }
 
     /**
+     * Function to replace ? with variables from bind variable
+     * @param string $str
+     * @param Array $vals
+     *
+     * @return string
+     */
+    protected function replacePlaceHolders ($str, $vals) {
+        $i = 1;
+        while ($pos = strpos ($str, "?"))
+            $str = substr ($str, 0, $pos) . $vals[$i++] . substr ($str, $pos + 1);
+
+        return $str;
+    }
+
+    /**
+     * Method returns last executed query
+     *
+     * @return string
+     */
+    public function getLastQuery () {
+        return $this->_lastQuery;
+    }
+
+    /**
      * Method returns mysql error
      *
      * @return string
      */
     public function getLastError () {
-        return $this->_mysqli->error;
+        return $this->_stmtError . " " . $this->_mysqli->error;
     }
 
     /* Helper functions */
@@ -707,7 +778,7 @@ class MysqliDb
      * @return array
     */
     public function now ($diff = null, $func = "NOW()") {
-        return Array ("[F]" => $this->interval($diff, $func));
+        return Array ("[F]" => Array($this->interval($diff, $func)));
     }
 
     /**
@@ -730,8 +801,8 @@ class MysqliDb
      * Method generates user defined function call
      * @param string user function body
      */
-    public function func ($expr) {
-        return Array ("[F]" => $expr);
+    public function func ($expr, $bindParams = null) {
+        return Array ("[F]" => Array($expr, $bindParams));
     }
 
 } // END class
