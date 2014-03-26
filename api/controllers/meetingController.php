@@ -298,9 +298,16 @@ class MeetingController {
         require_once dirname(__FILE__) .'/../includes/PHPMailer/PHPMailerAutoload.php';
 
         // Prepare email-template
-        $html = file_get_contents(dirname(__FILE__) .'/../templates/email/default.html');
+        $html   = file_get_contents(dirname(__FILE__) .'/../templates/email/default.html');
 
-        $data = array(
+        $osUrl  = 'opensim://'.
+                    $meeting->getRoom()->getRegion()->getGrid()->getOsIp() .':'.
+                    $meeting->getRoom()->getRegion()->getGrid()->getOsPort() .'/'.
+                    urlencode($meeting->getRoom()->getRegion()->getName()) .'/'.
+                    $meeting->getRoom()->getX() .'/'.
+                    $meeting->getRoom()->getY() .'/'.
+                    $meeting->getRoom()->getZ();
+        $data   = array(
             '{{title}}'     => $meeting->getName(),
             '{{body}}'      => \Helper::linkIt(
                 '<p>An meeting has been scheduled for '. date('l F j', $startDate) .' at '. date('H:i', $startDate) .' until '. date('H:i', $endDate) .'.</p>'
@@ -308,13 +315,10 @@ class MeetingController {
                 . str_replace(' ', '&nbsp;', nl2br($meeting->getAgenda()->toString(), FALSE))
                 .'<h2>Participants</h2>'
                 .'<p>'. nl2br($meeting->getParticipants()->toString(), FALSE) .'</p>'
-                .'<div style="text-align: center;"><a href="opensim://'.
-                    $meeting->getRoom()->getRegion()->getGrid()->getOsIp() .':'.
-                    $meeting->getRoom()->getRegion()->getGrid()->getOsPort() .'/'.
-                    urlencode($meeting->getRoom()->getRegion()->getName()) .'/'.
-                    $meeting->getRoom()->getX() .'/'.
-                    $meeting->getRoom()->getY() .'/'.
-                    $meeting->getRoom()->getZ() .'" class="btn btn-lg">Go to Meeting</a></div>'
+                .'<div style="text-align: center;">'
+                .'  <a href="'. $osUrl .'" class="btn btn-lg">Go to Meeting</a><br>'
+                .'  <small>'. $osUrl .'</small>'
+                .'</div>'
             )
         );
         $html = str_replace(array_keys($data), array_values($data), $html);
