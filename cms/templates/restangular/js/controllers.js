@@ -942,6 +942,7 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
             room: {
                 grid: { }
             },
+            agenda: '1. Opening\n',
             participants: []
         };
         $scope.grids                    = [];
