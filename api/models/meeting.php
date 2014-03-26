@@ -139,10 +139,12 @@ class Meeting implements simpleModel {
 
     /**
      * Gets the minutes for this meeting from the database
+     * Ordered by agenda item and timestamp
      */
     public function getMinutesFromDatabase() {
         $db = \Helper::getDB();
         $db->where('meetingId', $db->escape($this->getId()));
+        $db->orderBy('agendaId', 'ASC');
         $db->orderBy('timestamp', 'ASC');
         $results = $db->get('meeting_minutes');
 
@@ -153,8 +155,8 @@ class Meeting implements simpleModel {
         // Save results
         foreach($results as $result) {
             // Match UUID to a user
-            $user       = $this->getParticipants()->getParticipantByUuid($result['uuid']);
-            $user       = $user !== FALSE ? $user : NULL;
+            $userByUuid = $this->getParticipants()->getParticipantByUuid($result['uuid']);
+            $user       = $userByUuid !== FALSE ? $userByUuid : NULL;
 
             $minutes->addMinute($result['id'], $result['timestamp'], $result['agendaId'], $result['uuid'], $result['name'], $result['message'], $user);
         }

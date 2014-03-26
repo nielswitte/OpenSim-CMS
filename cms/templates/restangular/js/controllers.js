@@ -675,7 +675,9 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
         $scope.grids                    = [];
         $scope.rooms                    = [];
         $scope.participant              = '';
-        $scope.usernameSearchResults    = [];
+        var usernameSearchResults       = [];
+        $scope.document                 = '';
+        var documentSearchResults       = [];
 
         // Navigate the calendar to the current date
         $scope.updateCalendar = function() {
@@ -767,11 +769,59 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
             }
         };
 
+        // Search for the given documents
+        $scope.getDocumentByTitle = function($viewValue) {
+            if($viewValue != null && $viewValue.length >= 3) {
+                var results = RestangularCache.one('documents', $viewValue).get().then(function(documentsResponse) {
+                    documentSearchResults = documentsResponse;
+                    return documentsResponse;
+                });
+            } else {
+                var results = '';
+            }
+            return results;
+        };
+
+        // Adds the currently selected documents to the list
+        $scope.addDocument = function() {
+            for(var i = 0; i < documentSearchResults.length; i++) {
+                // Only add user when match found and not already listed
+                if(documentSearchResults[i].title == $scope.document) {
+                    if(!isDuplicateDocument()) {
+                        $scope.meeting.documents.push(documentSearchResults[i]);
+                    } else {
+                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The document '+ documentSearchResults[i].title + ' is already added to this meeting'), type: 'warning'});
+                    }
+                }
+            }
+        };
+
+        // Checks for duplicate documents
+        function isDuplicateDocument() {
+            for(var i = 0; i < $scope.meeting.documents.length; i++) {
+                if($scope.meeting.documents[i].title == $scope.document) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Removes the documents with the given ID from the list
+        $scope.removeDocument = function(id) {
+            for(var i = 0; i < $scope.meeting.documents.length; i++) {
+                if($scope.meeting.documents[i].id == id) {
+                    $scope.meeting.documents.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
+        };
+
         // Search for the given username
         $scope.getUserByUsername = function($viewValue) {
             if($viewValue != null && $viewValue.length >= 3) {
                 var results = RestangularCache.one('users', $viewValue).get().then(function(usersResponse) {
-                    $scope.usernameSearchResults = usersResponse;
+                    usernameSearchResults = usersResponse;
                     return usersResponse;
                 });
             } else {
@@ -782,13 +832,13 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
 
         // Adds the currently selected participant to the list
         $scope.addParticipant = function() {
-            for(var i = 0; i < $scope.usernameSearchResults.length; i++) {
+            for(var i = 0; i < usernameSearchResults.length; i++) {
                 // Only add user when match found and not already listed
-                if($scope.usernameSearchResults[i].username == $scope.participant) {
+                if(usernameSearchResults[i].username == $scope.participant) {
                     if(!isDuplicateParticipant()) {
-                        $scope.meeting.participants.push($scope.usernameSearchResults[i]);
+                        $scope.meeting.participants.push(usernameSearchResults[i]);
                     } else {
-                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The user '+ $scope.usernameSearchResults[i].username + ' is already a participant for this meeting'), type: 'warning'});
+                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The user '+ usernameSearchResults[i].username + ' is already a participant for this meeting'), type: 'warning'});
                     }
                 }
             }
@@ -834,7 +884,7 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
             angular.copy($scope.meeting, meetingOld);
             // Page and content titles
             $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
-            Page.setTitle('Meeting '+ meetingResponse.id);
+            Page.setTitle('Meeting '+ meetingResponse.name);
             meetingRequestUrl       = meetingResponse.getRequestedUrl();
             if($location.path().indexOf('/edit') == -1) {
                 $scope.meeting.agenda   = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
@@ -882,16 +932,24 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
 );
 
 // meetingMinutesController -------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('meetingMinutesController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache, $location) {
+angularRest.controller('meetingMinutesController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', '$location', '$compile', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache, $location, $compile) {
         $scope.meeting = {};
         RestangularCache.one('meeting', $routeParams.meetingId).one('minutes').get().then(function(meetingResponse) {
             meetingResponse.agenda = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
             $scope.meeting = meetingResponse;
+            Page.setTitle('Minutes '+ meetingResponse.name);
         });
 
         // From the datetime string only show the time
         $scope.timeOnly = function(string) {
-            return string.substr(11);
+            return $sce.trustAsHtml(string.substr(11));
+        };
+
+        // Whether or not to show guests in the minutes
+        $scope.showGuests = true;
+        $scope.toggleGuests = function() {
+            $scope.showGuests = !$scope.showGuests;
+            return $scope.showGuests;
         };
 
         // Show heading?
@@ -901,7 +959,42 @@ angularRest.controller('meetingMinutesController', ['Restangular', 'RestangularC
             } else {
                 return false;
             }
-        }
+        };
+
+        // Checks who said something
+        $scope.labelClass = function(index) {
+            var minute = $scope.meeting.minutes[index]
+            // Current user is sender?
+            if(minute.user !== undefined && minute.user.id == sessionStorage.id) {
+                return 'success';
+            // Server is sender?
+            } else if(minute.name == 'Server') {
+                return 'default';
+            // Other
+            } else {
+                return 'info';
+            }
+        };
+
+        // Parse the message for example to show voting results
+        $scope.parseMessage = function(msg) {
+            // Voting results?
+            if(msg.substring(0, 17) == '[Voting Results] ') {
+                var votes       = msg.substring(17).split(',');
+                var totalVotes  = 0;
+                for(var i = 0; i < votes.length; i++) {
+                    totalVotes = (totalVotes + parseInt(votes[i]));
+                }
+                var html        = '<strong>Votes: '+ totalVotes +'</strong><br>';
+                html += '<div class="progress" title="Approved"><div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[0]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[0]) / totalVotes) * 100) +'%;">'+ parseInt(votes[0]) +'</div></div>';
+                html += '<div class="progress" title="Rejected"><div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[1]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[1]) / totalVotes) * 100) +'%;">'+ parseInt(votes[1]) +'</div></div>';
+                html += '<div class="progress" title="Blank"><div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[2]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[2]) / totalVotes) * 100) +'%;">'+ parseInt(votes[2]) +'</div></div>';
+                html += '<div class="progress" title="None"><div class="progress-bar progress-bar-default" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[3]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[3]) / totalVotes) * 100) +'%;">'+ parseInt(votes[3]) +'</div></div>';
+                return $sce.trustAsHtml(html);
+            } else {
+                return $sce.trustAsHtml(msg);
+            }
+        };
 
         var parents     = [];
         // Start with 2 for H2
@@ -942,12 +1035,16 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
             room: {
                 grid: { }
             },
-            participants: []
+            agenda: '1. Opening\n',
+            participants: [],
+            documents: []
         };
         $scope.grids                    = [];
         $scope.rooms                    = [];
         $scope.participant              = '';
-        $scope.usernameSearchResults    = [];
+        var usernameSearchResults       = [];
+        $scope.document                 = '';
+        var documentSearchResults       = [];
 
         // Navigate the calendar to the current date
         $scope.updateCalendar = function() {
@@ -1020,11 +1117,59 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
             return $scope.agendaHelp;
         };
 
+        // Search for the given documents
+        $scope.getDocumentByTitle = function($viewValue) {
+            if($viewValue != null && $viewValue.length >= 3) {
+                var results = RestangularCache.one('documents', $viewValue).get().then(function(documentsResponse) {
+                    documentSearchResults = documentsResponse;
+                    return documentsResponse;
+                });
+            } else {
+                var results = '';
+            }
+            return results;
+        };
+
+        // Adds the currently selected documents to the list
+        $scope.addDocument = function() {
+            for(var i = 0; i < documentSearchResults.length; i++) {
+                // Only add user when match found and not already listed
+                if(documentSearchResults[i].title == $scope.document) {
+                    if(!isDuplicateDocument()) {
+                        $scope.meeting.documents.push(documentSearchResults[i]);
+                    } else {
+                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The document '+ documentSearchResults[i].title + ' is already added to this meeting'), type: 'warning'});
+                    }
+                }
+            }
+        };
+
+        // Checks for duplicate documents
+        function isDuplicateDocument() {
+            for(var i = 0; i < $scope.meeting.documents.length; i++) {
+                if($scope.meeting.documents[i].title == $scope.document) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Removes the documents with the given ID from the list
+        $scope.removeDocument = function(id) {
+            for(var i = 0; i < $scope.meeting.documents.length; i++) {
+                if($scope.meeting.documents[i].id == id) {
+                    $scope.meeting.documents.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
+        };
+
         // Search for the given username
         $scope.getUserByUsername = function($viewValue) {
             if($viewValue != null && $viewValue.length >= 3) {
                 var results = RestangularCache.one('users', $viewValue).get().then(function(usersResponse) {
-                    $scope.usernameSearchResults = usersResponse;
+                    usernameSearchResults = usersResponse;
                     return usersResponse;
                 });
             } else {
@@ -1035,13 +1180,13 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
 
         // Adds the currently selected participant to the list
         $scope.addParticipant = function() {
-            for(var i = 0; i < $scope.usernameSearchResults.length; i++) {
+            for(var i = 0; i < usernameSearchResults.length; i++) {
                 // Only add user when match found and not already listed
-                if($scope.usernameSearchResults[i].username == $scope.participant) {
+                if(usernameSearchResults[i].username == $scope.participant) {
                     if(!isDuplicateParticipant()) {
-                        $scope.meeting.participants.push($scope.usernameSearchResults[i]);
+                        $scope.meeting.participants.push(usernameSearchResults[i]);
                     } else {
-                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The user '+ $scope.usernameSearchResults[i].username + ' is already a participant for this meeting'), type: 'warning'});
+                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The user '+ usernameSearchResults[i].username + ' is already a participant for this meeting'), type: 'warning'});
                     }
                 }
             }

@@ -314,6 +314,7 @@ class Meeting extends Module{
         if($full) {
             $data['room'] = array(
                 'id'            => $meeting->getRoom()->getId(),
+                'name'          => $meeting->getRoom()->getName(),
                 'grid'          => array(
                     'id'        => $meeting->getRoom()->getRegion()->getGrid()->getId(),
                     'name'      => $meeting->getRoom()->getRegion()->getGrid()->getName()

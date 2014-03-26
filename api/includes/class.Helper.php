@@ -350,11 +350,12 @@ class Helper {
      * @param string $subject - Subject
      * @param string $description - Description of the event
      * @param string $location - Location where the event takes place
-     * @param string $attendeeName - The name of the attendee
-     * @param string $attendeeEmail - The e-mail address of the attendee
+     * @param string $creatorName - The name of the creator of this event
+     * @param string $creatorEmail - The email address of the creator
+     * @param array $attendees - List with name => email pairs
      * @return string $filename
      */
-    public static function getICS($startDate, $endDate, $subject, $description, $location, $attendeeName, $attendeeEmail) {
+    public static function getICS($startDate, $endDate, $subject, $description, $location, $creatorName, $creatorEmail, $attendees) {
         $start  = strtotime($startDate);
         $end    = strtotime($endDate);
         $ical   =
@@ -367,9 +368,15 @@ BEGIN:VEVENT
 DTSTART:". date('Ymd\THis\Z', $start) ."
 DTEND:". date('Ymd\THis\Z', $end) ."
 DTSTAMP:". date('Ymd\THis\Z') ."
-ORGANIZER;CN=". CMS_ADMIN_NAME .":mailto:". CMS_ADMIN_EMAIL ."
-UID:". uniqid() ."
-ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=". $attendeeName .";X-NUM-GUESTS=0:mailto:". $attendeeEmail ."
+ORGANIZER;CN=". $creatorName .":mailto:". $creatorEmail ."
+UID:". uniqid();
+        // Add attendees
+        foreach($attendees as $name => $email) {
+            $ical   .= "
+ATTENDEE;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION;RSVP=TRUE;CN=". $name .":MAILTO:". $email;
+        }
+        // Continue ICS creation
+        $ical   .= "
 DESCRIPTION:". str_replace("\n", "\n ", preg_replace('/([\,;])/','\\\$1', $description)) ."
 LOCATION:". preg_replace('/([\,;])/','\\\$1', $location) ."
 SEQUENCE:0

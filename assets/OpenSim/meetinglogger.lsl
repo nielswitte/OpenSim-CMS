@@ -1,5 +1,7 @@
 /**
- * When touching this prim the meeting will be logged
+ * When touching this prim the meeting will be logged and the agenda can be shown
+ * when using the agendaViewer script. In addition this allows avatars to vote
+ * during meetings.
  *
  * Do not forget to enable the following settings in your OpenSim configuration
  * For loading dynamic textures and enable JSON support:
@@ -11,7 +13,7 @@
  *
  * @author Niels Witte
  * @date March 14th, 2014
- * @version 0.2
+ * @version 0.3
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
@@ -35,6 +37,15 @@ list avatarsPresent;            // List to keep track of all avatars currently p
 integer meetingAreaSize = 25;   // Size of the meeting room to detect avatars in
 list agendaItems;               // List with the agenda items in it
 integer currentAgendaItem = 0;  // The current index of the agenda
+integer timerfiredcount = 0;    // Only send messages every 6th cycle (so every minute)
+// Voting
+integer voting = FALSE;         // Currently voting?
+integer votes_approve = 0;      // Vote count in favor
+integer votes_reject = 0;       // vote count against
+integer votes_blank = 0;        // vote count blank
+integer votes_none = 0;         // vote count none
+list avatarsVoted = [];         // List of avatars that have voted
+list voteListeners = [];        // List with vote listeners (which needs to be cleared when voting is over)
 
 // HTTP requests
 key http_request_api_token;     // API token request
@@ -158,6 +169,91 @@ agendaItem(integer index) {
 }
 
 /**
+ * Shows all present avatars the voting dialog
+ */
+start_voting() {
+    llSay(0, "[Meeting] Voting started");
+
+    // Reset voting parameters
+    votes_approve   = 0;
+    votes_reject    = 0;
+    votes_blank     = 0;
+    votes_none      = 0;
+    avatarsVoted    = [];
+
+    voting = TRUE;
+    integer i;
+    list options = ["Approve", "Reject", "Blank", "None"];
+    for(i = 0; i < llGetListLength(avatarsPresent); i++) {
+        key uuid = llList2Key(avatarsPresent, i);
+        voteListeners += llListen(channelListen, "", uuid, "");
+        llDialog(uuid, "Give your vote by choosing one of the options below.", options, channelListen);
+    }
+}
+
+/**
+ * Processes a vote
+ *
+ * @param string msg
+ * @param key id
+ */
+cast_vote(string msg, key id) {
+    // Avatar has already voted?
+    if(llListFindList(avatarsVoted, [id]) > -1) {
+        llInstantMessage(id, "[Meeting] You have already voted!");
+    // New vote
+    } else {
+        // Register avatar
+        avatarsVoted += [id];
+        // Process vote
+        if (msg == "Approve") {
+            votes_approve++;
+            if (debug) llInstantMessage(userUuid, "[Debug] Voted approve (" + id + ")");
+        } else if (msg == "Reject") {
+            votes_reject++;
+            if (debug) llInstantMessage(userUuid, "[Debug] Voted reject (" + id + ")");
+        } else if (msg == "Blank") {
+            votes_blank++;
+            if (debug) llInstantMessage(userUuid, "[Debug] Voted blank (" + id + ")");
+        } else if (msg == "None") {
+            votes_none++;
+            if (debug) llInstantMessage(userUuid, "[Debug] Voted none (" + id + ")");
+        }
+        llInstantMessage(id, "[Meeting] You voted: "+ msg);
+    }
+
+    // All avatars voted? -> stop voting automatically!
+    if(llGetListLength(avatarsVoted) == llGetListLength(voteListeners)) {
+        end_voting();
+    }
+}
+
+/**
+ * Show results when voting ends and remove listeners
+ */
+end_voting() {
+    voting = FALSE;
+    // Number of avatars which has not voted
+    integer allowedToVito = llGetListLength(voteListeners);
+    integer notVoted = allowedToVito - llGetListLength(avatarsVoted);
+    // Remove all vote listeners
+    integer i;
+    for (i = 0; i < allowedToVito; i++ ) {
+        llListenRemove(llList2Integer(voteListeners, i));
+    }
+    voteListeners = [];
+
+    // Say results
+    llSay(0, "[Meeting] A total of "+ llGetListLength(avatarsVoted) +" out of "+ allowedToVito +" avatars voted:");
+    llSay(0, "[Meeting]    Approve: "+ votes_approve);
+    llSay(0, "[Meeting]    Reject: "+ votes_reject);
+    llSay(0, "[Meeting]    Blank: "+ votes_blank);
+    llSay(0, "[Meeting]    None: "+ (votes_none + notVoted));
+    // Also send results to API
+    queueMessage(llGetUnixTime(), "", "Server", "[Voting Results] "+ votes_approve +","+ votes_reject +","+ votes_blank +","+ votes_none);
+}
+
+/**
  * The default state
  */
 default {
@@ -171,6 +267,7 @@ default {
         currentAgendaItem   = 0;
         agendaItems         = [];
         avatarsPresent      = [];
+        timerfiredcount     = 0;
 
         // SET COLOR RED
         llSetColor(<255, 0, 0>, ALL_SIDES);
@@ -245,7 +342,7 @@ state startup {
         } else if(request_id == http_request_meetings) {
             key json_body   = JsonCreateStore(body);
             integer meetingsLength = JsonGetArrayLength(json_body, "");
-            if(debug) llInstantMessage(userUuid, "[Debug] Found: "+ meetingsLength +" meetings");
+            if(debug) llInstantMessage(userUuid, "[Debug] Found: "+ meetingsLength +" meetings which are today or in the future");
             integer x;
             string today = llGetDate();
             list meetingsToday = [];
@@ -257,7 +354,7 @@ state startup {
 
                     // Only load meetings that start today
                     if(meetingStartDay == today) {
-                        meetingsToday += [ JsonGetValue(json_body, "["+ (meetingsLength - x) +"].id") +") "+ JsonGetValue(json_body, "["+ (meetingsLength - x) +"].name") ];
+                        meetingsToday += [ llGetSubString(JsonGetValue(json_body, "["+ (meetingsLength - x) +"].id") +") "+ JsonGetValue(json_body, "["+ (meetingsLength - x) +"].name"), 0, 23) ];
                     }
                 }
 
@@ -377,7 +474,12 @@ state logging {
         // Listen for message
         Listener += llListen(channelListen, "", userUuid, "");
         // Show options
-        list options = ["Previous", "Next", "Quit"];
+        list options = [];
+        if(voting) {
+            options = ["Previous", "Next", "End Vote", "Quit"];
+        } else {
+            options = ["Previous", "Next", "Start Vote", "Quit"];
+        }
         llDialog(userUuid, "Press Quit to stop logging the meeting. Or use Previous and Next to go to the other agenda items.", options, channelListen);
     }
 
@@ -417,6 +519,12 @@ state logging {
             // Go to the next agenda item
             } else if(message == "Next") {
                 agendaItem(currentAgendaItem+1);
+            } else if(message == "Start Vote") {
+                start_voting();
+            } else if(voting == TRUE && (message == "Approve" || message == "Reject" || message == "Blank" || message == "None")) {
+                cast_vote(message, id);
+            } else if(voting == TRUE && message == "End Vote") {
+                end_voting();
             }
         } else {
             queueMessage(llGetUnixTime(), (string) id, name, message);
@@ -425,8 +533,14 @@ state logging {
 
     // Loop through requests
     timer() {
-        if(debug) llInstantMessage(userUuid, "[Debug] Timer fired");
-        request_send_chat();
+        if(debug) llInstantMessage(userUuid, "[Debug] Timer fired ("+ timerfiredcount +")");
+        // Only send chat every 6th cycle (starting at 0)
+        if(timerfiredcount >= 5) {
+            timerfiredcount = 0;
+            request_send_chat();
+        }
+        timerfiredcount++;
+        // Detect avatars
         llSensor("", NULL_KEY, AGENT, meetingAreaSize, PI);
 
         llSetTimerEvent(10.0);

@@ -200,7 +200,7 @@ class User extends Module {
         foreach($results as $result) {
             $user       = new \Models\User($result['id']);
             $user->getInfoFromDatabase();
-            $data[]     = self::getUserData($user, FALSE);
+            $data[]     = $this->getUserData($user, FALSE);
         }
         return $data;
     }
@@ -216,7 +216,7 @@ class User extends Module {
         $user->getInfoFromDatabase();
         $user->getAvatarsFromDatabase();
         $user->getPresentationsFromDatabase();
-        return self::getUserData($user, TRUE);
+        return $this->getUserData($user, TRUE);
     }
 
     /**

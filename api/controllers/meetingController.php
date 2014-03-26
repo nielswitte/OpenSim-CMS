@@ -84,7 +84,7 @@ class MeetingController {
         // Create the agenda
         $agenda = $this->parseAgendaString($parameters['agenda']);
         $this->setAgenda($agenda);
-        
+
         // Mail participants for this meeting
         $this->mailParticipants();
 
@@ -137,13 +137,27 @@ class MeetingController {
         }
         $participantsAdd = $this->setParticipants($participants);
 
+        // Update the documents list
+        $documentsRemove = $this->removeDocuments();
+
+        // Participants are a array of ids or an array of users?
+        if(isset($parameters['documents'][0]) && is_numeric($parameters['documents'][0])) {
+            $documents = $parameters['documents'];
+        } else {
+            $documents = array();
+            foreach($parameters['documents'] as $document) {
+                $documents[] = $document['id'];
+            }
+        }
+        $documentsAdd = $this->setDocuments($documents);
+
         // Update the agenda
         $agenda = $this->parseAgendaString($parameters['agenda']);
         $this->removeAgenda();
         $this->setAgenda($agenda);
 
         // Were any updates made?
-        if($update || $participantsRemove || $participantsAdd) {
+        if($update || $participantsRemove || $participantsAdd || $documentsRemove || $documentsAdd) {
             return TRUE;
         } else {
             throw new \Exception('No changes were made to this meeting', 6);
@@ -173,6 +187,45 @@ class MeetingController {
         foreach($agenda as $item) {
             $item['meetingId'] = $this->getMeeting()->getId();
             $result = $db->insert('meeting_agenda_items', $item);
+        }
+        return $result;
+    }
+
+    /**
+     * Removes all documents from this meeting
+     *
+     * @return boolean
+     */
+    private function removeDocuments() {
+        // Create new empty documents list
+        $documents = new \Models\MeetingDocuments($this->getMeeting());
+        $this->getMeeting()->setDocuments($documents);
+
+        // Add documents to DB
+        $db = \Helper::getDB();
+        $db->where('meetingId', $db->escape($this->getMeeting()->getId()));
+        return $db->delete('meeting_documents');
+    }
+
+    /**
+     * Inserts the documents array into the database
+     *
+     * @param array $documents - List with document IDs
+     * @return boolean
+     */
+    private function setDocuments($documents) {
+        $db = \Helper::getDB();
+        $result = FALSE;
+        foreach($documents as $document) {
+            $doc = new \Models\Document($document);
+            $this->getMeeting()->getDocuments()->addDocument($doc);
+
+            // DB data
+            $data = array(
+                'meetingId'     => $db->escape($this->getMeeting()->getId()),
+                'documentId'    => $db->escape($doc->getId())
+            );
+            $result = $db->insert('meeting_documents', $data);
         }
         return $result;
     }
@@ -245,9 +298,16 @@ class MeetingController {
         require_once dirname(__FILE__) .'/../includes/PHPMailer/PHPMailerAutoload.php';
 
         // Prepare email-template
-        $html = file_get_contents(dirname(__FILE__) .'/../templates/email/default.html');
+        $html   = file_get_contents(dirname(__FILE__) .'/../templates/email/default.html');
 
-        $data = array(
+        $osUrl  = 'opensim://'.
+                    $meeting->getRoom()->getRegion()->getGrid()->getOsIp() .':'.
+                    $meeting->getRoom()->getRegion()->getGrid()->getOsPort() .'/'.
+                    urlencode($meeting->getRoom()->getRegion()->getName()) .'/'.
+                    $meeting->getRoom()->getX() .'/'.
+                    $meeting->getRoom()->getY() .'/'.
+                    $meeting->getRoom()->getZ();
+        $data   = array(
             '{{title}}'     => $meeting->getName(),
             '{{body}}'      => \Helper::linkIt(
                 '<p>An meeting has been scheduled for '. date('l F j', $startDate) .' at '. date('H:i', $startDate) .' until '. date('H:i', $endDate) .'.</p>'
@@ -255,16 +315,25 @@ class MeetingController {
                 . str_replace(' ', '&nbsp;', nl2br($meeting->getAgenda()->toString(), FALSE))
                 .'<h2>Participants</h2>'
                 .'<p>'. nl2br($meeting->getParticipants()->toString(), FALSE) .'</p>'
-                .'<div style="text-align: center;"><a href="opensim://'.
-                    $meeting->getRoom()->getRegion()->getGrid()->getOsIp() .':'.
-                    $meeting->getRoom()->getRegion()->getGrid()->getOsPort() .'/'.
-                    urlencode($meeting->getRoom()->getRegion()->getName()) .'/'.
-                    $meeting->getRoom()->getX() .'/'.
-                    $meeting->getRoom()->getY() .'/'.
-                    $meeting->getRoom()->getZ() .'" class="btn btn-lg">Go to Meeting</a></div>'
+                .'<div style="text-align: center;">'
+                .'  <a href="'. $osUrl .'" class="btn btn-lg">Go to Meeting</a><br>'
+                .'  <small>'. $osUrl .'</small>'
+                .'</div>'
             )
         );
         $html = str_replace(array_keys($data), array_values($data), $html);
+
+        // Create ICS
+        $pathToICS = \Helper::getICS(
+            $meeting->getStartDate(),
+            $meeting->getEndDate(),
+            $meeting->getName(),
+            $meeting->getAgenda()->toString(),
+            $meeting->getRoom()->getRegion()->getName(),
+            $meeting->getCreator()->getFirstName() .' '. $meeting->getCreator()->getLastName(),
+            $meeting->getCreator()->getEmail(),
+            $meeting->getParticipants()->getEmails()
+        );
 
         // Mail all participants
         foreach($participants as $participant) {
@@ -272,17 +341,17 @@ class MeetingController {
             $mail->addAddress($participant->getEmail(), $participant->getFirstName() .' '. $participant->getLastName());
             $mail->Subject = '[OpenSim-CMS] Meeting: '. $meeting->getName();
             $mail->setFrom(CMS_ADMIN_EMAIL, CMS_ADMIN_NAME);
-            // Create ICS
-            $pathToICS = \Helper::getICS($meeting->getStartDate(), $meeting->getEndDate(), $meeting->getName(), $meeting->getAgenda()->toString(), $meeting->getRoom()->getRegion()->getName(), $participant->getFirstName() .' '. $participant->getLastName(), $participant->getEmail());
+
             // Attach ICS
             $mail->addAttachment($pathToICS, 'invite.ics', 'base64', 'application/ics');
             // Add template
             $mail->msgHTML($html, '', TRUE);
             // Send the email
             $result = $mail->send();
-            // Remove the ICS file when done
-            unlink($pathToICS);
         }
+
+        // Remove the ICS file when done
+        unlink($pathToICS);
         return $result;
     }
 
@@ -464,9 +533,11 @@ class MeetingController {
         } elseif(!isset($parameters['endDate']) || !preg_match("/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/", $parameters['endDate']) || strtotime($parameters['endDate']) <=  strtotime($parameters['startDate'])) {
             throw new \Exception('Missing parameter (string) "endDate", which should be in the format YYYY-MM-DD HH:mm:ss and past "startDate"', 4);
         } elseif(!isset($parameters['room']) || (!isset($parameters['room']['id']) && !is_numeric($parameters['room']))) {
-            throw new \Exception('Missing parameter (integer or array) "room", which should be roomId or a room array which contains an roomId ', 5);
-        } elseif(!isset($parameters['participants'])) {
-            throw new \Exception('Missing parameter (array) "participants", which should be array which contains userIds of the participants ', 6);
+            throw new \Exception('Missing parameter (integer or array) "room", which should be a room id or a room array which contains a room id ', 5);
+        } elseif(isset($parameters['participants']) && (!empty($parameters['participants']) && !isset($parameters['participants'][0]['id']) && !is_numeric($parameters['participants'][0]))) {
+            throw new \Exception('Missing parameter (array) "participants", which should be array which contains ids of the participants or contains an array of users which have an id ', 6);
+        } elseif(isset($parameters['documents']) && (!empty($parameters['documents']) && !isset($parameters['documents'][0]['id']) && !is_numeric($parameters['documents'][0]))) {
+            throw new \Exception('Missing parameter (array) "documents", which should be array which contains ids of the documents or contains an array of documents which have an id ', 9);
         } elseif($this->meetingOverlap($parameters['startDate'], $parameters['endDate'], (isset($parameters['room']['id']) ? $parameters['room']['id'] : $parameters['room']), ($this->getMeeting() !== NULL ? $this->getMeeting()->getId() : 0))) {
             throw new \Exception('Meeting overlaps with an existing meeting', 8);
         } else {

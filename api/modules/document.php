@@ -34,12 +34,13 @@ class Document extends Module{
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/documents\/?$/",                "getDocuments",         $this, "GET",    \Auth::READ);    // Get list with 50 documents
-        $this->api->addRoute("/documents\/(\d+)\/?$/",         "getDocuments",         $this, "GET",    \Auth::READ);    // Get list with 50 documents starting at the given offset
-        $this->api->addRoute("/document\/?$/",                 "createDocument",       $this, "POST",   \Auth::EXECUTE); // Create a document
-        $this->api->addRoute("/document\/(\d+)\/?$/",          "getDocumentById",      $this, "GET",    \Auth::READ);    // Select specific document
-        $this->api->addRoute("/document\/(\d+)\/?$/",          "deleteDocumentById",   $this, "DELETE", \Auth::EXECUTE); // Delete specific document
-        $this->api->addRoute("/documents\/cache\/?$/",         "deleteExpiredCache",   $this, "DELETE", \Auth::EXECUTE); // Removes all expired cached assets
+        $this->api->addRoute("/documents\/?$/",                         "getDocuments",         $this, "GET",    \Auth::READ);    // Get list with 50 documents
+        $this->api->addRoute("/documents\/(\d+)\/?$/",                  "getDocuments",         $this, "GET",    \Auth::READ);    // Get list with 50 documents starting at the given offset
+        $this->api->addRoute("/documents\/([a-zA-Z0-9-_ ]{3,}+)\/?$/",   "getDocumentsByTitle",  $this, "GET",    \Auth::READ);    // Search for documents by title
+        $this->api->addRoute("/document\/?$/",                          "createDocument",       $this, "POST",   \Auth::EXECUTE); // Create a document
+        $this->api->addRoute("/document\/(\d+)\/?$/",                   "getDocumentById",      $this, "GET",    \Auth::READ);    // Select specific document
+        $this->api->addRoute("/document\/(\d+)\/?$/",                   "deleteDocumentById",   $this, "DELETE", \Auth::EXECUTE); // Delete specific document
+        $this->api->addRoute("/documents\/cache\/?$/",                  "deleteExpiredCache",   $this, "DELETE", \Auth::EXECUTE); // Removes all expired cached assets
     }
 
 
@@ -61,6 +62,25 @@ class Document extends Module{
         foreach($resutls as $result) {
             $document       = new \Models\Document($result['id'], $result['type'], $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate']);
             $data[]         = $this->getDocumentData($document, FALSE);
+        }
+        return $data;
+    }
+
+    /**
+     * Searches the database for the given (partial) title and returns a list with documents
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getDocumentsByTitle($args) {
+        $db             = \Helper::getDB();
+        $params         = array("%". strtolower($db->escape($args[1])) ."%");
+        $results        = $db->rawQuery('SELECT * FROM documents WHERE LOWER(title) LIKE ? ORDER BY LOWER(title) ASC', $params);
+        $data           = array();
+        foreach($results as $result) {
+            $document   = new \Models\Document($result['id']);
+            $document->getInfoFromDatabase();
+            $data[]     = $this->getDocumentData($document, FALSE);
         }
         return $data;
     }

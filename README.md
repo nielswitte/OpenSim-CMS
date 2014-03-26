@@ -76,7 +76,7 @@ the URL allows you to quickly teleport to a specific location. URLs need to be f
 
 For example if you have a server running on `192.168.1.2` on port `9000`, with a region called `My Region` and you want to travel to the coordinates `<100, 80, 20>` use:
 
-`opensim://192.168.1.2:9000/My%20Region/100/80/20`, The URL is case sensitive and spaces need to be converted to `%20`, use functions like `urlencode()` to ensure a valid URL.
+`opensim://192.168.1.2:9000/My%20Region/100/80/20`, The URL is case sensitive and spaces need to be converted to `%20` or `+`, use functions like `urlencode()` to ensure a valid URL.
 
 ## Credits
 Kudos to those who created the packages and classes which are used by this program.
@@ -84,8 +84,7 @@ Kudos to those who created the packages and classes which are used by this progr
 Used in the Models/Controllers and API:
  * Ajillion and Avbdr for PHP-MySQLi-Database-Class (https://github.com/avbdr/PHP-MySQLi-Database-Class/)
  * Sprain for class.Images.php (https://github.com/sprain/class.Images.php)
- * Eoghanobrien for php-simple-mail (https://github.com/eoghanobrien/php-simple-mail)
- * iCalcreator (https://github.com/iCalcreator/iCalcreator)
+ * PHPMailer (https://github.com/PHPMailer/PHPMailer/)
 
 Used in the CMS:
  * Mgonto for Restangular (https://github.com/mgonto/restangular)
