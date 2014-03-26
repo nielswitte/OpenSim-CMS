@@ -43,7 +43,7 @@
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="inputRegion">Rooms</label>
                 <div class="col-sm-10">
-                    <select id="inputRegion" class="form-control" ng-model="meeting.room.id" ng-options="room.id as room.id for room in rooms" required></select>
+                    <select id="inputRegion" class="form-control" ng-model="meeting.room.id" ng-options="room.id as room.name for room in rooms" required></select>
                 </div>
             </div>
             <fieldset>

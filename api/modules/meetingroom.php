@@ -52,6 +52,7 @@ class MeetingRoom extends Module{
             'mr.id as roomId',
             'mr.regionUuid as regionUuid',
             'mr.gridId as gridId',
+            'mr.name as name',
             'mr.description as description',
             'mr.x as x',
             'mr.y as y',
@@ -73,7 +74,7 @@ class MeetingRoom extends Module{
                 $region->setName($result['regionName']);
                 $grid->addRegion($region);
             }
-            $room       = new \Models\MeetingRoom($result['roomId'], $region, $result['description'], $result['x'], $result['y'], $result['z']);
+            $room       = new \Models\MeetingRoom($result['roomId'], $region, $result['name'], $result['description'], $result['x'], $result['y'], $result['z']);
             $data[]     = $this->getRoomData($room, FALSE);
         }
 
@@ -96,6 +97,7 @@ class MeetingRoom extends Module{
             'mr.id as roomId',
             'mr.regionUuid as regionUuid',
             'mr.gridId as gridId',
+            'mr.name as name',
             'mr.description as description',
             'mr.x as x',
             'mr.y as y',
@@ -122,7 +124,7 @@ class MeetingRoom extends Module{
             // Process results
             foreach($results as $result) {
                 // Only set the region once, reuse it for other rooms in the same region
-                $room       = new \Models\MeetingRoom($result['roomId'], $region, $result['description'], $result['x'], $result['y'], $result['z']);
+                $room       = new \Models\MeetingRoom($result['roomId'], $region, $result['name'], $result['description'], $result['x'], $result['y'], $result['z']);
                 $data[]     = $this->getRoomData($room, TRUE);
             }
         }
@@ -145,6 +147,7 @@ class MeetingRoom extends Module{
             'mr.id as roomId',
             'mr.regionUuid as regionUuid',
             'mr.gridId as gridId',
+            'mr.name as name',
             'mr.description as description',
             'mr.x as x',
             'mr.y as y',
@@ -169,7 +172,7 @@ class MeetingRoom extends Module{
             $grid->addRegion($region);
 
             // Create the room
-            $room       = new \Models\MeetingRoom($results[0]['roomId'], $region, $results[0]['description'], $results[0]['x'], $results[0]['y'], $results[0]['z']);
+            $room       = new \Models\MeetingRoom($results[0]['roomId'], $region, $results[0]['name'], $results[0]['description'], $results[0]['x'], $results[0]['y'], $results[0]['z']);
 
             // Process results
             $data       = $this->getRoomData($room, TRUE);
@@ -187,6 +190,7 @@ class MeetingRoom extends Module{
      */
     public function getRoomData(\Models\MeetingRoom $room, $full = TRUE) {
         $data['id']             = $room->getId();
+        $data['name']           = $room->getName();
         if($full) {
             $data['grid']       = array(
                 'id'    => $room->getRegion()->getGrid()->getId(),

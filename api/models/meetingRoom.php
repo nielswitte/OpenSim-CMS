@@ -15,6 +15,7 @@ require_once dirname(__FILE__) .'/simpleModel.php';
 class MeetingRoom implements simpleModel {
     private $id;
     private $region;
+    private $name;
     private $description;
     private $x, $y, $z;
 
@@ -23,14 +24,16 @@ class MeetingRoom implements simpleModel {
      *
      * @param integer $id - The id of the room
      * @param \Models\Region $region - [Optional] Region this room is in
+     * @param string $name - [Optional] The name of the room
      * @param string $description - [Optional] Description of the room
      * @param float $x - [Optional] The X-coordinate of the room
      * @param float $y - [Optional] The Y-coordinate of the room
      * @param float $z - [Optional] The Z-coordinate of the room
      */
-    public function __construct($id, $region = NULL, $description = '', $x = 0, $y = 0, $z = 0) {
+    public function __construct($id, $region = NULL, $name = '', $description = '', $x = 0, $y = 0, $z = 0) {
         $this->id               = $id;
         $this->region           = $region;
+        $this->name             = $name;
         $this->description      = $description;
         $this->x                = $x;
         $this->y                = $y;
@@ -51,6 +54,7 @@ class MeetingRoom implements simpleModel {
             $grid               = new \Models\Grid($room[0]['gridId']);
             $grid->getInfoFromDatabase();
             $this->region       = $grid->getRegionByUuid($room[0]['regionUuid']);
+            $this->name         = $room[0]['name'];
             $this->description  = $room[0]['description'];
             $this->x            = $room[0]['x'];
             $this->y            = $room[0]['y'];
@@ -67,6 +71,15 @@ class MeetingRoom implements simpleModel {
      */
     public function getId() {
         return $this->id;
+    }
+
+    /**
+     * Returns the name of this room
+     *
+     * @return string
+     */
+    public function getName() {
+       return $this->name;
     }
 
     /**

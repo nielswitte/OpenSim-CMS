@@ -163,7 +163,7 @@ CREATE TABLE IF NOT EXISTS `meeting_agenda_items` (
   `value` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (`id`,`meetingId`),
   KEY `FK_meeting_agenda_items_meetings` (`meetingId`),
-  CONSTRAINT `FK_meeting_agenda_items_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`)
+  CONSTRAINT `FK_meeting_agenda_items_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
@@ -218,6 +218,7 @@ CREATE TABLE IF NOT EXISTS `meeting_rooms` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `gridId` int(11) DEFAULT NULL,
   `regionUuid` varchar(36) COLLATE utf8_bin DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   `description` text COLLATE utf8_bin,
   `x` float unsigned DEFAULT '0',
   `y` float unsigned DEFAULT '0',
