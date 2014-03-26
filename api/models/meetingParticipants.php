@@ -47,14 +47,14 @@ class MeetingParticipants {
     }
 
     /**
-     * Returns an array with the email addresses of the participants
+     * Returns an array with the first name and last name as key and email addresses as value of the participants
      *
-     * @return array
+     * @return array - first name last name => email
      */
     public function getEmails() {
         $emails = array();
         foreach($this->getParticipants() as $participant) {
-            $emails[] = $participant->getEmail();
+            $emails[$participant->getFirstName() .' '. $participant->getLastName()] = $participant->getEmail();
         }
         return $emails;
     }

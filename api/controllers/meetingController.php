@@ -84,7 +84,7 @@ class MeetingController {
         // Create the agenda
         $agenda = $this->parseAgendaString($parameters['agenda']);
         $this->setAgenda($agenda);
-        
+
         // Mail participants for this meeting
         $this->mailParticipants();
 
@@ -266,23 +266,35 @@ class MeetingController {
         );
         $html = str_replace(array_keys($data), array_values($data), $html);
 
+        // Create ICS
+        $pathToICS = \Helper::getICS(
+            $meeting->getStartDate(),
+            $meeting->getEndDate(),
+            $meeting->getName(),
+            $meeting->getAgenda()->toString(),
+            $meeting->getRoom()->getRegion()->getName(),
+            $meeting->getCreator()->getFirstName() .' '. $meeting->getCreator()->getLastName(),
+            $meeting->getCreator()->getEmail(),
+            $meeting->getParticipants()->getEmails()
+        );
+
         // Mail all participants
         foreach($participants as $participant) {
             $mail = new \PHPMailer();
             $mail->addAddress($participant->getEmail(), $participant->getFirstName() .' '. $participant->getLastName());
             $mail->Subject = '[OpenSim-CMS] Meeting: '. $meeting->getName();
             $mail->setFrom(CMS_ADMIN_EMAIL, CMS_ADMIN_NAME);
-            // Create ICS
-            $pathToICS = \Helper::getICS($meeting->getStartDate(), $meeting->getEndDate(), $meeting->getName(), $meeting->getAgenda()->toString(), $meeting->getRoom()->getRegion()->getName(), $participant->getFirstName() .' '. $participant->getLastName(), $participant->getEmail());
+
             // Attach ICS
             $mail->addAttachment($pathToICS, 'invite.ics', 'base64', 'application/ics');
             // Add template
             $mail->msgHTML($html, '', TRUE);
             // Send the email
             $result = $mail->send();
-            // Remove the ICS file when done
-            unlink($pathToICS);
         }
+
+        // Remove the ICS file when done
+        unlink($pathToICS);
         return $result;
     }
 
