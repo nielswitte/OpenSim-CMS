@@ -298,7 +298,7 @@ ol {
 
 // Minutes
 #minutes {
-    div.row div {
+    div.row div.minute {
         padding-top: 5px;
         padding-bottom: 5px;
     }
@@ -366,6 +366,15 @@ ol {
         .messages {
             overflow-y: scroll;
             height: 220px;
+        }
+    }
+}
+
+// Progress bar
+.progress {
+    .progress-bar {
+        &.progress-bar-default {
+            background-color: #999;
         }
     }
 }
