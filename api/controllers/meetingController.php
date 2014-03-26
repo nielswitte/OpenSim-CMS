@@ -137,13 +137,27 @@ class MeetingController {
         }
         $participantsAdd = $this->setParticipants($participants);
 
+        // Update the documents list
+        $documentsRemove = $this->removeDocuments();
+
+        // Participants are a array of ids or an array of users?
+        if(isset($parameters['documents'][0]) && is_numeric($parameters['documents'][0])) {
+            $documents = $parameters['documents'];
+        } else {
+            $documents = array();
+            foreach($parameters['documents'] as $document) {
+                $documents[] = $document['id'];
+            }
+        }
+        $documentsAdd = $this->setDocuments($documents);
+
         // Update the agenda
         $agenda = $this->parseAgendaString($parameters['agenda']);
         $this->removeAgenda();
         $this->setAgenda($agenda);
 
         // Were any updates made?
-        if($update || $participantsRemove || $participantsAdd) {
+        if($update || $participantsRemove || $participantsAdd || $documentsRemove || $documentsAdd) {
             return TRUE;
         } else {
             throw new \Exception('No changes were made to this meeting', 6);
@@ -173,6 +187,45 @@ class MeetingController {
         foreach($agenda as $item) {
             $item['meetingId'] = $this->getMeeting()->getId();
             $result = $db->insert('meeting_agenda_items', $item);
+        }
+        return $result;
+    }
+
+    /**
+     * Removes all documents from this meeting
+     *
+     * @return boolean
+     */
+    private function removeDocuments() {
+        // Create new empty documents list
+        $documents = new \Models\MeetingDocuments($this->getMeeting());
+        $this->getMeeting()->setDocuments($documents);
+
+        // Add documents to DB
+        $db = \Helper::getDB();
+        $db->where('meetingId', $db->escape($this->getMeeting()->getId()));
+        return $db->delete('meeting_documents');
+    }
+
+    /**
+     * Inserts the documents array into the database
+     *
+     * @param array $documents - List with document IDs
+     * @return boolean
+     */
+    private function setDocuments($documents) {
+        $db = \Helper::getDB();
+        $result = FALSE;
+        foreach($documents as $document) {
+            $doc = new \Models\Document($document);
+            $this->getMeeting()->getDocuments()->addDocument($doc);
+
+            // DB data
+            $data = array(
+                'meetingId'     => $db->escape($this->getMeeting()->getId()),
+                'documentId'    => $db->escape($doc->getId())
+            );
+            $result = $db->insert('meeting_documents', $data);
         }
         return $result;
     }
@@ -476,9 +529,11 @@ class MeetingController {
         } elseif(!isset($parameters['endDate']) || !preg_match("/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/", $parameters['endDate']) || strtotime($parameters['endDate']) <=  strtotime($parameters['startDate'])) {
             throw new \Exception('Missing parameter (string) "endDate", which should be in the format YYYY-MM-DD HH:mm:ss and past "startDate"', 4);
         } elseif(!isset($parameters['room']) || (!isset($parameters['room']['id']) && !is_numeric($parameters['room']))) {
-            throw new \Exception('Missing parameter (integer or array) "room", which should be roomId or a room array which contains an roomId ', 5);
-        } elseif(!isset($parameters['participants'])) {
-            throw new \Exception('Missing parameter (array) "participants", which should be array which contains userIds of the participants ', 6);
+            throw new \Exception('Missing parameter (integer or array) "room", which should be a room id or a room array which contains a room id ', 5);
+        } elseif(isset($parameters['participants']) && (!empty($parameters['participants']) && !isset($parameters['participants'][0]['id']) && !is_numeric($parameters['participants'][0]))) {
+            throw new \Exception('Missing parameter (array) "participants", which should be array which contains ids of the participants or contains an array of users which have an id ', 6);
+        } elseif(isset($parameters['documents']) && (!empty($parameters['documents']) && !isset($parameters['documents'][0]['id']) && !is_numeric($parameters['documents'][0]))) {
+            throw new \Exception('Missing parameter (array) "documents", which should be array which contains ids of the documents or contains an array of documents which have an id ', 9);
         } elseif($this->meetingOverlap($parameters['startDate'], $parameters['endDate'], (isset($parameters['room']['id']) ? $parameters['room']['id'] : $parameters['room']), ($this->getMeeting() !== NULL ? $this->getMeeting()->getId() : 0))) {
             throw new \Exception('Meeting overlaps with an existing meeting', 8);
         } else {
