@@ -675,7 +675,9 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
         $scope.grids                    = [];
         $scope.rooms                    = [];
         $scope.participant              = '';
-        $scope.usernameSearchResults    = [];
+        var usernameSearchResults       = [];
+        $scope.document                 = '';
+        var documentSearchResults       = [];
 
         // Navigate the calendar to the current date
         $scope.updateCalendar = function() {
@@ -767,11 +769,59 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
             }
         };
 
+        // Search for the given documents
+        $scope.getDocumentByTitle = function($viewValue) {
+            if($viewValue != null && $viewValue.length >= 3) {
+                var results = RestangularCache.one('documents', $viewValue).get().then(function(documentsResponse) {
+                    documentSearchResults = documentsResponse;
+                    return documentsResponse;
+                });
+            } else {
+                var results = '';
+            }
+            return results;
+        };
+
+        // Adds the currently selected documents to the list
+        $scope.addDocument = function() {
+            for(var i = 0; i < documentSearchResults.length; i++) {
+                // Only add user when match found and not already listed
+                if(documentSearchResults[i].title == $scope.document) {
+                    if(!isDuplicateDocument()) {
+                        $scope.meeting.documents.push(documentSearchResults[i]);
+                    } else {
+                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The document '+ documentSearchResults[i].title + ' is already added to this meeting'), type: 'warning'});
+                    }
+                }
+            }
+        };
+
+        // Checks for duplicate documents
+        function isDuplicateDocument() {
+            for(var i = 0; i < $scope.meeting.documents.length; i++) {
+                if($scope.meeting.documents[i].title == $scope.document) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Removes the documents with the given ID from the list
+        $scope.removeDocument = function(id) {
+            for(var i = 0; i < $scope.meeting.documents.length; i++) {
+                if($scope.meeting.documents[i].id == id) {
+                    $scope.meeting.documents.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
+        };
+
         // Search for the given username
         $scope.getUserByUsername = function($viewValue) {
             if($viewValue != null && $viewValue.length >= 3) {
                 var results = RestangularCache.one('users', $viewValue).get().then(function(usersResponse) {
-                    $scope.usernameSearchResults = usersResponse;
+                    usernameSearchResults = usersResponse;
                     return usersResponse;
                 });
             } else {
@@ -782,13 +832,13 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
 
         // Adds the currently selected participant to the list
         $scope.addParticipant = function() {
-            for(var i = 0; i < $scope.usernameSearchResults.length; i++) {
+            for(var i = 0; i < usernameSearchResults.length; i++) {
                 // Only add user when match found and not already listed
-                if($scope.usernameSearchResults[i].username == $scope.participant) {
+                if(usernameSearchResults[i].username == $scope.participant) {
                     if(!isDuplicateParticipant()) {
-                        $scope.meeting.participants.push($scope.usernameSearchResults[i]);
+                        $scope.meeting.participants.push(usernameSearchResults[i]);
                     } else {
-                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The user '+ $scope.usernameSearchResults[i].username + ' is already a participant for this meeting'), type: 'warning'});
+                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The user '+ usernameSearchResults[i].username + ' is already a participant for this meeting'), type: 'warning'});
                     }
                 }
             }
@@ -943,12 +993,15 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
                 grid: { }
             },
             agenda: '1. Opening\n',
-            participants: []
+            participants: [],
+            documents: []
         };
         $scope.grids                    = [];
         $scope.rooms                    = [];
         $scope.participant              = '';
-        $scope.usernameSearchResults    = [];
+        var usernameSearchResults       = [];
+        $scope.document                 = '';
+        var documentSearchResults       = [];
 
         // Navigate the calendar to the current date
         $scope.updateCalendar = function() {
@@ -1021,11 +1074,59 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
             return $scope.agendaHelp;
         };
 
+        // Search for the given documents
+        $scope.getDocumentByTitle = function($viewValue) {
+            if($viewValue != null && $viewValue.length >= 3) {
+                var results = RestangularCache.one('documents', $viewValue).get().then(function(documentsResponse) {
+                    documentSearchResults = documentsResponse;
+                    return documentsResponse;
+                });
+            } else {
+                var results = '';
+            }
+            return results;
+        };
+
+        // Adds the currently selected documents to the list
+        $scope.addDocument = function() {
+            for(var i = 0; i < documentSearchResults.length; i++) {
+                // Only add user when match found and not already listed
+                if(documentSearchResults[i].title == $scope.document) {
+                    if(!isDuplicateDocument()) {
+                        $scope.meeting.documents.push(documentSearchResults[i]);
+                    } else {
+                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The document '+ documentSearchResults[i].title + ' is already added to this meeting'), type: 'warning'});
+                    }
+                }
+            }
+        };
+
+        // Checks for duplicate documents
+        function isDuplicateDocument() {
+            for(var i = 0; i < $scope.meeting.documents.length; i++) {
+                if($scope.meeting.documents[i].title == $scope.document) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Removes the documents with the given ID from the list
+        $scope.removeDocument = function(id) {
+            for(var i = 0; i < $scope.meeting.documents.length; i++) {
+                if($scope.meeting.documents[i].id == id) {
+                    $scope.meeting.documents.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
+        };
+
         // Search for the given username
         $scope.getUserByUsername = function($viewValue) {
             if($viewValue != null && $viewValue.length >= 3) {
                 var results = RestangularCache.one('users', $viewValue).get().then(function(usersResponse) {
-                    $scope.usernameSearchResults = usersResponse;
+                    usernameSearchResults = usersResponse;
                     return usersResponse;
                 });
             } else {
@@ -1036,13 +1137,13 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
 
         // Adds the currently selected participant to the list
         $scope.addParticipant = function() {
-            for(var i = 0; i < $scope.usernameSearchResults.length; i++) {
+            for(var i = 0; i < usernameSearchResults.length; i++) {
                 // Only add user when match found and not already listed
-                if($scope.usernameSearchResults[i].username == $scope.participant) {
+                if(usernameSearchResults[i].username == $scope.participant) {
                     if(!isDuplicateParticipant()) {
-                        $scope.meeting.participants.push($scope.usernameSearchResults[i]);
+                        $scope.meeting.participants.push(usernameSearchResults[i]);
                     } else {
-                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The user '+ $scope.usernameSearchResults[i].username + ' is already a participant for this meeting'), type: 'warning'});
+                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The user '+ usernameSearchResults[i].username + ' is already a participant for this meeting'), type: 'warning'});
                     }
                 }
             }

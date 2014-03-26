@@ -42,22 +42,19 @@
     <tr>
         <th><strong>Documents</strong></th>
         <td>
-            <ul>
-                <li ng-repeat="document in meeting.documents">
-                    <a href="#!/document/{{document.id}}">{{document.title}} ({{document.type}})</a>
-                </li>
-            </ul>
+            <p ng-repeat="document in meeting.documents">
+                <span class="label label-default">{{document.type}}</span> <a href="#!/document/{{document.id}}">{{document.title}} <small>({{document.creationDate}})</small></a>
+            </p>
+            <p ng-show="meeting.documents.length === 0">None</p>
         </td>
     </tr>
     <tr>
         <th><strong>Participants</strong></th>
         <td>
-            <ul>
-                <li ng-repeat="participant in meeting.participants">
+            <p ng-repeat="participant in meeting.participants">
                     <a href="#!/user/{{participant.id}}">{{participant.username}} ({{participant.firstName}} {{participant.lastName}})</a>
-                </li>
-                <li ng-show="meeting.participants.length === 0">None</li>
-            </ul>
+            </p>
+            <p ng-show="meeting.participants.length === 0">None</p>
         </td>
     </tr>
 </table>

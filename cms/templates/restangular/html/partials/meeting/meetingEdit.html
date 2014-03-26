@@ -89,6 +89,27 @@
                 </div>
             </fieldset>
             <fieldset>
+                <legend>Documents (<span>{{meeting.documents.length}}</span>)</legend>
+                <div class="form-group">
+                    <label class="col-sm-2 control-label">Documents</label>
+                    <div class="col-sm-10">
+                        <ul class="list-group list-group-hover" ng-show="meeting.documents.length >= 1">
+                            <li class="list-group-item" ng-repeat="document in meeting.documents">
+                                <button type="button" class="btn btn-danger btn-xs" ng-click="removeDocument(document.id)"><i class="glyphicon glyphicon-remove"></i></button>
+                                <span class="label label-default">{{document.type}}</span> {{document.title}} <small>({{document.creationDate}})</small>
+                            </li>
+                        </ul>
+                        <ul class="list-group" ng-show="meeting.documents.length == 0">
+                            <li class="list-group-item">None</li>
+                        </ul>
+                        <div class="input-group">
+                            <input type="text" class="form-control" value="" key-field="id" text-field="title" placeholder="Document to add" ng-model="document" ng-options="document.title as document.title for document in getDocumentByTitle($viewValue)" bs-typeahead>
+                            <span class="input-group-btn" ng-click="addDocument()"><button type="button" class="btn btn-success"><i class="glyphicon glyphicon-plus"></i> Add document</button></span>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset>
                 <legend>Participants (<span>{{meeting.participants.length}}</span>)</legend>
                 <div class="form-group">
                     <label class="col-sm-2 control-label">Participants</label>
