@@ -2,13 +2,17 @@
     <h1>Minutes <small>{{meeting.name}}</small></h1>
 </div>
 <div class="toolbar toolbar-top">
-    <a ng-href="#!/meeting/{{meeting.id}}" type="button" class="btn btn-default"><i class="glyphicon glyphicon-backward"></i> Back to meeting</a>
+    <a ng-href="#!/meeting/{{meeting.id}}" class="btn btn-default"><i class="glyphicon glyphicon-backward"></i> Back to meeting</a>
 </div>
 <h2>Agenda</h2>
 <div ng-bind-html="meeting.agenda"></div>
 <h2>Minutes</h2>
+<div class="toolbar toolbar-top">
+    <button type="button" class="btn btn-default" ng-click="toggleGuests()" ng-show="showGuests"><i class="glyphicon glyphicon-filter"></i> Only show invited participants</button>
+    <button type="button" class="btn btn-default" ng-click="toggleGuests()" ng-hide="showGuests"><i class="glyphicon glyphicon-filter"></i> Show all participants</button>
+</div>
 <section id="minutes" class="heading-numbers">
-    <div class="row row-striped row-hover" ng-repeat="(index, minute) in meeting.minutes">
+    <div class="row row-striped row-hover" ng-repeat="(index, minute) in meeting.minutes" ng-show="minute.user || showGuests || minute.name == 'Server'">
         <div class="col-sm-12" ng-show="showAgendaNextItemHeading(index)" ng-bind-html="agendaNextItemHeading(index, minute)"></div>
 
         <div class="col-sm-2 minute">

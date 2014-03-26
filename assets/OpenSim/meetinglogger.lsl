@@ -1,5 +1,7 @@
 /**
- * When touching this prim the meeting will be logged
+ * When touching this prim the meeting will be logged and the agenda can be shown
+ * when using the agendaViewer script. In addition this allows avatars to vote
+ * during meetings.
  *
  * Do not forget to enable the following settings in your OpenSim configuration
  * For loading dynamic textures and enable JSON support:
@@ -11,7 +13,7 @@
  *
  * @author Niels Witte
  * @date March 14th, 2014
- * @version 0.2
+ * @version 0.3
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
@@ -186,6 +188,43 @@ start_voting() {
         key uuid = llList2Key(avatarsPresent, i);
         voteListeners += llListen(channelListen, "", uuid, "");
         llDialog(uuid, "Give your vote by choosing one of the options below.", options, channelListen);
+    }
+}
+
+/**
+ * Processes a vote
+ *
+ * @param string msg
+ * @param key id
+ */
+cast_vote(string msg, key id) {
+    // Avatar has already voted?
+    if(llListFindList(avatarsVoted, [id]) > -1) {
+        llInstantMessage(id, "[Meeting] You have already voted!");
+    // New vote
+    } else {
+        // Register avatar
+        avatarsVoted += [id];
+        // Process vote
+        if (msg == "Approve") {
+            votes_approve++;
+            if (debug) llInstantMessage(userUuid, "[Debug] Voted approve (" + id + ")");
+        } else if (msg == "Reject") {
+            votes_reject++;
+            if (debug) llInstantMessage(userUuid, "[Debug] Voted reject (" + id + ")");
+        } else if (msg == "Blank") {
+            votes_blank++;
+            if (debug) llInstantMessage(userUuid, "[Debug] Voted blank (" + id + ")");
+        } else if (msg == "None") {
+            votes_none++;
+            if (debug) llInstantMessage(userUuid, "[Debug] Voted none (" + id + ")");
+        }
+        llInstantMessage(id, "[Meeting] You voted: "+ msg);
+    }
+
+    // All avatars voted? -> stop voting automatically!
+    if(llGetListLength(avatarsVoted) == llGetListLength(voteListeners)) {
+        end_voting();
     }
 }
 
@@ -482,38 +521,8 @@ state logging {
                 agendaItem(currentAgendaItem+1);
             } else if(message == "Start Vote") {
                 start_voting();
-            } else if(voting == TRUE && message == "Approve") {
-                if(llListFindList(avatarsVoted, [id]) == -1) {
-                    votes_approve++;
-                    avatarsVoted += [id];
-                    if(debug) llInstantMessage(userUuid, "[Debug] Voted approve ("+ id +")");
-                } else {
-                    llInstantMessage(id, "[Meeting] You have already voted!");
-                }
-            } else if(voting == TRUE && message == "Reject") {
-                if(llListFindList(avatarsVoted, [id]) == -1) {
-                    votes_reject++;
-                    avatarsVoted += [id];
-                    if(debug) llInstantMessage(userUuid, "[Debug] Voted reject ("+ id +")");
-                } else {
-                    llInstantMessage(id, "[Meeting] You have already voted!");
-                }
-            } else if(voting == TRUE && message == "Blank") {
-                if(llListFindList(avatarsVoted, [id]) == -1) {
-                    votes_blank++;
-                    avatarsVoted += [id];
-                    if(debug) llInstantMessage(userUuid, "[Debug] Voted blank ("+ id +")");
-                } else {
-                    llInstantMessage(id, "[Meeting] You have already voted!");
-                }
-            } else if(voting == TRUE && message == "None") {
-                if(llListFindList(avatarsVoted, [id]) == -1) {
-                    votes_none++;
-                    avatarsVoted += [id];
-                    if(debug) llInstantMessage(userUuid, "[Debug] Voted none ("+ id +")");
-                } else {
-                    llInstantMessage(id, "[Meeting] You have already voted!");
-                }
+            } else if(voting == TRUE && (message == "Approve" || message == "Reject" || message == "Blank" || message == "None")) {
+                cast_vote(message, id);
             } else if(voting == TRUE && message == "End Vote") {
                 end_voting();
             }

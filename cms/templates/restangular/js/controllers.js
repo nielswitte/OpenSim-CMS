@@ -945,6 +945,13 @@ angularRest.controller('meetingMinutesController', ['Restangular', 'RestangularC
             return $sce.trustAsHtml(string.substr(11));
         };
 
+        // Whether or not to show guests in the minutes
+        $scope.showGuests = true;
+        $scope.toggleGuests = function() {
+            $scope.showGuests = !$scope.showGuests;
+            return $scope.showGuests;
+        };
+
         // Show heading?
         $scope.showAgendaNextItemHeading = function(index) {
             if(index == 0 || $scope.meeting.minutes[index].agenda.id != $scope.meeting.minutes[index-1].agenda.id) {
@@ -979,10 +986,10 @@ angularRest.controller('meetingMinutesController', ['Restangular', 'RestangularC
                     totalVotes = (totalVotes + parseInt(votes[i]));
                 }
                 var html        = '<strong>Votes: '+ totalVotes +'</strong><br>';
-                html += '<div class="progress"><div title="Approved" class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[0]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[0]) / totalVotes) * 100) +'%;">'+ parseInt(votes[0]) +'</div></div>';
-                html += '<div class="progress"><div title="Rejected" class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[1]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[1]) / totalVotes) * 100) +'%;">'+ parseInt(votes[1]) +'</div></div>';
-                html += '<div class="progress"><div title="Blank" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[2]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[2]) / totalVotes) * 100) +'%;">'+ parseInt(votes[2]) +'</div></div>';
-                html += '<div class="progress"><div title="None" class="progress-bar progress-bar-default" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[3]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[3]) / totalVotes) * 100) +'%;">'+ parseInt(votes[3]) +'</div></div>';
+                html += '<div class="progress" title="Approved"><div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[0]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[0]) / totalVotes) * 100) +'%;">'+ parseInt(votes[0]) +'</div></div>';
+                html += '<div class="progress" title="Rejected"><div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[1]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[1]) / totalVotes) * 100) +'%;">'+ parseInt(votes[1]) +'</div></div>';
+                html += '<div class="progress" title="Blank"><div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[2]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[2]) / totalVotes) * 100) +'%;">'+ parseInt(votes[2]) +'</div></div>';
+                html += '<div class="progress" title="None"><div class="progress-bar progress-bar-default" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[3]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[3]) / totalVotes) * 100) +'%;">'+ parseInt(votes[3]) +'</div></div>';
                 return $sce.trustAsHtml(html);
             } else {
                 return $sce.trustAsHtml(msg);
