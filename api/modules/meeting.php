@@ -314,18 +314,30 @@ class Meeting extends Module{
             );
         // Show detailed information?
         if($full) {
+            $room = $meeting->getRoom();
+            $grid = $room->getRegion()->getGrid();
             $data['room'] = array(
-                'id'            => $meeting->getRoom()->getId(),
-                'name'          => $meeting->getRoom()->getName(),
+                'id'            => $room->getId(),
+                'name'          => $room->getName(),
                 'grid'          => array(
-                    'id'        => $meeting->getRoom()->getRegion()->getGrid()->getId(),
-                    'name'      => $meeting->getRoom()->getRegion()->getGrid()->getName()
+                    'id'        => $grid->getId(),
+                    'name'      => $grid->getName(),
+                    'openSim'   => array(
+                        'protocol'  => $grid->getOsProtocol(),
+                        'ip'        => $grid->getOsIp(),
+                        'port'      => $grid->getOsPort()
+                    ),
                 ),
                 'region'        => array(
-                    'name'          => $meeting->getRoom()->getRegion()->getName(),
-                    'uuid'          => $meeting->getRoom()->getRegion()->getUuid()
+                    'name'          => $room->getRegion()->getName(),
+                    'uuid'          => $room->getRegion()->getUuid()
                 ),
-                'description'   => $meeting->getRoom()->getDescription()
+                'description'   => $room->getDescription(),
+                'coordinates'   => array(
+                    'x'             => $room->getX(),
+                    'y'             => $room->getY(),
+                    'z'             => $room->getZ()
+                ),
             );
             // Make a list of participants
             $participants = array();
