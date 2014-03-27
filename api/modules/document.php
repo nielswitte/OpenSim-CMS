@@ -55,8 +55,9 @@ class Document extends Module{
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 presentations from the given offset
-        $params         = array($db->escape($args[1]), 50);
-        $resutls        = $db->rawQuery("SELECT * FROM documents ORDER BY creationDate DESC LIMIT ?, ?", $params);
+        $db->orderBy('creationDate', 'DESC');
+        $resutls        = $db->get('documents', array($args[1], 50));
+
         // Process results
         $data           = array();
         foreach($resutls as $result) {

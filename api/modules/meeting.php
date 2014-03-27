@@ -58,11 +58,13 @@ class Meeting extends Module{
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 presentations from the given offset
-        $params         = array($db->escape($args[1]), 50);
-        $resutls        = $db->rawQuery("SELECT *, m.id as meetingId FROM meetings m, users u WHERE u.id = m.userId ORDER BY m.startDate DESC LIMIT ?, ?", $params);
+        $db->where('u.id', 'm.userId');
+        $db->orderBy('m.startDate', 'DESC');
+        $results = $db->get('meetings m, users u', array($db->escape($args[1]), 50), '*, m.id as meetingId');
+
         // Process results
         $data           = array();
-        foreach($resutls as $result) {
+        foreach($results as $result) {
             $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
             $room       = new \Models\MeetingRoom($result['roomId']);
             $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room, $result['name']);

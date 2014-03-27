@@ -175,8 +175,8 @@ class User extends Module {
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 presentations from the given offset
-        $params         = array($db->escape($args[1]), 50);
-        $resutls        = $db->rawQuery("SELECT * FROM users ORDER BY LOWER(username) ASC LIMIT ?, ?", $params);
+        $db->orderBy('LOWER(username)', 'ASC');
+        $resutls        = $db->get('users', array($args[1], 50));
         // Process results
         $data           = array();
         foreach($resutls as $result) {
