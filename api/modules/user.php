@@ -37,20 +37,20 @@ class User extends Module {
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/users\/?$/",                                       "getUsers",               $this, "GET",    \Auth::READ);     // Gets a list of all users
-        $this->api->addRoute("/users\/(\d+)\/?$/",                                "getUsers",               $this, "GET",    \Auth::READ);     // Gets a list of all users starting at the given offset
-        $this->api->addRoute("/users\/([a-zA-Z0-9-_]{3,}+)\/?$/",                 "getUsersByUsername",     $this, "GET",    \Auth::READ);     // Gets a list of all users with usernames matching the search of atleast 3 characters
-        $this->api->addRoute("/user\/?$/",                                        "createUser",             $this, "POST",   \Auth::WRITE);    // Create a new CMS user
-        $this->api->addRoute("/user\/(\d+)\/?$/",                                 "getUserById",            $this, "GET",    \Auth::READ);     // Get a user by ID
-        $this->api->addRoute("/user\/(\d+)\/?$/",                                 "updateUserById",         $this, "PUT",    \Auth::READ);     // Update the given user
-        $this->api->addRoute("/user\/(\d+)\/?$/",                                 "deleteUserById",         $this, "DELETE", \Auth::WRITE);    // Delete the given user
-        $this->api->addRoute("/user\/(\d+)\/password\/?$/",                       "updateUserPasswordById", $this, "PUT",    \Auth::READ);     // Updates the user's password
-        $this->api->addRoute("/user\/([a-z0-9-]{36})\/teleport\/?$/",             "teleportAvatarByUuid",   $this, "PUT",    \Auth::READ);     // Teleports a user
-        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "getUserByAvatar",        $this, "GET",    \Auth::READ);     // Gets an user by the avatar of this grid
-        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "linkAvatarToUser",       $this, "POST",   \Auth::EXECUTE);  // Add this avatar to the user's avatar list
-        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "confirmAvatar",          $this, "PUT",    \Auth::READ);     // Confirms the avatar for the authenticated user
-        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",        "unlinkAvatar",           $this, "DELETE", \Auth::READ);     // Removes the avatar for the authenticated user's avatar list
-        $this->api->addRoute("/grid\/(\d+)\/avatar\/?$/",                         "createAvatar",           $this, "POST",   \Auth::WRITE);    // Create an avatar
+        $this->api->addRoute("/users\/?$/",                                         "getUsers",               $this, "GET",    \Auth::READ);     // Gets a list of all users
+        $this->api->addRoute("/users\/(\d+)\/?$/",                                  "getUsers",               $this, "GET",    \Auth::READ);     // Gets a list of all users starting at the given offset
+        $this->api->addRoute("/users\/([a-zA-Z0-9-_]{3,}+)\/?$/",                   "getUsersByUsername",     $this, "GET",    \Auth::READ);     // Gets a list of all users with usernames matching the search of atleast 3 characters
+        $this->api->addRoute("/user\/?$/",                                          "createUser",             $this, "POST",   \Auth::WRITE);    // Create a new CMS user
+        $this->api->addRoute("/user\/(\d+)\/?$/",                                   "getUserById",            $this, "GET",    \Auth::READ);     // Get a user by ID
+        $this->api->addRoute("/user\/(\d+)\/?$/",                                   "updateUserById",         $this, "PUT",    \Auth::READ);     // Update the given user
+        $this->api->addRoute("/user\/(\d+)\/?$/",                                   "deleteUserById",         $this, "DELETE", \Auth::WRITE);    // Delete the given user
+        $this->api->addRoute("/user\/(\d+)\/password\/?$/",                         "updateUserPasswordById", $this, "PUT",    \Auth::READ);     // Updates the user's password
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/teleport\/?$/","teleportAvatarByUuid",   $this, "PUT",    \Auth::READ);     // Teleports a user
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",          "getUserByAvatar",        $this, "GET",    \Auth::READ);     // Gets an user by the avatar of this grid
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",          "linkAvatarToUser",       $this, "POST",   \Auth::EXECUTE);  // Add this avatar to the user's avatar list
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",          "confirmAvatar",          $this, "PUT",    \Auth::READ);     // Confirms the avatar for the authenticated user
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",          "unlinkAvatar",           $this, "DELETE", \Auth::READ);     // Removes the avatar for the authenticated user's avatar list
+        $this->api->addRoute("/grid\/(\d+)\/avatar\/?$/",                           "createAvatar",           $this, "POST",   \Auth::WRITE);    // Create an avatar
     }
 
     /**
@@ -175,8 +175,8 @@ class User extends Module {
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 presentations from the given offset
-        $params         = array($db->escape($args[1]), 50);
-        $resutls        = $db->rawQuery("SELECT * FROM users ORDER BY LOWER(username) ASC LIMIT ?, ?", $params);
+        $db->orderBy('LOWER(username)', 'ASC');
+        $resutls        = $db->get('users', array($args[1], 50));
         // Process results
         $data           = array();
         foreach($resutls as $result) {
@@ -386,13 +386,14 @@ class User extends Module {
         $parsedPutData  = \Helper::getInput(TRUE);
 
         // use UUID from GET request
-        $parsedPutData['agentUuid'] = $args[1];
+        $parsedPutData['agentUuid'] = $args[2];
+        $parsedPutData['gridId']    = $args[1];
         $result                     = '';
         $avatarCtrl                 = new \Controllers\AvatarController();
         // Teleport an avatar
         if($avatarCtrl->validateParametersTeleport($parsedPutData)) {
             // Do request and fetch result
-            $data                   = $avatarCtrl->teleportUser($parsedPutData);
+            $data                   = $avatarCtrl->teleportAvatar($parsedPutData);
             // Set result
             $result                 = $data;
         }

@@ -91,9 +91,19 @@ angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', 'Ca
             $anchorScroll();
         });
 
+        var errorCount = 0;
         // Set an error interceptor for Restangular
         Restangular.setErrorInterceptor(function(resp) {
             jQuery('#loading').hide();
+
+            // To many errors is auto logout
+            errorCount++;
+            if(errorCount >= 10) {
+                errorCount = 0;
+                sessionStorage.clear();
+                $alert({title: 'Session Terminated', content: $sce.trustAsHtml('You have been logged out because you caused to many errors.'), type: 'danger'});
+                $location.path('/login');
+            }
 
             // Session check? Logout if expired
             if(sessionStorage.tokenTimeOut < moment().unix()) {
