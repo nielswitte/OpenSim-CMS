@@ -668,6 +668,11 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
         $scope.endDateString            = new moment().format('YYYY/MM/DD');
         $scope.endTimeString            = new moment().format('HH') +':00';
         $scope.meeting                  = {
+            room: {
+                grid: {
+                    id: 1
+                }
+            },
             creator: { id: -1 },
             participants: []
         };
@@ -698,6 +703,35 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
                 }
                 i++;
             }
+        };
+
+        // Teleports the avatar of the user to the meeting location
+        $scope.teleportUser = function() {
+            var avatarFound = false;
+            // Search for avatars from the currently logged in user
+            Restangular.one('user', sessionStorage.id).get().then(function(userResponse) {
+                for(var i = 0; i < userResponse.avatars.length; i++) {
+                    // Avatar on grid and online?
+                    if(userResponse.avatars[i].gridId == $scope.meeting.room.grid.id && userResponse.avatars[i].online == 1) {
+                        avatarFound = true;
+                        // Teleport the found avatar
+                        Restangular.one('grid', $scope.meeting.room.grid.id).one('avatar', userResponse.avatars[i].uuid).customPUT({
+                            posX: $scope.meeting.room.coordinates.x,
+                            posY: $scope.meeting.room.coordinates.y,
+                            posZ: $scope.meeting.room.coordinates.z,
+                            regionName: $scope.meeting.room.region.name
+                        }, 'teleport').then(function(teleportResponse) {
+                            $alert({title: 'Teleported!', content: $sce.trustAsHtml('Avatar teleported to '+ $scope.meeting.room.name +' in region: '+ $scope.meeting.room.region.name +' on grid '+ $scope.meeting.room.grid.name), type: 'success'});
+                            return true;
+                        });
+                    }
+                }
+                // No match found?
+                if(!avatarFound) {
+                    $alert({title: 'No avatar found!', content: $sce.trustAsHtml('Currently there is no avatar online, linked to your user account, on this grid to teleport.'), type: 'danger'});
+                }
+            });
+            return false;
         };
 
         /**
