@@ -886,47 +886,48 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
             $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
             Page.setTitle('Meeting '+ meetingResponse.name);
             meetingRequestUrl       = meetingResponse.getRequestedUrl();
+            // When not editing, reformat the agenda
             if($location.path().indexOf('/edit') == -1) {
                 $scope.meeting.agenda   = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
+            // When editing, load additional information
+            } else {
+                // Get additional information about the Grids
+                RestangularCache.all('grids').getList().then(function(gridsResponse) {
+                    gridsRequestUrl = gridsResponse.getRequestedUrl();
+                    $scope.grids    = gridsResponse;
+                });
+
+                // Get additional meeting rooms
+                $scope.getMeetingRooms();
+
+                // Set the dates and times
+                setDateTimes();
+
+                // Load meetings on same day
+                var date = new moment().subtract('week', 2).format('YYYY-MM-DD');
+                Restangular.one('meetings', date).all('calendar').getList().then(function(meetingsResponse) {
+                    calendar = jQuery('#calendar').calendar({
+                        language:       'en-US',
+                        events_source:  meetingsResponse,
+                        tmpl_cache:     true,
+                        view:           'day',
+                        day:            new moment($scope.meeting.startDate).format('YYYY-MM-DD'),
+                        time_start:     TIME_START,
+                        time_end:       TIME_END,
+                        tmpl_path:      partial_path +'/../calendar/',
+                        holidays:       HOLIDAYS,
+                        onAfterViewLoad: function(view) {
+                            jQuery('h4.calendar-date').text(this.getTitle());
+
+                            // Scroll halfway they calendar
+                            var container = jQuery('#calendar').parent('div.calendar-container');
+                            container.scrollTop(container.height() / 2);
+                        }
+                    });
+                });
             }
-
-            // Set the dates and times
-            setDateTimes();
-
-            // Get additional information about the Grids
-            RestangularCache.all('grids').getList().then(function(gridsResponse) {
-                gridsRequestUrl = gridsResponse.getRequestedUrl();
-                $scope.grids    = gridsResponse;
-            });
-
-            // Get additional meeting rooms
-            $scope.getMeetingRooms();
-
             // Remove loading screen
             jQuery('#loading').hide();
-
-            // Load meetings on same day
-            var date = new moment().subtract('week', 2).format('YYYY-MM-DD');
-            Restangular.one('meetings', date).all('calendar').getList().then(function(meetingsResponse) {
-                calendar = jQuery('#calendar').calendar({
-                    language:       'en-US',
-                    events_source:  meetingsResponse,
-                    tmpl_cache:     true,
-                    view:           'day',
-                    day:            new moment($scope.meeting.startDate).format('YYYY-MM-DD'),
-                    time_start:     TIME_START,
-                    time_end:       TIME_END,
-                    tmpl_path:      partial_path +'/../calendar/',
-                    holidays:       HOLIDAYS,
-                    onAfterViewLoad: function(view) {
-                        jQuery('h4.calendar-date').text(this.getTitle());
-
-                        // Scroll halfway they calendar
-                        var container = jQuery('#calendar').parent('div.calendar-container');
-                        container.scrollTop(container.height() / 2);
-                    }
-                });
-            });
         });
     }]
 );
