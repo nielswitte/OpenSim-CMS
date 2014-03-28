@@ -13,7 +13,8 @@ require_once dirname(__FILE__) .'/../controllers/presentationController.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.3
+ * @version 0.4
+ * @date March 28th, 2014
  * @since February 24th, 2014
  */
 class Presentation extends Module{

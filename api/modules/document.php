@@ -11,7 +11,8 @@ require_once dirname(__FILE__) .'/../controllers/documentController.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.2
+ * @version 0.3
+ * @date March 28th, 2014
  * @since March 3rd, 2014
  */
 class Document extends Module{

@@ -11,8 +11,8 @@ require_once dirname(__FILE__) .'/../controllers/meetingController.php';
  * Implements the functions for meetings
  *
  * @author Niels Witte
- * @version 0.3
- * @date March 20th, 2014
+ * @version 0.4
+ * @date March 28th, 2014
  * @since February 25th, 2014
  */
 class Meeting extends Module{

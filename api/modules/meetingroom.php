@@ -10,7 +10,8 @@ require_once dirname(__FILE__) .'/../models/meetingRoom.php';
  * Implements the functions for rooms
  *
  * @author Niels Witte
- * @version 0.2
+ * @version 0.3
+ * @date March 28th, 2014
  * @since February 26th, 2014
  */
 class MeetingRoom extends Module{

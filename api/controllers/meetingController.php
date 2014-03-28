@@ -7,7 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the Meeting controller
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
+ * @date March 28th, 2014
  * @since March 13th, 2014
  */
 class MeetingController {

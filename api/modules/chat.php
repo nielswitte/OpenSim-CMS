@@ -11,7 +11,8 @@ require_once dirname(__FILE__) .'/../controllers/chatController.php';
  * Implements the functions called on the Grid
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
+ * @date March 28th, 2014
  * @since March 21st, 2014
  */
 class Chat extends Module{
