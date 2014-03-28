@@ -7,7 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the user controller
  *
  * @author Niels Witte
- * @version 0.2
+ * @version 0.3
+ * @date March 28th, 2014
  * @since February 12th, 2014
  */
 class UserController {

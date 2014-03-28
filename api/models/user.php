@@ -9,8 +9,8 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class is the user model
  *
  * @author Niels Witte
- * @version 0.1
- * @date March 20th, 2014
+ * @version 0.2
+ * @date March 28th, 2014
  * @since February 10th, 2014
  */
 class User implements SimpleModel {

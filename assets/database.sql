@@ -57,6 +57,21 @@ CREATE TABLE IF NOT EXISTS `chats` (
 -- Data exporteren was gedeselecteerd
 
 
+-- Structuur van  tabel OpenSim-CMS.comments wordt geschreven
+CREATE TABLE IF NOT EXISTS `comments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `userId` int(11) DEFAULT NULL,
+  `type` varchar(50) DEFAULT NULL,
+  `date` timestamp NULL DEFAULT NULL,
+  `message` text,
+  PRIMARY KEY (`id`),
+  KEY `FK_comments_users` (`userId`),
+  CONSTRAINT `FK_comments_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Data exporteren was gedeselecteerd
+
+
 -- Structuur van  tabel OpenSim-CMS.documents wordt geschreven
 CREATE TABLE IF NOT EXISTS `documents` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
