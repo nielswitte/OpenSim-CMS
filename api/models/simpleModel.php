@@ -14,7 +14,6 @@ defined('EXEC') or die('Config not loaded');
 interface SimpleModel {
     /**
      * Retrieves model information from the database
-     * @throws Exception on failure
      */
     function getInfoFromDatabase();
 }
