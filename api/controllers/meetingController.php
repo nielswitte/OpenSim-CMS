@@ -81,6 +81,17 @@ class MeetingController {
         // Sets the participants for this meeting
         $this->setParticipants($participants);
 
+        // Documents are a array of ids or an array of documents?
+        if(isset($parameters['documents'][0]) && is_numeric($parameters['documents'][0])) {
+            $documents = $parameters['documents'];
+        } else {
+            $documents = array();
+            foreach($parameters['documents'] as $document) {
+                $documents[] = $document['id'];
+            }
+        }
+        $this->setDocuments($documents);
+
         // Create the agenda
         $agenda = $this->parseAgendaString($parameters['agenda']);
         $this->setAgenda($agenda);
@@ -140,7 +151,7 @@ class MeetingController {
         // Update the documents list
         $documentsRemove = $this->removeDocuments();
 
-        // Participants are a array of ids or an array of users?
+        // Documents are a array of ids or an array of documents?
         if(isset($parameters['documents'][0]) && is_numeric($parameters['documents'][0])) {
             $documents = $parameters['documents'];
         } else {
