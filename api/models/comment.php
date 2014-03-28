@@ -12,8 +12,12 @@ defined('EXEC') or die('Invalid request');
  */
 class Comment {
     /**
+     * The ID of the comment
+     * @var integer
+     */
+    private $id;
+    /**
      * The user instance of the author of this message
-     *
      * @var \Models\User
      */
     private $user;
@@ -36,16 +40,27 @@ class Comment {
     /**
      * Constructs a new comment
      *
+     * @param integer $id
      * @param \Models\User $user
      * @param string $type
      * @param string $date
      * @param string $msg
      */
-    public function __construct(\Models\User $user, $type, $date, $msg) {
+    public function __construct($id, \Models\User $user, $type, $date, $msg) {
+        $this->id   = $id;
         $this->user = $user;
         $this->type = $type;
         $this->date = $date;
         $this->msg  = $msg;
+    }
+
+    /**
+     * Returns the ID of this comment
+     *
+     * @return integer
+     */
+    public function getId() {
+       return $this->id;
     }
 
     /**

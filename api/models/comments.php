@@ -37,12 +37,15 @@ class Comments implements SimpleModel {
     }
 
     /**
-     * Gets the comments from the database and adds them to the list
+     * Gets all or partial selection of comments from the database and adds them to the list
+     *
+     * @param integer $offset - [Optional] Starting point for retrieving data
+     * @param integer $limit - [Optional] Number of items to get from database
      */
-    public function getInfoFromDatabase() {
+    public function getInfoFromDatabase($offset = 0, $limit = 0) {
         // Parent is a Document?
         if($this->getParent() instanceof \Models\Document) {
-            $type = 'documents';
+            $type = 'document';
         } else {
             $type = FALSE;
         }
@@ -53,14 +56,24 @@ class Comments implements SimpleModel {
             $db = \Helper::getDB();
             $db->join('users u', 'c.userId = u.id', 'LEFT');
             $db->where('type', $db->escape($type));
-            $db->orderBy('date', 'ASC');
-            $results = $db->get('comments c', null, 'u.id as userId, c.id as commentId, *');
+            $db->where('itemId', $db->escape($this->getParent()->getId()));
+            $db->orderBy('date', 'DESC');
+
+            // Determine the limit
+            if($limit > 0) {
+                $limit = array($db->escape($offset), $db->escape($limit));
+            } else {
+                $limit = null;
+            }
+
+            $results = $db->get('comments c', $limit, '*, u.id as userId, c.id as commentId');
             // Found results?
             if(isset($results[0])) {
+
                 // Save all comments
                 foreach($results as $result) {
                     $user    = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
-                    $comment = new \Models\Comment($user, $result['type'], $result['date'], $result['message']);
+                    $comment = new \Models\Comment($result['commentId'], $user, $result['type'], $result['date'], $result['message']);
                     $this->addComment($comment);
                 }
             }

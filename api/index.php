@@ -13,6 +13,7 @@ require_once dirname(__FILE__) .'/includes/class.Auth.php';
 require_once dirname(__FILE__) .'/api.php';
 require_once dirname(__FILE__) .'/modules/auth.php';
 require_once dirname(__FILE__) .'/modules/chat.php';
+require_once dirname(__FILE__) .'/modules/comment.php';
 require_once dirname(__FILE__) .'/modules/document.php';
 require_once dirname(__FILE__) .'/modules/grid.php';
 require_once dirname(__FILE__) .'/modules/meeting.php';
@@ -24,7 +25,8 @@ require_once dirname(__FILE__) .'/modules/user.php';
  * This class is catches the API calls and searches for the matching function
  *
  * @author Niels Witte
- * @version 0.4
+ * @version 0.5
+ * @date March 28th, 2014
  * @since February 10th, 2014
  */
 
@@ -48,6 +50,7 @@ try {
 
     // Add modules
     $chatApi            = new \API\Modules\Chat($api);
+    $commentsApi        = new \API\Modules\Comment($api);
     $gridApi            = new \API\Modules\Grid($api);
     $documentApi        = new \API\Modules\Document($api);
     $meetingsApi        = new \API\Modules\Meeting($api);

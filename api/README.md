@@ -596,6 +596,28 @@ PUT /api/presentation/<ID>/slide/number/<SLIDE#>/ HTTP/1.1
 | uuid              | string    | UUID of the slide to be saved                   |
 | gridId            | integer   | The ID of the grid, as used in the CMS database |
 
+## Comments
+On almost everything users can leave comments (when the user has sufficient permissions).
+The comments can be saved, retrieved and removed through the API by using the following functions:
+
+### Get comments
+Getting the latest 50 comments by using this URL.
+
+```http
+GET /api/comments/<TYPE>/<ID>/ HTTP/1.1
+```
+
+Or add an additional parameter to specify the offset.
+
+```http
+GET /api/comments/<TYPE>/<ID>/<OFFSET>/ HTTP/1.1
+```
+
+| Types         | Description                                                      |
+|---------------|------------------------------------------------------------------|
+| documents     | Get comments for the document with id = <ID>.                    |
+| meeting       | Get comments on the meeting with the given id.                   |
+
 ## Grids
 For an overview of all grids and their information, the following request can be used:
 
