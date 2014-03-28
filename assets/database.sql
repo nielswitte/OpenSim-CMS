@@ -2,7 +2,7 @@
 -- Host:                         localhost
 -- Server versie:                5.5.35-0ubuntu0.13.10.2 - (Ubuntu)
 -- Server OS:                    debian-linux-gnu
--- HeidiSQL Versie:              8.3.0.4727
+-- HeidiSQL Versie:              8.3.0.4744
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -268,6 +268,7 @@ CREATE TABLE IF NOT EXISTS `user_permissions` (
   `userId` int(11) NOT NULL AUTO_INCREMENT,
   `auth` tinyint(1) unsigned NOT NULL,
   `chat` tinyint(1) unsigned NOT NULL,
+  `comment` tinyint(1) unsigned NOT NULL,
   `document` tinyint(1) unsigned NOT NULL,
   `grid` tinyint(1) unsigned NOT NULL,
   `meeting` tinyint(1) unsigned NOT NULL,

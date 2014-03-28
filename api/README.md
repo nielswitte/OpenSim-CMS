@@ -57,6 +57,7 @@ These numbers can be used for the following parameters:
 |-------------------|-----------|---------------------------------------------------------------|
 | auth              | Integer   | Permission level regarding Authorization API                  |
 | chat              | Integer   | Permission level regarding Chats API                          |
+| comment           | Integer   | Permission level regarding Comments API                       |
 | document          | Integer   | Permission level regarding Documents API                      |
 | grid              | Integer   | Permission level regarding Grids API                          |
 | meeting           | Integer   | Permission level regarding Meetings API                       |

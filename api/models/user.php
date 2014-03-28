@@ -215,6 +215,7 @@ class User implements SimpleModel {
             $this->rights = array(
                 'auth'              => (int) \Auth::NONE, // 0
                 'chat'              => (int) \Auth::NONE, // 0
+                'comment'           => (int) \Auth::NONE, // 0
                 'document'          => (int) \Auth::NONE, // 0
                 'grid'              => (int) \Auth::NONE, // 0
                 'meeting'           => (int) \Auth::NONE, // 0
@@ -232,6 +233,7 @@ class User implements SimpleModel {
                 $this->rights = array(
                     'auth'              => $result[0]['auth'],
                     'chat'              => $result[0]['chat'],
+                    'comment'           => $result[0]['comment'],
                     'document'          => $result[0]['document'],
                     'grid'              => $result[0]['grid'],
                     'meeting'           => $result[0]['meeting'],

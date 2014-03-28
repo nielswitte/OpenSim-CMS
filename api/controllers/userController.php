@@ -202,6 +202,7 @@ class UserController {
             $permissions = array(
                 'userId'        => $db->escape($userId),
                 'chat'          => $db->escape(\Auth::READ),
+                'comment'       => $db->escape(\Auth::READ),
                 'auth'          => $db->escape(\Auth::READ),
                 'document'      => $db->escape(\Auth::READ),
                 'grid'          => $db->escape(\Auth::READ),
@@ -241,6 +242,8 @@ class UserController {
      *
      * @param array $parameters - Array with parameters to set permissions to
      *              * integer auth - permission level
+     *              * integer chat - permission level
+     *              * integer comment - permission level
      *              * integer document - permission level
      *              * integer grid - permission level
      *              * integer meeting - permission level
@@ -254,6 +257,7 @@ class UserController {
         $data   = array(
             'auth'          => $db->escape($parameters['auth']),
             'chat'          => $db->escape($parameters['chat']),
+            'comment'       => $db->escape($parameters['comment']),
             'document'      => $db->escape($parameters['document']),
             'grid'          => $db->escape($parameters['grid']),
             'meeting'       => $db->escape($parameters['meeting']),
@@ -358,25 +362,29 @@ class UserController {
             \Auth::WRITE,
             \Auth::ALL
         );
+        // Permissions to check
+        $permissionTypes = array(
+            'auth',
+            'chat',
+            'comment',
+            'document',
+            'grid',
+            'meeting',
+            'meetingroom',
+            'presentation',
+            'user'
+        );
 
-        if(count($parameters) < 7) {
-            throw new \Exception('Expected 7 parameters, '. count($parameters) .' given', 1);
-        } elseif(!isset($parameters['auth']) || !in_array($parameters['auth'], $permissions)) {
-            throw new \Exception('Missing parameter (integer) "auth", with value in ('. implode(', ', $permissions) .')', 2);
-        } elseif(!isset($parameters['chat']) || !in_array($parameters['chat'], $permissions)) {
-            throw new \Exception('Missing parameter (integer) "chat", with value in ('. implode(', ', $permissions) .')', 2);
-        } elseif(!isset($parameters['document']) || !in_array($parameters['document'], $permissions)) {
-            throw new \Exception('Missing parameter (integer) "document", with value in ('. implode(', ', $permissions) .')', 2);
-        } elseif(!isset($parameters['grid']) || !in_array($parameters['grid'], $permissions)) {
-            throw new \Exception('Missing parameter (integer) "grid", with value in ('. implode(', ', $permissions) .')', 2);
-        } elseif(!isset($parameters['meeting']) || !in_array($parameters['meeting'], $permissions)) {
-            throw new \Exception('Missing parameter (integer) "meeting", with value in ('. implode(', ', $permissions) .')', 2);
-        } elseif(!isset($parameters['meetingroom']) || !in_array($parameters['meetingroom'], $permissions)) {
-            throw new \Exception('Missing parameter (integer) "meetingroom", with value in ('. implode(', ', $permissions) .')', 2);
-        } elseif(!isset($parameters['presentation']) || !in_array($parameters['presentation'], $permissions)) {
-            throw new \Exception('Missing parameter (integer) "presentation", with value in ('. implode(', ', $permissions) .')', 2);
-        } elseif(!isset($parameters['user']) || !in_array($parameters['user'], $permissions)) {
-            throw new \Exception('Missing parameter (integer) "user", with value in ('. implode(', ', $permissions) .')', 2);
+        if(count($parameters) < count($permissionTypes)) {
+            throw new \Exception('Expected '. count($permissionTypes) .' parameters, '. count($parameters) .' given', 1);
+        } elseif(count($parameters) >= count($permissionTypes)) {
+            $result = TRUE;
+            foreach($permissionTypes as $type) {
+                if(!isset($parameters[$type]) || !in_array($parameters[$type], $permissions)) {
+                    $result = FALSE;
+                    throw new \Exception('Missing parameter (integer) "'. $type .'", with value in ('. implode(', ', $permissions) .')', 2);
+                }
+            }
         } else {
             $result = TRUE;
         }
