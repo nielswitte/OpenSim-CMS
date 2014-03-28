@@ -110,6 +110,7 @@ angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', 'Ca
                 sessionStorage.clear();
                 Cache.clearCache();
                 $alert({title: 'Session Expired!', content: $sce.trustAsHtml('You have been logged out because your session has expired'), type: 'warning'});
+                $location.path('/login');
             }
             // Unauthorized
             if(resp.status == 401) {
