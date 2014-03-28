@@ -36,15 +36,15 @@ class Presentation extends Module{
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/presentations\/?$/",                                         "getPresentations",             $this, "GET",  \Auth::READ);  // Get list with 50 presentations
-        $this->api->addRoute("/presentations\/(\d+)\/?$/",                                  "getPresentations",             $this, "GET",  \Auth::READ);  // Get list with 50 presentations starting at the given offset
-        $this->api->addRoute("/presentation\/?$/",                                          "createPresentation",           $this, "POST", \Auth::EXECUTE); // Create a presentation
-        $this->api->addRoute("/presentation\/(\d+)\/?$/",                                   "getPresentationById",          $this, "GET",  \Auth::READ);  // Select specific presentation
-        $this->api->addRoute("/presentation\/(\d+)\/slide\/(\d+)\/?$/",                     "getSlideById",                 $this, "GET",  \Auth::READ);  // Get slide from presentation
-        $this->api->addRoute("/presentation\/(\d+)\/slide\/number\/(\d+)\/?$/",             "getSlideByNumber",             $this, "GET",  \Auth::READ);  // Get slide from presentation
-        $this->api->addRoute("/presentation\/(\d+)\/slide\/number\/(\d+)\/?$/",             "updateSlideUuidByNumber",      $this, "PUT",  \Auth::WRITE); // Update slide UUID for given slide of presentation
-        $this->api->addRoute("/presentation\/(\d+)\/slide\/number\/(\d+)\/image\/?$/",      "getSlideImageByNumber",        $this, "GET",  \Auth::READ);  // Get only the image of a given presentation slide
-        $this->api->addRoute("/presentation\/(\d+)\/slide\/number\/(\d+)\/thumbnail\/?$/",  "getSlideThumbnailByNumber",    $this, "GET",  \Auth::READ);  // Get only the image of a given presentation slide
+        $this->api->addRoute("/^\/presentations\/?$/",                                         "getPresentations",             $this, "GET",  \Auth::READ);  // Get list with 50 presentations
+        $this->api->addRoute("/^\/presentations\/(\d+)\/?$/",                                  "getPresentations",             $this, "GET",  \Auth::READ);  // Get list with 50 presentations starting at the given offset
+        $this->api->addRoute("/^\/presentation\/?$/",                                          "createPresentation",           $this, "POST", \Auth::EXECUTE); // Create a presentation
+        $this->api->addRoute("/^\/presentation\/(\d+)\/?$/",                                   "getPresentationById",          $this, "GET",  \Auth::READ);  // Select specific presentation
+        $this->api->addRoute("/^\/presentation\/(\d+)\/slide\/(\d+)\/?$/",                     "getSlideById",                 $this, "GET",  \Auth::READ);  // Get slide from presentation
+        $this->api->addRoute("/^\/presentation\/(\d+)\/slide\/number\/(\d+)\/?$/",             "getSlideByNumber",             $this, "GET",  \Auth::READ);  // Get slide from presentation
+        $this->api->addRoute("/^\/presentation\/(\d+)\/slide\/number\/(\d+)\/?$/",             "updateSlideUuidByNumber",      $this, "PUT",  \Auth::WRITE); // Update slide UUID for given slide of presentation
+        $this->api->addRoute("/^\/presentation\/(\d+)\/slide\/number\/(\d+)\/image\/?$/",      "getSlideImageByNumber",        $this, "GET",  \Auth::READ);  // Get only the image of a given presentation slide
+        $this->api->addRoute("/^\/presentation\/(\d+)\/slide\/number\/(\d+)\/thumbnail\/?$/",  "getSlideThumbnailByNumber",    $this, "GET",  \Auth::READ);  // Get only the image of a given presentation slide
     }
 
 

@@ -32,7 +32,7 @@ class Auth extends Module {
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/auth\/username\/?$/", "authUser", $this, "POST", \Auth::NONE); // Authenticate the given user
+        $this->api->addRoute("/^\/auth\/username\/?$/", "authUser", $this, "POST", \Auth::NONE); // Authenticate the given user
     }
 
     /**

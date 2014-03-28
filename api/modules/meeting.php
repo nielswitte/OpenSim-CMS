@@ -35,16 +35,16 @@ class Meeting extends Module{
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/meetings\/([0-9]{4}-[0-9]{1,2}-[0-9]{1,2})\/?$/",            "getMeetingsByDate",        $this, "GET",  \Auth::READ);  // Get all meetings that start after the given date
-        $this->api->addRoute("/meetings\/([0-9]{4}-[0-9]{1,2}-[0-9]{1,2})\/calendar\/?$/",  "getMeetingsByDate",        $this, "GET",  \Auth::READ);  // Get all meetings that start after the given date
-        $this->api->addRoute("/meetings\/?$/",                                              "getMeetings",              $this, "GET",  \Auth::READ);  // Get list with 50 meetings ordered by startdate DESC
-        $this->api->addRoute("/meetings\/(\d+)\/?$/",                                       "getMeetings",              $this, "GET",  \Auth::READ);  // Get list with 50 meetings ordered by startdate DESC starting at the given offset
-        $this->api->addRoute("/meeting\/?$/",                                               "createMeeting",            $this, "POST", \AUTH::EXECUTE); //Create a new meeting
-        $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "getMeetingById",           $this, "GET",  \Auth::READ);  // Select a specific meeting
-        $this->api->addRoute("/meeting\/(\d+)\/agenda\/?$/",                                "getMeetingAgendaById",     $this, "GET",  \Auth::READ);  // Select a specific meeting and only get the agenda
-        $this->api->addRoute("/meeting\/(\d+)\/?$/",                                        "updateMeetingById",        $this, "PUT",  \Auth::EXECUTE); // Update a specific meeting
-        $this->api->addRoute("/meeting\/(\d+)\/minutes\/?$/",                               "saveMinutesByMeetingId",   $this, "POST", \Auth::WRITE); // Save meeting minutes
-        $this->api->addRoute("/meeting\/(\d+)\/minutes\/?$/",                               "getMinutesByMeetingId",    $this, "GET",  \Auth::READ); // Get meeting minutes
+        $this->api->addRoute("/^\/meetings\/([0-9]{4}-[0-9]{1,2}-[0-9]{1,2})\/?$/",            "getMeetingsByDate",        $this, "GET",  \Auth::READ);  // Get all meetings that start after the given date
+        $this->api->addRoute("/^\/meetings\/([0-9]{4}-[0-9]{1,2}-[0-9]{1,2})\/calendar\/?$/",  "getMeetingsByDate",        $this, "GET",  \Auth::READ);  // Get all meetings that start after the given date
+        $this->api->addRoute("/^\/meetings\/?$/",                                              "getMeetings",              $this, "GET",  \Auth::READ);  // Get list with 50 meetings ordered by startdate DESC
+        $this->api->addRoute("/^\/meetings\/(\d+)\/?$/",                                       "getMeetings",              $this, "GET",  \Auth::READ);  // Get list with 50 meetings ordered by startdate DESC starting at the given offset
+        $this->api->addRoute("/^\/meeting\/?$/",                                               "createMeeting",            $this, "POST", \AUTH::EXECUTE); //Create a new meeting
+        $this->api->addRoute("/^\/meeting\/(\d+)\/?$/",                                        "getMeetingById",           $this, "GET",  \Auth::READ);  // Select a specific meeting
+        $this->api->addRoute("/^\/meeting\/(\d+)\/agenda\/?$/",                                "getMeetingAgendaById",     $this, "GET",  \Auth::READ);  // Select a specific meeting and only get the agenda
+        $this->api->addRoute("/^\/meeting\/(\d+)\/?$/",                                        "updateMeetingById",        $this, "PUT",  \Auth::EXECUTE); // Update a specific meeting
+        $this->api->addRoute("/^\/meeting\/(\d+)\/minutes\/?$/",                               "saveMinutesByMeetingId",   $this, "POST", \Auth::WRITE); // Save meeting minutes
+        $this->api->addRoute("/^\/meeting\/(\d+)\/minutes\/?$/",                               "getMinutesByMeetingId",    $this, "GET",  \Auth::READ); // Get meeting minutes
     }
 
     /**

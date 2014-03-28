@@ -33,9 +33,9 @@ class MeetingRoom extends Module{
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/grid\/(\d+)\/rooms\/?$/",                                    "getRoomsByGrid",       $this, "GET",  \Auth::READ);  // Get rooms for the given grid
-        $this->api->addRoute("/grid\/(\d+)\/room\/(\d+)\/?$/",                              "getRoomById",          $this, "GET",  \Auth::READ);  // Get the given room on the grid
-        $this->api->addRoute("/grid\/(\d+)\/region\/([a-z0-9-]{36})\/rooms\/?$/",           "getRoomsByGridRegion", $this, "GET",  \Auth::READ);  // Get the given room on the grid
+        $this->api->addRoute("/^\/grid\/(\d+)\/rooms\/?$/",                                    "getRoomsByGrid",       $this, "GET",  \Auth::READ);  // Get rooms for the given grid
+        $this->api->addRoute("/^\/grid\/(\d+)\/room\/(\d+)\/?$/",                              "getRoomById",          $this, "GET",  \Auth::READ);  // Get the given room on the grid
+        $this->api->addRoute("/^\/grid\/(\d+)\/region\/([a-z0-9-]{36})\/rooms\/?$/",           "getRoomsByGridRegion", $this, "GET",  \Auth::READ);  // Get the given room on the grid
     }
 
     /**
