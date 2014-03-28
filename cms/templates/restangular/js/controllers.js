@@ -1365,13 +1365,61 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
     }]
 );
 /**
+ *    _____ _ _     _
+ *   / ____| (_)   | |
+ *  | (___ | |_  __| | ___  ___
+ *   \___ \| | |/ _` |/ _ \/ __|
+ *   ____) | | | (_| |  __/\__ \
+ *  |_____/|_|_|\__,_|\___||___/
+ *
+ */
+// slideController ----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('slideController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$alert', '$sce', 'Cache', '$routeParams', '$location', function(RestangularCache, Restangular, $scope, Page, $alert, $sce, Cache, $routeParams, $location) {
+        $scope.slide = {};
+        $scope.comments = [];
+        // Get the slide details
+        RestangularCache.one('presentation', $routeParams.documentId).one('slide', $routeParams.slideId).get().then(function(slideResponse) {
+            $scope.slide = slideResponse;
+            Page.setTitle('Slide '+ slideResponse.number);
+
+            if(slideResponse.hasComments !== false) {
+                // Load comments
+                RestangularCache.all('comments').one('slide', slideResponse.id).get().then(function(commentResponse) {
+                    $scope.comments = commentResponse;
+                });
+            }
+        });
+
+        $scope.nextSlide = function() {
+            $location.path('document/'+ $routeParams.documentId +'/slide/'+ (parseInt($routeParams.slideId) + 1));
+        };
+
+        $scope.previousSlide = function() {
+            $location.path('document/'+ $routeParams.documentId +'/slide/'+ (parseInt($routeParams.slideId) - 1));
+        };
+
+        /**
+         * Gets the slide image with the token for this session
+         * @returns {String}
+         */
+        $scope.getSlideImage = function() {
+            if($scope.slide.image !== undefined) {
+                return $scope.slide.image +'?token='+ sessionStorage.token;
+            } else {
+                return '';
+            }
+        };
+    }]
+);
+
+/**
  *   _    _
  *  | |  | |
  *  | |  | |___  ___ _ __ ___
  *  | |  | / __|/ _ \ '__/ __|
  *  | |__| \__ \  __/ |  \__ \
  *   \____/|___/\___|_|  |___/
- *                            
+ *
  */
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', '$sce', 'Cache', '$route', function(RestangularCache, Restangular, $scope, Page, $modal, $alert, $sce, Cache, $route) {
@@ -1600,7 +1648,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                     $alert({title: 'User updating failed!', content: $sce.trustAsHtml(putResponse.error), type: 'danger'});
                 } else {
                     $alert({title: 'User updated!', content: $sce.trustAsHtml('The user information has been updated.'), type: 'success'});
-                    Cache.clearCachedUrl(userRequestUrl);
+                    Cache.clearCache();
                 }
                 // Remove loading screen
                 jQuery('#loading').hide();

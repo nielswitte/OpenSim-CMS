@@ -19,7 +19,7 @@ var angularRest = angular.module('OpenSim-CMS', [
         templateUrl: partial_path +'/document/document.html',
         controller: 'documentController',
         requireLogin: true
-    }).when('/document/:documentId/slide/:slideNr', {
+    }).when('/document/:documentId/slide/:slideId', {
         templateUrl: partial_path +'/document/slide.html',
         controller: 'slideController',
         requireLogin: true

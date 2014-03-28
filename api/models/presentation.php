@@ -106,14 +106,11 @@ class Presentation extends Document {
         if(count($this->getSlides()) > 0) {
             foreach($this->getSlides() as $slide) {
                 if($slide->getId() == $id) {
-                    $result = $slide;
-                    break;
+                    return $slide;
                 }
             }
-        } else {
-            throw new \Exception("Slide does not exist", 6);
         }
-        return $result;
+        throw new \Exception("Slide does not exist", 6);
     }
 
     /**

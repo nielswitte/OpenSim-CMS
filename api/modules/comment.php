@@ -55,7 +55,9 @@ class Comment extends Module {
 
         if($args[1] == 'document') {
             $parent = new \Models\Document($id);
-        } else {
+        } elseif($args[1] == 'slide') {
+            $parent = new \Models\Slide($args[2], 1, '');
+        }else {
             $parent = FALSE;
             throw new \Exception('Type not implemented yet', 1);
         }
