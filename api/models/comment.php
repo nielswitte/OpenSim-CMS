@@ -30,7 +30,7 @@ class Comment {
      * Datetime string YYYY-MM-DD HH:mm:ss
      * @var string
      */
-    private $date;
+    private $timestamp;
     /**
      * The actual comment
      * @var string
@@ -43,15 +43,15 @@ class Comment {
      * @param integer $id
      * @param \Models\User $user
      * @param string $type
-     * @param string $date
+     * @param string $timestamp
      * @param string $msg
      */
-    public function __construct($id, \Models\User $user, $type, $date, $msg) {
-        $this->id   = $id;
-        $this->user = $user;
-        $this->type = $type;
-        $this->date = $date;
-        $this->msg  = $msg;
+    public function __construct($id, \Models\User $user, $type, $timestamp, $msg) {
+        $this->id        = $id;
+        $this->user      = $user;
+        $this->type      = $type;
+        $this->timestamp = $timestamp;
+        $this->msg       = $msg;
     }
 
     /**
@@ -82,12 +82,12 @@ class Comment {
     }
 
     /**
-     * Returns the date when this comment was posted
+     * Returns the timestamp when this comment was posted
      *
-     * @return string
+     * @return string - YYYY-MM-DD HH:mm:ss
      */
-    public function getDate() {
-        return $this->date;
+    public function getTimestamp() {
+        return $this->timestamp;
     }
 
     /**

@@ -59,7 +59,7 @@ class Comments implements SimpleModel {
             $db->join('users u', 'c.userId = u.id', 'LEFT');
             $db->where('type', $db->escape($type));
             $db->where('itemId', $db->escape($this->getParent()->getId()));
-            $db->orderBy('date', 'DESC');
+            $db->orderBy('timestamp', 'DESC');
 
             // Determine the limit
             if($limit > 0) {
@@ -75,7 +75,7 @@ class Comments implements SimpleModel {
                 // Save all comments
                 foreach($results as $result) {
                     $user    = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
-                    $comment = new \Models\Comment($result['commentId'], $user, $result['type'], $result['date'], $result['message']);
+                    $comment = new \Models\Comment($result['commentId'], $user, $result['type'], $result['timestamp'], $result['message']);
                     $this->addComment($comment);
                 }
             }

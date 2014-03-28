@@ -86,7 +86,7 @@ class Comment extends Module {
                     'lastName'  => $comment->getUser()->getLastName(),
                     'email'     => $comment->getUser()->getEmail()
                 ),
-                'date'      => $comment->getDate(),
+                'timestamp' => $comment->getTimestamp(),
                 'message'   => $comment->getMessage()
             );
         }

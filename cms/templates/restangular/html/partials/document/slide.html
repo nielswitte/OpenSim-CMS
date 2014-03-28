@@ -13,10 +13,10 @@
 <div id="comments">
     <h2>Comments ({{comments.length}})</h2>
     <div class="row row-striped row-hover" ng-repeat="comment in comments">
-        <div class="col-sm-2 comment">
-            <span class="label label-info">{{minute.timestamp}}</span>
+        <div class="col-sm-3 comment">
+            <span class="label label-info">{{comment.timestamp}}</span>
             <strong><a ng-href="#!/user/{{comment.user.id}}" title="View profile of user {{comment.user.username}}" bs-tooltip>{{comment.user.firstName}} {{comment.user.lastName}}</a></strong>
         </div>
-        <div class="col-sm-10 comment">{{comment.message}}</div>
+        <div class="col-sm-9 comment">{{comment.message}}</div>
     </div>
 </div>

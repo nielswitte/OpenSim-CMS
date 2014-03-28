@@ -60,9 +60,10 @@ CREATE TABLE IF NOT EXISTS `chats` (
 -- Structuur van  tabel OpenSim-CMS.comments wordt geschreven
 CREATE TABLE IF NOT EXISTS `comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `itemId` int(11) DEFAULT NULL,
   `userId` int(11) DEFAULT NULL,
   `type` varchar(50) DEFAULT NULL,
-  `date` timestamp NULL DEFAULT NULL,
+  `timestamp` timestamp NULL DEFAULT NULL,
   `message` text,
   PRIMARY KEY (`id`),
   KEY `FK_comments_users` (`userId`),
