@@ -5,7 +5,15 @@ function MainCntl($scope, $route, $routeParams, $location, Page) {
     $scope.$routeParams = $routeParams;
     $scope.Page         = Page;
 };
-
+/**
+ *    _____ _           _
+ *   / ____| |         | |
+ *  | |    | |__   __ _| |_
+ *  | |    | '_ \ / _` | __|
+ *  | |____| | | | (_| | |_
+ *   \_____|_| |_|\__,_|\__|
+ *
+ */
 // chatController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$scope', '$aside', '$sce', '$timeout', '$alert', function(Restangular, RestangularCache, $scope, $aside, $sce, $timeout, $alert) {
         $scope.grids          = [];
@@ -188,13 +196,32 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
         };
     }]
 );
-
+/**
+ *   _    _
+ *  | |  | |
+ *  | |__| | ___  _ __ ___   ___
+ *  |  __  |/ _ \| '_ ` _ \ / _ \
+ *  | |  | | (_) | | | | | |  __/
+ *  |_|  |_|\___/|_| |_| |_|\___|
+ *
+ */
 // homeController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('homeController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
         Page.setTitle('Home');
     }]
 );
 
+/**
+ *   _                 _
+ *  | |               (_)
+ *  | |     ___   __ _ _ _ __
+ *  | |    / _ \ / _` | | '_ \
+ *  | |___| (_) | (_| | | | | |
+ *  |______\___/ \__, |_|_| |_|
+ *                __/ |
+ *               |___/
+ *
+ */
 // loginController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$scope', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, $alert, $sce, Cache) {
         $scope.isLoggedIn = false;
@@ -272,7 +299,15 @@ angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$
         };
     }]
 );
-
+/**
+ *   _______          _ _
+ *  |__   __|        | | |
+ *     | | ___   ___ | | |__   __ _ _ __
+ *     | |/ _ \ / _ \| | '_ \ / _` | '__|
+ *     | | (_) | (_) | | |_) | (_| | |
+ *     |_|\___/ \___/|_|_.__/ \__,_|_|
+ *
+ */
 // toolbarController --------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$location', '$alert', function($scope, $sce, Cache, $location, $alert) {
         $scope.currentLocation = $location.path();
@@ -327,7 +362,15 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
         }
     }]
 );
-
+/**
+ *   _____                                        _
+ *  |  __ \                                      | |
+ *  | |  | | ___   ___ _   _ _ __ ___   ___ _ __ | |_ ___
+ *  | |  | |/ _ \ / __| | | | '_ ` _ \ / _ \ '_ \| __/ __|
+ *  | |__| | (_) | (__| |_| | | | | | |  __/ | | | |_\__ \
+ *  |_____/ \___/ \___|\__,_|_| |_| |_|\___|_| |_|\__|___/
+ *
+ */
 // documentsController ------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('documentsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$modal', '$sce', 'Cache', '$route',
     function(Restangular, RestangularCache, $scope, Page, $alert, $modal, $sce, Cache, $route) {
@@ -522,7 +565,15 @@ angularRest.controller('documentController', ['Restangular', '$scope', '$routePa
         };
     }]
 );
-
+/**
+ *    _____      _     _
+ *   / ____|    (_)   | |
+ *  | |  __ _ __ _  __| |___
+ *  | | |_ | '__| |/ _` / __|
+ *  | |__| | |  | | (_| \__ \
+ *   \_____|_|  |_|\__,_|___/
+ *
+ */
 // gridsController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
         $scope.orderByField     = 'name';
@@ -584,7 +635,16 @@ angularRest.controller('gridController', ['Restangular', '$scope', '$routeParams
         };
     }]
 );
-
+/**
+ *   __  __           _   _
+ *  |  \/  |         | | (_)
+ *  | \  / | ___  ___| |_ _ _ __   __ _ ___
+ *  | |\/| |/ _ \/ _ \ __| | '_ \ / _` / __|
+ *  | |  | |  __/  __/ |_| | | | | (_| \__ \
+ *  |_|  |_|\___|\___|\__|_|_| |_|\__, |___/
+ *                                 __/ |
+ *                                |___/
+ */
 // meetingsController -------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('meetingsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$modal', '$tooltip', '$sce', 'Cache', '$location',  function(Restangular, RestangularCache, $scope, Page, $modal, $tooltip, $sce, Cache, $location) {
         var date = new Date(new Date - (1000*60*60*24*14));
@@ -1304,7 +1364,15 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
         });
     }]
 );
-
+/**
+ *   _    _
+ *  | |  | |
+ *  | |  | |___  ___ _ __ ___
+ *  | |  | / __|/ _ \ '__/ __|
+ *  | |__| \__ \  __/ |  \__ \
+ *   \____/|___/\___|_|  |___/
+ *                            
+ */
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', '$sce', 'Cache', '$route', function(RestangularCache, Restangular, $scope, Page, $modal, $alert, $sce, Cache, $route) {
         $scope.orderByField     = 'username';
