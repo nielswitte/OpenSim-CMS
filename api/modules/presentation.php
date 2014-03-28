@@ -17,7 +17,11 @@ require_once dirname(__FILE__) .'/../controllers/presentationController.php';
  * @date March 28th, 2014
  * @since February 24th, 2014
  */
-class Presentation extends Module{
+class Presentation extends Module {
+    /**
+     * The API to add this module to
+     * @var \API\API
+     */
     private $api;
 
     /**
@@ -47,7 +51,6 @@ class Presentation extends Module{
         $this->api->addRoute("/^\/presentation\/(\d+)\/slide\/number\/(\d+)\/image\/?$/",      "getSlideImageByNumber",        $this, "GET",  \Auth::READ);  // Get only the image of a given presentation slide
         $this->api->addRoute("/^\/presentation\/(\d+)\/slide\/number\/(\d+)\/thumbnail\/?$/",  "getSlideThumbnailByNumber",    $this, "GET",  \Auth::READ);  // Get only the image of a given presentation slide
     }
-
 
     /**
      * Gets a list of presentations starting at the given argument offset
@@ -143,10 +146,11 @@ class Presentation extends Module{
      */
     public function getSlideData(\Models\Presentation $presentation, \Models\Slide $slide, $full = TRUE) {
         $data = array(
-            'id'        => $slide->getId(),
-            'number'    => $slide->getNumber(),
-            'image'     => $presentation->getApiUrl() . 'slide/number/' . $slide->getNumber() . '/image/',
-            'thumbnail' => $presentation->getApiUrl() . 'slide/number/' . $slide->getNumber() . '/thumbnail/'
+            'id'            => $slide->getId(),
+            'number'        => $slide->getNumber(),
+            'hasComments'   => $slide->hasComments(),
+            'image'         => $presentation->getApiUrl() . 'slide/number/' . $slide->getNumber() . '/image/',
+            'thumbnail'     => $presentation->getApiUrl() . 'slide/number/' . $slide->getNumber() . '/thumbnail/'
         );
 
         // Show additional information

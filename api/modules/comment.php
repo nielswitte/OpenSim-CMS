@@ -17,7 +17,6 @@ require_once dirname(__FILE__) .'/../controllers/commentController.php';
 class Comment extends Module {
     /**
      * The API to add this module to
-     *
      * @var \API\API
      */
     private $api;
@@ -60,7 +59,7 @@ class Comment extends Module {
             $parent = FALSE;
             throw new \Exception('Type not implemented yet', 1);
         }
-        
+
         $comments = new \Models\Comments($parent);
         $comments->getInfoFromDatabase($offset, 50);
 

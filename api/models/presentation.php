@@ -9,7 +9,8 @@ require_once dirname(__FILE__) .'/document.php';
  * This class is the presentation model
  *
  * @author Niels Witte
- * @version 0.2
+ * @version 0.3
+ * @date March 28th, 2014
  * @since February 10th, 2014
  */
 class Presentation extends Document {
@@ -50,12 +51,15 @@ class Presentation extends Document {
         if(empty($this->slides)) {
             $db = \Helper::getDB();
             $db->where('documentId', $db->escape($this->getId()));
-            $db->orderBy('id', 'asc');
-            $results = $db->get('document_slides');
+            $db->orderBy('s.id', 'asc');
+            $db->join('comments c', 'c.itemId = s.id', 'LEFT');
+            $db->groupBy('s.id');
+            $results = $db->get('document_slides s', NULL, '*, count(c.id) as commentsCount, s.id as id');
 
             $i = 1;
             foreach($results as $result) {
-                $this->slides[$i] = new \Models\Slide($result['id'], $i, $this->getPath(). DS . $i .'.'. IMAGE_TYPE);
+                $hasComments = $result['commentsCount'] > 0 ? TRUE : FALSE;
+                $this->slides[$i] = new \Models\Slide($result['id'], $i, $this->getPath(). DS . $i .'.'. IMAGE_TYPE, $hasComments);
                 $i++;
             }
         }

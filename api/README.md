@@ -492,7 +492,9 @@ Cache information is left out in the list view.
         "ownerId": 1,
         "slides": [
             {
+                "id": 1,
                 "number": 1,
+                "hasComments": false,
                 "image": "http://localhost:80/OpenSim-CMS/api/presentation/1/slide/1/image/"
             },
             {
@@ -539,7 +541,9 @@ Example of output when request is successful:
     "ownerId": 1,
     "slides": [
         {
+            "id": 1,
             "number": 1,
+            "hasComments": false,
             "image": "http:\/\/localhost:80\/OpenSim-CMS\/api\/presentation\/1\/slide\/1\/image\/",
             "cache": {
                 "1": {
@@ -615,8 +619,9 @@ GET /api/comments/<TYPE>/<ID>/<OFFSET>/ HTTP/1.1
 
 | Types         | Description                                                      |
 |---------------|------------------------------------------------------------------|
-| documents     | Get comments for the document with id = <ID>.                    |
+| document      | Get comments for the document with id = <ID>.                    |
 | meeting       | Get comments on the meeting with the given id.                   |
+| slide         | Get comments for the slide with id = <ID>.                       |
 
 ## Grids
 For an overview of all grids and their information, the following request can be used:
