@@ -236,6 +236,7 @@ angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$
                         // Store permissions
                         sessionStorage.authPermission          = userResponse.permissions.auth;
                         sessionStorage.chatPermission          = userResponse.permissions.chat;
+                        sessionStorage.commentPermission       = userResponse.permissions.comment;
                         sessionStorage.documentPermission      = userResponse.permissions.document;
                         sessionStorage.gridPermission          = userResponse.permissions.grid;
                         sessionStorage.meetingPermission       = userResponse.permissions.meeting;
