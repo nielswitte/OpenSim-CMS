@@ -1,4 +1,4 @@
-var partial_path = base_url +'/cms/templates/restangular/html/partials';
+var partial_path    = base_url +'/cms/templates/restangular/html/partials';
 var controller_path = base_url +'/cms/templates/restangular/js/controllers';
 
 /** @const No (0) permissions */
@@ -29,6 +29,6 @@ var HOLIDAYS = {
 };
 
 /** @const Start time of the day */
-TIME_START  = '06:00';
+var TIME_START  = '06:00';
 /** @const End time of the day */
-TIME_END    = '22:00';
+var TIME_END    = '22:00';

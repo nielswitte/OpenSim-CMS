@@ -215,6 +215,7 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
                 user: {
                     id: sessionStorage.id
                 },
+                type: $scope.commentType,
                 parentId: 0,
                 message: ""
             };
@@ -267,6 +268,15 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
             }
             // put cursor in textarea
             jQuery('#commentForm textarea').focus();
+        };
+
+        // Submits the new comment to the API
+        $scope.commentSubmit = function() {
+            if($scope.commentType == 'slide') {
+                // @todo
+            } else {
+                $alert({title: 'Comment type not implemented!', content: $sce.trustAsHtml('The comment could not be saved because the comment type is not set or not implemented.'), type: 'warning'});
+            }
         };
 
         // Checks if the user has permission to remove a comment
@@ -1498,6 +1508,12 @@ angularRest.controller('slideController', ['RestangularCache', 'Restangular', '$
                 });
             }
         });
+
+        // Show comments and set the comment Type to: slide
+        $scope.showComments = function() {
+            $scope.commentType = 'slide';
+            return partial_path +'/comment/commentContainer.html';
+        };
 
         // Go to the next slide
         $scope.nextSlide = function() {

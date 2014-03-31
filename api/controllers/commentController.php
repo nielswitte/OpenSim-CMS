@@ -8,6 +8,7 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author Niels Witte
  * @version 0.1
+ * @date March 31st, 2014
  * @since March 28th, 2014
  */
 class CommentController {
@@ -37,5 +38,25 @@ class CommentController {
         $db->where('id', $db->escape($this->comment->getId()));
         $result = $db->delete('comments');
         return $result;
+    }
+
+    /**
+     * Creates the new comment
+     *
+     * @param array $parameters
+     * @return integer commentId or boolean FALSE on failure
+     */
+    public function createComment($parameters) {
+        return FALSE;
+    }
+
+    /**
+     * Checks if the create parameters for a new comment are correct
+     *
+     * @param array $parameters
+     * @return boolean
+     */
+    public function validateParametersCreate($parameters) {
+        return FALSE;
     }
 }

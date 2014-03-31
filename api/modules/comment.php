@@ -12,6 +12,7 @@ require_once dirname(__FILE__) .'/../controllers/commentController.php';
  *
  * @author Niels Witte
  * @version 0.1
+ * @date March 31st, 2014
  * @since March 28th, 2014
  */
 class Comment extends Module {
@@ -39,7 +40,8 @@ class Comment extends Module {
      */
     public function setRoutes() {
         $this->api->addRoute("/^\/comments\/([a-z]+)\/(\d+)\/?$/",                      "getComments",           $this, "GET",       \Auth::READ);    // Get list with comments
-        $this->api->addRoute("/^\/comment\/(\d+)\/?$/",                                 "deleteComment",         $this, "DELETE",    \Auth::READ);    // Removes the given comment
+        $this->api->addRoute("/^\/comment\/([a-z]+)\/(\d+)\/?$/",                       "createComment",         $this, "POST",      \Auth::EXECUTE); // Create a new comment
+        $this->api->addRoute("/^\/comment\/(\d+)\/?$/",                                 "deleteCommentById",     $this, "DELETE",    \Auth::READ);    // Removes the given comment
     }
 
     /**
@@ -126,6 +128,34 @@ class Comment extends Module {
     }
 
     /**
+     * Creates a new comment for the given type and id
+     * with the post parameters.
+     *
+     * @param array $args
+     * @return array
+     * @throws \Exception
+     */
+    public function createComment($args) {
+        $type = \Helper::getCommentType($args[1], $args[2]);
+        if($type !== FALSE) {
+            $parameters = \Helper::getInput(TRUE);
+            $commentCtrl = new \Controllers\CommentController();
+            if($commentCtrl->validateParametersCreate($parameters)) {
+                $data = $commentCtrl->createComment($parameters);
+            }
+        } else {
+            throw new \Exception('Type not implemented yet', 1);
+        }
+
+        // Format the result
+        $result = array(
+            'success'   => ($data !== FALSE ? TRUE : FALSE),
+            'commentId' => ($data !== FALSE ? $data : 0)
+        );
+        return $result;
+    }
+
+    /**
      * Removes the given comment from the database
      * WARNING: This will also remove all responses to this comment (CASCADE)
      *
@@ -133,7 +163,7 @@ class Comment extends Module {
      * @return array
      * @throws \Exception
      */
-    public function deleteComment($args) {
+    public function deleteCommentById($args) {
         // Get commnet data
         $db         = \Helper::getDB();
         $db->where('id', $db->escape($args[1]));
