@@ -208,7 +208,22 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
  *
  */
 // chatController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '$route', '$alert', 'Cache', function(Restangular, $scope, $sce, $route, $alert, Cache) {
+angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '$route', '$alert', 'Cache', '$location', '$anchorScroll', function(Restangular, $scope, $sce, $route, $alert, Cache, $location, $anchorScroll) {
+        // Clear the comment form
+        $scope.clearComment = function() {
+            $scope.comment = {
+                user: {
+                    id: sessionStorage.id
+                },
+                parentId: 0,
+                message: ""
+            };
+            $scope.replyTo = "";
+        };
+
+        // Clear comment form on init
+        $scope.clearComment();
+
         // Removes a comment from the database
         $scope.deleteComment = function(id) {
             // Show loading screen
@@ -228,6 +243,32 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
             });
         };
 
+        // User has sufficient permissions to add comment?
+        $scope.allowComments = function() {
+            if(sessionStorage.commentPermission >= EXECUTE) {
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        // Create new comment
+        $scope.newComment = function(id) {
+            // Scroll to textarea
+            jQuery('body').scrollTop(jQuery('#commentForm').offset().top);
+            // Set quote text
+            if(id > 0) {
+                $scope.comment.parentId = id;
+                $scope.replyTo = jQuery('#comment-'+ id +' header a').text();
+                $scope.comment.message =  "> **"+ $scope.replyTo;
+                $scope.comment.message += " @ "+ jQuery('#comment-'+ id +' header time').text() +"**  \n";
+                $scope.comment.message += "> "+ jQuery('#comment-'+ id +' span.message').data('message').replace(/\n/g, "\n> ");
+                $scope.comment.message += "\n\n";
+            }
+            // put cursor in textarea
+            jQuery('#commentForm textarea').focus();
+        };
+
         // Checks if the user has permission to remove a comment
         $scope.allowDelete = function(userId) {
             // Read permissions or higher and own comment?
@@ -240,6 +281,22 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
             } else {
                 return false;
             }
+        };
+
+        // Trust the message as safe markdown html
+        $scope.markdown = function(message) {
+            return $sce.trustAsHtml(markdown.toHTML(""+ message));
+        };
+
+        // Toggle MarkDown help
+        var showMDHelp = false;
+        $scope.toggleMDHelp = function() {
+            showMDHelp = !showMDHelp;
+        };
+
+        // Show or hide MarkDown Help
+        $scope.showMDHelp = function() {
+            return showMDHelp;
         };
     }]
 );
@@ -1428,6 +1485,7 @@ angularRest.controller('slideController', ['RestangularCache', 'Restangular', '$
             comments: [],
             commentCount: 0
         };
+
         // Get the slide details
         RestangularCache.one('presentation', $routeParams.documentId).one('slide', $routeParams.slideId).get().then(function(slideResponse) {
             $scope.slide = slideResponse;
@@ -1441,10 +1499,12 @@ angularRest.controller('slideController', ['RestangularCache', 'Restangular', '$
             }
         });
 
+        // Go to the next slide
         $scope.nextSlide = function() {
             $location.path('document/'+ $routeParams.documentId +'/slide/'+ (parseInt($routeParams.slideId) + 1));
         };
 
+        // Go to the previous slide
         $scope.previousSlide = function() {
             $location.path('document/'+ $routeParams.documentId +'/slide/'+ (parseInt($routeParams.slideId) - 1));
         };

@@ -88,6 +88,7 @@ defined('EXEC') or die('Config not loaded');
         <script src="templates/restangular/js/libs/moment.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/bootstrap-calendar.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/select2.min.js" type="text/javascript"></script>
+        <script src="templates/restangular/js/libs/markdown.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/less.min.js" type="text/javascript"></script>
         <!-- Angular implementations -->
         <script src="templates/restangular/js/main.js" type="text/javascript"></script>

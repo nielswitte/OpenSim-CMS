@@ -94,3 +94,4 @@ Used in the CMS:
  * Ivaynberg for Select2 (https://github.com/ivaynberg/select2)
  * Moment (https://github.com/moment/moment)
  * Jashkenas for Underscore (https://github.com/jashkenas/underscore)
+ * evilstreak for markdown-js (https://github.com/evilstreak/markdown-js)
