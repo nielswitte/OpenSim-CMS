@@ -62,13 +62,13 @@ class Comments implements SimpleModel {
             $results = $db->get('comments c', NULL, '*, u.id as userId, c.id as commentId');
             // Found results?
             if(isset($results[0])) {
-
+                $number = 1;
                 // Save all comments
                 foreach($results as $result) {
                     // The author of the comment
                     $user    = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
                     // Create comment
-                    $comment = new \Models\Comment($result['commentId'], $result['parentId'], $user, $result['type'], $result['timestamp'], $result['message']);
+                    $comment = new \Models\Comment($result['commentId'], $result['parentId'], $number, $user, $result['type'], $result['timestamp'], $result['message']);
                     // Is a reaction on another comment?
                     if($comment->getParentId() !== NULL) {
                         $parentComment = $this->getCommentById($result['parentId']);
@@ -77,7 +77,7 @@ class Comments implements SimpleModel {
                             $parentComment->addChild($comment);
                         }
                     }
-
+                    $number++;
                     // Add to comments
                     $this->addComment($comment);
                 }

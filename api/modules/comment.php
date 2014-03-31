@@ -78,6 +78,7 @@ class Comment extends Module {
             $data["comments"][] = array(
                 'id'            => $comment->getId(),
                 'parentId'      => $comment->getParentId(),
+                'number'        => $comment->getNumber(),
                 'user'          => array(
                     'id'        => $comment->getUser()->getId(),
                     'username'  => $comment->getUser()->getUsername(),
@@ -107,6 +108,8 @@ class Comment extends Module {
         foreach($commentParent->getChildren() as $comment) {
             $data[] = array(
                 'id'            => $comment->getId(),
+                'parentId'      => $comment->getParentId(),
+                'number'        => $comment->getNumber(),
                 'user'          => array(
                     'id'        => $comment->getUser()->getId(),
                     'username'  => $comment->getUser()->getUsername(),

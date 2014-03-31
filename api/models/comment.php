@@ -23,6 +23,11 @@ class Comment {
      */
     private $parentId;
     /**
+     * The number of the comment (first comment = 1)
+     * @var integer
+     */
+    private $number;
+    /**
      * The user instance of the author of this message
      * @var \Models\User
      */
@@ -58,14 +63,16 @@ class Comment {
      *
      * @param integer $id
      * @param integer $parentId
+     * @param integer $number
      * @param \Models\User $user
      * @param string $type
      * @param string $timestamp
      * @param string $msg
      */
-    public function __construct($id, $parentId, \Models\User $user, $type, $timestamp, $msg) {
+    public function __construct($id, $parentId, $number, \Models\User $user, $type, $timestamp, $msg) {
         $this->id        = $id;
         $this->parentId  = $parentId;
+        $this->number    = $number;
         $this->user      = $user;
         $this->type      = $type;
         $this->timestamp = $timestamp;
@@ -88,6 +95,15 @@ class Comment {
      */
     public function getParentId() {
         return $this->parentId;
+    }
+
+    /**
+     * Returns the number of this comment. Which represents the order of posting
+     *
+     * @return integer
+     */
+    public function getNumber() {
+        return $this->number;
     }
 
     /**

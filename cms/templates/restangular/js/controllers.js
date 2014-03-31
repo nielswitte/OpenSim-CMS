@@ -196,6 +196,38 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
         };
     }]
 );
+
+
+/****************************************************************************************************************************************************
+ *   _____                                     _
+ *  / ____|                                   | |
+ * | |     ___  _ __ ___  _ __ ___   ___ _ __ | |_ ___
+ * | |    / _ \| '_ ` _ \| '_ ` _ \ / _ \ '_ \| __/ __|
+ * | |___| (_) | | | | | | | | | | |  __/ | | | |_\__ \
+ *  \_____\___/|_| |_| |_|_| |_| |_|\___|_| |_|\__|___/
+ *
+ */
+// chatController -----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '$alert', function(Restangular, $scope, $sce, $alert) {
+        $scope.deleteComment = function() {
+
+        };
+
+        $scope.allowDelete = function(userId) {
+            // Read permissions or higher and own comment?
+            if(sessionStorage.id == userId && sessionStorage.commentPermission >= READ) {
+                return true;
+            // Write permission
+            } else if(sessionStorage.commentPermission >= WRITE) {
+                return true;
+            // Insufficient permissions
+            } else {
+                return false;
+            }
+        };
+    }]
+);
+
 /****************************************************************************************************************************************************
  *   _    _
  *  | |  | |
