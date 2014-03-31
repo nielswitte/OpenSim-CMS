@@ -306,12 +306,10 @@ ol {
     }
 }
 
-// Minutes and comments
-#minutes,
-#comments{
+// Minutes
+#minutes {
     div.row {
-        div.minute,
-        div.comment {
+        div.minute {
             padding-top: 5px;
             padding-bottom: 5px;
         }
@@ -389,6 +387,47 @@ ol {
     .progress-bar {
         &.progress-bar-default {
             background-color: #999;
+        }
+    }
+}
+
+// Comments
+#comments {
+    ul {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+
+        ul {
+
+        }
+        li {
+            article.comment {
+
+                header {
+                    time {
+                        font-size: 10px;
+                        color: #999;
+                    }
+                }
+            }
+        }
+
+        // Alternate colors
+        .well {
+            padding: 15px;
+            margin-bottom: 15px;
+
+            .well:last-child {
+                margin-bottom: 0;
+            }
+
+            &:nth-child(odd) {
+                background-color: #ffffff;
+            }
+            &:nth-child(even) {
+                background-color: #f9f9f9;
+            }
         }
     }
 }

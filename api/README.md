@@ -605,16 +605,10 @@ On almost everything users can leave comments (when the user has sufficient perm
 The comments can be saved, retrieved and removed through the API by using the following functions:
 
 ### Get comments
-Getting the latest 50 comments by using this URL.
+Getting the latest comments by using this URL.
 
 ```http
 GET /api/comments/<TYPE>/<ID>/ HTTP/1.1
-```
-
-Or add an additional parameter to specify the offset.
-
-```http
-GET /api/comments/<TYPE>/<ID>/<OFFSET>/ HTTP/1.1
 ```
 
 | Types         | Description                                                      |

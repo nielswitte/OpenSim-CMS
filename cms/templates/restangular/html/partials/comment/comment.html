@@ -1,0 +1,10 @@
+<header>
+    <div class="pull-right">
+        #{{comment.id}}
+        <button type="button" class="btn btn-default btn-xs" ng-click="">reply</button>
+    </div>
+    <a ng-href="#!/user/{{comment.user.id}}" bs-tooltip title="Profile of {{comment.user.username}}">{{comment.user.firstName}} {{comment.user.lastName}}:</a><br>
+    <time>{{comment.timestamp}}</time>
+
+</header>
+<p>{{comment.message}}</p>

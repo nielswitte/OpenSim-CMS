@@ -11,7 +11,12 @@
     </div>
 </div>
 <div id="comments">
-    <h2>Comments ({{comments.length}})</h2>
+    <h2>Comments ({{comments.commentCount}})</h2>
+
+    <ul>
+        <li ng-repeat="comment in comments.comments" ng-include src="'templates/restangular/html/partials/comment/comments.html'" class="well"></li>
+    </ul>
+    <!--
     <div class="row row-striped row-hover" ng-repeat="comment in comments">
         <div class="col-sm-3 comment">
             <span class="label label-info">{{comment.timestamp}}</span>
@@ -19,4 +24,5 @@
         </div>
         <div class="col-sm-9 comment">{{comment.message}}</div>
     </div>
+    -->
 </div>

@@ -38,8 +38,7 @@ class Comment extends Module {
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/^\/comments\/([a-z]+)\/(\d+)\/?$/",                         "getComments",         $this, "GET",    \Auth::READ);    // Get list with 50 comments
-        $this->api->addRoute("/^\/comments\/([a-z]+)\/(\d+)\/(\d+)\/?$/",                  "getComments",         $this, "GET",    \Auth::READ);    // Get list with 50 comments starting at the given offset
+        $this->api->addRoute("/^\/comments\/([a-z]+)\/(\d+)\/?$/",                         "getComments",         $this, "GET",    \Auth::READ);    // Get list with comments
     }
 
     /**
@@ -51,7 +50,6 @@ class Comment extends Module {
      */
     public function getComments($args) {
         $id     = $args[2];
-        $offset = isset($args[3]) ? $args[3] : 0;
 
         if($args[1] == 'document') {
             $parent = new \Models\Document($id);
@@ -63,7 +61,7 @@ class Comment extends Module {
         }
 
         $comments = new \Models\Comments($parent);
-        $comments->getInfoFromDatabase($offset, 50);
+        $comments->getInfoFromDatabase();
 
         return $this->getCommentsData($comments);
     }
@@ -77,7 +75,7 @@ class Comment extends Module {
     public function getCommentsData(\Models\Comments $comments) {
         $data = array();
         foreach($comments->getCommentsThreaded($comments->getComments()) as $comment) {
-            $data[] = array(
+            $data["comments"][] = array(
                 'id'            => $comment->getId(),
                 'parentId'      => $comment->getParentId(),
                 'user'          => array(
@@ -93,6 +91,7 @@ class Comment extends Module {
                 'children'      => $this->getCommentData($comment)
             );
         }
+        $data['commentCount']   = $comments->getCommentCount();
 
         return $data;
     }
