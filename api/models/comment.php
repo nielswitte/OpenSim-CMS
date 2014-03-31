@@ -17,6 +17,11 @@ class Comment {
      */
     private $id;
     /**
+     * The ID this item is a subitem from
+     * @var integer
+     */
+    private $parentId;
+    /**
      * The user instance of the author of this message
      * @var \Models\User
      */
@@ -41,13 +46,15 @@ class Comment {
      * Constructs a new comment
      *
      * @param integer $id
+     * @param integer $parentId
      * @param \Models\User $user
      * @param string $type
      * @param string $timestamp
      * @param string $msg
      */
-    public function __construct($id, \Models\User $user, $type, $timestamp, $msg) {
+    public function __construct($id, $parentId, \Models\User $user, $type, $timestamp, $msg) {
         $this->id        = $id;
+        $this->parentId  = $parentId;
         $this->user      = $user;
         $this->type      = $type;
         $this->timestamp = $timestamp;
@@ -61,6 +68,15 @@ class Comment {
      */
     public function getId() {
        return $this->id;
+    }
+
+    /**
+     * Returns the parent Id
+     *
+     * @return integer
+     */
+    public function getParentId() {
+        return $this->parentId;
     }
 
     /**

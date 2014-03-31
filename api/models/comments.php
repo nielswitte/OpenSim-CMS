@@ -75,7 +75,7 @@ class Comments implements SimpleModel {
                 // Save all comments
                 foreach($results as $result) {
                     $user    = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
-                    $comment = new \Models\Comment($result['commentId'], $user, $result['type'], $result['timestamp'], $result['message']);
+                    $comment = new \Models\Comment($result['commentId'], $result['parentId'], $user, $result['type'], $result['timestamp'], $result['message']);
                     $this->addComment($comment);
                 }
             }
