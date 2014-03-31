@@ -208,11 +208,27 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
  *
  */
 // chatController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '$alert', function(Restangular, $scope, $sce, $alert) {
-        $scope.deleteComment = function() {
+angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '$route', '$alert', 'Cache', function(Restangular, $scope, $sce, $route, $alert, Cache) {
+        // Removes a comment from the database
+        $scope.deleteComment = function(id) {
+            // Show loading screen
+            jQuery('#loading').show();
 
+            Restangular.one('comment', id).remove().then(function(resp) {
+                if(!resp.success) {
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                } else {
+                    $alert({title: 'Comment removed!', content: $sce.trustAsHtml('The comment with ID '+ id +' has been removed from the CMS.'), type: 'success'});
+                    Cache.clearCache();
+                    $route.reload();
+                }
+
+                // Remove loading screen
+                jQuery('#loading').hide();
+            });
         };
 
+        // Checks if the user has permission to remove a comment
         $scope.allowDelete = function(userId) {
             // Read permissions or higher and own comment?
             if(sessionStorage.id == userId && sessionStorage.commentPermission >= READ) {
@@ -1408,7 +1424,10 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
 // slideController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('slideController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$alert', '$sce', 'Cache', '$routeParams', '$location', function(RestangularCache, Restangular, $scope, Page, $alert, $sce, Cache, $routeParams, $location) {
         $scope.slide = {};
-        $scope.comments = [];
+        $scope.comments = {
+            comments: [],
+            commentCount: 0
+        };
         // Get the slide details
         RestangularCache.one('presentation', $routeParams.documentId).one('slide', $routeParams.slideId).get().then(function(slideResponse) {
             $scope.slide = slideResponse;

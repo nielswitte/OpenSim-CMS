@@ -392,4 +392,22 @@ END:VCALENDAR";
 
         return FILES_LOCATION . DS .'ical'. DS . $filename;
     }
+
+    /**
+     * Gets an instance of the comment's parent
+     *
+     * @param string $type - Type of the parent
+     * @param integer $id - The parent's ID
+     * @return \Models\Document or \Models\Slide or boolean FALSE when type not found
+     */
+    public static function getCommentType($type, $id) {
+        if($type == 'document') {
+            $parent = new \Models\Document($id);
+        } elseif($type == 'slide') {
+            $parent = new \Models\Slide($id, 1, '');
+        }else {
+            $parent = FALSE;
+        }
+        return $parent;
+    }
 }

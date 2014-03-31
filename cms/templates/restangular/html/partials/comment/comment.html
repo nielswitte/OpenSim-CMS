@@ -2,10 +2,9 @@
     <div class="pull-right">
         <span class="number">#{{comment.number}}</span>
         <button type="button" class="btn btn-default btn-xs" ng-click=""><i class="glyphicon glyphicon-comment"></i> Reply</button>
-        <button class="btn btn-danger btn-xs" confirmed-click="deleteComment(index)" ng-confirm-click="Are you sure you want to delete comment #{{comment.number}} by {{comment.user.username}}?" ng-show="allowDelete(comment.user.id)"><i class="glyphicon glyphicon-remove"></i></button>
+        <button class="btn btn-danger btn-xs" confirmed-click="deleteComment(comment.id)" ng-confirm-click="Are you sure you want to delete comment #{{comment.number}} by {{comment.user.username}}?" ng-show="allowDelete(comment.user.id)"><i class="glyphicon glyphicon-remove"></i></button>
     </div>
     <a ng-href="#!/user/{{comment.user.id}}" bs-tooltip title="Profile of {{comment.user.username}}">{{comment.user.firstName}} {{comment.user.lastName}}:</a><br>
     <time>{{comment.timestamp}}</time>
-
 </header>
 <p>{{comment.message}}</p>

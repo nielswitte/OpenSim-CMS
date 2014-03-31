@@ -610,12 +610,17 @@ Getting the latest comments by using this URL.
 ```http
 GET /api/comments/<TYPE>/<ID>/ HTTP/1.1
 ```
-
 | Types         | Description                                                      |
 |---------------|------------------------------------------------------------------|
 | document      | Get comments for the document with id = <ID>.                    |
 | meeting       | Get comments on the meeting with the given id.                   |
 | slide         | Get comments for the slide with id = <ID>.                       |
+
+### Remove comment
+
+```http
+DELETE /api/comment/<COMMENT-ID>/ HTTP/1.1
+```
 
 ## Grids
 For an overview of all grids and their information, the following request can be used:

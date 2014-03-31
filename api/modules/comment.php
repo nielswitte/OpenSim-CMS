@@ -38,7 +38,8 @@ class Comment extends Module {
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/^\/comments\/([a-z]+)\/(\d+)\/?$/",                         "getComments",         $this, "GET",    \Auth::READ);    // Get list with comments
+        $this->api->addRoute("/^\/comments\/([a-z]+)\/(\d+)\/?$/",                      "getComments",           $this, "GET",       \Auth::READ);    // Get list with comments
+        $this->api->addRoute("/^\/comment\/(\d+)\/?$/",                                 "deleteComment",         $this, "DELETE",    \Auth::READ);    // Removes the given comment
     }
 
     /**
@@ -51,12 +52,9 @@ class Comment extends Module {
     public function getComments($args) {
         $id     = $args[2];
 
-        if($args[1] == 'document') {
-            $parent = new \Models\Document($id);
-        } elseif($args[1] == 'slide') {
-            $parent = new \Models\Slide($args[2], 1, '');
-        }else {
-            $parent = FALSE;
+        // Get comment type instance
+        $parent = \Helper::getCommentType($args[1], $id);
+        if($parent === FALSE) {
             throw new \Exception('Type not implemented yet', 1);
         }
 
@@ -125,5 +123,41 @@ class Comment extends Module {
         }
 
         return $data;
+    }
+
+    /**
+     * Removes the given comment from the database
+     * WARNING: This will also remove all responses to this comment (CASCADE)
+     *
+     * @param array $args
+     * @return array
+     * @throws \Exception
+     */
+    public function deleteComment($args) {
+        // Get commnet data
+        $db         = \Helper::getDB();
+        $db->where('id', $db->escape($args[1]));
+        $result     = $db->get('comments');
+        if(isset($result[0])) {
+            $user       = new \Models\User($result[0]['userId']);
+            $comment    = new \Models\Comment($result[0]['id'], $result[0]['parentId'], 1, $user, $result[0]['type'], $result[0]['timestamp'], $result[0]['message']);
+
+            // Only allow when the user has write access or wants to update his/her own comment
+            if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $comment->getUser()->getId() != \Auth::getUser()->getId()) {
+                throw new \Exception('You do not have permissions to update this user.', 6);
+            }
+
+            // Delete!
+            $commentCtrl = new \Controllers\CommentController($comment);
+            $data        = $commentCtrl->removeComment();
+        } else {
+            throw new \Exception('Cound not find comment with ID: '. $args[1], 2);
+        }
+
+        // Format the result
+        $result = array(
+            'success'   => ($data !== FALSE ? TRUE : FALSE)
+        );
+        return $result;
     }
 }

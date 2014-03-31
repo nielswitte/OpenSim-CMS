@@ -26,4 +26,16 @@ class CommentController {
         $this->comment = $comment;
     }
 
+    /**
+     * Removes the selected comment from the database,
+     * this also removes responses to the given comment sice the database cascades on remove
+     *
+     * @return boolean
+     */
+    public function removeComment() {
+        $db = \Helper::getDB();
+        $db->where('id', $db->escape($this->comment->getId()));
+        $result = $db->delete('comments');
+        return $result;
+    }
 }
