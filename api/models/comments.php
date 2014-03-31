@@ -11,7 +11,8 @@ require_once dirname(__FILE__) .'/comment.php';
  *
  * @author Niels Witte
  * @version 0.1
- * @since March 28st, 2014
+ * @date March 31st, 2014
+ * @since March 28th, 2014
  */
 class Comments implements SimpleModel {
     /**
@@ -59,7 +60,7 @@ class Comments implements SimpleModel {
             $db->join('users u', 'c.userId = u.id', 'LEFT');
             $db->where('type', $db->escape($type));
             $db->where('itemId', $db->escape($this->getParent()->getId()));
-            $db->orderBy('timestamp', 'DESC');
+            $db->orderBy('timestamp', 'ASC');
 
             // Determine the limit
             if($limit > 0) {
@@ -74,8 +75,20 @@ class Comments implements SimpleModel {
 
                 // Save all comments
                 foreach($results as $result) {
+                    // The author of the comment
                     $user    = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+                    // Create comment
                     $comment = new \Models\Comment($result['commentId'], $result['parentId'], $user, $result['type'], $result['timestamp'], $result['message']);
+                    // Is a reaction on another comment?
+                    if($comment->getParentId() !== NULL) {
+                        $parentComment = $this->getCommentById($result['parentId']);
+                        // Parent comment found?
+                        if($parentComment !== FALSE) {
+                            $parentComment->addChild($comment);
+                        }
+                    }
+
+                    // Add to comments
                     $this->addComment($comment);
                 }
             }
@@ -101,12 +114,46 @@ class Comments implements SimpleModel {
     }
 
     /**
-     * Get comments
+     * Get comments as a flat array, which does include the parent/child objects but outputs the comments
+     * as a flat list
      *
      * @return array
      */
     public function getComments() {
         return $this->comments;
+    }
+
+    /**
+     * Returns a threaded array with the comments,
+     * actually only returns the main level, the sub levels need to be accessed by using the
+     * getChildren() function
+     *
+     * @return array
+     */
+    public function getCommentsThreaded($commentsList) {
+        $comments = array();
+        foreach($commentsList as $comment) {
+            if($comment->getParentId() == NULL) {
+                $comments[] = $comment;
+            }
+        }
+
+        return $comments;
+    }
+
+    /**
+     * Search the comments for a comment with the given ID
+     *
+     * @param integer $id
+     * @return \Models\Comment or boolean FALSE when no comment found with the given id
+     */
+    private function getCommentById($id) {
+        foreach($this->getComments() as $comment) {
+            if($comment->getId() == $id) {
+                return $comment;
+            }
+        }
+        return FALSE;
     }
 
     /**

@@ -7,7 +7,8 @@ defined('EXEC') or die('Invalid request');
  * This class represents a single comment
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
+ * @date March 31st, 2014
  * @since March 28st, 2014
  */
 class Comment {
@@ -41,6 +42,16 @@ class Comment {
      * @var string
      */
     private $msg;
+    /**
+     * The parent comment
+     * @var \Models\Comment
+     */
+    private $parent;
+    /**
+     * List with the reactions on this comment
+     * @var array
+     */
+    private $children = array();
 
     /**
      * Constructs a new comment
@@ -71,7 +82,7 @@ class Comment {
     }
 
     /**
-     * Returns the parent Id
+     * Returns the parent comment's ID
      *
      * @return integer
      */
@@ -113,5 +124,42 @@ class Comment {
      */
     public function getMessage() {
         return $this->msg;
+    }
+
+    /**
+     * Sets the parent of this commnet
+     *
+     * @param \Models\Comment $parent
+     */
+    public function setParent(\Models\Comment $parent) {
+        $this->parent = $parent;
+    }
+
+    /**
+     * Returns the parent of this comment
+     *
+     * @return \Models\Comment
+     */
+    public function getParent() {
+        return $this->parent;
+    }
+
+    /**
+     * Adds the child to the comment list and sets the parent of the child to this comment
+     *
+     * @param \Models\Comment $child
+     */
+    public function addChild(\Models\Comment $child) {
+        $this->children[] = $child;
+        $child->setParent($this);
+    }
+
+    /**
+     * Returns all children (reactions) on this comment
+     *
+     * @return array
+     */
+    public function getChildren() {
+        return $this->children;
     }
 }

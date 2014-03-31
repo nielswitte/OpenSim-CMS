@@ -65,29 +65,60 @@ class Comment extends Module {
         $comments = new \Models\Comments($parent);
         $comments->getInfoFromDatabase($offset, 50);
 
-        return $this->getCommentData($comments);
+        return $this->getCommentsData($comments);
     }
 
     /**
-     * Formats the comments to a nice array which can be converted to the output format
+     * Used for formatting the root Level
      *
      * @param \Models\Comments $comments
      * @return array
      */
-    public function getCommentData(\Models\Comments $comments) {
+    public function getCommentsData(\Models\Comments $comments) {
         $data = array();
-        foreach($comments->getComments() as $comment) {
+        foreach($comments->getCommentsThreaded($comments->getComments()) as $comment) {
             $data[] = array(
-                'id'        => $comment->getId(),
-                'user'      => array(
+                'id'            => $comment->getId(),
+                'parentId'      => $comment->getParentId(),
+                'user'          => array(
                     'id'        => $comment->getUser()->getId(),
                     'username'  => $comment->getUser()->getUsername(),
                     'firstName' => $comment->getUser()->getFirstName(),
                     'lastName'  => $comment->getUser()->getLastName(),
                     'email'     => $comment->getUser()->getEmail()
                 ),
-                'timestamp' => $comment->getTimestamp(),
-                'message'   => $comment->getMessage()
+                'timestamp'     => $comment->getTimestamp(),
+                'message'       => $comment->getMessage(),
+                'childrenCount' => count($comment->getChildren()),
+                'children'      => $this->getCommentData($comment)
+            );
+        }
+
+        return $data;
+    }
+
+    /**
+     * Formats the children comments
+     *
+     * @param \Models\Comment $commentParent
+     * @return array
+     */
+    public function getCommentData(\Models\Comment $commentParent) {
+        $data = array();
+        foreach($commentParent->getChildren() as $comment) {
+            $data[] = array(
+                'id'            => $comment->getId(),
+                'user'          => array(
+                    'id'        => $comment->getUser()->getId(),
+                    'username'  => $comment->getUser()->getUsername(),
+                    'firstName' => $comment->getUser()->getFirstName(),
+                    'lastName'  => $comment->getUser()->getLastName(),
+                    'email'     => $comment->getUser()->getEmail()
+                ),
+                'timestamp'     => $comment->getTimestamp(),
+                'message'       => $comment->getMessage(),
+                'childrenCount' => count($comment->getChildren()),
+                'children'      => $this->getCommentData($comment)
             );
         }
 
