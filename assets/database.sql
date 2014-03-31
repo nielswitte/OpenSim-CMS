@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS `chats` (
 -- Structuur van  tabel OpenSim-CMS.comments wordt geschreven
 CREATE TABLE IF NOT EXISTS `comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `parentId` int(11) DEFAULT NULL,
+  `parentId` int(11) NOT NULL DEFAULT '0',
   `itemId` int(11) DEFAULT NULL,
   `userId` int(11) DEFAULT NULL,
   `type` varchar(50) DEFAULT NULL,
@@ -68,8 +68,6 @@ CREATE TABLE IF NOT EXISTS `comments` (
   `message` text,
   PRIMARY KEY (`id`),
   KEY `FK_comments_users` (`userId`),
-  KEY `FK_comments_comments` (`parentId`),
-  CONSTRAINT `FK_comments_comments` FOREIGN KEY (`parentId`) REFERENCES `comments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_comments_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -177,7 +175,7 @@ CREATE TABLE IF NOT EXISTS `meetings` (
 CREATE TABLE IF NOT EXISTS `meeting_agenda_items` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `meetingId` int(11) NOT NULL,
-  `parentId` int(11) DEFAULT NULL,
+  `parentId` int(11) NOT NULL DEFAULT '0',
   `sort` int(11) DEFAULT NULL,
   `value` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (`id`,`meetingId`),
