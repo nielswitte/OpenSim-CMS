@@ -88,6 +88,7 @@ class Comment extends Module {
                     'email'     => $comment->getUser()->getEmail()
                 ),
                 'timestamp'     => $comment->getTimestamp(),
+                'editTimestamp' => $comment->getEditTimestamp(),
                 'message'       => $comment->getMessage(),
                 'childrenCount' => count($comment->getChildren()),
                 'children'      => $this->getCommentData($comment)
@@ -144,7 +145,9 @@ class Comment extends Module {
             $parameters['type']     = $args[1];
             $parameters['itemId']   = $args[2];
             $commentCtrl = new \Controllers\CommentController();
+            // Validate parameters
             if($commentCtrl->validateParametersCreate($parameters)) {
+                // Create comment
                 $data = $commentCtrl->createComment($parameters);
             }
         } else {
@@ -172,6 +175,7 @@ class Comment extends Module {
         $db         = \Helper::getDB();
         $db->where('id', $db->escape($args[1]));
         $query      = $db->getOne('comments');
+        // Comment exists
         if($query) {
             $user       = new \Models\User($query['userId']);
             $comment    = new \Models\Comment($query['id'], $query['parentId'], 1, $user, $query['type'], $query['timestamp'], $query['message']);
@@ -180,8 +184,13 @@ class Comment extends Module {
             if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $comment->getUser()->getId() != \Auth::getUser()->getId()) {
                 throw new \Exception('You do not have permissions to update this comment.', 6);
             }
-
-            // @todo Update
+            $commentCtrl = new \Controllers\CommentController($comment);
+            $parameters  = \Helper::getInput(TRUE);
+            // Validate parameters
+            if($commentCtrl->validateParametersUpdate($parameters)) {
+                // Update comment
+                $commentCtrl->updateComment($parameters);
+            }
         } else {
             throw new \Exception('Cound not find comment with ID: '. $args[1], 2);
         }
