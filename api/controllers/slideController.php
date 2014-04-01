@@ -8,6 +8,7 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author Niels Witte
  * @version 0.1
+ * @date April 1st, 2014
  * @since February 12th, 2014
  */
 class SlideController {
@@ -48,11 +49,11 @@ class SlideController {
 
             $results = $db->insert('document_slides_cache', $cacheSlideData);
         } else {
-            throw new \Exception("Invalid UUID provided", 2);
+            throw new \Exception('Invalid UUID provided', 2);
         }
 
         if($results === FALSE) {
-            throw new \Exception("Updating UUID failed", 1);
+            throw new \Exception('Updating UUID failed', 1);
         }
         return $results !== FALSE;
     }

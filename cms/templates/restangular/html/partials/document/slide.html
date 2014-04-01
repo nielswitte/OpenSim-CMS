@@ -1,0 +1,13 @@
+<div class="page-header">
+    <h1>Slide <small>{{slide.number}}</small></h1>
+</div>
+<div class="toolbar toolbar-top">
+    <button ng-click="previousSlide()" type="button" class="btn btn-default" ng-show="slide.number > 1"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
+    <button ng-click="nextSlide()" type="button" class="btn btn-default">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <img src="templates/restangular/img/img-placeholder.png" ng-src="{{getSlideImage()}}" class="img-responsive img-thumbnail" alt="Slide {{slide.number}}">
+    </div>
+</div>
+<div ng-include src="showComments()"></div>

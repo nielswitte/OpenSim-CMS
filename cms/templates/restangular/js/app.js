@@ -19,6 +19,10 @@ var angularRest = angular.module('OpenSim-CMS', [
         templateUrl: partial_path +'/document/document.html',
         controller: 'documentController',
         requireLogin: true
+    }).when('/document/:documentId/slide/:slideId', {
+        templateUrl: partial_path +'/document/slide.html',
+        controller: 'slideController',
+        requireLogin: true
     }).when('/grids', {
         templateUrl: partial_path +'/grid/grids.html',
         controller: 'gridsController',
@@ -110,6 +114,7 @@ angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', 'Ca
                 sessionStorage.clear();
                 Cache.clearCache();
                 $alert({title: 'Session Expired!', content: $sce.trustAsHtml('You have been logged out because your session has expired'), type: 'warning'});
+                $location.path('/login');
             }
             // Unauthorized
             if(resp.status == 401) {

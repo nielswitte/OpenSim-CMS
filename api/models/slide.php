@@ -7,13 +7,15 @@ defined('EXEC') or die('Config not loaded');
  * This class is the slide model
  *
  * @author Niels Witte
- * @version 0.2
+ * @version 0.3
+ * @date March 28th, 2014
  * @since February 12th, 2014
  */
 class Slide {
     private $id;
     private $number;
     private $path;
+    private $hasComments;
 
     /**
      * Constructs a new slide with the given parameters
@@ -21,11 +23,13 @@ class Slide {
      * @param integer $id
      * @param integer $number
      * @param string $path
+     * @param boolean $hasComments - [Optional] Whether or not the Slide has comments available
      */
-    public function __construct($id, $number, $path) {
+    public function __construct($id, $number, $path, $hasComments = FALSE) {
         $this->id           = $id;
         $this->number       = $number;
         $this->path         = $path;
+        $this->hasComments  = $hasComments;
     }
 
     /**
@@ -67,5 +71,14 @@ class Slide {
      */
     public function getPath() {
         return $this->path;
+    }
+
+    /**
+     * Returns the comments or FALSE when no comments set
+     *
+     * @return \Models\Comments or FALSE when no comments
+     */
+    public function hasComments() {
+        return $this->hasComments;
     }
 }

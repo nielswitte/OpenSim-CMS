@@ -20,6 +20,6 @@
             <strong ng-show="minute.user"><a ng-href="#!/user/{{minute.user.id}}" title="View profile of user {{minute.user.username}}">{{minute.name}}</a></strong>
             <strong ng-hide="minute.user">{{minute.name}}</strong>
         </div>
-        <div class="col-sm-10 minute" ng-bind-html="parseMessage(minute.message)" dynamic></div>
+        <div class="col-sm-10 minute" ng-bind-html="parseMessage(minute.message)"></div>
     </div>
 </section>

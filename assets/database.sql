@@ -2,7 +2,7 @@
 -- Host:                         localhost
 -- Server versie:                5.5.35-0ubuntu0.13.10.2 - (Ubuntu)
 -- Server OS:                    debian-linux-gnu
--- HeidiSQL Versie:              8.3.0.4727
+-- HeidiSQL Versie:              8.3.0.4744
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -52,6 +52,26 @@ CREATE TABLE IF NOT EXISTS `chats` (
   KEY `FK_chats_grids` (`gridId`),
   CONSTRAINT `FK_chats_grids` FOREIGN KEY (`gridId`) REFERENCES `grids` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK__users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.comments wordt geschreven
+CREATE TABLE IF NOT EXISTS `comments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `parentId` int(11) DEFAULT NULL,
+  `type` varchar(50) DEFAULT NULL,
+  `itemId` int(11) DEFAULT NULL,
+  `userId` int(11) DEFAULT NULL,
+  `message` text,
+  `timestamp` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `editTimestamp` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_comments_users` (`userId`),
+  KEY `FK_comments_comments` (`parentId`),
+  CONSTRAINT `FK_comments_comments` FOREIGN KEY (`parentId`) REFERENCES `comments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_comments_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- Data exporteren was gedeselecteerd
@@ -163,6 +183,8 @@ CREATE TABLE IF NOT EXISTS `meeting_agenda_items` (
   `value` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (`id`,`meetingId`),
   KEY `FK_meeting_agenda_items_meetings` (`meetingId`),
+  KEY `FK_meeting_agenda_items_meeting_agenda_items` (`parentId`),
+  CONSTRAINT `FK_meeting_agenda_items_meeting_agenda_items` FOREIGN KEY (`parentId`) REFERENCES `meeting_agenda_items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_meeting_agenda_items_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
@@ -268,6 +290,7 @@ CREATE TABLE IF NOT EXISTS `user_permissions` (
   `userId` int(11) NOT NULL AUTO_INCREMENT,
   `auth` tinyint(1) unsigned NOT NULL,
   `chat` tinyint(1) unsigned NOT NULL,
+  `comment` tinyint(1) unsigned NOT NULL,
   `document` tinyint(1) unsigned NOT NULL,
   `grid` tinyint(1) unsigned NOT NULL,
   `meeting` tinyint(1) unsigned NOT NULL,

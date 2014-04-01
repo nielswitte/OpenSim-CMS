@@ -5,19 +5,19 @@
     <div class="form-group">
         <label for="inputId" class="col-sm-2 control-label">ID</label>
         <div class="col-sm-10">
-            <input type="number" class="form-control" id="inputId" placeholder="ID" value="{{document.id}}" readonly="readonly">
+            <p class="form-control-static">{{document.id}}</p>
         </div>
     </div>
     <div class="form-group">
         <label for="inputType" class="col-sm-2 control-label">Type</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="inputType" placeholder="Type" value="{{document.type}}" readonly="readonly">
+            <p class="form-control-static">{{document.type}}</p>
         </div>
     </div>
     <div class="form-group">
         <label for="inputTitle" class="col-sm-2 control-label">Title</label>
         <div class="col-sm-10">
-            <input type="text" class="form-control" id="inputTitle" placeholder="Title" value="{{document.title}}">
+            <p class="form-control-static">{{document.title}}</p>
         </div>
     </div>
     <div class="form-group">
@@ -29,19 +29,19 @@
     <div class="form-group" ng-show="document.type == 'presentation'">
         <label for="inputSlidesCount" class="col-sm-2 control-label">Slides count</label>
         <div class="col-sm-10">
-            <input type="number" class="form-control" id="inputSlidesCount" placeholder="Slides count" value="{{document.slidesCount}}" readonly="readonly">
+            <p class="form-control-static">{{document.slidesCount}}</p>
         </div>
     </div>
     <div class="form-group">
         <label for="inputCreationDate" class="col-sm-2 control-label">Creation date</label>
         <div class="col-sm-10">
-            <input type="datetime" class="form-control" id="inputCreationDate" placeholder="Creation date" value="{{document.creationDate}}" readonly="readonly">
+            <p class="form-control-static">{{document.creationDate}}</p>
         </div>
     </div>
     <div class="form-group">
         <label for="inputModificationDate" class="col-sm-2 control-label">Modification date</label>
         <div class="col-sm-10">
-            <input type="datetime" class="form-control" id="inputModificationDate" placeholder="Modification date" value="{{document.modificationDate}}" readonly="readonly">
+            <p class="form-control-static">{{document.modificationDate}}</p>
         </div>
     </div>
 </form>
@@ -51,7 +51,11 @@
     <div class="row">
         <div class="col-sm-3" ng-repeat="slide in document.slides">
             <div class="thumbnail">
-                <a href="javascript:void(0);" ng-click="lightbox(slide.number, slide.image)" title="Click for larger version of slide {{slide.number}}"><img src="templates/restangular/img/img-placeholder.png" ng-src="{{slide.thumbnail}}?token={{token}}"></a>
+                <a ng-href="#!/document/{{document.id}}/slide/{{slide.id}}" class="btn btn-success" ng-show="{{slide.hasComments}}" title="There are comments attached to this slide" bs-tooltip><i class="glyphicon glyphicon-comment"></i></a>
+                <a ng-href="#!/document/{{document.id}}/slide/{{slide.id}}" class="btn btn-default" ng-hide="{{slide.hasComments}}" title="Be the first to attach a comment to this slide" bs-tooltip><i class="glyphicon glyphicon-comment"></i></a>
+                <a href="javascript:void(0);" ng-click="lightbox(slide.number, slide.image)" title="Click for larger version of slide {{slide.number}}">
+                    <img src="templates/restangular/img/img-placeholder.png" ng-src="{{slide.thumbnail}}?token={{token}}">
+                </a>
             </div>
         </div>
     </div>

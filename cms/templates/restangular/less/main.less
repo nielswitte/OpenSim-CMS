@@ -46,6 +46,10 @@ body {
     &.toolbar-top {
         margin-bottom: 15px;
     }
+
+    &.toolbar-bottom {
+        margin-top: 15px;
+    }
 }
 
 // Filters for table lists
@@ -70,9 +74,19 @@ body {
     }
 }
 
+// Region thumbnail images
 #regionThumbs {
     div.region {
         min-height: 500px;
+    }
+}
+
+// Slide thumbnails
+div.thumbnail {
+    a.btn {
+        position: absolute;
+        margin-left: 10px;
+        margin-top: 10px;
     }
 }
 
@@ -298,9 +312,11 @@ ol {
 
 // Minutes
 #minutes {
-    div.row div.minute {
-        padding-top: 5px;
-        padding-bottom: 5px;
+    div.row {
+        div.minute {
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
     }
 }
 
@@ -375,6 +391,56 @@ ol {
     .progress-bar {
         &.progress-bar-default {
             background-color: #999;
+        }
+    }
+}
+
+// Comments
+#comments {
+    ul.comments {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+
+        li {
+            article.comment {
+
+                header {
+                    .number {
+                        color: #999;
+                    }
+
+                    time {
+                        font-size: 10px;
+                        color: #999;
+                    }
+                }
+            }
+        }
+
+        // Alternate colors
+        .well {
+            padding: 15px;
+            margin-bottom: 15px;
+
+            .well:last-child {
+                margin-bottom: 0;
+            }
+
+            &:nth-child(odd) {
+                background-color: #ffffff;
+            }
+            &:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+        }
+    }
+
+    #commentPreview,
+    .message {
+        font-size: 14px;
+        blockquote {
+            font-size: 14px;
         }
     }
 }

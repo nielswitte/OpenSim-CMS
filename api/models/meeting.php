@@ -13,7 +13,7 @@ require_once dirname(__FILE__) . '/meetingMinutes.php';
  *
  * @author Niels Witte
  * @version 0.4
- * @date March 20th, 2014
+ * @date April 1st, 2014
  * @since February 25th, 2014
  */
 class Meeting implements simpleModel {
@@ -62,17 +62,17 @@ class Meeting implements simpleModel {
         $db         = \Helper::getDB();
         $db->join('users u', 'm.userId = u.id', 'LEFT');
         $db->where('m.id', $db->escape($this->getId()));
-        $meeting    = $db->get('meetings m', 1);
+        $meeting    = $db->getOne('meetings m');
 
         // Meeting found?
-        if(isset($meeting[0])) {
-            $this->room         = new \Models\MeetingRoom($meeting[0]['roomId']);
-            $this->creator      = new \Models\User($meeting['0']['userId'], $meeting['0']['username'], $meeting['0']['email'], $meeting['0']['firstName'], $meeting['0']['lastName']);
-            $this->startDate    = $meeting[0]['startDate'];
-            $this->endDate      = $meeting[0]['endDate'];
-            $this->name         = $meeting[0]['name'];
+        if($meeting) {
+            $this->room         = new \Models\MeetingRoom($meeting['roomId']);
+            $this->creator      = new \Models\User($meeting['userId'], $meeting['username'], $meeting['email'], $meeting['firstName'], $meeting['lastName']);
+            $this->startDate    = $meeting['startDate'];
+            $this->endDate      = $meeting['endDate'];
+            $this->name         = $meeting['name'];
         } else {
-            throw new Exception("Meeting not found", 1);
+            throw new Exception('Meeting not found', 1);
         }
     }
 

@@ -13,7 +13,8 @@ require_once dirname(__FILE__) .'/../controllers/regionController.php';
  * Implements the functions called on the Grid
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
+ * @date April 1st, 2014
  * @since February 24th, 2014
  */
 class Grid extends Module{
@@ -36,10 +37,10 @@ class Grid extends Module{
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/grids\/?$/",                                       "getGrids",             $this, "GET",  \Auth::READ);  // Get a list with grids
-        $this->api->addRoute("/grid\/(\d+)\/?$/",                                 "getGridById",          $this, "GET",  \Auth::READ);  // Get grid information by ID
-        $this->api->addRoute("/grid\/(\d+)\/region\/([a-z0-9-]{36})\/?$/",        "getRegionByUuid",      $this, "GET",  \Auth::READ);  // Get information about the given region
-        $this->api->addRoute("/grid\/(\d+)\/region\/([a-z0-9-]{36})\/image\/?$/", "getRegionImageByUuid", $this, "GET",  \Auth::READ);  // Get the map of the region
+        $this->api->addRoute("/^\/grids\/?$/",                                       'getGrids',             $this, 'GET',  \Auth::READ);  // Get a list with grids
+        $this->api->addRoute("/^\/grid\/(\d+)\/?$/",                                 'getGridById',          $this, 'GET',  \Auth::READ);  // Get grid information by ID
+        $this->api->addRoute("/^\/grid\/(\d+)\/region\/([a-z0-9-]{36})\/?$/",        'getRegionByUuid',      $this, 'GET',  \Auth::READ);  // Get information about the given region
+        $this->api->addRoute("/^\/grid\/(\d+)\/region\/([a-z0-9-]{36})\/image\/?$/", 'getRegionImageByUuid', $this, 'GET',  \Auth::READ);  // Get the map of the region
     }
 
     /**
@@ -149,7 +150,7 @@ class Grid extends Module{
         if($region !== FALSE) {
             $data = $this->getRegionData($region);
         } else {
-            throw new \Exception("Region not found", 1);
+            throw new \Exception('Region not found', 1);
         }
 
         return $data;
@@ -163,7 +164,7 @@ class Grid extends Module{
      */
     public function getRegionImageByUuid($args) {
         if(!\Helper::isValidUuid($args[2])) {
-            throw new \Exception("Invalid UUID used", 1);
+            throw new \Exception('Invalid UUID used', 1);
         } else {
             $grid       = new \Models\Grid($args[1]);
             $grid->getInfoFromDatabase();
@@ -171,7 +172,7 @@ class Grid extends Module{
                 header('Content-Type: image/jpeg');
                 echo file_get_contents($grid->getOsProtocol() .'://'. $grid->getOsIp() .':'. $grid->getOsPort() .'/index.php?method=regionImage'. str_replace('-', '', $args[2]));
             } else {
-                throw new \Exception("UUID isn't a region on this server", 2);
+                throw new \Exception('UUID isn\'t a region on this server', 2);
             }
         }
     }

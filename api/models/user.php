@@ -9,8 +9,8 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class is the user model
  *
  * @author Niels Witte
- * @version 0.1
- * @date March 20th, 2014
+ * @version 0.2
+ * @date April 1st, 2014
  * @since February 10th, 2014
  */
 class User implements SimpleModel {
@@ -55,15 +55,15 @@ class User implements SimpleModel {
             $db->where('username', $db->escape($this->getUsername()));
         }
         if($this->getUsername() != '' || $this->getId() > -1) {
-            $user = $db->get('users', 1);
+            $user = $db->getOne('users');
 
             // Results!
-            if(isset($user[0])) {
-                $this->id               = $user[0]['id'];
-                $this->username         = $user[0]['username'];
-                $this->firstName        = $user[0]['firstName'];
-                $this->lastName         = $user[0]['lastName'];
-                $this->email            = $user[0]['email'];
+            if($user) {
+                $this->id               = $user['id'];
+                $this->username         = $user['username'];
+                $this->firstName        = $user['firstName'];
+                $this->lastName         = $user['lastName'];
+                $this->email            = $user['email'];
             } else {
                 throw new \Exception("User not found", 3);
             }
@@ -215,6 +215,7 @@ class User implements SimpleModel {
             $this->rights = array(
                 'auth'              => (int) \Auth::NONE, // 0
                 'chat'              => (int) \Auth::NONE, // 0
+                'comment'           => (int) \Auth::NONE, // 0
                 'document'          => (int) \Auth::NONE, // 0
                 'grid'              => (int) \Auth::NONE, // 0
                 'meeting'           => (int) \Auth::NONE, // 0
@@ -226,18 +227,19 @@ class User implements SimpleModel {
             // Get user's permissions from DB
             $db = \Helper::getDB();
             $db->where('userId', $db->escape($this->getId()));
-            $result = $db->get('user_permissions', 1);
+            $result = $db->getOne('user_permissions');
 
-            if(isset($result[0])) {
+            if($result) {
                 $this->rights = array(
-                    'auth'              => $result[0]['auth'],
-                    'chat'              => $result[0]['chat'],
-                    'document'          => $result[0]['document'],
-                    'grid'              => $result[0]['grid'],
-                    'meeting'           => $result[0]['meeting'],
-                    'meetingroom'       => $result[0]['meetingroom'],
-                    'presentation'      => $result[0]['presentation'],
-                    'user'              => $result[0]['user'],
+                    'auth'              => $result['auth'],
+                    'chat'              => $result['chat'],
+                    'comment'           => $result['comment'],
+                    'document'          => $result['document'],
+                    'grid'              => $result['grid'],
+                    'meeting'           => $result['meeting'],
+                    'meetingroom'       => $result['meetingroom'],
+                    'presentation'      => $result['presentation'],
+                    'user'              => $result['user'],
                 );
             }
         }

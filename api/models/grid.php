@@ -10,6 +10,7 @@ require_once dirname(__FILE__) . '/simpleModel.php';
  *
  * @author Niels Witte
  * @version 0.1
+ * @date April 1st, 2014
  * @since February 21th, 2014
  */
 class Grid implements SimpleModel {
@@ -57,24 +58,24 @@ class Grid implements SimpleModel {
     public function getInfoFromDatabase() {
         $db = \Helper::getDB();
         $db->where('id', $db->escape($this->getId()));
-        $result = $db->get('grids', 1);
+        $result = $db->getOne('grids');
 
         // Found a result?
-        if(isset($result[0])) {
-            $this->name                 = $result[0]['name'];
-            $this->osProtocol           = $result[0]['osProtocol'];
-            $this->osIp                 = $result[0]['osIp'];
-            $this->osPort               = $result[0]['osPort'];
-            $this->raUrl                = $result[0]['raUrl'];
-            $this->raPort               = $result[0]['raPort'];
-            $this->raPassword           = $result[0]['raPassword'];
-            $this->dbUrl                = $result[0]['dbUrl'];
-            $this->dbPort               = $result[0]['dbPort'];
-            $this->dbUsername           = $result[0]['dbUsername'];
-            $this->dbPassword           = $result[0]['dbPassword'];
-            $this->dbName               = $result[0]['dbName'];
-            $this->cachetime            = $result[0]['cacheTime'];
-            $this->defaultRegionUuid    = $result[0]['defaultRegionUuid'];
+        if($result) {
+            $this->name                 = $result['name'];
+            $this->osProtocol           = $result['osProtocol'];
+            $this->osIp                 = $result['osIp'];
+            $this->osPort               = $result['osPort'];
+            $this->raUrl                = $result['raUrl'];
+            $this->raPort               = $result['raPort'];
+            $this->raPassword           = $result['raPassword'];
+            $this->dbUrl                = $result['dbUrl'];
+            $this->dbPort               = $result['dbPort'];
+            $this->dbUsername           = $result['dbUsername'];
+            $this->dbPassword           = $result['dbPassword'];
+            $this->dbName               = $result['dbName'];
+            $this->cachetime            = $result['cacheTime'];
+            $this->defaultRegionUuid    = $result['defaultRegionUuid'];
 
             // Add Grid's regions to list
             $db->where('gridId', $db->escape($this->getId()));
@@ -87,7 +88,7 @@ class Grid implements SimpleModel {
                 $this->addRegion($newRegion);
             }
         } else {
-            throw new \Exception("Grid ID does not exist", 1);
+            throw new \Exception('Grid ID does not exist', 1);
         }
     }
 
@@ -133,7 +134,7 @@ class Grid implements SimpleModel {
      */
     public function getRegionByUuid($uuid) {
         if(!\Helper::isValidUuid($uuid)) {
-            throw new \Exception("Invalid UUID provided", 1);
+            throw new \Exception('Invalid UUID provided', 1);
         }
         return isset($this->regions[$uuid]) ? $this->regions[$uuid] : FALSE;
     }

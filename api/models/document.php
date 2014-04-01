@@ -10,7 +10,8 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class is the presentation model
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
+ * @date April 1st, 2014
  * @since February 10th, 2014
  */
 class Document implements SimpleModel {
@@ -48,16 +49,16 @@ class Document implements SimpleModel {
     public function getInfoFromDatabase() {
         $db = \Helper::getDB();
         $db->where('id', $db->escape((int) $this->getId()));
-        $results = $db->get('documents', 1);
+        $result = $db->getOne('documents');
 
-        if(!empty($results)) {
-            $this->title            = $results[0]['title'];
-            $this->type             = $results[0]['type'];
-            $this->creationDate     = $results[0]['creationDate'];
-            $this->modificationDate = $results[0]['modificationDate'];
-            $this->ownerId          = $results[0]['ownerId'];
+        if($result) {
+            $this->title            = $result['title'];
+            $this->type             = $result['type'];
+            $this->creationDate     = $result['creationDate'];
+            $this->modificationDate = $result['modificationDate'];
+            $this->ownerId          = $result['ownerId'];
         } else {
-            throw new \Exception("Document not found", 5);
+            throw new \Exception('Document not found', 5);
         }
     }
 

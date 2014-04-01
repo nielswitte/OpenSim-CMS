@@ -7,7 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the Meeting controller
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.3
+ * @date April 1st, 2014
  * @since March 13th, 2014
  */
 class MeetingController {
@@ -81,6 +82,21 @@ class MeetingController {
         // Sets the participants for this meeting
         $this->setParticipants($participants);
 
+        // Attach a new documents list
+        $documents = new \Models\MeetingDocuments($this->getMeeting());
+        $this->getMeeting()->setDocuments($documents);
+
+        // Documents are a array of ids or an array of documents?
+        if(isset($parameters['documents'][0]) && is_numeric($parameters['documents'][0])) {
+            $documents = $parameters['documents'];
+        } else {
+            $documents = array();
+            foreach($parameters['documents'] as $document) {
+                $documents[] = $document['id'];
+            }
+        }
+        $this->setDocuments($documents);
+
         // Create the agenda
         $agenda = $this->parseAgendaString($parameters['agenda']);
         $this->setAgenda($agenda);
@@ -140,7 +156,7 @@ class MeetingController {
         // Update the documents list
         $documentsRemove = $this->removeDocuments();
 
-        // Participants are a array of ids or an array of users?
+        // Documents are a array of ids or an array of documents?
         if(isset($parameters['documents'][0]) && is_numeric($parameters['documents'][0])) {
             $documents = $parameters['documents'];
         } else {
@@ -185,6 +201,7 @@ class MeetingController {
         $db = \Helper::getDB();
         $result = FALSE;
         foreach($agenda as $item) {
+            $item['parentId']  = ($item['parentId'] == 0 ? NULL : $item['parentId']);
             $item['meetingId'] = $this->getMeeting()->getId();
             $result = $db->insert('meeting_agenda_items', $item);
         }

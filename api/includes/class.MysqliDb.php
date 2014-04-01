@@ -217,11 +217,14 @@ class MysqliDb
      *
      * @return array Contains the returned rows from the select query.
      */
-     public function getOne($tableName, $columns = '*')
-     {
-         $res = $this->get ($tableName, 1, $columns);
-         return $res[0];
-     }
+    public function getOne($tableName, $columns = '*')
+    {
+        $res = $this->get ($tableName, 1, $columns);
+        if (isset($res[0]))
+            return $res[0];
+
+        return null;
+    }
 
     /**
      *
@@ -282,7 +285,7 @@ class MysqliDb
     }
 
     /**
-     * This method allows you to specify multipl (method chaining optional) WHERE statements for SQL queries.
+     * This method allows you to specify multiple (method chaining optional) AND WHERE statements for SQL queries.
      *
      * @uses $MySqliDb->where('id', 7)->where('title', 'MyTitle');
      *
@@ -293,10 +296,25 @@ class MysqliDb
      */
     public function where($whereProp, $whereValue)
     {
-        $this->_where[$whereProp] = $whereValue;
+        $this->_where[$whereProp] = Array ("AND", $whereValue);
         return $this;
     }
 
+    /**
+     * This method allows you to specify multiple (method chaining optional) OR WHERE statements for SQL queries.
+     *
+     * @uses $MySqliDb->orWhere('id', 7)->orWhere('title', 'MyTitle');
+     *
+     * @param string $whereProp  The name of the database field.
+     * @param mixed  $whereValue The value of the database field.
+     *
+     * @return MysqliDb
+     */
+    public function orWhere($whereProp, $whereValue)
+    {
+        $this->_where[$whereProp] = Array ("OR", $whereValue);
+        return $this;
+    }
     /**
      * This method allows you to concatenate joins for the final SQL statement.
      *
@@ -440,7 +458,6 @@ class MysqliDb
 
         // Did the user call the "where" method?
         if (!empty($this->_where)) {
-
             // if update data was passed, filter through and create the SQL query, accordingly.
             if ($hasTableData) {
                 $pos = strpos($this->_query, 'UPDATE');
@@ -452,10 +469,9 @@ class MysqliDb
                                 $this->_query .= $prop . $value['[I]'] . ", ";
                             else {
                                 $this->_query .= $value['[F]'][0] . ", ";
-                                if (is_array ($value['[F]'][1])) {
-                                    foreach ($value['[F]'][1] as $key => $val) {
+                                if (!empty($val['[F]'][1]) && is_array ($value['[F]'][1])) {
+                                    foreach ($value['[F]'][1] as $val)
                                         $this->_paramTypeList .= $this->_determineType($val);
-                                    }
                                 }
                             }
                         } else {
@@ -473,6 +489,12 @@ class MysqliDb
             //Prepair the where portion of the query
             $this->_query .= ' WHERE ';
             foreach ($this->_where as $column => $value) {
+                $andOr = '';
+                // Determine if where condition was a first one or it was AND or OR type
+                if (array_search ($column, array_keys ($this->_where)) != 0)
+                    $andOr = ' ' . $value[0]. ' ';
+
+                $value = $value[1];
                 $comparison = ' = ? ';
                 if( is_array( $value ) ) {
                     // if the value is an array, then this isn't a basic = comparison
@@ -503,9 +525,8 @@ class MysqliDb
                     $this->_whereTypeList .= $this->_determineType($value);
                 }
                 // Prepares the reset of the SQL query.
-                $this->_query .= ($column.$comparison.' AND ');
+                $this->_query .= ($andOr.$column.$comparison);
             }
-            $this->_query = rtrim($this->_query, ' AND ');
         }
 
         // Did the user call the "groupBy" method?
@@ -531,33 +552,24 @@ class MysqliDb
         // Determine if is INSERT query
         if ($hasTableData) {
             $pos = strpos($this->_query, 'INSERT');
-
             if ($pos !== false) {
                 //is insert statement
-                $keys = array_keys($tableData);
-                $values = array_values($tableData);
-
-                $this->_query .= '(' . implode($keys, ', ') . ')';
+                $this->_query .= '(' . implode(array_keys($tableData), ', ') . ')';
                 $this->_query .= ' VALUES(';
-                // wrap values in quotes if needed
-                foreach ($values as $key => $val) {
-                    if (is_array($val)) {
-                        if (!empty($val['[I]']))
-                            $this->_query .= $keys[$key].$val['[I]'].", ";
-                        else {
-                            $this->_query .= $val['[F]'][0].", ";
-                            if (is_array ($val['[F]'][1])) {
-                                foreach ($val['[F]'][1] as $key => $value) {
-                                    $this->_paramTypeList .= $this->_determineType($value);
-                                }
-                            }
-                        }
-                        continue;
-                    }
 
-                    $values[$key] = "'{$val}'";
-                    $this->_paramTypeList .= $this->_determineType($val);
-                    $this->_query .= '?, ';
+                foreach ($tableData as $key => $val) {
+                    if (!is_array ($val)) {
+                        $this->_paramTypeList .= $this->_determineType($val);
+                        $this->_query .= '?, ';
+                    } else if (!empty($val['[I]'])) {
+                        $this->_query .= $key . $val['[I]'] . ", ";
+                    } else {
+                        $this->_query .= $val['[F]'][0] . ", ";
+                        if (!empty($val['[F]'][1]) && is_array ($val['[F]'][1])) {
+                            foreach ($val['[F]'][1] as $value)
+                                $this->_paramTypeList .= $this->_determineType($value);
+                        }
+                    }
                 }
                 $this->_query = rtrim($this->_query, ', ');
                 $this->_query .= ')';
@@ -578,14 +590,12 @@ class MysqliDb
         // Prepare table data bind parameters
         if ($hasTableData) {
             $this->_bindParams[0] = $this->_paramTypeList;
-            foreach ($tableData as $prop => $val) {
-                if (!is_array($tableData[$prop])) {
-                    array_push($this->_bindParams, $tableData[$prop]);
-                    continue;
-                }
-
-                if (is_array($tableData[$prop]['[F]'][1])) {
-                    foreach ($tableData[$prop]['[F]'][1] as $val)
+            foreach ($tableData as $val) {
+                if (!is_array ($val)) {
+                    array_push ($this->_bindParams, $val);
+                } else if (!empty($val['[F]'][1]) && is_array ($val['[F]'][1])) {
+                    // collect func() arguments
+                    foreach ($val['[F]'][1] as $val)
                         array_push($this->_bindParams, $val);
                 }
             }
@@ -594,22 +604,13 @@ class MysqliDb
         if ($hasConditional) {
             if ($this->_where) {
                 $this->_bindParams[0] .= $this->_whereTypeList;
-                foreach ($this->_where as $prop => $val) {
+                foreach ($this->_where as $val) {
+                    $val = $val[1];
                     if (!is_array ($val)) {
-                        array_push ($this->_bindParams, $this->_where[$prop]);
-                        continue;
-                    }
-                    // if val is an array, this is not a basic = comparison operator
-                    $key = key($val);
-                    $vals = $val[$key];
-                    if (is_array($vals)) {
-                        // if vals is an array, this comparison operator takes more than one parameter
-                        foreach ($vals as $k => $v) {
-                            array_push($this->_bindParams, $this->_where[$prop][$key][$k]);
-                        }
+                        array_push ($this->_bindParams, $val);
                     } else {
-                        // otherwise this comparison operator takes only one parameter
-                        array_push ($this->_bindParams, $this->_where[$prop][$key]);
+                        foreach ($val as $v)
+                            array_push ($this->_bindParams, $v);
                     }
                 }
             }
@@ -657,9 +658,9 @@ class MysqliDb
             foreach ($row as $key => $val) {
                 $x[$key] = $val;
             }
+            $this->count++;
             array_push($results, $x);
         }
-        $this->count = $stmt->num_rows;
 
         return $results;
     }

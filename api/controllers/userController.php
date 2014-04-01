@@ -7,7 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the user controller
  *
  * @author Niels Witte
- * @version 0.2
+ * @version 0.3
+ * @date April 1st, 2014
  * @since February 12th, 2014
  */
 class UserController {
@@ -37,10 +38,10 @@ class UserController {
             // Check if UUID not in use
             $db->where('uuid', $db->escape($uuid));
             $db->where('gridId', $db->escape($gridId));
-            $avatars = $db->get('avatars');
+            $avatars = $db->getOne('avatars');
 
             // Not used?
-            if(!isset($avatars[0])) {
+            if(!$avatars) {
                 $avatarData = array(
                     'userId'        => $db->escape($this->user->getId()),
                     'gridId'        => $db->escape($gridId),
@@ -48,18 +49,18 @@ class UserController {
                 );
                 $results = $db->insert('avatars', $avatarData);
             } else {
-                $db->where("id", $db->escape($avatars[0]['userId']));
-                $user = $db->get("users", 1);
+                $db->where('id', $db->escape($avatars['userId']));
+                $user = $db->getOne('users');
 
-                throw new \Exception("UUID already in use on this Grid, used by: ". $user[0]['username'], 3);
+                throw new \Exception('UUID already in use on this Grid, used by: '. $user['username'], 3);
             }
         } else {
-            throw new \Exception("Invalid UUID provided", 2);
+            throw new \Exception('Invalid UUID provided', 2);
         }
 
         // Something when wrong?
         if($results === FALSE) {
-            throw new \Exception("Updating UUID failed, check Username and Grid ID", 1);
+            throw new \Exception('Updating UUID failed, check Username and Grid ID', 1);
         }
         return $results !== FALSE;
     }
@@ -79,7 +80,7 @@ class UserController {
         $result     = $db->delete('avatars');
 
         if($result === FALSE) {
-            throw new \Exception("Given Avatar not found on the given Grid for the given User", 1);
+            throw new \Exception('Given Avatar not found on the given Grid for the given User', 1);
         }
 
         return $result;
@@ -102,7 +103,7 @@ class UserController {
         $result     = $db->update('avatars', $data);
 
         if($result === FALSE) {
-            throw new \Exception("Given unconfirmed Avatar not found on the given Grid for the currently logged in user", 1);
+            throw new \Exception('Given unconfirmed Avatar not found on the given Grid for the currently logged in user', 1);
         }
 
         return $result;
@@ -117,9 +118,9 @@ class UserController {
     public function checkUsername($username) {
         $db = \Helper::getDB();
         $db->where('username', $db->escape($username));
-        $result = $db->get('users', 1);
+        $result = $db->getOne('users');
 
-        return !isset($result[0]);
+        return !$result;
     }
 
     /**
@@ -131,9 +132,9 @@ class UserController {
     public function checkEmail($email) {
         $db = \Helper::getDB();
         $db->where('email', $db->escape($email));
-        $result = $db->get('users', 1);
+        $result = $db->getOne('users');
 
-        return !isset($result[0]);
+        return !$result;
     }
 
     /**
@@ -145,11 +146,11 @@ class UserController {
     public function checkPassword($password) {
         $db = \Helper::getDB();
         $db->where('id', $db->escape($this->user->getId()));
-        $result = $db->get('users', 1);
+        $result = $db->getOne('users');
 
         // Got a result?
-        if(isset($result[0]['password'])) {
-            $hash = $result[0]['password'];
+        if($result) {
+            $hash = $result['password'];
         } else {
             $hash = '';
         }
@@ -202,6 +203,7 @@ class UserController {
             $permissions = array(
                 'userId'        => $db->escape($userId),
                 'chat'          => $db->escape(\Auth::READ),
+                'comment'       => $db->escape(\Auth::READ),
                 'auth'          => $db->escape(\Auth::READ),
                 'document'      => $db->escape(\Auth::READ),
                 'grid'          => $db->escape(\Auth::READ),
@@ -241,6 +243,8 @@ class UserController {
      *
      * @param array $parameters - Array with parameters to set permissions to
      *              * integer auth - permission level
+     *              * integer chat - permission level
+     *              * integer comment - permission level
      *              * integer document - permission level
      *              * integer grid - permission level
      *              * integer meeting - permission level
@@ -254,6 +258,7 @@ class UserController {
         $data   = array(
             'auth'          => $db->escape($parameters['auth']),
             'chat'          => $db->escape($parameters['chat']),
+            'comment'       => $db->escape($parameters['comment']),
             'document'      => $db->escape($parameters['document']),
             'grid'          => $db->escape($parameters['grid']),
             'meeting'       => $db->escape($parameters['meeting']),
@@ -279,7 +284,7 @@ class UserController {
         $result     = $db->delete('users');
 
         if($result === FALSE) {
-            throw new \Exception("Given User could not be removed from the CMS", 1);
+            throw new \Exception('Given User could not be removed from the CMS', 1);
         }
 
         return $result;
@@ -299,9 +304,9 @@ class UserController {
         } elseif(!isset($parameters['username']) || strlen($parameters['username']) < SERVER_MIN_USERNAME_LENGTH) {
             throw new \Exception('Missing parameter (string) "username" with a minimum length of '. SERVER_MIN_USERNAME_LENGTH, 2);
         } elseif(isset($parameters['username']) && !$this->checkUsername($parameters['username'])) {
-            throw new \Exception("Username is already being used", 9);
+            throw new \Exception('Username is already being used', 9);
         } elseif(isset($parameters['email']) && !$this->checkEmail($parameters['email'])) {
-            throw new \Exception("This is email is already being used", 10);
+            throw new \Exception('This is email is already being used', 10);
         } elseif(!isset($parameters['password']) || strlen($parameters['password']) < SERVER_MIN_PASSWORD_LENGTH) {
             throw new \Exception('Missing parameter (string) "password" with a minimum length of '. SERVER_MIN_PASSWORD_LENGTH, 3);
         } elseif(!isset($parameters['password2']) || $parameters['password'] != $parameters['password2']) {
@@ -358,25 +363,29 @@ class UserController {
             \Auth::WRITE,
             \Auth::ALL
         );
+        // Permissions to check
+        $permissionTypes = array(
+            'auth',
+            'chat',
+            'comment',
+            'document',
+            'grid',
+            'meeting',
+            'meetingroom',
+            'presentation',
+            'user'
+        );
 
-        if(count($parameters) < 7) {
-            throw new \Exception('Expected 7 parameters, '. count($parameters) .' given', 1);
-        } elseif(!isset($parameters['auth']) || !in_array($parameters['auth'], $permissions)) {
-            throw new \Exception('Missing parameter (integer) "auth", with value in ('. implode(', ', $permissions) .')', 2);
-        } elseif(!isset($parameters['chat']) || !in_array($parameters['chat'], $permissions)) {
-            throw new \Exception('Missing parameter (integer) "chat", with value in ('. implode(', ', $permissions) .')', 2);
-        } elseif(!isset($parameters['document']) || !in_array($parameters['document'], $permissions)) {
-            throw new \Exception('Missing parameter (integer) "document", with value in ('. implode(', ', $permissions) .')', 2);
-        } elseif(!isset($parameters['grid']) || !in_array($parameters['grid'], $permissions)) {
-            throw new \Exception('Missing parameter (integer) "grid", with value in ('. implode(', ', $permissions) .')', 2);
-        } elseif(!isset($parameters['meeting']) || !in_array($parameters['meeting'], $permissions)) {
-            throw new \Exception('Missing parameter (integer) "meeting", with value in ('. implode(', ', $permissions) .')', 2);
-        } elseif(!isset($parameters['meetingroom']) || !in_array($parameters['meetingroom'], $permissions)) {
-            throw new \Exception('Missing parameter (integer) "meetingroom", with value in ('. implode(', ', $permissions) .')', 2);
-        } elseif(!isset($parameters['presentation']) || !in_array($parameters['presentation'], $permissions)) {
-            throw new \Exception('Missing parameter (integer) "presentation", with value in ('. implode(', ', $permissions) .')', 2);
-        } elseif(!isset($parameters['user']) || !in_array($parameters['user'], $permissions)) {
-            throw new \Exception('Missing parameter (integer) "user", with value in ('. implode(', ', $permissions) .')', 2);
+        if(count($parameters) < count($permissionTypes)) {
+            throw new \Exception('Expected '. count($permissionTypes) .' parameters, '. count($parameters) .' given', 1);
+        } elseif(count($parameters) >= count($permissionTypes)) {
+            $result = TRUE;
+            foreach($permissionTypes as $type) {
+                if(!isset($parameters[$type]) || !in_array($parameters[$type], $permissions)) {
+                    $result = FALSE;
+                    throw new \Exception('Missing parameter (integer) "'. $type .'", with value in ('. implode(', ', $permissions) .')', 2);
+                }
+            }
         } else {
             $result = TRUE;
         }

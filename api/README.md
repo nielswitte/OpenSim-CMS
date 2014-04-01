@@ -57,6 +57,7 @@ These numbers can be used for the following parameters:
 |-------------------|-----------|---------------------------------------------------------------|
 | auth              | Integer   | Permission level regarding Authorization API                  |
 | chat              | Integer   | Permission level regarding Chats API                          |
+| comment           | Integer   | Permission level regarding Comments API                       |
 | document          | Integer   | Permission level regarding Documents API                      |
 | grid              | Integer   | Permission level regarding Grids API                          |
 | meeting           | Integer   | Permission level regarding Meetings API                       |
@@ -491,7 +492,9 @@ Cache information is left out in the list view.
         "ownerId": 1,
         "slides": [
             {
+                "id": 1,
                 "number": 1,
+                "hasComments": false,
                 "image": "http://localhost:80/OpenSim-CMS/api/presentation/1/slide/1/image/"
             },
             {
@@ -538,7 +541,9 @@ Example of output when request is successful:
     "ownerId": 1,
     "slides": [
         {
+            "id": 1,
             "number": 1,
+            "hasComments": false,
             "image": "http:\/\/localhost:80\/OpenSim-CMS\/api\/presentation\/1\/slide\/1\/image\/",
             "cache": {
                 "1": {
@@ -594,6 +599,53 @@ PUT /api/presentation/<ID>/slide/number/<SLIDE#>/ HTTP/1.1
 |-------------------|-----------|-------------------------------------------------|
 | uuid              | string    | UUID of the slide to be saved                   |
 | gridId            | integer   | The ID of the grid, as used in the CMS database |
+
+## Comments
+On almost everything users can leave comments (when the user has sufficient permissions).
+The comments can be saved, retrieved and removed through the API by using the following functions:
+
+### Get comments
+Getting the latest comments by using this URL.
+
+```http
+GET /api/comments/<TYPE>/<ID>/ HTTP/1.1
+```
+| Types         | Description                                                      |
+|---------------|------------------------------------------------------------------|
+| document      | Get comments for the document with id = <ID>.                    |
+| meeting       | Get comments on the meeting with the given id.                   |
+| slide         | Get comments for the slide with id = <ID>.                       |
+
+### Post a comment
+
+```http
+POST /api/comment/<TYPE>/<ID>/ HTTP/1.1
+```
+| Parameter         | Type              | Description                                                                       |
+|-------------------|-------------------|-----------------------------------------------------------------------------------|
+| user              | array or integer  | An user object containing atleast the user ID, or only the userID as integer      |
+| parentId          | integer           | The ID of the comment for which this is a reply, 0 when no reply                  |
+| message           | string            | The message (the CMS uses Markdown)                                               |
+| timestamp         | string            | [Optional] The timestamp when the message is posted (format: YYYY-MM-DD HH:mm:ss) |
+
+### Update a comment
+The only thing that can be updated of a comment is the message. The poster, parentId, type, itemId and the original posted timestamp remain the same.
+
+The editTimestamp will be automatically set by the server.
+
+```http
+PUT /api/comment/<COMMENT-ID>/ HTTP/1.1
+```
+
+| Parameter         | Type              | Description                                                                       |
+|-------------------|-------------------|-----------------------------------------------------------------------------------|
+| message           | string            | The message (the CMS uses Markdown)                                               |
+
+### Remove comment
+
+```http
+DELETE /api/comment/<COMMENT-ID>/ HTTP/1.1
+```
 
 ## Grids
 For an overview of all grids and their information, the following request can be used:

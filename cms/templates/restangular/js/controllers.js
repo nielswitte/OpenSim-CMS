@@ -5,7 +5,15 @@ function MainCntl($scope, $route, $routeParams, $location, Page) {
     $scope.$routeParams = $routeParams;
     $scope.Page         = Page;
 };
-
+/****************************************************************************************************************************************************
+ *    _____ _           _
+ *   / ____| |         | |
+ *  | |    | |__   __ _| |_
+ *  | |    | '_ \ / _` | __|
+ *  | |____| | | | (_| | |_
+ *   \_____|_| |_|\__,_|\__|
+ *
+ */
 // chatController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$scope', '$aside', '$sce', '$timeout', '$alert', function(Restangular, RestangularCache, $scope, $aside, $sce, $timeout, $alert) {
         $scope.grids          = [];
@@ -189,12 +197,218 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
     }]
 );
 
+
+/****************************************************************************************************************************************************
+ *   _____                                     _
+ *  / ____|                                   | |
+ * | |     ___  _ __ ___  _ __ ___   ___ _ __ | |_ ___
+ * | |    / _ \| '_ ` _ \| '_ ` _ \ / _ \ '_ \| __/ __|
+ * | |___| (_) | | | | | | | | | | |  __/ | | | |_\__ \
+ *  \_____\___/|_| |_| |_|_| |_| |_|\___|_| |_|\__|___/
+ *
+ */
+// chatController -----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '$route', '$alert', 'Cache', function(Restangular, $scope, $sce, $route, $alert, Cache) {
+        // Clear the comment form
+        $scope.clearComment = function() {
+            $scope.comment = {
+                user: {
+                    id: sessionStorage.id
+                },
+                type: $scope.commentType,
+                itemId: $scope.commentItemId,
+                parentId: 0,
+                message: ""
+            };
+            $scope.replyTo = "";
+        };
+
+        // Clear comment form on init
+        $scope.clearComment();
+
+        // Removes a comment from the database
+        $scope.deleteComment = function(id) {
+            // Show loading screen
+            jQuery('#loading').show();
+
+            Restangular.one('comment', id).remove().then(function(resp) {
+                if(!resp.success) {
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                } else {
+                    $alert({title: 'Comment removed!', content: $sce.trustAsHtml('The comment with ID '+ id +' has been removed from the CMS.'), type: 'success'});
+                    Cache.clearCache();
+                    $route.reload();
+                }
+
+                // Remove loading screen
+                jQuery('#loading').hide();
+            });
+        };
+
+        // User has sufficient permissions to add comment?
+        $scope.allowComments = function() {
+            if(sessionStorage.commentPermission >= EXECUTE) {
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        // Create new comment
+        $scope.newComment = function(id) {
+            // Scroll to textarea
+            jQuery('body').scrollTop(jQuery('#commentForm').offset().top);
+            // Set quote text
+            if(id > 0) {
+                $scope.comment.parentId = id;
+                $scope.replyTo          = jQuery('#comment-'+ id +' header a').text();
+                var message  = "> **"+ $scope.replyTo;
+                message     += " @ "+ jQuery('#comment-'+ id +' header time').text() +"**  \n";
+                message     += "> "+ jQuery('#comment-'+ id +' span.message').data('message').replace(/\n/g, "\n> ");
+                message     += "\n\n";
+
+                // Strip dubbel quoted messages, max for 250 lines
+                var count       = 0;
+                var dubbelQoute = message.indexOf("\n> > ");
+                while(dubbelQoute > -1 && count < 250) {
+                    var endOfLine   = message.indexOf("\n", dubbelQoute + 5);
+                    // First occurenace replace with "[...]"
+                    if(count == 0) {
+                        message     = message.slice(0, dubbelQoute) +"\n> [...]"+ message.slice(endOfLine);
+                    } else {
+                        message     = message.slice(0, dubbelQoute) + message.slice(endOfLine);
+                    }
+
+                    dubbelQoute     = message.indexOf("\n> >");
+                    count++;
+                }
+                // Update scope
+                $scope.comment.message = message;
+            }
+            // put cursor in textarea
+            jQuery('#commentForm textarea').focus();
+        };
+
+        // Submits the new comment to the API
+        $scope.commentSubmit = function() {
+            // Show loading screen
+            jQuery('#loading').show();
+
+            // Post comment
+            if($scope.commentType == 'slide') {
+                Restangular.one('comment', 'slide').all($scope.comment.itemId).post($scope.comment).then(function(resp) {
+                    if(!resp.success) {
+                        $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                    } else {
+                        $alert({title: 'Comment removed!', content: $sce.trustAsHtml('Comment has been posted with ID: '+ resp.commentId +'.'), type: 'success'});
+                        Cache.clearCache();
+                        $route.reload();
+                    }
+                });
+            } else {
+                $alert({title: 'Comment type not implemented!', content: $sce.trustAsHtml('The comment could not be saved because the comment type is not set or not implemented.'), type: 'warning'});
+            }
+
+            // Remove loading screen
+            jQuery('#loading').hide();
+        };
+
+        // Is the update form visible?
+        var updateForm = 0;
+        $scope.showUpdateForm = function(id) {
+            return updateForm === id;
+        };
+
+        // Sets the update form
+        $scope.editComment = function(id) {
+            updateForm     = id;
+            $scope.message = jQuery('#commentUpdate-'+ id).data('message');
+            jQuery('#commentUpdate-'+ id).val($scope.message);
+        };
+
+        // Hides the form and resets the message
+        $scope.updateCommentReset = function() {
+            $scope.message  = "";
+            updateForm      = 0;
+        };
+
+        // Update a comment
+        $scope.updateComment = function(id) {
+            Restangular.one('comment', id).customPUT({message: this.message}).then(function(resp) {
+                if(!resp.success) {
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                } else {
+                    $alert({title: 'Comment updated!', content: $sce.trustAsHtml('Comment with ID: '+ id +' has been updated.'), type: 'success'});
+                    $scope.updateCommentReset();
+                    Cache.clearCache();
+                    $route.reload();
+                }
+            });
+        };
+
+        // Check if the user is allowed to update this comment
+        $scope.allowUpdate = function(userId) {
+            return $scope.allowDelete(userId);
+        };
+
+        // Checks if the user has permission to remove a comment
+        $scope.allowDelete = function(userId) {
+            // Read permissions or higher and own comment?
+            if(sessionStorage.id == userId && sessionStorage.commentPermission >= READ) {
+                return true;
+            // Write permission
+            } else if(sessionStorage.commentPermission >= WRITE) {
+                return true;
+            // Insufficient permissions
+            } else {
+                return false;
+            }
+        };
+
+        // Trust the message as safe markdown html
+        $scope.markdown = function(message) {
+            return $sce.trustAsHtml(markdown.toHTML(""+ message));
+        };
+
+        // Toggle MarkDown help
+        var showMDHelp = false;
+        $scope.toggleMDHelp = function() {
+            showMDHelp = !showMDHelp;
+        };
+
+        // Show or hide MarkDown Help
+        $scope.showMDHelp = function() {
+            return showMDHelp;
+        };
+    }]
+);
+
+/****************************************************************************************************************************************************
+ *   _    _
+ *  | |  | |
+ *  | |__| | ___  _ __ ___   ___
+ *  |  __  |/ _ \| '_ ` _ \ / _ \
+ *  | |  | | (_) | | | | | |  __/
+ *  |_|  |_|\___/|_| |_| |_|\___|
+ *
+ */
 // homeController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('homeController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
         Page.setTitle('Home');
     }]
 );
 
+/****************************************************************************************************************************************************
+ *   _                 _
+ *  | |               (_)
+ *  | |     ___   __ _ _ _ __
+ *  | |    / _ \ / _` | | '_ \
+ *  | |___| (_) | (_| | | | | |
+ *  |______\___/ \__, |_|_| |_|
+ *                __/ |
+ *               |___/
+ *
+ */
 // loginController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$scope', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, $alert, $sce, Cache) {
         $scope.isLoggedIn = false;
@@ -236,6 +450,7 @@ angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$
                         // Store permissions
                         sessionStorage.authPermission          = userResponse.permissions.auth;
                         sessionStorage.chatPermission          = userResponse.permissions.chat;
+                        sessionStorage.commentPermission       = userResponse.permissions.comment;
                         sessionStorage.documentPermission      = userResponse.permissions.document;
                         sessionStorage.gridPermission          = userResponse.permissions.grid;
                         sessionStorage.meetingPermission       = userResponse.permissions.meeting;
@@ -271,7 +486,15 @@ angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$
         };
     }]
 );
-
+/****************************************************************************************************************************************************
+ *   _______          _ _
+ *  |__   __|        | | |
+ *     | | ___   ___ | | |__   __ _ _ __
+ *     | |/ _ \ / _ \| | '_ \ / _` | '__|
+ *     | | (_) | (_) | | |_) | (_| | |
+ *     |_|\___/ \___/|_|_.__/ \__,_|_|
+ *
+ */
 // toolbarController --------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$location', '$alert', function($scope, $sce, Cache, $location, $alert) {
         $scope.currentLocation = $location.path();
@@ -326,7 +549,15 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
         }
     }]
 );
-
+/****************************************************************************************************************************************************
+ *   _____                                        _
+ *  |  __ \                                      | |
+ *  | |  | | ___   ___ _   _ _ __ ___   ___ _ __ | |_ ___
+ *  | |  | |/ _ \ / __| | | | '_ ` _ \ / _ \ '_ \| __/ __|
+ *  | |__| | (_) | (__| |_| | | | | | |  __/ | | | |_\__ \
+ *  |_____/ \___/ \___|\__,_|_| |_| |_|\___|_| |_|\__|___/
+ *
+ */
 // documentsController ------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('documentsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$modal', '$sce', 'Cache', '$route',
     function(Restangular, RestangularCache, $scope, Page, $alert, $modal, $sce, Cache, $route) {
@@ -521,7 +752,15 @@ angularRest.controller('documentController', ['Restangular', '$scope', '$routePa
         };
     }]
 );
-
+/****************************************************************************************************************************************************
+ *    _____      _     _
+ *   / ____|    (_)   | |
+ *  | |  __ _ __ _  __| |___
+ *  | | |_ | '__| |/ _` / __|
+ *  | |__| | |  | | (_| \__ \
+ *   \_____|_|  |_|\__,_|___/
+ *
+ */
 // gridsController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page', function(RestangularCache, $scope, Page) {
         $scope.orderByField     = 'name';
@@ -583,7 +822,16 @@ angularRest.controller('gridController', ['Restangular', '$scope', '$routeParams
         };
     }]
 );
-
+/****************************************************************************************************************************************************
+ *   __  __           _   _
+ *  |  \/  |         | | (_)
+ *  | \  / | ___  ___| |_ _ _ __   __ _ ___
+ *  | |\/| |/ _ \/ _ \ __| | '_ \ / _` / __|
+ *  | |  | |  __/  __/ |_| | | | | (_| \__ \
+ *  |_|  |_|\___|\___|\__|_|_| |_|\__, |___/
+ *                                 __/ |
+ *                                |___/
+ */
 // meetingsController -------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('meetingsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$modal', '$tooltip', '$sce', 'Cache', '$location',  function(Restangular, RestangularCache, $scope, Page, $modal, $tooltip, $sce, Cache, $location) {
         var date = new Date(new Date - (1000*60*60*24*14));
@@ -1303,7 +1551,76 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
         });
     }]
 );
+/****************************************************************************************************************************************************
+ *    _____ _ _     _
+ *   / ____| (_)   | |
+ *  | (___ | |_  __| | ___  ___
+ *   \___ \| | |/ _` |/ _ \/ __|
+ *   ____) | | | (_| |  __/\__ \
+ *  |_____/|_|_|\__,_|\___||___/
+ *
+ */
+// slideController ----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('slideController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$alert', '$sce', 'Cache', '$routeParams', '$location', function(RestangularCache, Restangular, $scope, Page, $alert, $sce, Cache, $routeParams, $location) {
+        $scope.slide = {};
+        $scope.comments = {
+            comments: [],
+            commentCount: 0
+        };
 
+        // Get the slide details
+        RestangularCache.one('presentation', $routeParams.documentId).one('slide', $routeParams.slideId).get().then(function(slideResponse) {
+            $scope.slide = slideResponse;
+            Page.setTitle('Slide '+ slideResponse.number);
+
+            if(slideResponse.hasComments !== false) {
+                // Load comments
+                RestangularCache.all('comments').one('slide', slideResponse.id).get().then(function(commentResponse) {
+                    $scope.comments = commentResponse;
+                });
+            }
+        });
+
+        // Show comments and set the comment Type to: slide and the id of the slide
+        $scope.showComments = function() {
+            $scope.commentType      = 'slide';
+            $scope.commentItemId    = $routeParams.slideId;
+            return partial_path +'/comment/commentContainer.html';
+        };
+
+        // Go to the next slide
+        $scope.nextSlide = function() {
+            $location.path('document/'+ $routeParams.documentId +'/slide/'+ (parseInt($routeParams.slideId) + 1));
+        };
+
+        // Go to the previous slide
+        $scope.previousSlide = function() {
+            $location.path('document/'+ $routeParams.documentId +'/slide/'+ (parseInt($routeParams.slideId) - 1));
+        };
+
+        /**
+         * Gets the slide image with the token for this session
+         * @returns {String}
+         */
+        $scope.getSlideImage = function() {
+            if($scope.slide.image !== undefined) {
+                return $scope.slide.image +'?token='+ sessionStorage.token;
+            } else {
+                return '';
+            }
+        };
+    }]
+);
+
+/****************************************************************************************************************************************************
+ *   _    _
+ *  | |  | |
+ *  | |  | |___  ___ _ __ ___
+ *  | |  | / __|/ _ \ '__/ __|
+ *  | |__| \__ \  __/ |  \__ \
+ *   \____/|___/\___|_|  |___/
+ *
+ */
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', '$sce', 'Cache', '$route', function(RestangularCache, Restangular, $scope, Page, $modal, $alert, $sce, Cache, $route) {
         $scope.orderByField     = 'username';
@@ -1531,7 +1848,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                     $alert({title: 'User updating failed!', content: $sce.trustAsHtml(putResponse.error), type: 'danger'});
                 } else {
                     $alert({title: 'User updated!', content: $sce.trustAsHtml('The user information has been updated.'), type: 'success'});
-                    Cache.clearCachedUrl(userRequestUrl);
+                    Cache.clearCache();
                 }
                 // Remove loading screen
                 jQuery('#loading').hide();
