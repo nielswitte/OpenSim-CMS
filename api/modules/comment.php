@@ -11,8 +11,8 @@ require_once dirname(__FILE__) .'/../controllers/commentController.php';
  * Implements the functions for comments
  *
  * @author Niels Witte
- * @version 0.1
- * @date March 31st, 2014
+ * @version 0.2
+ * @date April 1st, 2014
  * @since March 28th, 2014
  */
 class Comment extends Module {
@@ -137,8 +137,11 @@ class Comment extends Module {
      */
     public function createComment($args) {
         $type = \Helper::getCommentType($args[1], $args[2]);
+        $data = FALSE;
         if($type !== FALSE) {
             $parameters = \Helper::getInput(TRUE);
+            $parameters['type']     = $args[1];
+            $parameters['itemId']   = $args[2];
             $commentCtrl = new \Controllers\CommentController();
             if($commentCtrl->validateParametersCreate($parameters)) {
                 $data = $commentCtrl->createComment($parameters);
