@@ -398,14 +398,16 @@ END:VCALENDAR";
      *
      * @param string $type - Type of the parent
      * @param integer $id - The parent's ID
-     * @return \Models\Document or \Models\Slide or boolean FALSE when type not found
+     * @return \Models\Documents or other \Models\* instance or boolean FALSE when type not found
      */
     public static function getCommentType($type, $id) {
         if($type == 'document') {
             $parent = new \Models\Document($id);
         } elseif($type == 'slide') {
             $parent = new \Models\Slide($id, 1, '');
-        }else {
+        } elseif($type == 'meeting') {
+            $parent = new \Models\Meeting($id);
+        } else {
             $parent = FALSE;
         }
         return $parent;

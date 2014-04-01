@@ -46,6 +46,8 @@ class Comments implements SimpleModel {
             $type = 'document';
         } elseif($this->getParent() instanceof \Models\Slide) {
             $type = 'slide';
+        } elseif($this->getParent() instanceof \Models\Meeting) {
+            $type = 'meeting';
         } else {
             $type = FALSE;
         }

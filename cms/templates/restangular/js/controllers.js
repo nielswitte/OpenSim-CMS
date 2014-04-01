@@ -295,19 +295,15 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
             jQuery('#loading').show();
 
             // Post comment
-            if($scope.commentType == 'slide') {
-                Restangular.one('comment', 'slide').all($scope.comment.itemId).post($scope.comment).then(function(resp) {
-                    if(!resp.success) {
-                        $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
-                    } else {
-                        $alert({title: 'Comment removed!', content: $sce.trustAsHtml('Comment has been posted with ID: '+ resp.commentId +'.'), type: 'success'});
-                        Cache.clearCache();
-                        $route.reload();
-                    }
-                });
-            } else {
-                $alert({title: 'Comment type not implemented!', content: $sce.trustAsHtml('The comment could not be saved because the comment type is not set or not implemented.'), type: 'warning'});
-            }
+            Restangular.one('comment', $scope.commentType).all($scope.comment.itemId).post($scope.comment).then(function(resp) {
+                if(!resp.success) {
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                } else {
+                    $alert({title: 'Comment removed!', content: $sce.trustAsHtml('Comment has been posted with ID: '+ resp.commentId +'.'), type: 'success'});
+                    Cache.clearCache();
+                    $route.reload();
+                }
+            });
 
             // Remove loading screen
             jQuery('#loading').hide();
@@ -931,6 +927,15 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
         var usernameSearchResults       = [];
         $scope.document                 = '';
         var documentSearchResults       = [];
+        $scope.comments = {
+            comments: [],
+            commentCount: 0
+        };
+
+        // Load comments
+        RestangularCache.all('comments').one('meeting', $routeParams.meetingId).get().then(function(commentResponse) {
+            $scope.comments = commentResponse;
+        });
 
         // Navigate the calendar to the current date
         $scope.updateCalendar = function() {
@@ -1002,6 +1007,13 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
             RestangularCache.one('grid', $scope.meeting.room.grid.id).one('region', $scope.meeting.room.region.uuid).all('rooms').getList().then(function(roomsResponse){
                 $scope.rooms = roomsResponse;
             });
+        };
+
+        // Show comments and set the comment Type to: meeting and the id of the meeting
+        $scope.showComments = function() {
+            $scope.commentType      = 'meeting';
+            $scope.commentItemId    = $routeParams.meetingId;
+            return partial_path +'/comment/commentContainer.html';
         };
 
         // Update the meeting with the new data
@@ -1563,10 +1575,6 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
 // slideController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('slideController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$alert', '$sce', 'Cache', '$routeParams', '$location', function(RestangularCache, Restangular, $scope, Page, $alert, $sce, Cache, $routeParams, $location) {
         $scope.slide = {};
-        $scope.comments = {
-            comments: [],
-            commentCount: 0
-        };
 
         // Get the slide details
         RestangularCache.one('presentation', $routeParams.documentId).one('slide', $routeParams.slideId).get().then(function(slideResponse) {
@@ -1583,6 +1591,11 @@ angularRest.controller('slideController', ['RestangularCache', 'Restangular', '$
 
         // Show comments and set the comment Type to: slide and the id of the slide
         $scope.showComments = function() {
+            $scope.comments = {
+                comments: [],
+                commentCount: 0
+            };
+
             $scope.commentType      = 'slide';
             $scope.commentItemId    = $routeParams.slideId;
             return partial_path +'/comment/commentContainer.html';
