@@ -189,7 +189,7 @@ class Comment extends Module {
             // Validate parameters
             if($commentCtrl->validateParametersUpdate($parameters)) {
                 // Update comment
-                $commentCtrl->updateComment($parameters);
+                $data = $commentCtrl->updateComment($parameters);
             }
         } else {
             throw new \Exception('Cound not find comment with ID: '. $args[1], 2);
