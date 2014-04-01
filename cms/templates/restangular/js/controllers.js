@@ -1597,6 +1597,11 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
 // slideController ----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('slideController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$alert', '$sce', 'Cache', '$routeParams', '$location', function(RestangularCache, Restangular, $scope, Page, $alert, $sce, Cache, $routeParams, $location) {
         $scope.slide = {};
+        $scope.comments = {
+            comments: [],
+            commentCount: 0
+        };
+
 
         // Get the slide details
         RestangularCache.one('presentation', $routeParams.documentId).one('slide', $routeParams.slideId).get().then(function(slideResponse) {
@@ -1613,11 +1618,6 @@ angularRest.controller('slideController', ['RestangularCache', 'Restangular', '$
 
         // Show comments and set the comment Type to: slide and the id of the slide
         $scope.showComments = function() {
-            $scope.comments = {
-                comments: [],
-                commentCount: 0
-            };
-
             $scope.commentType      = 'slide';
             $scope.commentItemId    = $routeParams.slideId;
             return partial_path +'/comment/commentContainer.html';
