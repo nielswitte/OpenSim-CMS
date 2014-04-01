@@ -300,7 +300,7 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
                     if(!resp.success) {
                         $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                     } else {
-                        $alert({title: 'Comment removed!', content: $sce.trustAsHtml('The comment with ID '+ id +' has been removed from the CMS.'), type: 'success'});
+                        $alert({title: 'Comment removed!', content: $sce.trustAsHtml('Comment has been posted with ID: '+ resp.commentId +'.'), type: 'success'});
                         Cache.clearCache();
                         $route.reload();
                     }
