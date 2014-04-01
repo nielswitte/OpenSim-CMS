@@ -5,21 +5,23 @@
         <li ng-repeat="comment in comments.comments" ng-include src="'templates/restangular/html/partials/comment/comments.html'" class="well"></li>
     </ul>
     <div ng-show="allowComments()" id="commentForm" class="row">
-        <div class="col-sm-6 editor">
-            <h3>Write comment <small ng-show="replyTo">Reply to: {{replyTo}}</small><button class="btn btn-link btn-xs" ng-click="toggleMDHelp()"><i class="glyphicon glyphicon-question-sign"></i> Markdown syntax</button></h3>
+        <form method="post" ng-submit="commentSubmit()">
+            <div class="col-sm-6 editor">
+                <h3>Write comment <small ng-show="replyTo">Reply to: {{replyTo}}</small><button class="btn btn-link btn-xs" ng-click="toggleMDHelp()"><i class="glyphicon glyphicon-question-sign"></i> Markdown syntax</button></h3>
 
-            <div class="alert alert-info" ng-show="showMDHelp()">
-                <strong>Markdown!</strong> The comments are formatted using Markdown. A reference for the syntax can be found here: <a href="http://daringfireball.net/projects/markdown/syntax" target="_blank">http://daringfireball.net/projects/markdown/syntax</a>.
+                <div class="alert alert-info" ng-show="showMDHelp()">
+                    <strong>Markdown!</strong> The comments are formatted using Markdown. A reference for the syntax can be found here: <a href="http://daringfireball.net/projects/markdown/syntax" target="_blank">http://daringfireball.net/projects/markdown/syntax</a>.
+                </div>
+                <textarea ng-model="comment.message" class="form-control" rows="15"></textarea>
+                <div class="toolbar toolbar-bottom">
+                    <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-comment"></i> Post comment</button>
+                    <button type="reset" class="btn btn-danger" ng-click="clearComment()"><i class="glyphicon glyphicon-remove"></i> Clear</button>
+                </div>
             </div>
-            <textarea ng-model="comment.message" class="form-control" rows="15"></textarea>
-            <div class="toolbar toolbar-bottom">
-                <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-comment"></i> Post comment</button>
-                <button type="reset" class="btn btn-danger" ng-click="clearComment()"><i class="glyphicon glyphicon-remove"></i> Clear</button>
+            <div class="col-sm-6 preview">
+                <h3>Comment preview</h3>
+                <div id="commentPreview" ng-bind-html="markdown(comment.message)"></div>
             </div>
-        </div>
-        <div class="col-sm-6 preview">
-            <h3>Comment preview</h3>
-            <div id="commentPreview" ng-bind-html="markdown(comment.message)"></div>
-        </div>
+        </form>
     </div>
 </div>
