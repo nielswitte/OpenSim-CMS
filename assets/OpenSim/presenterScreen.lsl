@@ -13,11 +13,11 @@
  *
  * @author Niels Witte
  * @date February 11th, 2014
- * @version 0.5
+ * @version 0.6
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
-integer debug = 1;              // Enables showing debugging comments
+integer debug = 0;              // Enables showing debugging comments
 string APIUsername = "OpenSim"; // API user name to be used
 string APIPassword = "OpenSim"; // API password
 integer serverId = 1;           // The ID of this server in OpenSim-CMS
@@ -153,11 +153,11 @@ nav_slide(integer next) {
         if(res > -1) {
             string texture = llList2String(textureCache, res+2);
             if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by local uuid from cache (" + texture +")");
-            llSetTexture(texture, ALL_SIDES);
+            llSetTexture(texture, 1);
         // Check if requested image has a valid UUID in the database
         } else if(isKey(url) == 2 && llGetSubString(url, 0, 3) != "http") {
             if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by remote uuid from cache (" + url +")");
-            llSetTexture(url, ALL_SIDES);
+            llSetTexture(url, 1);
         // Load texture from remote server
         } else {
             // Remove previous texture
@@ -174,7 +174,12 @@ nav_slide(integer next) {
             if(debug) llInstantMessage(userUuid, "[Debug] Loaded slide");
             // Keep trying to fetch the new texture from object
             while((texture = llGetTexture(0)) == oldtexture)
-                 llSleep(1.0);
+                llSleep(1.0);
+
+            // Remove previous texture
+            llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
+            llSetTexture(TEXTURE_BLANK, ALL_SIDES);
+            llSetTexture(texture, 1);
 
             // add new texture to list in format [presentation ID, slide number, texture UUID]
             textureCache += [presentationId, next, texture];
@@ -497,7 +502,7 @@ state off {
         textureCache = empty;
         // Set color to black
         llSetColor(ZERO_VECTOR, ALL_SIDES);
-        llSetTexture(TEXTURE_BLANK, 1);
+        llSetTexture(TEXTURE_BLANK, ALL_SIDES);
         llListenRemove(gListener);
         llListenRemove(mListener);
     }
