@@ -44,24 +44,30 @@ class CommentController {
      * Creates the new comment
      *
      * @param array $parameters
+     *              * integer or array user - The userID of the poster
+     *              * integer parentId - The ID of a comment for which this is a reply, 0 if not a reply
+     *              * string message - The comment message
+     *              * string type - Type of item this is a comment for (i.e. slide, document)
+     *              * integer itemId - The ID of the item this is a comment for
+     *              * string timestamp - [Optional] Timestamp in the format YYYY-MM-DD HH:mm:ss
      * @return integer commentId or boolean FALSE on failure
      */
     public function createComment($parameters) {
         $db = \Helper::getDB();
         $data = array(
-            'userId'        => is_array($parameters['user']) ? $db->escape($parameters['user']['id']) : $db->escape($parameters['user']),
             'parentId'      => $parameters['parentId'] > 0 ? $db->escape($parameters['parentId']) : NULL,
-            // Correct line breaks
-            'message'       => str_replace('\n', "\n", $db->escape($parameters['message'])),
             'type'          => $db->escape($parameters['type']),
-            'itemId'        => $db->escape($parameters['itemId'])
+            'itemId'        => $db->escape($parameters['itemId']),
+            'userId'        => is_array($parameters['user']) ? $db->escape($parameters['user']['id']) : $db->escape($parameters['user']),
+            // Correct line breaks
+            'message'       => str_replace('\n', "\n", $db->escape($parameters['message']))
         );
 
         if(isset($parameters['timestamp'])) {
-            $data['timestamp']  = $db->escape($parameters['timestamp']);
+            $data['timestamp'] = $db->escape($parameters['timestamp']);
         }
 
-        $id = $db->insert('comments', $data);
+        $id = @$db->insert('comments', $data);
         return $id;
     }
 
@@ -87,6 +93,42 @@ class CommentController {
         } else {
             $result = TRUE;
         }
+        return $result;
+    }
+
+    /**
+     * Updates this comment to the given message
+     *
+     * @param array $parameters
+     *              * string message - The updated text for the comment
+     * @return boolean
+     */
+    public function updateComment($parameters) {
+        $db     = \Helper::getDB();
+        $data   = array(
+            'message'       => $db->escape($parameters['message']),
+            'editTimestamp' => $db->escape(date('Y-m-d H:i:s'))
+        );
+        $db->where('id', $db->escape($this->comment->getId()));
+        $result = $db->update('comments', $data);
+
+        return $result;
+    }
+
+    /**
+     * Validates the parameters for updating a comment
+     *
+     * @param array $parameters
+     * @return boolean
+     */
+    public function validateParametersUpdate($parameters) {
+        $result = FALSE;
+        if(!isset($parameters['message']) || strlen($parameters['message']) < 1) {
+            throw new \Exception('Missing parameter (string) "message" which should be atleast one character long.', 3);
+        } else {
+            $result = TRUE;
+        }
+
         return $result;
     }
 }
