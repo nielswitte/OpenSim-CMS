@@ -616,6 +616,18 @@ GET /api/comments/<TYPE>/<ID>/ HTTP/1.1
 | meeting       | Get comments on the meeting with the given id.                   |
 | slide         | Get comments for the slide with id = <ID>.                       |
 
+### Post a comment
+
+```http
+POST /api/comment/<TYPE>/<ID>/ HTTP/1.1
+```
+| Parameter         | Type              | Description                                                                       |
+|-------------------|-------------------|-----------------------------------------------------------------------------------|
+| user              | array or integer  | An user object containing atleast the user ID, or only the userID as integer      |
+| parentId          | integer           | The ID of the comment for which this is a reply, 0 when no reply                  |
+| message           | string            | The message (the CMS uses Markdown)                                               |
+| timestamp         | string            | [Optional] The timestamp when the message is posted (format: YYYY-MM-DD HH:mm:ss) |
+
 ### Remove comment
 
 ```http
