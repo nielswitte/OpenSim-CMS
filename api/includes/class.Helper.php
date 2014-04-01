@@ -5,8 +5,8 @@ defined('EXEC') or die('Config not loaded');
  * Helper class to support the CMS and API
  *
  * @author Niels Witte
- * @version 0.1
- * @date March 19th, 2014
+ * @version 0.2
+ * @date April 1st, 2014
  * @since February 12th, 2014
  */
 class Helper {
@@ -27,16 +27,16 @@ class Helper {
     /**
      * Sets the database to use so it can be retrieved by other components
      *
-     * @param MysqlDb $db
+     * @param \MysqliDb $db
      */
-    public static function setDB($db){
+    public static function setDB(\MysqliDb $db){
         self::$db = $db;
     }
 
     /**
      * Retuns the database class
      *
-     * @return MysqlDb
+     * @return \MysqliDb
      */
     public static function getDB() {
         return self::$db;
