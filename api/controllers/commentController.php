@@ -106,7 +106,9 @@ class CommentController {
     public function updateComment($parameters) {
         $db     = \Helper::getDB();
         $data   = array(
-            'message'       => $db->escape($parameters['message']),
+            // Correct line breaks
+            'message'       => str_replace('\n', "\n", $db->escape($parameters['message'])),
+            // Insert update timestamp
             'editTimestamp' => $db->escape(date('Y-m-d H:i:s'))
         );
         $db->where('id', $db->escape($this->comment->getId()));

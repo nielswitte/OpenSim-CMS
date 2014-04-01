@@ -313,16 +313,42 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
             jQuery('#loading').hide();
         };
 
+        // Is the update form visible?
+        var updateForm = 0;
+        $scope.showUpdateForm = function(id) {
+            return updateForm === id;
+        };
+
+        // Sets the update form
+        $scope.editComment = function(id) {
+            updateForm     = id;
+            $scope.message = jQuery('#commentUpdate-'+ id).data('message');
+            jQuery('#commentUpdate-'+ id).val($scope.message);
+        };
+
+        // Hides the form and resets the message
+        $scope.updateCommentReset = function() {
+            $scope.message  = "";
+            updateForm      = 0;
+        };
+
         // Update a comment
-        $scope.commentUpdate = function(id) {
-            Restangular.one('comment', id).customPUT({message: this.comment.message}).then(function(resp) {
+        $scope.updateComment = function(id) {
+            Restangular.one('comment', id).customPUT({message: this.message}).then(function(resp) {
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                 } else {
                     $alert({title: 'Comment updated!', content: $sce.trustAsHtml('Comment with ID: '+ id +' has been updated.'), type: 'success'});
+                    $scope.updateCommentReset();
                     Cache.clearCache();
+                    $route.reload();
                 }
             });
+        };
+
+        // Check if the user is allowed to update this comment
+        $scope.allowUpdate = function(userId) {
+            return $scope.allowDelete(userId);
         };
 
         // Checks if the user has permission to remove a comment
