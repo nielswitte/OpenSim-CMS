@@ -23,9 +23,13 @@ class PresentationController {
     }
 
     /**
+     * Creates a presentation
      *
-     * @param type $parameters
-     * @return type
+     * @param array $parameters
+     *              * string file - Base64 encoded file
+     *              * string title - The document title
+     *              * string type - Should be presentation 
+     * @return integer or boolean FALSE on failure
      * @throws \Exception
      */
     public function createPresentation($parameters) {
