@@ -8,6 +8,7 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author Niels Witte
  * @version 0.2
+ * @date April 1st, 2014
  * @since February 27th, 2014
  */
 class AvatarController {
@@ -69,23 +70,23 @@ class AvatarController {
     public function validateParametersCreate($parameters) {
         $result = FALSE;
         if(count($parameters) < 5 && count($parameters) > 7) {
-            throw new \Exception("Invalid number of parameters, uses 5 to 7 parameters", 4);
+            throw new \Exception('Invalid number of parameters, uses 5 to 7 parameters', 4);
         } elseif(!isset($parameters['gridId'])) {
-            throw new \Exception("Missing parameter (integer) gridId", 5);
+            throw new \Exception('Missing parameter (integer) "gridId"', 5);
         } elseif(!isset($parameters['firstName'])) {
-            throw new \Exception("Missing parameter (string) firstName", 6);
+            throw new \Exception('Missing parameter (string) "firstName"', 6);
         } elseif(!isset($parameters['lastName'])) {
-            throw new \Exception("Missing parameter (string) lastName", 7);
+            throw new \Exception('Missing parameter (string) "lastName"', 7);
         } elseif(!isset($parameters['password'])) {
-            throw new \Exception("Missing parameter (string) password", 8);
+            throw new \Exception('Missing parameter (string) "password"', 8);
         } elseif(isset($parameters['password']) && $this->checkPasswordForIlligalCharacters($parameters['password'])) {
-            throw new \Exception("Parameter (string) password contains one of the following characters: ". implode('', $this->notAllowedChars), 8);
+            throw new \Exception('Parameter (string) "password" contains one of the following characters: '. implode('', $this->notAllowedChars), 8);
         } elseif(!isset($parameters['email'])) {
-            throw new \Exception("Missing parameter (string) email", 9);
+            throw new \Exception('Missing parameter (string) "email"', 9);
         } elseif(isset($parameters['startRegionY']) && (!isset($parameters['startRegionX']) || !is_numeric($parameters['startRegionX']))) {
-            throw new \Exception("Missing parameter (integer) startRegionX", 10);
+            throw new \Exception('Missing parameter (integer) "startRegionX"', 10);
         } elseif(isset($parameters['startRegionX']) && (!isset($parameters['startRegionY']) || !is_numeric($parameters['startRegionY']))) {
-            throw new \Exception("Missing parameter (integer) startRegionY", 11);
+            throw new \Exception('Missing parameter (integer) "startRegionY"', 11);
         } else {
             $result = TRUE;
         }

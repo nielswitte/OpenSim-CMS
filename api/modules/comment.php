@@ -39,9 +39,10 @@ class Comment extends Module {
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/^\/comments\/([a-z]+)\/(\d+)\/?$/",                      "getComments",           $this, "GET",       \Auth::READ);    // Get list with comments
-        $this->api->addRoute("/^\/comment\/([a-z]+)\/(\d+)\/?$/",                       "createComment",         $this, "POST",      \Auth::EXECUTE); // Create a new comment
-        $this->api->addRoute("/^\/comment\/(\d+)\/?$/",                                 "deleteCommentById",     $this, "DELETE",    \Auth::READ);    // Removes the given comment
+        $this->api->addRoute("/^\/comments\/([a-z]+)\/(\d+)\/?$/",                      'getComments',           $this, 'GET',       \Auth::READ);    // Get list with comments
+        $this->api->addRoute("/^\/comment\/([a-z]+)\/(\d+)\/?$/",                       'createComment',         $this, 'POST',      \Auth::EXECUTE); // Create a new comment
+        $this->api->addRoute("/^\/comment\/(\d+)\/?$/",                                 'updateCommentById',     $this, 'PUT',       \Auth::READ);    // Updates the given comment
+        $this->api->addRoute("/^\/comment\/(\d+)\/?$/",                                 'deleteCommentById',     $this, 'DELETE',    \Auth::READ);    // Removes the given comment
     }
 
     /**
@@ -159,6 +160,40 @@ class Comment extends Module {
     }
 
     /**
+     * Updates the given comment message
+     *
+     * @param array $args
+     * @return array
+     * @throws \Exception
+     */
+    public function updateCommentById($args) {
+        $data = FALSE;
+        // Get commnet data
+        $db         = \Helper::getDB();
+        $db->where('id', $db->escape($args[1]));
+        $query      = $db->getOne('comments');
+        if($query) {
+            $user       = new \Models\User($query['userId']);
+            $comment    = new \Models\Comment($query['id'], $query['parentId'], 1, $user, $query['type'], $query['timestamp'], $query['message']);
+
+            // Only allow when the user has write access or wants to update his/her own comment
+            if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $comment->getUser()->getId() != \Auth::getUser()->getId()) {
+                throw new \Exception('You do not have permissions to update this comment.', 6);
+            }
+
+            // @todo Update
+        } else {
+            throw new \Exception('Cound not find comment with ID: '. $args[1], 2);
+        }
+
+        // Format the result
+        $result = array(
+            'success'   => ($data !== FALSE ? TRUE : FALSE)
+        );
+        return $result;
+    }
+
+    /**
      * Removes the given comment from the database
      * WARNING: This will also remove all responses to this comment (CASCADE)
      *
@@ -167,17 +202,18 @@ class Comment extends Module {
      * @throws \Exception
      */
     public function deleteCommentById($args) {
+        $data = FALSE;
         // Get commnet data
         $db         = \Helper::getDB();
         $db->where('id', $db->escape($args[1]));
-        $result     = $db->get('comments');
-        if(isset($result[0])) {
-            $user       = new \Models\User($result[0]['userId']);
-            $comment    = new \Models\Comment($result[0]['id'], $result[0]['parentId'], 1, $user, $result[0]['type'], $result[0]['timestamp'], $result[0]['message']);
+        $query     = $db->getOne('comments');
+        if($query) {
+            $user       = new \Models\User($query['userId']);
+            $comment    = new \Models\Comment($query['id'], $query['parentId'], 1, $user, $query['type'], $query['timestamp'], $query['message']);
 
             // Only allow when the user has write access or wants to update his/her own comment
             if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $comment->getUser()->getId() != \Auth::getUser()->getId()) {
-                throw new \Exception('You do not have permissions to update this user.', 6);
+                throw new \Exception('You do not have permissions to remove this comment.', 6);
             }
 
             // Delete!

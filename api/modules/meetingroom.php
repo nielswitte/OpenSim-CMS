@@ -11,7 +11,7 @@ require_once dirname(__FILE__) .'/../models/meetingRoom.php';
  *
  * @author Niels Witte
  * @version 0.3
- * @date March 28th, 2014
+ * @date April 1st, 2014
  * @since February 26th, 2014
  */
 class MeetingRoom extends Module{
@@ -34,9 +34,9 @@ class MeetingRoom extends Module{
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/^\/grid\/(\d+)\/rooms\/?$/",                                    "getRoomsByGrid",       $this, "GET",  \Auth::READ);  // Get rooms for the given grid
-        $this->api->addRoute("/^\/grid\/(\d+)\/room\/(\d+)\/?$/",                              "getRoomById",          $this, "GET",  \Auth::READ);  // Get the given room on the grid
-        $this->api->addRoute("/^\/grid\/(\d+)\/region\/([a-z0-9-]{36})\/rooms\/?$/",           "getRoomsByGridRegion", $this, "GET",  \Auth::READ);  // Get the given room on the grid
+        $this->api->addRoute("/^\/grid\/(\d+)\/rooms\/?$/",                                    'getRoomsByGrid',       $this, 'GET',  \Auth::READ);  // Get rooms for the given grid
+        $this->api->addRoute("/^\/grid\/(\d+)\/room\/(\d+)\/?$/",                              'getRoomById',          $this, 'GET',  \Auth::READ);  // Get the given room on the grid
+        $this->api->addRoute("/^\/grid\/(\d+)\/region\/([a-z0-9-]{36})\/rooms\/?$/",           'getRoomsByGridRegion', $this, 'GET',  \Auth::READ);  // Get the given room on the grid
     }
 
     /**
@@ -159,21 +159,21 @@ class MeetingRoom extends Module{
             'g.osIp as osIp',
             'g.osPort as osPort'
         );
-        $results    = $db->get('meeting_rooms mr', 1, $columns);
+        $results    = $db->getOne('meeting_rooms mr', $columns);
         $data       = array();
 
         // Room found?
-        if(isset($results[0])) {
+        if($results) {
             // Create the grid
-            $grid       = new \Models\Grid($results[0]['gridId'], $results[0]['gridName'], $results[0]['osProtocol'], $results[0]['osIp'], $results[0]['osPort']);
+            $grid       = new \Models\Grid($results['gridId'], $results['gridName'], $results['osProtocol'], $results['osIp'], $results['osPort']);
 
             // Create region and add it to Grid
-            $region     = new \Models\Region($results[0]['regionUuid'], $grid);
-            $region->setName($results[0]['regionName']);
+            $region     = new \Models\Region($results['regionUuid'], $grid);
+            $region->setName($results['regionName']);
             $grid->addRegion($region);
 
             // Create the room
-            $room       = new \Models\MeetingRoom($results[0]['roomId'], $region, $results[0]['name'], $results[0]['description'], $results[0]['x'], $results[0]['y'], $results[0]['z']);
+            $room       = new \Models\MeetingRoom($results['roomId'], $region, $results['name'], $results['description'], $results['x'], $results['y'], $results['z']);
 
             // Process results
             $data       = $this->getRoomData($room, TRUE);

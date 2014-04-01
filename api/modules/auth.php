@@ -10,7 +10,7 @@ require_once dirname(__FILE__) .'/module.php';
  *
  * @author Niels Witte
  * @version 0.2
- * @date March 28th, 2014
+ * @date April 1st, 2014
  * @since February 24th, 2014
  */
 class Auth extends Module {
@@ -33,7 +33,7 @@ class Auth extends Module {
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/^\/auth\/username\/?$/", "authUser", $this, "POST", \Auth::NONE); // Authenticate the given user
+        $this->api->addRoute("/^\/auth\/username\/?$/", 'authUser', $this, 'POST', \Auth::NONE); // Authenticate the given user
     }
 
     /**
@@ -51,7 +51,7 @@ class Auth extends Module {
         $ip                     = isset($input['ip']) ? $input['ip'] : FALSE;
 
         // Default settings
-        $userId = ($username == "OpenSim" ? 0 : -1);
+        $userId = ($username == 'OpenSim' ? 0 : -1);
 
         // Basic output data
         $data['token']          = $db->escape(\Helper::generateToken(48));
@@ -63,7 +63,7 @@ class Auth extends Module {
 
         // Attempt to access with OpenSim from outside the Grid
         if($userId == 0 && !$isGrid) {
-            throw new \Exception("Not allowed to login as OpenSim outside the Grid", 2);
+            throw new \Exception('Not allowed to login as OpenSim outside the Grid', 2);
         }
 
         $user                   = new \Models\UserLoggedIn($userId, $username);
@@ -74,7 +74,7 @@ class Auth extends Module {
 
         // Can't login?
         if(!$validRequest) {
-            throw new \Exception("Invalid username/password combination used", 1);
+            throw new \Exception('Invalid username/password combination used', 1);
         // Can login
         } else {
             // User has permission to use Auth?
@@ -87,7 +87,7 @@ class Auth extends Module {
                 }
             // User lacks permission
             } else {
-                throw new \Exception("You do not have permission to use the API", 2);
+                throw new \Exception('You do not have permission to use the API', 2);
             }
         }
 

@@ -8,7 +8,7 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author Niels Witte
  * @version 0.3
- * @date March 28th, 2014
+ * @date April 1st, 2014
  * @since February 12th, 2014
  */
 class UserController {
@@ -38,10 +38,10 @@ class UserController {
             // Check if UUID not in use
             $db->where('uuid', $db->escape($uuid));
             $db->where('gridId', $db->escape($gridId));
-            $avatars = $db->get('avatars');
+            $avatars = $db->getOne('avatars');
 
             // Not used?
-            if(!isset($avatars[0])) {
+            if(!$avatars) {
                 $avatarData = array(
                     'userId'        => $db->escape($this->user->getId()),
                     'gridId'        => $db->escape($gridId),
@@ -49,18 +49,18 @@ class UserController {
                 );
                 $results = $db->insert('avatars', $avatarData);
             } else {
-                $db->where("id", $db->escape($avatars[0]['userId']));
-                $user = $db->get("users", 1);
+                $db->where('id', $db->escape($avatars['userId']));
+                $user = $db->getOne('users');
 
-                throw new \Exception("UUID already in use on this Grid, used by: ". $user[0]['username'], 3);
+                throw new \Exception('UUID already in use on this Grid, used by: '. $user['username'], 3);
             }
         } else {
-            throw new \Exception("Invalid UUID provided", 2);
+            throw new \Exception('Invalid UUID provided', 2);
         }
 
         // Something when wrong?
         if($results === FALSE) {
-            throw new \Exception("Updating UUID failed, check Username and Grid ID", 1);
+            throw new \Exception('Updating UUID failed, check Username and Grid ID', 1);
         }
         return $results !== FALSE;
     }
@@ -80,7 +80,7 @@ class UserController {
         $result     = $db->delete('avatars');
 
         if($result === FALSE) {
-            throw new \Exception("Given Avatar not found on the given Grid for the given User", 1);
+            throw new \Exception('Given Avatar not found on the given Grid for the given User', 1);
         }
 
         return $result;
@@ -103,7 +103,7 @@ class UserController {
         $result     = $db->update('avatars', $data);
 
         if($result === FALSE) {
-            throw new \Exception("Given unconfirmed Avatar not found on the given Grid for the currently logged in user", 1);
+            throw new \Exception('Given unconfirmed Avatar not found on the given Grid for the currently logged in user', 1);
         }
 
         return $result;
@@ -118,9 +118,9 @@ class UserController {
     public function checkUsername($username) {
         $db = \Helper::getDB();
         $db->where('username', $db->escape($username));
-        $result = $db->get('users', 1);
+        $result = $db->getOne('users');
 
-        return !isset($result[0]);
+        return !$result;
     }
 
     /**
@@ -132,9 +132,9 @@ class UserController {
     public function checkEmail($email) {
         $db = \Helper::getDB();
         $db->where('email', $db->escape($email));
-        $result = $db->get('users', 1);
+        $result = $db->getOne('users');
 
-        return !isset($result[0]);
+        return !$result;
     }
 
     /**
@@ -146,11 +146,11 @@ class UserController {
     public function checkPassword($password) {
         $db = \Helper::getDB();
         $db->where('id', $db->escape($this->user->getId()));
-        $result = $db->get('users', 1);
+        $result = $db->getOne('users');
 
         // Got a result?
-        if(isset($result[0]['password'])) {
-            $hash = $result[0]['password'];
+        if($result) {
+            $hash = $result['password'];
         } else {
             $hash = '';
         }
@@ -284,7 +284,7 @@ class UserController {
         $result     = $db->delete('users');
 
         if($result === FALSE) {
-            throw new \Exception("Given User could not be removed from the CMS", 1);
+            throw new \Exception('Given User could not be removed from the CMS', 1);
         }
 
         return $result;
@@ -304,9 +304,9 @@ class UserController {
         } elseif(!isset($parameters['username']) || strlen($parameters['username']) < SERVER_MIN_USERNAME_LENGTH) {
             throw new \Exception('Missing parameter (string) "username" with a minimum length of '. SERVER_MIN_USERNAME_LENGTH, 2);
         } elseif(isset($parameters['username']) && !$this->checkUsername($parameters['username'])) {
-            throw new \Exception("Username is already being used", 9);
+            throw new \Exception('Username is already being used', 9);
         } elseif(isset($parameters['email']) && !$this->checkEmail($parameters['email'])) {
-            throw new \Exception("This is email is already being used", 10);
+            throw new \Exception('This is email is already being used', 10);
         } elseif(!isset($parameters['password']) || strlen($parameters['password']) < SERVER_MIN_PASSWORD_LENGTH) {
             throw new \Exception('Missing parameter (string) "password" with a minimum length of '. SERVER_MIN_PASSWORD_LENGTH, 3);
         } elseif(!isset($parameters['password2']) || $parameters['password'] != $parameters['password2']) {

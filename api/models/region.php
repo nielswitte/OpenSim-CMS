@@ -10,6 +10,7 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  *
  * @author Niels Witte
  * @version 0.2
+ * @date April 1st, 2014
  * @since February 17th, 2014
  */
 class Region implements SimpleModel {
@@ -80,8 +81,8 @@ class Region implements SimpleModel {
         if($this->grid->getDbUrl() && $this->getOnlineStatus()) {
             $osdb = new \MysqliDb($this->grid->getDbUrl(), $this->grid->getDbUsername(), $this->grid->getDbPassword(), $this->grid->getDbName(), $this->grid->getDbPort());
             // Get user's
-            $osdb->where("LastRegionID", $osdb->escape($this->getUuid()));
-            $results = $osdb->get("GridUser");
+            $osdb->where('LastRegionID', $osdb->escape($this->getUuid()));
+            $results = $osdb->get('GridUser');
 
             $this->activeUsers  = 0;
             $this->totalUsers   = 0;

@@ -628,6 +628,19 @@ POST /api/comment/<TYPE>/<ID>/ HTTP/1.1
 | message           | string            | The message (the CMS uses Markdown)                                               |
 | timestamp         | string            | [Optional] The timestamp when the message is posted (format: YYYY-MM-DD HH:mm:ss) |
 
+### Update a comment
+The only thing that can be updated of a comment is the message. The poster, parentId, type, itemId and the original posted timestamp remain the same.
+
+The editTimestamp will be automatically set by the server.
+
+```http
+PUT /api/comment/<COMMENT-ID>/ HTTP/1.1
+```
+
+| Parameter         | Type              | Description                                                                       |
+|-------------------|-------------------|-----------------------------------------------------------------------------------|
+| message           | string            | The message (the CMS uses Markdown)                                               |
+
 ### Remove comment
 
 ```http

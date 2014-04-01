@@ -9,7 +9,8 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class represents a meeting room
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
+ * @date April 1st, 2014
  * @since February 25th, 2014
  */
 class MeetingRoom implements simpleModel {
@@ -48,19 +49,19 @@ class MeetingRoom implements simpleModel {
     public function getInfoFromDatabase() {
         $db = \Helper::getDB();
         $db->where('id', $db->escape($this->getId()));
-        $room = $db->get('meeting_rooms', 1);
+        $room = $db->getOne('meeting_rooms');
         // Match found?
-        if(isset($room[0])) {
-            $grid               = new \Models\Grid($room[0]['gridId']);
+        if($room) {
+            $grid               = new \Models\Grid($room['gridId']);
             $grid->getInfoFromDatabase();
-            $this->region       = $grid->getRegionByUuid($room[0]['regionUuid']);
-            $this->name         = $room[0]['name'];
-            $this->description  = $room[0]['description'];
-            $this->x            = $room[0]['x'];
-            $this->y            = $room[0]['y'];
-            $this->z            = $room[0]['z'];
+            $this->region       = $grid->getRegionByUuid($room['regionUuid']);
+            $this->name         = $room['name'];
+            $this->description  = $room['description'];
+            $this->x            = $room['x'];
+            $this->y            = $room['y'];
+            $this->z            = $room['z'];
         } else {
-            throw new \Exception("Meeting room not found", 1);
+            throw new \Exception('Meeting room not found', 1);
         }
     }
 

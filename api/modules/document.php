@@ -12,7 +12,7 @@ require_once dirname(__FILE__) .'/../controllers/documentController.php';
  *
  * @author Niels Witte
  * @version 0.3
- * @date March 28th, 2014
+ * @date April 1st, 2014
  * @since March 3rd, 2014
  */
 class Document extends Module{
@@ -35,13 +35,13 @@ class Document extends Module{
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/^\/documents\/?$/",                         "getDocuments",         $this, "GET",    \Auth::READ);    // Get list with 50 documents
-        $this->api->addRoute("/^\/documents\/(\d+)\/?$/",                  "getDocuments",         $this, "GET",    \Auth::READ);    // Get list with 50 documents starting at the given offset
-        $this->api->addRoute("/^\/documents\/([a-zA-Z0-9-_ ]{3,}+)\/?$/",  "getDocumentsByTitle",  $this, "GET",    \Auth::READ);    // Search for documents by title
-        $this->api->addRoute("/^\/document\/?$/",                          "createDocument",       $this, "POST",   \Auth::EXECUTE); // Create a document
-        $this->api->addRoute("/^\/document\/(\d+)\/?$/",                   "getDocumentById",      $this, "GET",    \Auth::READ);    // Select specific document
-        $this->api->addRoute("/^\/document\/(\d+)\/?$/",                   "deleteDocumentById",   $this, "DELETE", \Auth::EXECUTE); // Delete specific document
-        $this->api->addRoute("/^\/documents\/cache\/?$/",                  "deleteExpiredCache",   $this, "DELETE", \Auth::EXECUTE); // Removes all expired cached assets
+        $this->api->addRoute("/^\/documents\/?$/",                         'getDocuments',         $this, 'GET',    \Auth::READ);    // Get list with 50 documents
+        $this->api->addRoute("/^\/documents\/(\d+)\/?$/",                  'getDocuments',         $this, 'GET',    \Auth::READ);    // Get list with 50 documents starting at the given offset
+        $this->api->addRoute("/^\/documents\/([a-zA-Z0-9-_ ]{3,}+)\/?$/",  'getDocumentsByTitle',  $this, 'GET',    \Auth::READ);    // Search for documents by title
+        $this->api->addRoute("/^\/document\/?$/",                          'createDocument',       $this, 'POST',   \Auth::EXECUTE); // Create a document
+        $this->api->addRoute("/^\/document\/(\d+)\/?$/",                   'getDocumentById',      $this, 'GET',    \Auth::READ);    // Select specific document
+        $this->api->addRoute("/^\/document\/(\d+)\/?$/",                   'deleteDocumentById',   $this, 'DELETE', \Auth::EXECUTE); // Delete specific document
+        $this->api->addRoute("/^\/documents\/cache\/?$/",                  'deleteExpiredCache',   $this, 'DELETE', \Auth::EXECUTE); // Removes all expired cached assets
     }
 
 

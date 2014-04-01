@@ -10,7 +10,7 @@ require_once dirname(__FILE__) .'/document.php';
  *
  * @author Niels Witte
  * @version 0.3
- * @date March 28th, 2014
+ * @date April 1st, 2014
  * @since February 10th, 2014
  */
 class Presentation extends Document {
@@ -84,7 +84,7 @@ class Presentation extends Document {
         if(isset($this->slides[$number])) {
             $slide = $this->slides[$number];
         } else {
-            throw new \Exception("Slide does not exist", 6);
+            throw new \Exception('Slide does not exist', 6);
         }
         return $slide;
     }
@@ -110,7 +110,7 @@ class Presentation extends Document {
                 }
             }
         }
-        throw new \Exception("Slide does not exist", 6);
+        throw new \Exception('Slide does not exist', 6);
     }
 
     /**

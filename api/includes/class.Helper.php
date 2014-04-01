@@ -148,7 +148,7 @@ class Helper {
      */
     public static function getBase64Content($base64, $decode = TRUE) {
         $result         = FALSE;
-        $base64_start   = ";base64,";
+        $base64_start   = ';base64,';
         // Get position of base64 tag
         $base64_offset  = strpos($base64, $base64_start);
         // Is a base64 string?
@@ -168,7 +168,7 @@ class Helper {
      */
     public static function getBase64Header($base64) {
         $result         = FALSE;
-        $base64_start   = ";base64,";
+        $base64_start   = ';base64,';
         // Get position of base64 tag
         $base64_offset  = strpos($base64, $base64_start);
         if($base64_offset !== FALSE) {

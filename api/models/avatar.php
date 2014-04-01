@@ -10,6 +10,7 @@ require_once dirname(__FILE__) . '/simpleModel.php';
  *
  * @author Niels Witte
  * @version 0.2
+ * @date April 1st, 2014
  * @since February 21th, 2014
  */
 class Avatar implements simpleModel {
@@ -32,7 +33,7 @@ class Avatar implements simpleModel {
     public function __construct(\Models\Grid $grid, $uuid) {
         $this->grid = $grid;
         if(!\Helper::isValidUuid($uuid)) {
-            throw new \Exception("Invalid UUID provided", 1);
+            throw new \Exception('Invalid UUID provided', 1);
         }
         $this->uuid = $uuid;
     }
@@ -46,16 +47,16 @@ class Avatar implements simpleModel {
             $osdb = new \MysqliDb($this->grid->getDbUrl(), $this->grid->getDbUsername(), $this->grid->getDbPassword(), $this->grid->getDbName(), $this->grid->getDbPort());
             $osdb->join('GridUser g', 'u.PrincipalID = g.UserID', 'LEFT');
             $osdb->where('u.PrincipalID', $osdb->escape($this->getUuid()));
-            $results = $osdb->get('UserAccounts u', 1);
+            $result = $osdb->getOne('UserAccounts u');
 
-            if(isset($results[0])) {
-                $this->firstName        = $results[0]['FirstName'];
-                $this->lastName         = $results[0]['LastName'];
-                $this->email            = $results[0]['Email'];
-                $this->online           = $results[0]['Online'];
-                $this->lastLogin        = $results[0]['Login'];
-                $this->lastPosition     = $results[0]['LastPosition'];
-                $this->lastRegionUuid   = $results[0]['LastRegionID'];
+            if($result) {
+                $this->firstName        = $result['FirstName'];
+                $this->lastName         = $result['LastName'];
+                $this->email            = $result['Email'];
+                $this->online           = $result['Online'];
+                $this->lastLogin        = $result['Login'];
+                $this->lastPosition     = $result['LastPosition'];
+                $this->lastRegionUuid   = $result['LastRegionID'];
             }
         }
     }
@@ -69,9 +70,9 @@ class Avatar implements simpleModel {
         $db = \Helper::getDB();
         $db->where('uuid', $db->escape($this->getUuid()));
         $db->where('gridId', $db->escape($this->getGrid()->getId()));
-        $id = $db->get('avatars', 1);
+        $id = $db->getOne('avatars');
 
-        return isset($id[0]) ? $id[0]['userId'] : FALSE;
+        return $id ? $id['userId'] : FALSE;
     }
 
     /**
