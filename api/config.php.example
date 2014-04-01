@@ -30,7 +30,7 @@
 	define('IMAGE_THUMBNAIL_HEIGHT',    256);                                   // height of thumnails
 	define('IMAGE_WIDTH',               1024);                                  // Texture width in OpenSim, used to resize presentations
 	define('IMAGE_HEIGHT',              1024);                                  // Texture height in OpenSim, used to resize presentations
-    define('IMAGE_TYPE',                'png');                                 // File type to store images in
+    define('IMAGE_TYPE',                'jpg');                                 // File type to store images in
 
     // PHP Settings
     date_default_timezone_set("Europe/Amsterdam");                              // see: http://www.php.net/manual/en/timezones.php
