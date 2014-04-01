@@ -304,7 +304,6 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
                         Cache.clearCache();
                         $route.reload();
                     }
-                    console.log(resp);
                 });
             } else {
                 $alert({title: 'Comment type not implemented!', content: $sce.trustAsHtml('The comment could not be saved because the comment type is not set or not implemented.'), type: 'warning'});
@@ -312,6 +311,18 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
 
             // Remove loading screen
             jQuery('#loading').hide();
+        };
+
+        // Update a comment
+        $scope.commentUpdate = function(id) {
+            Restangular.one('comment', id).customPUT({message: this.comment.message}).then(function(resp) {
+                if(!resp.success) {
+                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                } else {
+                    $alert({title: 'Comment updated!', content: $sce.trustAsHtml('Comment with ID: '+ id +' has been updated.'), type: 'success'});
+                    Cache.clearCache();
+                }
+            });
         };
 
         // Checks if the user has permission to remove a comment
