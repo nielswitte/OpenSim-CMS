@@ -208,7 +208,7 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
  *
  */
 // chatController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '$route', '$alert', 'Cache', '$location', '$anchorScroll', function(Restangular, $scope, $sce, $route, $alert, Cache, $location, $anchorScroll) {
+angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '$route', '$alert', 'Cache', function(Restangular, $scope, $sce, $route, $alert, Cache) {
         // Clear the comment form
         $scope.clearComment = function() {
             $scope.comment = {
@@ -216,6 +216,7 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
                     id: sessionStorage.id
                 },
                 type: $scope.commentType,
+                itemId: $scope.commentItemId,
                 parentId: 0,
                 message: ""
             };
@@ -260,11 +261,29 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
             // Set quote text
             if(id > 0) {
                 $scope.comment.parentId = id;
-                $scope.replyTo = jQuery('#comment-'+ id +' header a').text();
-                $scope.comment.message =  "> **"+ $scope.replyTo;
-                $scope.comment.message += " @ "+ jQuery('#comment-'+ id +' header time').text() +"**  \n";
-                $scope.comment.message += "> "+ jQuery('#comment-'+ id +' span.message').data('message').replace(/\n/g, "\n> ");
-                $scope.comment.message += "\n\n";
+                $scope.replyTo          = jQuery('#comment-'+ id +' header a').text();
+                var message  = "> **"+ $scope.replyTo;
+                message     += " @ "+ jQuery('#comment-'+ id +' header time').text() +"**  \n";
+                message     += "> "+ jQuery('#comment-'+ id +' span.message').data('message').replace(/\n/g, "\n> ");
+                message     += "\n\n";
+
+                // Strip dubbel quoted messages, max for 250 lines
+                var count       = 0;
+                var dubbelQoute = message.indexOf("\n> > ");
+                while(dubbelQoute > -1 && count < 250) {
+                    var endOfLine   = message.indexOf("\n", dubbelQoute + 5);
+                    // First occurenace replace with "[...]"
+                    if(count == 0) {
+                        message     = message.slice(0, dubbelQoute) +"\n> [...]"+ message.slice(endOfLine);
+                    } else {
+                        message     = message.slice(0, dubbelQoute) + message.slice(endOfLine);
+                    }
+
+                    dubbelQoute     = message.indexOf("\n> >");
+                    count++;
+                }
+                // Update scope
+                $scope.comment.message = message;
             }
             // put cursor in textarea
             jQuery('#commentForm textarea').focus();
@@ -272,11 +291,27 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
 
         // Submits the new comment to the API
         $scope.commentSubmit = function() {
+            // Show loading screen
+            jQuery('#loading').show();
+
+            // Post comment
             if($scope.commentType == 'slide') {
-                // @todo
+                Restangular.one('comment', 'slide').all($scope.comment.itemId).post($scope.comment).then(function(resp) {
+                    if(!resp.success) {
+                        $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                    } else {
+                        $alert({title: 'Comment removed!', content: $sce.trustAsHtml('The comment with ID '+ id +' has been removed from the CMS.'), type: 'success'});
+                        Cache.clearCache();
+                        $route.reload();
+                    }
+                    console.log(resp);
+                });
             } else {
                 $alert({title: 'Comment type not implemented!', content: $sce.trustAsHtml('The comment could not be saved because the comment type is not set or not implemented.'), type: 'warning'});
             }
+
+            // Remove loading screen
+            jQuery('#loading').hide();
         };
 
         // Checks if the user has permission to remove a comment
@@ -1509,9 +1544,10 @@ angularRest.controller('slideController', ['RestangularCache', 'Restangular', '$
             }
         });
 
-        // Show comments and set the comment Type to: slide
+        // Show comments and set the comment Type to: slide and the id of the slide
         $scope.showComments = function() {
-            $scope.commentType = 'slide';
+            $scope.commentType      = 'slide';
+            $scope.commentItemId    = $routeParams.slideId;
             return partial_path +'/comment/commentContainer.html';
         };
 
