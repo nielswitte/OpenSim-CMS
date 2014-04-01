@@ -2,7 +2,7 @@ OpenSim-CMS
 ===========
 
 A Content Management System (CMS) for OpenSim. Uses the 0.8 development versions of OpenSim to ensure JSON support. Uses JSON to serve data from and to OpenSim.
-Also includes a couple of example scripts to be used in OpenSim in the assets folder. Such as the `presenter.lsl` which enables you to access
+Also includes a couple of example scripts to be used in OpenSim in the assets folder. Such as the `presenterScreen.lsl` which enables you to access
 presentations created in the CMS.
 
 This project is based on the MVC pattern and uses Apache web server with PHP5.4+ and a MySQL database. The API is RESTful and provides the basic GET, POST, PUT and DELETE functionalities.
