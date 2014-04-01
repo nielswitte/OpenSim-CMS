@@ -61,11 +61,11 @@ CREATE TABLE IF NOT EXISTS `chats` (
 CREATE TABLE IF NOT EXISTS `comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `parentId` int(11) DEFAULT NULL,
+  `type` varchar(50) DEFAULT NULL,
   `itemId` int(11) DEFAULT NULL,
   `userId` int(11) DEFAULT NULL,
-  `type` varchar(50) DEFAULT NULL,
-  `timestamp` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `message` text,
+  `timestamp` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `editTimestamp` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_comments_users` (`userId`),
@@ -178,11 +178,13 @@ CREATE TABLE IF NOT EXISTS `meetings` (
 CREATE TABLE IF NOT EXISTS `meeting_agenda_items` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `meetingId` int(11) NOT NULL,
-  `parentId` int(11) NOT NULL DEFAULT '0',
+  `parentId` int(11) DEFAULT NULL,
   `sort` int(11) DEFAULT NULL,
   `value` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (`id`,`meetingId`),
   KEY `FK_meeting_agenda_items_meetings` (`meetingId`),
+  KEY `FK_meeting_agenda_items_meeting_agenda_items` (`parentId`),
+  CONSTRAINT `FK_meeting_agenda_items_meeting_agenda_items` FOREIGN KEY (`parentId`) REFERENCES `meeting_agenda_items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_meeting_agenda_items_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 

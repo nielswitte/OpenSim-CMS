@@ -34,7 +34,7 @@ class MeetingAgenda {
      * @param integer $order
      * @param integer $parentId
      */
-    public function addAgendaItem($id, $value, $order, $parentId = 0) {
+    public function addAgendaItem($id, $value, $order, $parentId = NULL) {
         $this->agenda[] = array(
             'id'        => $id,
             'value'     => $value,
@@ -65,7 +65,7 @@ class MeetingAgenda {
      * @param integer $parentId - [Optional] The starting level for parents to be matched to
      * @return array - The multidemensional sorted array
      */
-    public function buildAgenda($parentId = 0) {
+    public function buildAgenda($parentId = NULL) {
         $branch = array();
 
         // Get child elements for given parent
@@ -95,7 +95,7 @@ class MeetingAgenda {
      * @param mixed $parentId - [Optional] integer if only one parent, array if more
      * @return string
      */
-    public function toString($agenda = NULL, $depth = 0, $parentId = 0) {
+    public function toString($agenda = NULL, $depth = 0, $parentId = NULL) {
         // Agenda is not set? Use this agenda
         if($agenda === NULL) {
             $agenda = $this->buildAgenda();
@@ -106,7 +106,7 @@ class MeetingAgenda {
             $parentId = array($parentId);
         }
         // Remove the main level from the list
-        if($parentId[0] == 0) {
+        if($parentId[0] == NULL) {
             array_shift($parentId);
         }
 
