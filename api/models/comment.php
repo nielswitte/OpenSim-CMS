@@ -8,7 +8,7 @@ defined('EXEC') or die('Invalid request');
  *
  * @author Niels Witte
  * @version 0.2
- * @date March 31st, 2014
+ * @date April 1st, 2014
  * @since March 28st, 2014
  */
 class Comment {
@@ -48,6 +48,11 @@ class Comment {
      */
     private $msg;
     /**
+     * Datetime string YYYY-MM-DD HH:mm:ss, for when the message was last edited
+     * @var string
+     */
+    private $editTimestamp;
+    /**
      * The parent comment
      * @var \Models\Comment
      */
@@ -68,15 +73,17 @@ class Comment {
      * @param string $type
      * @param string $timestamp
      * @param string $msg
+     * @param string $editTimestamp - [Optional]
      */
-    public function __construct($id, $parentId, $number, \Models\User $user, $type, $timestamp, $msg) {
-        $this->id        = $id;
-        $this->parentId  = $parentId;
-        $this->number    = $number;
-        $this->user      = $user;
-        $this->type      = $type;
-        $this->timestamp = $timestamp;
-        $this->msg       = $msg;
+    public function __construct($id, $parentId, $number, \Models\User $user, $type, $timestamp, $msg, $editTimestamp = NULL) {
+        $this->id               = $id;
+        $this->parentId         = $parentId;
+        $this->number           = $number;
+        $this->user             = $user;
+        $this->type             = $type;
+        $this->timestamp        = $timestamp;
+        $this->msg              = $msg;
+        $this->editTimestamp    = $editTimestamp;
     }
 
     /**
@@ -140,6 +147,15 @@ class Comment {
      */
     public function getMessage() {
         return $this->msg;
+    }
+
+    /**
+     * Returns the datetime when the comment was last edited
+     *
+     * @return string or NULL when not set - YYYY-MM-DD HH:mm:ss
+     */
+    public function getEditTimestamp() {
+        return $this->editTimestamp;
     }
 
     /**
