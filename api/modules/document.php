@@ -102,7 +102,10 @@ class Document extends Module{
             $data = is_array($presentation) ? $presentation['id'] : $data;
         // Process other files
         } else {
-            // @todo
+            $documentCtrl   = new \Controllers\DocumentController();
+            if($documentCtrl->validateParametersCreate($input)) {
+                $data = $documentCtrl->createDocument($input);
+            }
         }
 
         // Format the result
