@@ -687,15 +687,36 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 );
 
 // documentController -------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentController', ['Restangular', '$scope', '$routeParams', 'Page', '$modal', '$sce', function(Restangular, $scope, $routeParams, Page, $modal, $sce) {
+angularRest.controller('documentController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$modal', '$sce', function(Restangular, RestangularCache, $scope, $routeParams, Page, $modal, $sce) {
         // Show loading screen
         jQuery('#loading').show();
 
         // Get document from API
-        Restangular.one('document', $routeParams.documentId).get().then(function(documentResponse) {
+        RestangularCache.one('document', $routeParams.documentId).get().then(function(documentResponse) {
             $scope.document = documentResponse;
             $scope.token    = sessionStorage.token;
             Page.setTitle(documentResponse.title);
+
+            // Only show comments when document is not a presentation
+            if(documentResponse.type != 'presentation') {
+                // List with comments
+                $scope.comments = {
+                    comments: [],
+                    commentCount: 0
+                };
+
+                // Load comments
+                RestangularCache.all('comments').one('document', $routeParams.documentId).get().then(function(commentResponse) {
+                    $scope.comments = commentResponse;
+                });
+
+                // Show comments and set the comment Type to: meeting and the id of the meeting
+                $scope.showComments = function() {
+                    $scope.commentType      = 'document';
+                    $scope.commentItemId    = $routeParams.meetingId;
+                    return partial_path +'/comment/commentContainer.html';
+                };
+            }
 
             // Init select2
             jQuery('#inputOwner').select2({
@@ -927,6 +948,7 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
         var usernameSearchResults       = [];
         $scope.document                 = '';
         var documentSearchResults       = [];
+        // List with comments
         $scope.comments = {
             comments: [],
             commentCount: 0
@@ -936,6 +958,13 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
         RestangularCache.all('comments').one('meeting', $routeParams.meetingId).get().then(function(commentResponse) {
             $scope.comments = commentResponse;
         });
+
+        // Show comments and set the comment Type to: meeting and the id of the meeting
+        $scope.showComments = function() {
+            $scope.commentType      = 'meeting';
+            $scope.commentItemId    = $routeParams.meetingId;
+            return partial_path +'/comment/commentContainer.html';
+        };
 
         // Navigate the calendar to the current date
         $scope.updateCalendar = function() {
@@ -1007,13 +1036,6 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
             RestangularCache.one('grid', $scope.meeting.room.grid.id).one('region', $scope.meeting.room.region.uuid).all('rooms').getList().then(function(roomsResponse){
                 $scope.rooms = roomsResponse;
             });
-        };
-
-        // Show comments and set the comment Type to: meeting and the id of the meeting
-        $scope.showComments = function() {
-            $scope.commentType      = 'meeting';
-            $scope.commentItemId    = $routeParams.meetingId;
-            return partial_path +'/comment/commentContainer.html';
         };
 
         // Update the meeting with the new data

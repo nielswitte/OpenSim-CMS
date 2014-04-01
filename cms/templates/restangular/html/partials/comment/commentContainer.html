@@ -1,6 +1,6 @@
 <div id="comments" ng-controller="commentsController">
     <h2>Comments ({{comments.commentCount}})</h2>
-
+    <hr>
     <ul class="comments">
         <li ng-repeat="comment in comments.comments" ng-include src="'templates/restangular/html/partials/comment/comments.html'" class="well"></li>
     </ul>
