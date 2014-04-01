@@ -189,10 +189,14 @@ class Helper {
         switch ($type) {
             case "application/pdf":
                 return 'pdf';
-            break;
+            case "image/jpeg":
+                return 'jpg';
+            case "image/png":
+                return 'png';
+            case "image/gif":
+                return 'gif';
             default:
                 return 'txt';
-            break;
         }
     }
 
@@ -219,8 +223,10 @@ class Helper {
         // Create the full path if needed
         $path    = dirname($destination);
         mkdir($path, 0777, TRUE);
+        // Command requires jpeg instead of jpg
+        $image_type = IMAGE_TYPE == 'jpg' ? 'jpeg' : IMAGE_TYPE;
         // Exec the command uses the larges of the image width or height as limit
-        $command = 'pdftoppm -'. IMAGE_TYPE .' -scale-to '. (IMAGE_WIDTH > IMAGE_HEIGHT ? IMAGE_WIDTH : IMAGE_HEIGHT) .' -aa yes -aaVector yes '. $file .' '. $destination;
+        $command = 'pdftoppm -'. $image_type .' -scale-to '. (IMAGE_WIDTH > IMAGE_HEIGHT ? IMAGE_WIDTH : IMAGE_HEIGHT) .' -aa yes -aaVector yes '. $file .' '. $destination;
         exec($command);
     }
 
