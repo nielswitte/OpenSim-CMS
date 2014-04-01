@@ -146,7 +146,7 @@ nav_slide(integer next) {
 
         // Load slide
         string url          = llList2String(slides, next-1);
-        string params       = "width:"+width+",height:"+height;
+        string params       = "width:"+ width +",height:"+ height;
 
         integer res = llListFindList(textureCache, [presentationId, next]);
         // Check if texture is found in cache, only required on first usage
@@ -160,16 +160,12 @@ nav_slide(integer next) {
             llSetTexture(url, 1);
         // Load texture from remote server
         } else {
-            // Remove previous texture
-            llSetTexture(TEXTURE_BLANK, ALL_SIDES);
-            llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
-
             if(debug) llInstantMessage(userUuid, "[Debug] Loading slide "+ slide +" by url (" + url +")");
             // Previous texture
             string oldtexture = llGetTexture(0);
 
             // Load new image
-            string texture = osSetDynamicTextureURLBlend("", "image", url +"?token="+ APIToken, params, 0, 255);
+            string texture = osSetDynamicTextureURL("", "image", url +"?token="+ APIToken, params, 0);
 
             if(debug) llInstantMessage(userUuid, "[Debug] Loaded slide");
             // Keep trying to fetch the new texture from object
