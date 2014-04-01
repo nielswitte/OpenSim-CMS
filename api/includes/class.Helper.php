@@ -302,7 +302,7 @@ class Helper {
             if(!file_exists($destination) || $resizeRequired) {
                 // Load the background
                 $averageColor = $resize->getAverageColor();
-                if(($averageColor['red'] + $averageColor['green'] + $averageColor['blue'] / 4) >= 128) {
+                if((($averageColor['red'] + $averageColor['green'] + $averageColor['blue']) / 3) >= 128) {
                     $image = new \Image(FILES_LOCATION . DS . 'background_light.jpg');
                 } else {
                     $image = new \Image(FILES_LOCATION . DS . 'background_dark.jpg');
