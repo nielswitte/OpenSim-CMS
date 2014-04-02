@@ -1840,11 +1840,15 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
 
         // Get all information about this user
         RestangularCache.one('user', $routeParams.userId).get().then(function(userResponse) {
-            Page.setTitle(userResponse.username);
-            $scope.user             = userResponse;
-            angular.copy($scope.user, userOld);
-            $scope.user.avatarCount = Object.keys(userResponse.avatars).length;
-            userRequestUrl          = userResponse.getRequestedUrl();
+            if(userResponse.success !== false) {
+                Page.setTitle(userResponse.username);
+                $scope.user             = userResponse;
+                angular.copy($scope.user, userOld);
+                $scope.user.avatarCount = Object.keys(userResponse.avatars).length;
+                userRequestUrl          = userResponse.getRequestedUrl();
+            } else {
+                $alert({title: 'Loading user failed!', content: $sce.trustAsHtml(userResponse.error), type: 'danger'});
+            }
 
             // Remove loading screen
             jQuery('#loading').hide();
