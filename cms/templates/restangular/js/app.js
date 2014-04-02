@@ -150,13 +150,13 @@ angularRest.service('Cache', ['$cacheFactory', function($cacheFactory) {
 
 // Handeling of the page title
 angularRest.factory('Page', function() {
-    var title = 'OpenSim-CMS';
+    var title = '';
     return {
         title: function() {
-            return title;
+            return title +' - OpenSim-CMS';
         },
         setTitle: function(newTitle) {
-            title = newTitle +' - '+ title;
+            title = newTitle;
         }
     };
 });
