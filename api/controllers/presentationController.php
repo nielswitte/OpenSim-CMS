@@ -7,10 +7,15 @@ defined('EXEC') or die('Config not loaded');
  * This class is the presentation controller
  *
  * @author Niels Witte
- * @version 0.2
+ * @version 0.3
+ * @date April 2nd, 2014
  * @since March 10th, 2014
  */
 class PresentationController {
+    /**
+     * The presentation object
+     * @var \Models\Presentation
+     */
     private $presentation;
 
     /**
@@ -28,7 +33,7 @@ class PresentationController {
      * @param array $parameters
      *              * string file - Base64 encoded file
      *              * string title - The document title
-     *              * string type - Should be presentation 
+     *              * string type - Should be presentation
      * @return integer or boolean FALSE on failure
      * @throws \Exception
      */
@@ -45,7 +50,8 @@ class PresentationController {
             'title'         => $db->escape($parameters['title']),
             'type'          => $db->escape($parameters['type']),
             'ownerId'       => $db->escape(\Auth::getUser()->getId()),
-            'creationDate'  => $db->escape(date('Y-m-d H:m:s'))
+            'creationDate'  => $db->escape(date('Y-m-d H:m:s')),
+            'file'          => $db->escape('source.'. $extension)
         );
         $fileId = $db->insert('documents', $data);
 
@@ -59,8 +65,8 @@ class PresentationController {
                 $slidesDirectory = FILES_LOCATION . DS . $parameters['type'] . DS . $fileId;
                 $slidesPath      = $slidesDirectory . DS . 'slide';
                 \Helper::pdf2jpeg($filename, $slidesPath);
-                // Remove temp file
-                unlink($filename);
+                // Move temp file
+                \Helper::moveFile($filename, $slidesDirectory . DS .'source.'. $extension);
                 // Save successful?
                 $result = $this->setPresentationSlides($fileId) ? $fileId : $result;
             }
