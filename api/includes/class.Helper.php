@@ -328,7 +328,7 @@ class Helper {
 
                 // Fill remaining of image with black
                 $image->resize($width, $height, 'fit');
-                $image->addWatermark($destination);
+                $image->addWatermark($source);
                 $image->writeWatermark(100, 0, 0, 'c', 'c');
                 return $image->save($destinationFile, $destinationDir, $destinationExt);
             // Thumbnail already exists?
