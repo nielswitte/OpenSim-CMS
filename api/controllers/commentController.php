@@ -46,7 +46,7 @@ class CommentController {
      *
      * @param string $type
      * @param integer $itemId
-     * @return boolean
+     * @return integer - Number of removed rows
      */
     public function removeCommentsByItem($type, $itemId) {
         $db = \Helper::getDB();
