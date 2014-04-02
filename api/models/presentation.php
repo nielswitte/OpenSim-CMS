@@ -10,7 +10,7 @@ require_once dirname(__FILE__) .'/file.php';
  *
  * @author Niels Witte
  * @version 0.3
- * @date April 1st, 2014
+ * @date April 2nd, 2014
  * @since February 10th, 2014
  */
 class Presentation extends File {
