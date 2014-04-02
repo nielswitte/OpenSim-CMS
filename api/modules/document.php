@@ -223,7 +223,7 @@ class Document extends Module{
 
     /**
      * Outputs the original source file
-     * 
+     *
      * @param array $args
      */
     public function getDocumentSourceById($args) {
