@@ -149,14 +149,18 @@ class Document implements SimpleModel {
     }
 
     /**
-     * Returns the API url of this presentation
-     * This can be extended by adding: 'slide/x/'
-     * to retrieve slide number x
+     * Returns the API url of this document
+     * This can be extended by adding: 'slide/x/' to retrieve slide number x for a presentation
+     * or with 'image/' to retrieve the resized image of an image document
      *
      * @return string
      */
     public function getApiUrl() {
-        return SERVER_PROTOCOL .'://'. SERVER_ADDRESS .':'.SERVER_PORT . SERVER_ROOT .'/api/'. $this->getType() .'/'. $this->getId() .'/';
+        if($this->getType() == 'presentation') {
+            return SERVER_PROTOCOL .'://'. SERVER_ADDRESS .':'.SERVER_PORT . SERVER_ROOT .'/api/'. $this->getType() .'/'. $this->getId() .'/';
+        } else {
+            return SERVER_PROTOCOL .'://'. SERVER_ADDRESS .':'.SERVER_PORT . SERVER_ROOT .'/api/document/'. $this->getId() .'/';
+        }
     }
 
     /**
