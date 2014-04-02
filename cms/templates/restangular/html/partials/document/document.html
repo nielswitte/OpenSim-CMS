@@ -64,9 +64,9 @@
     </div>
 </div>
 
-<div ng-show="document.type == 'image'">
+<div ng-show="document.type == 'image'" class="row">
     <div class="col-sm-12">
-        <img src="templates/restangular/img/img-placeholder.png" ng-src="{{document.url}}/image/?token={{token}}" class="img-responsive img-thumbnail" alt="{{document.title}}">
+        <img src="templates/restangular/img/img-placeholder.png" ng-src="{{getDocumentImage()}}" class="img-responsive img-thumbnail" alt="{{document.title}}">
     </div>
 </div>
 

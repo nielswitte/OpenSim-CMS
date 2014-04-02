@@ -299,7 +299,7 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                 } else {
-                    $alert({title: 'Comment removed!', content: $sce.trustAsHtml('Comment has been posted with ID: '+ resp.commentId +'.'), type: 'success'});
+                    $alert({title: 'Comment added!', content: $sce.trustAsHtml('Comment has been posted with ID: '+ resp.commentId +'.'), type: 'success'});
                     Cache.clearCache();
                     $route.reload();
                 }
@@ -707,6 +707,23 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 angularRest.controller('documentController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$modal', '$sce', function(Restangular, RestangularCache, $scope, $routeParams, Page, $modal, $sce) {
         // Show loading screen
         jQuery('#loading').show();
+        // List with comments
+        $scope.comments = {
+            comments: [],
+            commentCount: 0
+        };
+
+        // Load comments
+        RestangularCache.all('comments').one('meeting', $routeParams.documentId).get().then(function(commentResponse) {
+            $scope.comments = commentResponse;
+        });
+
+        // Show comments and set the comment Type to: meeting and the id of the meeting
+        $scope.showComments = function() {
+            $scope.commentType      = 'document';
+            $scope.commentItemId    = $routeParams.documentId;
+            return partial_path +'/comment/commentContainer.html';
+        };
 
         // Get document from API
         RestangularCache.one('document', $routeParams.documentId).get().then(function(documentResponse) {
@@ -772,6 +789,15 @@ angularRest.controller('documentController', ['Restangular', 'RestangularCache',
             // Remove loading screen
             jQuery('#loading').hide();
         });
+
+        // Loads the image when document details have loaded
+        $scope.getDocumentImage = function() {
+            if($scope.document !== undefined) {
+                return $scope.document.url +'/image/?token='+ sessionStorage.token;
+            } else {
+                return '';
+            }
+        };
 
         // Open dialog with the Slide preview
         $scope.lightbox = function(number, url) {
