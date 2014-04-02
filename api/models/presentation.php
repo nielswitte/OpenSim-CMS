@@ -13,7 +13,7 @@ require_once dirname(__FILE__) .'/document.php';
  * @date April 1st, 2014
  * @since February 10th, 2014
  */
-class Presentation extends Document {
+class Presentation extends File {
 	private $currentSlide;
     private $slides = array();
 

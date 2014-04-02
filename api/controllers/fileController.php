@@ -4,65 +4,65 @@ namespace Controllers;
 defined('EXEC') or die('Config not loaded');
 
 /**
- * This class is the Document controller
+ * This class is the File controller
  *
  * @author Niels Witte
  * @version 0.2
  * @date April 2nd, 2014
  * @since March 10th, 2014
  */
-class DocumentController {
-    private $document;
+class FileController {
+    private $file;
 
     /**
      * Constructs a new controller with the given presentation
      *
-     * @param \Models\Document $document
+     * @param \Models\File $file
      */
-    public function __construct(\Models\Document $document = NULL) {
-        $this->document = $document;
+    public function __construct(\Models\File $file = NULL) {
+        $this->file = $file;
     }
 
     /**
-     * Removes this document from the system
+     * Removes this file from the system
      *
      * @return boolean - FALSE when failed
      * @throws \Exception
      */
-    public function removeDocument() {
+    public function removeFile() {
         $db = \Helper::getDB();
         // Type is not available?
-        if($this->document->getType() == '') {
-            $this->document->getInfoFromDatabase();
+        if($this->file->getType() == '') {
+            $this->file->getInfoFromDatabase();
         }
 
-        // Remove comments for this document
+        // Remove comments for this file
         $commentCtrl = new \Controllers\CommentController();
-        $commentCtrl->removeCommentsByItem($this->document->getType(), $this->document->getId());
+        $commentCtrl->removeCommentsByItem($this->file->getType(), $this->file->getId());
 
         // If it's a presentation, remove all comments for slides as well
-        if($this->document->getType() == 'presentation') {
-            $presentation = new \Models\Presentation($this->document->getId());
+        if($this->file->getType() == 'presentation') {
+            $presentation = new \Models\Presentation($this->file->getId());
 
             foreach($presentation->getSlides() as $slide) {
                 $commentCtrl->removeCommentsByItem('slide', $slide->getId());
             }
 
-            // First slides before parent document!
-            $db->where('documentId', $db->escape($this->document->getId()));
+            // First slides before parent file!
+            $db->where('documentId', $db->escape($this->file->getId()));
             $db->delete('document_slides');
         }
 
-        // Remove the document itself
-        $db->where('id', $db->escape($this->document->getId()));
+        // Remove the file itself
+        $db->where('id', $db->escape($this->file->getId()));
         $result = $db->delete('documents');
 
         // Something went wrong?
         if($result === FALSE) {
-            throw new \Exception('Given Document ('. $this->document->getId() .') could not be removed from the CMS. The document is probably being used in a meeting.', 1);
+            throw new \Exception('Given File ('. $this->file->getId() .') could not be removed from the CMS. The file is probably being used in a meeting.', 1);
         } else {
             // Clear files after deletion
-            \Helper::removeDirAndContents($this->document->getPath());
+            \Helper::removeDirAndContents($this->file->getPath());
         }
 
         return $result;
@@ -83,16 +83,16 @@ class DocumentController {
     }
 
     /**
-     * Creates a new document
+     * Creates a new file
      *
      * @param array $parameters
      *              * string file - Base64 encoded file
-     *              * string title - The document title
-     *              * string type - Name of the type of document
+     *              * string title - The file title
+     *              * string type - Name of the type of file
      * @return integer or boolean FALSE on failure
      * @throws \Exception
      */
-    public function createDocument($parameters) {
+    public function createFile($parameters) {
         $result         = FALSE;
         // Prepare additional information
         $file           = \Helper::getBase64Content($parameters['file'], TRUE);
@@ -100,7 +100,7 @@ class DocumentController {
         $extension      = \Helper::getExtentionFromContentType($header);
         $db             = \Helper::getDB();
 
-        // Insert main document data into database to get a autoincrement ID
+        // Insert main file data into database to get a autoincrement ID
         $data           = array(
             'title'         => $db->escape($parameters['title']),
             'type'          => $db->escape($parameters['type']),
@@ -140,13 +140,13 @@ class DocumentController {
                     throw new \Exception('Failed to move file to storage', 6);
                 }
 
-                // Remove document from DB
+                // Remove file from DB
                 $db->where('id', $db->escape($fileId));
                 $db->delete('documents');
 
                 throw new \Exception('Failed to save file to temp storage', 6);
             } else {
-                throw new \Exception('Failed to insert document into database', 5);
+                throw new \Exception('Failed to insert file into database', 5);
             }
         }
 

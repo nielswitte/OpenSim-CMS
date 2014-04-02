@@ -4,8 +4,10 @@ namespace API\Modules;
 defined('EXEC') or die('Config not loaded');
 
 require_once dirname(__FILE__) .'/module.php';
+require_once dirname(__FILE__) .'/../models/file.php';
 require_once dirname(__FILE__) .'/../models/document.php';
-require_once dirname(__FILE__) .'/../controllers/documentController.php';
+require_once dirname(__FILE__) .'/../models/presentation.php';
+require_once dirname(__FILE__) .'/../controllers/fileController.php';
 
 /**
  * Implements the functions for presentations
@@ -27,7 +29,6 @@ class Document extends Module{
         $this->api = $api;
         $this->setName('document');
         $this->api->addModule($this->getName(), $this);
-
         $this->setRoutes();
     }
 
@@ -63,8 +64,8 @@ class Document extends Module{
         // Process results
         $data           = array();
         foreach($resutls as $result) {
-            $document       = new \Models\Document($result['id'], $result['type'], $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate'], $result['file']);
-            $data[]         = $this->getDocumentData($document, FALSE);
+            $file       = new \Models\File($result['id'], $result['type'], $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate'], $result['file']);
+            $data[]         = $this->getDocumentData($file, FALSE);
         }
         return $data;
     }
@@ -81,11 +82,31 @@ class Document extends Module{
         $results        = $db->rawQuery('SELECT * FROM documents WHERE LOWER(title) LIKE ? ORDER BY LOWER(title) ASC', $params);
         $data           = array();
         foreach($results as $result) {
-            $document   = new \Models\Document($result['id']);
-            $document->getInfoFromDatabase();
-            $data[]     = $this->getDocumentData($document, FALSE);
+            $file   = new \Models\File($result['id']);
+            $file->getInfoFromDatabase();
+            $data[]     = $this->getDocumentData($file, FALSE);
         }
         return $data;
+    }
+
+    /**
+     * Get document details for the given document
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getDocumentById($args) {
+        $file = new \Models\File($args[1]);
+        $file->getInfoFromDatabase();
+
+        // If the given document is a presentation, return it as a presentation
+        if($file->getType() == 'presentation') {
+            $presentation = new \Models\Presentation($file->getId(), 0, $file->getTitle(), $file->getOwnerId(), $file->getCreationDate(), $file->getModificationDate());
+            return $this->api->getModule('presentation')->getPresentationData($presentation, TRUE);
+        // Return it as a document
+        } else {
+            return $this->getDocumentData($file, TRUE);
+        }
     }
 
     /**
@@ -103,9 +124,9 @@ class Document extends Module{
             $data = is_array($presentation) ? $presentation['id'] : $data;
         // Process other files
         } else {
-            $documentCtrl   = new \Controllers\DocumentController();
-            if($documentCtrl->validateParametersCreate($input)) {
-                $data = $documentCtrl->createDocument($input);
+            $fileCtrl   = new \Controllers\FileController();
+            if($fileCtrl->validateParametersCreate($input)) {
+                $data = $fileCtrl->createFile($input);
             }
         }
 
@@ -119,42 +140,22 @@ class Document extends Module{
     }
 
     /**
-     * Get document details for the given document
-     *
-     * @param array $args
-     * @return array
-     */
-    public function getDocumentById($args) {
-        $document = new \Models\Document($args[1]);
-        $document->getInfoFromDatabase();
-
-        // If the given document is a presentation, return it as a presentation
-        if($document->getType() == 'presentation') {
-            $presentation = new \Models\Presentation($document->getId(), 0, $document->getTitle(), $document->getOwnerId(), $document->getCreationDate(), $document->getModificationDate());
-            return $this->api->getModule('presentation')->getPresentationData($presentation, TRUE);
-        // Return it as a document
-        } else {
-            return $this->getDocumentData($document, TRUE);
-        }
-    }
-
-    /**
      * Removes the given document from the CMS
      *
      * @param array $args
      * @return array
      */
     public function deleteDocumentById($args) {
-        $document     = new \Models\Document($args[1]);
-        $document->getInfoFromDatabase();
+        $file     = new \Models\File($args[1]);
+        $file->getInfoFromDatabase();
 
         // Only allow when the user has write access or wants to update his/her own documents
-        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $document->getOwnerId() != \Auth::getUser()->getId()) {
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $file->getOwnerId() != \Auth::getUser()->getId()) {
             throw new \Exception('You do not have permissions to update this user.', 6);
         }
 
-        $documentCtrl = new \Controllers\DocumentController($document);
-        $data         = $documentCtrl->removeDocument();
+        $fileCtrl = new \Controllers\FileController($file);
+        $data         = $fileCtrl->removeFile();
         // Format the result
         $result = array(
             'success'   => ($data !== FALSE ? TRUE : FALSE)
@@ -165,20 +166,20 @@ class Document extends Module{
     /**
      * Format the presentation data to the desired format
      *
-     * @param \Models\Document $document
+     * @param \Models\File $file
      * @param boolean $full - [Optional] Show all information about the presentation and slides
      * @return array
      */
-    public function getDocumentData(\Models\Document $document, $full = TRUE) {
+    public function getDocumentData(\Models\File $file, $full = TRUE) {
         $data = array(
-            'id'                => $document->getId(),
-            'type'              => $document->getType(),
-            'title'             => $document->getTitle(),
-            'ownerId'           => $document->getOwnerId(),
-            'creationDate'      => $document->getCreationDate(),
-            'modificationDate'  => $document->getModificationDate(),
-            'sourceFile'        => $document->getFile(),
-            'url'               => $document->getApiUrl()
+            'id'                => $file->getId(),
+            'type'              => $file->getType(),
+            'title'             => $file->getTitle(),
+            'ownerId'           => $file->getOwnerId(),
+            'creationDate'      => $file->getCreationDate(),
+            'modificationDate'  => $file->getModificationDate(),
+            'sourceFile'        => $file->getFile(),
+            'url'               => $file->getApiUrl()
         );
 
         return $data;
@@ -192,8 +193,8 @@ class Document extends Module{
      * @return array
      */
     public function deleteExpiredCache($args) {
-        $documentCtrl = new \Controllers\DocumentController(NULL);
-        $data         = $documentCtrl->removeExpiredCache();
+        $fileCtrl = new \Controllers\FileController(NULL);
+        $data         = $fileCtrl->removeExpiredCache();
 
         // Format the result
         $result = array(
@@ -211,13 +212,13 @@ class Document extends Module{
      * @throws \Exception
      */
     public function getDocumentImageById($args) {
-        $document = new \Models\Document($args[1]);
-        $document->getInfoFromDatabase();
-        if($document->getType() != 'image') {
+        $file = new \Models\File($args[1]);
+        $file->getInfoFromDatabase();
+        if($file->getType() != 'image') {
             throw new \Exception('Document with ID '+ $args[1] +' is not an image.');
         }
         require_once dirname(__FILE__) .'/../includes/class.Images.php';
-        $image = new \Image($document->getPath() . DS . $document->getId() .'.'. IMAGE_TYPE);
+        $image = new \Image($file->getPath() . DS . $file->getId() .'.'. IMAGE_TYPE);
         $image->display();
     }
 
@@ -227,8 +228,8 @@ class Document extends Module{
      * @param array $args
      */
     public function getDocumentSourceById($args) {
-        $document = new \Models\Document($args[1]);
-        $document->getInfoFromDatabase();
-        $document->getOriginalFile();
+        $file = new \Models\File($args[1]);
+        $file->getInfoFromDatabase();
+        $file->getOriginalFile();
     }
 }
