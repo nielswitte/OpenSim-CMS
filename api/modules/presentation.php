@@ -14,7 +14,7 @@ require_once dirname(__FILE__) .'/../controllers/presentationController.php';
  *
  * @author Niels Witte
  * @version 0.4
- * @date April 1st, 2014
+ * @date April 2nd, 2014
  * @since February 24th, 2014
  */
 class Presentation extends Module {
@@ -69,7 +69,7 @@ class Presentation extends Module {
         // Process results
         $data           = array();
         foreach($resutls as $result) {
-            $presentation   = new \Models\Presentation($result['id'], 0, $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate']);
+            $presentation   = new \Models\Presentation($result['id'], 0, $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate'], $result['file']);
             $data[]         = $this->getPresentationData($presentation, FALSE);
         }
         return $data;
@@ -127,11 +127,12 @@ class Presentation extends Module {
             $slides[] = $this->getSlideData($presentation, $slide, $full);
         }
 
-
         $data['slides']             = $slides;
         $data['slidesCount']        = $presentation->getNumberOfSlides();
         $data['creationDate']       = $presentation->getCreationDate();
         $data['modificationDate']   = $presentation->getModificationDate();
+        $data['sourceFile']         = $document->getFile();
+        $data['url']                = $document->getApiUrl();
 
         return $data;
     }
