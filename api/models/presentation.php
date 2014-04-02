@@ -3,7 +3,7 @@ namespace Models;
 
 defined('EXEC') or die('Config not loaded');
 
-require_once dirname(__FILE__) .'/document.php';
+require_once dirname(__FILE__) .'/file.php';
 
 /**
  * This class is the presentation model
@@ -30,8 +30,7 @@ class Presentation extends File {
      */
 	public function __construct($id, $slide = 0, $title = '', $ownerId = '', $creationDate = '', $modificationDate = '', $file = '') {
 		$this->currentSlide     = $slide;
-        $type                   = 'presentation';
-        parent::__construct($id, $type, $title, $ownerId, $creationDate, $modificationDate, $file);
+        parent::__construct($id, 'presentation', $title, $ownerId, $creationDate, $modificationDate, $file);
 	}
 
     /**
@@ -53,7 +52,7 @@ class Presentation extends File {
             $db = \Helper::getDB();
             $db->where('documentId', $db->escape($this->getId()));
             $db->orderBy('s.id', 'asc');
-            $db->join('comments c', 'c.itemId = s.id', 'LEFT');
+            $db->join('comments c', 'c.itemId = s.id AND c.type = "slide"', 'LEFT');
             $db->groupBy('s.id');
             $results = $db->get('document_slides s', NULL, '*, count(c.id) as commentsCount, s.id as id');
 

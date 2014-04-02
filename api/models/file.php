@@ -13,7 +13,7 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * @date April 2nd, 2014
  * @since April 2nd, 2014
  */
-class File implements SimpleModel  {
+class File implements SimpleModel {
     /**
      * Document ID
      * @var integer
@@ -54,7 +54,7 @@ class File implements SimpleModel  {
      * Constructs a new document with the given id and optional the given slide
      *
      * @param integer $id - ID of this presentation
-     * @param integer $type - [Optional] document type
+     * @param string $type - [Optional] document type
      * @param string $title - [Optional] Title of document
      * @param integer $ownerId - [Optional] ID of the owner
      * @param string $creationDate - [Optional] Creation date time, YYYY-MM-DD HH:mm:ss
@@ -92,7 +92,7 @@ class File implements SimpleModel  {
             throw new \Exception('Document not found', 5);
         }
     }
-    
+
     /**
      * Returns the title from this document
      *

@@ -93,6 +93,31 @@ CREATE TABLE IF NOT EXISTS `documents` (
 -- Data exporteren was gedeselecteerd
 
 
+-- Structuur van  tabel OpenSim-CMS.document_pages wordt geschreven
+CREATE TABLE IF NOT EXISTS `document_pages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `documentId` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `FK_document_pages_documents` (`documentId`),
+  CONSTRAINT `FK_document_pages_documents` FOREIGN KEY (`documentId`) REFERENCES `documents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.document_pages_cache wordt geschreven
+CREATE TABLE IF NOT EXISTS `document_pages_cache` (
+  `pageId` int(11) NOT NULL,
+  `cacheId` int(11) NOT NULL,
+  PRIMARY KEY (`pageId`,`cacheId`),
+  KEY `FK_document_pages_cache_cached_assets` (`cacheId`),
+  CONSTRAINT `FK_document_pages_cache_document_pages` FOREIGN KEY (`pageId`) REFERENCES `document_pages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_document_pages_cache_cached_assets` FOREIGN KEY (`cacheId`) REFERENCES `cached_assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Data exporteren was gedeselecteerd
+
+
 -- Structuur van  tabel OpenSim-CMS.document_slides wordt geschreven
 CREATE TABLE IF NOT EXISTS `document_slides` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
