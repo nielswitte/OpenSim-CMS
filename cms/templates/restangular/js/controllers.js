@@ -448,6 +448,7 @@ angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$
                         sessionStorage.chatPermission          = userResponse.permissions.chat;
                         sessionStorage.commentPermission       = userResponse.permissions.comment;
                         sessionStorage.documentPermission      = userResponse.permissions.document;
+                        sessionStorage.filePermission          = userResponse.permissions.file;
                         sessionStorage.gridPermission          = userResponse.permissions.grid;
                         sessionStorage.meetingPermission       = userResponse.permissions.meeting;
                         sessionStorage.meetingroomPermission   = userResponse.permissions.meetingroom;
@@ -566,9 +567,9 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
         jQuery('#loading').show();
 
         // Get a list with documents
-        RestangularCache.all('documents').getList().then(function(documentsResponse) {
+        RestangularCache.all('files').getList().then(function(documentsResponse) {
             $scope.documentsList = documentsResponse;
-            Page.setTitle('Documents');
+            Page.setTitle('Files');
             requestDocumentsUrl = documentsResponse.getRequestedUrl();
 
             // Remove loading screen
@@ -600,11 +601,11 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
             // Show loading screen
             jQuery('#loading').show();
 
-            Restangular.all('document').post($scope.document).then(function(resp) {
+            Restangular.all('file').post($scope.document).then(function(resp) {
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                 } else {
-                    $alert({title: 'Document created!', content: $sce.trustAsHtml('The document: '+ $scope.document.title + ' has been created with ID: '+ resp.id +'.'), type: 'success'});
+                    $alert({title: 'File created!', content: $sce.trustAsHtml('The file: '+ $scope.document.title + ' has been created with ID: '+ resp.id +'.'), type: 'success'});
                     $scope.document.id                  = resp.id;
                     $scope.document.ownerId             = sessionStorage.id;
                     $scope.document.creationDate        = new moment().format('YYYY-MM-DD HH:mm:ss');
@@ -652,7 +653,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
             jQuery('#loading').show();
 
             // Remove document by ID
-            Restangular.one('document', id).remove().then(function(resp) {
+            Restangular.one('file', id).remove().then(function(resp) {
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                 } else {
@@ -726,31 +727,10 @@ angularRest.controller('documentController', ['Restangular', 'RestangularCache',
         };
 
         // Get document from API
-        RestangularCache.one('document', $routeParams.documentId).get().then(function(documentResponse) {
+        RestangularCache.one('file', $routeParams.documentId).get().then(function(documentResponse) {
             $scope.document = documentResponse;
             $scope.token    = sessionStorage.token;
             Page.setTitle(documentResponse.title);
-
-            // Only show comments when document is not a presentation
-            if(documentResponse.type != 'presentation') {
-                // List with comments
-                $scope.comments = {
-                    comments: [],
-                    commentCount: 0
-                };
-
-                // Load comments
-                RestangularCache.all('comments').one('document', $routeParams.documentId).get().then(function(commentResponse) {
-                    $scope.comments = commentResponse;
-                });
-
-                // Show comments and set the comment Type to: meeting and the id of the meeting
-                $scope.showComments = function() {
-                    $scope.commentType      = 'document';
-                    $scope.commentItemId    = $routeParams.meetingId;
-                    return partial_path +'/comment/commentContainer.html';
-                };
-            }
 
             // Init select2
             jQuery('#inputOwner').select2({
@@ -1131,7 +1111,7 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
         // Search for the given documents
         $scope.getDocumentByTitle = function($viewValue) {
             if($viewValue != null && $viewValue.length >= 3) {
-                var results = RestangularCache.one('documents', $viewValue).get().then(function(documentsResponse) {
+                var results = RestangularCache.one('files', $viewValue).get().then(function(documentsResponse) {
                     documentSearchResults = documentsResponse;
                     return documentsResponse;
                 });
@@ -1480,7 +1460,7 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
         // Search for the given documents
         $scope.getDocumentByTitle = function($viewValue) {
             if($viewValue != null && $viewValue.length >= 3) {
-                var results = RestangularCache.one('documents', $viewValue).get().then(function(documentsResponse) {
+                var results = RestangularCache.one('files', $viewValue).get().then(function(documentsResponse) {
                     documentSearchResults = documentsResponse;
                     return documentsResponse;
                 });

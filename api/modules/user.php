@@ -45,7 +45,7 @@ class User extends Module {
         $this->api->addRoute("/^\/user\/(\d+)\/?$/",                                    'getUserById',              $this, 'GET',    \Auth::READ);     // Get a user by ID
         $this->api->addRoute("/^\/user\/(\d+)\/?$/",                                    'updateUserById',           $this, 'PUT',    \Auth::READ);     // Update the given user
         $this->api->addRoute("/^\/user\/(\d+)\/?$/",                                    'deleteUserById',           $this, 'DELETE', \Auth::WRITE);    // Delete the given user
-        $this->api->addRoute("/^\/user\/(\d+)\/documents\/?$/",                         'getUserDocumentsById',     $this, 'GET',    \Auth::READ);     // Load all documents for the user
+        $this->api->addRoute("/^\/user\/(\d+)\/files\/?$/",                             'getUserFilesById',         $this, 'GET',    \Auth::READ);     // Load all files for the user
         $this->api->addRoute("/^\/user\/(\d+)\/password\/?$/",                          'updateUserPasswordById',   $this, 'PUT',    \Auth::READ);     // Updates the user's password
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/teleport\/?$/", 'teleportAvatarByUuid',     $this, 'PUT',    \Auth::READ);     // Teleports a user
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'getUserByAvatar',          $this, 'GET',    \Auth::READ);     // Gets an user by the avatar of this grid
@@ -53,7 +53,7 @@ class User extends Module {
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'confirmAvatar',            $this, 'PUT',    \Auth::READ);     // Confirms the avatar for the authenticated user
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'unlinkAvatar',             $this, 'DELETE', \Auth::READ);     // Removes the avatar for the authenticated user's avatar list
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/?$/",                            'createAvatar',             $this, 'POST',   \Auth::WRITE);    // Create an avatar
-        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/documents\/?$/",'getUserDocumentsByAvatar', $this, 'GET',    \AUTH::READ);     // Load all documents for the user accociated with the avatar UUID on the given grid
+        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/files\/?$/",    'getUserFilesByAvatar',     $this, 'GET',    \AUTH::READ);     // Load all files for the user accociated with the avatar UUID on the given grid
     }
 
     /**
@@ -456,34 +456,34 @@ class User extends Module {
      * @param array $args
      * @return array
      */
-    public function getUserDocumentsById($args) {
+    public function getUserFilesById($args) {
         $data = array();
         $db = \Helper::getDB();
         $db->where('ownerId', $db->escape($args[1]));
         $documents = $db->get('documents');
         foreach($documents as $document) {
-            $document = new \Models\Document($document['id'], $document['type'], $document['title'], $document['ownerId'], $document['creationDate'], $document['modificationDate'], $document['file']);
-            $data[] = $this->api->getModule('document')->getDocumentData($document);
+            $file   = new \Models\File($document['id'], $document['type'], $document['title'], $document['ownerId'], $document['creationDate'], $document['modificationDate'], $document['file']);
+            $data[] = $this->api->getModule('file')->getFileData($file);
         }
 
         return $data;
     }
 
     /**
-     * Gets a list with documents for the user attached to the given avatar on the given grid
+     * Gets a list with files for the user attached to the given avatar on the given grid
      *
      * @param array $args
      * @return array
      * @throws \Exception
      */
-    public function getUserDocumentsByAvatar($args) {
+    public function getUserFilesByAvatar($args) {
         if(\Helper::isValidUuid($args[2])) {
             $db = \Helper::getDB();
             $db->where('uuid', $db->escape($args[2]));
             $db->where('gridId', $db->escape($args[1]));
             $avatarQuery = $db->getOne('avatars');
             if($avatarQuery) {
-                return $this->getUserDocumentsById(array('', $avatarQuery['userId']));
+                return $this->getUserFilesById(array('', $avatarQuery['userId']));
             } else {
                 throw new \Exception('Avatar not found on this Grid', 2);
             }

@@ -190,6 +190,7 @@ class User implements SimpleModel {
                 'chat'              => (int) \Auth::NONE, // 0
                 'comment'           => (int) \Auth::NONE, // 0
                 'document'          => (int) \Auth::NONE, // 0
+                'file'              => (int) \Auth::NONE, // 0
                 'grid'              => (int) \Auth::NONE, // 0
                 'meeting'           => (int) \Auth::NONE, // 0
                 'meetingroom'       => (int) \Auth::NONE, // 0
@@ -209,6 +210,7 @@ class User implements SimpleModel {
                     'comment'           => $result['comment'],
                     'document'          => $result['document'],
                     'grid'              => $result['grid'],
+                    'file'              => $result['file'],
                     'meeting'           => $result['meeting'],
                     'meetingroom'       => $result['meetingroom'],
                     'presentation'      => $result['presentation'],

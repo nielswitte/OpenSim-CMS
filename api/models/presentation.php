@@ -34,7 +34,7 @@ class Presentation extends File {
 	}
 
     /**
-     * Returns the slide number, starts at 0
+     * Returns the slide number, starts at 1
      *
      * @return integer
      */

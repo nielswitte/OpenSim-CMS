@@ -36,14 +36,14 @@ class Document extends File {
      * @param string $modificationDate - [Optional] Date of last modification, YYYY-MM-DD HH:mm:ss
      * @param string $file - [Optional] The file name and extension of this source file
      */
-	public function __construct($id, $currentPage = 1, $title = '', $ownerId = '', $creationDate = '', $modificationDate = '', $file = '') {
-        $this->currentPage = $page;
+	public function __construct($id, $currentPage = 0, $title = '', $ownerId = '', $creationDate = '', $modificationDate = '', $file = '') {
+        $this->currentPage = $currentPage;
 
         parent::__construct($id, 'document', $title, $ownerId, $creationDate, $modificationDate, $file);
     }
 
     /**
-     * Returns the page number, starts at 0
+     * Returns the page number, starts at 1
      *
      * @return integer
      */
