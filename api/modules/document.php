@@ -11,8 +11,8 @@ require_once dirname(__FILE__) .'/../controllers/documentController.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.3
- * @date April 1st, 2014
+ * @version 0.4
+ * @date April 2nd, 2014
  * @since March 3rd, 2014
  */
 class Document extends Module{
@@ -35,13 +35,14 @@ class Document extends Module{
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/^\/documents\/?$/",                         'getDocuments',         $this, 'GET',    \Auth::READ);    // Get list with 50 documents
-        $this->api->addRoute("/^\/documents\/(\d+)\/?$/",                  'getDocuments',         $this, 'GET',    \Auth::READ);    // Get list with 50 documents starting at the given offset
-        $this->api->addRoute("/^\/documents\/([a-zA-Z0-9-_ ]{3,}+)\/?$/",  'getDocumentsByTitle',  $this, 'GET',    \Auth::READ);    // Search for documents by title
-        $this->api->addRoute("/^\/document\/?$/",                          'createDocument',       $this, 'POST',   \Auth::EXECUTE); // Create a document
-        $this->api->addRoute("/^\/document\/(\d+)\/?$/",                   'getDocumentById',      $this, 'GET',    \Auth::READ);    // Select specific document
-        $this->api->addRoute("/^\/document\/(\d+)\/?$/",                   'deleteDocumentById',   $this, 'DELETE', \Auth::EXECUTE); // Delete specific document
-        $this->api->addRoute("/^\/documents\/cache\/?$/",                  'deleteExpiredCache',   $this, 'DELETE', \Auth::EXECUTE); // Removes all expired cached assets
+        $this->api->addRoute("/^\/documents\/?$/",                         'getDocuments',          $this, 'GET',       \Auth::READ);      // Get list with 50 documents
+        $this->api->addRoute("/^\/documents\/(\d+)\/?$/",                  'getDocuments',          $this, 'GET',       \Auth::READ);      // Get list with 50 documents starting at the given offset
+        $this->api->addRoute("/^\/documents\/([a-zA-Z0-9-_ ]{3,}+)\/?$/",  'getDocumentsByTitle',   $this, 'GET',       \Auth::READ);      // Search for documents by title
+        $this->api->addRoute("/^\/document\/?$/",                          'createDocument',        $this, 'POST',      \Auth::EXECUTE);   // Create a document
+        $this->api->addRoute("/^\/document\/(\d+)\/?$/",                   'getDocumentById',       $this, 'GET',       \Auth::READ);      // Select specific document
+        $this->api->addRoute("/^\/document\/(\d+)\/?$/",                   'deleteDocumentById',    $this, 'DELETE',    \Auth::EXECUTE);   // Delete specific document
+        $this->api->addRoute("/^\/documents\/cache\/?$/",                  'deleteExpiredCache',    $this, 'DELETE',    \Auth::EXECUTE);   // Removes all expired cached assets
+        $this->api->addRoute("/^\/image\/(\d+)\/?$/",                      'getImageById',          $this, 'GET',       \AUTH::READ);      // Retrieves an image document type
     }
 
 
@@ -62,7 +63,7 @@ class Document extends Module{
         // Process results
         $data           = array();
         foreach($resutls as $result) {
-            $document       = new \Models\Document($result['id'], $result['type'], $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate']);
+            $document       = new \Models\Document($result['id'], $result['type'], $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate'], $result['file']);
             $data[]         = $this->getDocumentData($document, FALSE);
         }
         return $data;
@@ -169,13 +170,16 @@ class Document extends Module{
      * @return array
      */
     public function getDocumentData(\Models\Document $document, $full = TRUE) {
-        $data = array();
-        $data['id']                 = $document->getId();
-        $data['type']               = $document->getType();
-        $data['title']              = $document->getTitle();
-        $data['ownerId']            = $document->getOwnerId();
-        $data['creationDate']       = $document->getCreationDate();
-        $data['modificationDate']   = $document->getModificationDate();
+        $data = array(
+            'id'                => $document->getId(),
+            'type'              => $document->getType(),
+            'title'             => $document->getTitle(),
+            'ownerId'           => $document->getOwnerId(),
+            'creationDate'      => $document->getCreationDate(),
+            'modificationDate'  => $document->getModificationDate(),
+            'sourceFile'        => $document->getFile(),
+            'url'               => $document->getApiUrl()
+        );
 
         return $data;
     }
@@ -198,5 +202,9 @@ class Document extends Module{
         );
 
         return $result;
+    }
+
+    public function getImageById($args) {
+        return '';
     }
 }
