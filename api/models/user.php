@@ -73,24 +73,6 @@ class User implements SimpleModel {
     }
 
     /**
-     * Gets the user's presentations from the database
-     */
-    public function getPresentationsFromDatabase() {
-        $db = \Helper::getDB();
-        // Get user's presentations
-        $db->where("ownerId", $db->escape($this->getId()));
-        $db->where('type', $db->escape('presentation'));
-        $presentations = $db->get("documents");
-
-        // Convert presentation Ids to array
-        if(!empty($presentations)) {
-            foreach($presentations as $presentation) {
-                $this->presentationIds[] = $presentation['id'];
-            }
-        }
-    }
-
-    /**
      * Gets the user's avatars from the database
      *
      * @param boolean $full - Also get information from Grid if possible
@@ -157,15 +139,6 @@ class User implements SimpleModel {
      */
     public function getEmail() {
         return $this->email;
-    }
-
-    /**
-     * Returns an array with presentation IDs of the user
-     *
-     * @return array
-     */
-    public function getPresentationIds() {
-        return $this->presentationIds;
     }
 
     /**

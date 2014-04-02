@@ -124,11 +124,6 @@ Example of output
     "firstName": "Test",
     "lastName": "User",
     "email": "testuser@email.com",
-    "presentationIds": [
-        "1",
-        "5",
-        "8"
-    ],
     "permissions" : {
         "auth": 7,
         "document": 5,
@@ -439,6 +434,21 @@ Search for a document by title, at least 3 characters.
 ```http
 GET /api/documents/<SEARCH>/ HTTP/1.1
 ```
+
+### Owned by a specific user
+It is possible to retrieve a list with documents owned by a specific user. This can be done by
+using the user's ID:
+
+```http
+GET /api/user/<USER-ID>/documents/ HTTP/1.1
+```
+
+Or by using an UUID of an avatar linked to the user.
+
+```http
+GET /api/grid/<GRID-ID>/avatar/<AVATAR-UUID>/documents/ HTTP/1.1
+```
+
 ### Clear the cache
 Removes all expired items from the cache. The functions returns the number of removed
 cache items.

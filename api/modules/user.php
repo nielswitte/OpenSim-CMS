@@ -38,20 +38,22 @@ class User extends Module {
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/^\/users\/?$/",                                         'getUsers',               $this, 'GET',    \Auth::READ);     // Gets a list of all users
-        $this->api->addRoute("/^\/users\/(\d+)\/?$/",                                  'getUsers',               $this, 'GET',    \Auth::READ);     // Gets a list of all users starting at the given offset
-        $this->api->addRoute("/^\/users\/([a-zA-Z0-9-_]{3,}+)\/?$/",                   'getUsersByUsername',     $this, 'GET',    \Auth::READ);     // Gets a list of all users with usernames matching the search of atleast 3 characters
-        $this->api->addRoute("/^\/user\/?$/",                                          'createUser',             $this, 'POST',   \Auth::WRITE);    // Create a new CMS user
-        $this->api->addRoute("/^\/user\/(\d+)\/?$/",                                   'getUserById',            $this, 'GET',    \Auth::READ);     // Get a user by ID
-        $this->api->addRoute("/^\/user\/(\d+)\/?$/",                                   'updateUserById',         $this, 'PUT',    \Auth::READ);     // Update the given user
-        $this->api->addRoute("/^\/user\/(\d+)\/?$/",                                   'deleteUserById',         $this, 'DELETE', \Auth::WRITE);    // Delete the given user
-        $this->api->addRoute("/^\/user\/(\d+)\/password\/?$/",                         'updateUserPasswordById', $this, 'PUT',    \Auth::READ);     // Updates the user's password
-        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/teleport\/?$/",'teleportAvatarByUuid',   $this, 'PUT',    \Auth::READ);     // Teleports a user
-        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",          'getUserByAvatar',        $this, 'GET',    \Auth::READ);     // Gets an user by the avatar of this grid
-        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",          'linkAvatarToUser',       $this, 'POST',   \Auth::EXECUTE);  // Add this avatar to the user's avatar list
-        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",          'confirmAvatar',          $this, 'PUT',    \Auth::READ);     // Confirms the avatar for the authenticated user
-        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",          'unlinkAvatar',           $this, 'DELETE', \Auth::READ);     // Removes the avatar for the authenticated user's avatar list
-        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/?$/",                           'createAvatar',           $this, 'POST',   \Auth::WRITE);    // Create an avatar
+        $this->api->addRoute("/^\/users\/?$/",                                          'getUsers',                 $this, 'GET',    \Auth::READ);     // Gets a list of all users
+        $this->api->addRoute("/^\/users\/(\d+)\/?$/",                                   'getUsers',                 $this, 'GET',    \Auth::READ);     // Gets a list of all users starting at the given offset
+        $this->api->addRoute("/^\/users\/([a-zA-Z0-9-_]{3,}+)\/?$/",                    'getUsersByUsername',       $this, 'GET',    \Auth::READ);     // Gets a list of all users with usernames matching the search of atleast 3 characters
+        $this->api->addRoute("/^\/user\/?$/",                                           'createUser',               $this, 'POST',   \Auth::WRITE);    // Create a new CMS user
+        $this->api->addRoute("/^\/user\/(\d+)\/?$/",                                    'getUserById',              $this, 'GET',    \Auth::READ);     // Get a user by ID
+        $this->api->addRoute("/^\/user\/(\d+)\/?$/",                                    'updateUserById',           $this, 'PUT',    \Auth::READ);     // Update the given user
+        $this->api->addRoute("/^\/user\/(\d+)\/?$/",                                    'deleteUserById',           $this, 'DELETE', \Auth::WRITE);    // Delete the given user
+        $this->api->addRoute("/^\/user\/(\d+)\/documents\/?$/",                         'getUserDocumentsById',     $this, 'GET',    \Auth::READ);     // Load all documents for the user
+        $this->api->addRoute("/^\/user\/(\d+)\/password\/?$/",                          'updateUserPasswordById',   $this, 'PUT',    \Auth::READ);     // Updates the user's password
+        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/teleport\/?$/", 'teleportAvatarByUuid',     $this, 'PUT',    \Auth::READ);     // Teleports a user
+        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'getUserByAvatar',          $this, 'GET',    \Auth::READ);     // Gets an user by the avatar of this grid
+        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'linkAvatarToUser',         $this, 'POST',   \Auth::EXECUTE);  // Add this avatar to the user's avatar list
+        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'confirmAvatar',            $this, 'PUT',    \Auth::READ);     // Confirms the avatar for the authenticated user
+        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'unlinkAvatar',             $this, 'DELETE', \Auth::READ);     // Removes the avatar for the authenticated user's avatar list
+        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/?$/",                            'createAvatar',             $this, 'POST',   \Auth::WRITE);    // Create an avatar
+        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/documents\/?$/",'getUserDocumentsByAvatar', $this, 'GET',    \AUTH::READ);     // Load all documents for the user accociated with the avatar UUID on the given grid
     }
 
     /**
@@ -175,7 +177,7 @@ class User extends Module {
         $db             = \Helper::getDB();
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
-        // Get 50 presentations from the given offset
+        // Get 50 users from the given offset
         $db->orderBy('LOWER(username)', 'ASC');
         $resutls        = $db->get('users', array($args[1], 50));
         // Process results
@@ -216,7 +218,6 @@ class User extends Module {
         $user = new \Models\User($args[1]);
         $user->getInfoFromDatabase();
         $user->getAvatarsFromDatabase();
-        $user->getPresentationsFromDatabase();
         return $this->getUserData($user, TRUE);
     }
 
@@ -239,7 +240,6 @@ class User extends Module {
                 $user = new \Models\User($avatarQuery['userId']);
                 $user->getInfoFromDatabase();
                 $user->getAvatarsFromDatabase();
-                $user->getPresentationsFromDatabase();
                 $data = $this->getUserData($user, TRUE);
             } else {
                 throw new \Exception('Avatar not found on this Grid', 2);
@@ -265,7 +265,6 @@ class User extends Module {
         $data['email']              = $user->getEmail();
 
         if($full) {
-            $data['presentationIds']    = $user->getPresentationIds();
             $data['permissions']        = $user->getRights();
         }
         if($full) {
@@ -449,5 +448,47 @@ class User extends Module {
             $result = $data;
         }
         return $result;
+    }
+
+    /**
+     * Returns a formatted list with documents owned by this user.
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getUserDocumentsById($args) {
+        $data = array();
+        $db = \Helper::getDB();
+        $db->where('ownerId', $db->escape($args[1]));
+        $documents = $db->get('documents');
+        foreach($documents as $document) {
+            $document = new \Models\Document($document['id'], $document['type'], $document['title'], $document['ownerId'], $document['creationDate'], $document['modificationDate'], $document['file']);
+            $data[] = $this->api->getModule('document')->getDocumentData($document);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Gets a list with documents for the user attached to the given avatar on the given grid
+     *
+     * @param array $args
+     * @return array
+     * @throws \Exception
+     */
+    public function getUserDocumentsByAvatar($args) {
+        if(\Helper::isValidUuid($args[2])) {
+            $db = \Helper::getDB();
+            $db->where('uuid', $db->escape($args[2]));
+            $db->where('gridId', $db->escape($args[1]));
+            $avatarQuery = $db->getOne('avatars');
+            if($avatarQuery) {
+                return $this->getUserDocumentsById(array('', $avatarQuery['userId']));
+            } else {
+                throw new \Exception('Avatar not found on this Grid', 2);
+            }
+        } else {
+            throw new \Exception('Invalid UUID provided', 1);
+        }
     }
 }

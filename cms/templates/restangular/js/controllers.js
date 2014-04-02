@@ -793,7 +793,7 @@ angularRest.controller('documentController', ['Restangular', 'RestangularCache',
         // Loads the image when document details have loaded
         $scope.getDocumentImage = function() {
             if($scope.document !== undefined && $scope.document.type == 'image') {
-                return $scope.document.url +'/image/?token='+ sessionStorage.token;
+                return $scope.document.url +'image/?token='+ sessionStorage.token;
             } else {
                 return '';
             }
