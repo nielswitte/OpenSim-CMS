@@ -323,6 +323,8 @@ class Helper {
                 if($resize->getWidth() > $width || $resize->getHeight() > $height) {
                     $resize->resize($width, $height, 'fit');
                     $resize->save($destinationFile, $destinationDir, $destinationExt);
+                    // Now use destination as source, since it is resized
+                    $source = $destination;
                 }
                 unset($resize);
 
