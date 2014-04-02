@@ -26,11 +26,12 @@ class Presentation extends Document {
      * @param integer $ownerId - [optional] ID of the owner
      * @param datetime $creationDate - [optional] Creation date time, yyyy-mm-dd hh:mm:ss
      * @param datetime $modificationDate - [optional] Date of last modification, yyyy-mm-dd hh:mm:ss
+     * @param string $file - [Optional] The file name and extension of this source file
      */
-	public function __construct($id, $slide = 0, $title = '', $ownerId = '', $creationDate = '', $modificationDate = '') {
+	public function __construct($id, $slide = 0, $title = '', $ownerId = '', $creationDate = '', $modificationDate = '', $file = '') {
 		$this->currentSlide     = $slide;
         $type                   = 'presentation';
-        parent::__construct($id, $type, $title, $ownerId, $creationDate, $modificationDate);
+        parent::__construct($id, $type, $title, $ownerId, $creationDate, $modificationDate, $file);
 	}
 
     /**
