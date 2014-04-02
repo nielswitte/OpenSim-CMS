@@ -439,6 +439,9 @@ Search for a document by title, at least 3 characters.
 ```http
 GET /api/documents/<SEARCH>/ HTTP/1.1
 ```
+### Clear the cache
+Removes all expired items from the cache. The functions returns the number of removed
+cache items.
 
 ```http
 DELETE /api/documents/cache/ HTTP/1.1
