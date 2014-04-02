@@ -4,3 +4,11 @@
     Options -MultiViews
     RewriteRule ^(.*)$ index.php?_url=/$1 [QSA,L]
 </IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    # Default for files 1 hour after access
+    ExpiresDefault "access plus 1 hour"
+    # 5 seconds after access for json
+    ExpiresByType application/json "A5"
+</IfModule>

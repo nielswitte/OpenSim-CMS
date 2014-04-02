@@ -14,6 +14,10 @@ clone this repository in your `www` directory. For example: `/var/www/`. Go to t
 Copy `config.php.example` and rename it to `config.php` in `api` and `cms` directories . Change the values in `config.php` to the values for your installation and setup your database
 by importing the `database.sql` file in the `assets` directory.
 
+### Apache
+Apache requires `mod_rewrite` and optional is `mod_expires`.
+
+### OpenSim
 OpenSim needs to be configured with the following settings:
 
 For loading dynamic textures:

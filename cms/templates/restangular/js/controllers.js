@@ -1645,7 +1645,6 @@ angularRest.controller('slideController', ['RestangularCache', 'Restangular', '$
             commentCount: 0
         };
 
-
         // Get the slide details
         RestangularCache.one('presentation', $routeParams.documentId).one('slide', $routeParams.slideId).get().then(function(slideResponse) {
             $scope.slide = slideResponse;

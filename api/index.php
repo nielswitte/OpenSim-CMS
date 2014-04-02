@@ -1,13 +1,6 @@
 <?php
 namespace API;
 
-// Default headers to disable caching
-header("Expires: ". gmdate("D, d M Y H:i:s") ." GMT");
-header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
-header("Pragma: no-cache");
-
 require_once dirname(__FILE__) .'/config.php';
 require_once dirname(__FILE__) .'/includes/class.Auth.php';
 require_once dirname(__FILE__) .'/api.php';
@@ -25,8 +18,8 @@ require_once dirname(__FILE__) .'/modules/user.php';
  * This class is catches the API calls and searches for the matching function
  *
  * @author Niels Witte
- * @version 0.5
- * @date March 28th, 2014
+ * @version 0.6
+ * @date April 2nd, 2014
  * @since February 10th, 2014
  */
 
@@ -85,6 +78,7 @@ $headers = getallheaders();
 
 // Any result to parse?
 if($result != '') {
+    // Content is JSON
     header('Content-Type: application/json');
 
     // Output to human readable or compact fast parsable code?
