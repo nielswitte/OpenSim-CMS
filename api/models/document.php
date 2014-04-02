@@ -10,35 +10,66 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class is the presentation model
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 1st, 2014
+ * @version 0.3
+ * @date April 2nd, 2014
  * @since February 10th, 2014
  */
 class Document implements SimpleModel {
-	private $id;
+	/**
+     * Document ID
+     * @var integer
+     */
+    private $id;
+    /**
+     * Title of document
+     * @var string
+     */
     private $title;
+    /**
+     * Creation date time, YYYY-MM-DD HH:mm:ss
+     * @var string
+     */
     private $creationDate;
+    /**
+     * Date of last modification, YYYY-MM-DD HH:mm:ss
+     * @var string
+     */
     private $modificationDate;
+    /**
+     * The id of the owner
+     * @var integer
+     */
     private $ownerId;
+    /**
+     * Type of document
+     * @var string
+     */
     private $type;
+    /**
+     * Document file type (extension)
+     * @var string
+     */
+    private $fileType;
 
     /**
      * Constructs a new document with the given id and optional the given slide
      *
      * @param integer $id - ID of this presentation
-     * @param integer $type - [optional] document type
-     * @param string $title - [optional] Title of document
-     * @param integer $ownerId - [optional] ID of the owner
-     * @param datetime $creationDate - [optional] Creation date time, yyyy-mm-dd hh:mm:ss
-     * @param datetime $modificationDate - [optional] Date of last modification, yyyy-mm-dd hh:mm:ss
+     * @param integer $type - [Optional] document type
+     * @param string $title - [Optional] Title of document
+     * @param integer $ownerId - [Optional] ID of the owner
+     * @param string $creationDate - [Optional] Creation date time, YYYY-MM-DD HH:mm:ss
+     * @param string $modificationDate - [Optional] Date of last modification, YYYY-MM-DD HH:mm:ss
+     * @param string $fileType - [Optional] The file extension of this file
      */
-	public function __construct($id, $type = '', $title = '', $ownerId = '', $creationDate = '', $modificationDate = '') {
+	public function __construct($id, $type = '', $title = '', $ownerId = '', $creationDate = '', $modificationDate = '', $fileType = '') {
 		$this->id               = $id;
         $this->type             = $type;
         $this->title            = $title;
         $this->creationDate     = $creationDate;
         $this->modificationDate = $modificationDate;
         $this->ownerId          = $ownerId;
+        $this->fileType         = $fileType;
 	}
 
     /**
@@ -57,6 +88,7 @@ class Document implements SimpleModel {
             $this->creationDate     = $result['creationDate'];
             $this->modificationDate = $result['modificationDate'];
             $this->ownerId          = $result['ownerId'];
+            $this->fileType         = $result['fileType'];
         } else {
             throw new \Exception('Document not found', 5);
         }
@@ -98,8 +130,22 @@ class Document implements SimpleModel {
         return FILES_LOCATION . DS . $this->getType() . DS . $this->getId();
     }
 
+    /**
+     * Returns the type of document
+     *
+     * @return string
+     */
     public function getType() {
         return $this->type;
+    }
+
+    /**
+     * Returns the file type (extension) for this document
+     *
+     * @return string
+     */
+    public function getFileType() {
+        return $this->fileType;
     }
 
     /**
