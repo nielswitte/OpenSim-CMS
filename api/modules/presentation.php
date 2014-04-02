@@ -117,22 +117,12 @@ class Presentation extends Module {
      * @return array
      */
     public function getPresentationData(\Models\Presentation $presentation, $full = TRUE) {
-        $data = array();
-        $data['id']                 = $presentation->getId();
-        $data['type']               = 'presentation';
-        $data['title']              = $presentation->getTitle();
-        $data['ownerId']            = $presentation->getOwnerId();
+        $data       = $this->api->getModule('document')->getDocumentData($presentation);
         $slides     = array();
         foreach($presentation->getSlides() as $slide) {
             $slides[] = $this->getSlideData($presentation, $slide, $full);
         }
-
         $data['slides']             = $slides;
-        $data['slidesCount']        = $presentation->getNumberOfSlides();
-        $data['creationDate']       = $presentation->getCreationDate();
-        $data['modificationDate']   = $presentation->getModificationDate();
-        $data['sourceFile']         = $document->getFile();
-        $data['url']                = $document->getApiUrl();
 
         return $data;
     }
