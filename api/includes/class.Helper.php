@@ -6,7 +6,7 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author Niels Witte
  * @version 0.2
- * @date April 1st, 2014
+ * @date April 2nd, 2014
  * @since February 12th, 2014
  */
 class Helper {
@@ -206,11 +206,22 @@ class Helper {
      * @param string $filename - Filename and extension
      * @param string $location - File location
      * @param string $data - Data to store in file
-     * @return string full path to file or boolean when failed
+     * @return string - full path to file or boolean when failed
      */
     public static function saveFile($filename, $location, $data) {
         $filepath = $location .DS. $filename;
         return @file_put_contents($filepath, $data) !== FALSE ? $filepath : FALSE;
+    }
+
+    /**
+     * Moves the source file to the target file
+     *
+     * @param string $source - File path, name and extension of source
+     * @param string $destination - File path, name and extension of target
+     * @return boolean
+     */
+    public static function moveFile($source, $destination) {
+        return rename($source, $destination);
     }
 
     /**
