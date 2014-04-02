@@ -444,6 +444,7 @@ GET /api/documents/<SEARCH>/ HTTP/1.1
 DELETE /api/documents/cache/ HTTP/1.1
 ```
 
+### Get a single document
 ```http
 GET /api/document/<DOCUMENT-ID>/ HTTP/1.1
 ```
@@ -464,6 +465,13 @@ POST /api/presentation/ HTTP/1.1
 
 ```http
 DELETE /api/document/<DOCUMENT-ID>/ HTTP/1.1
+```
+
+### Images
+The image of documents with type `image` can be retrieved by using the following API function
+
+```http
+GET /api/document/<DOCUMENT-ID>/image/ HTTP/1.1
 ```
 
 ### Presentations

@@ -38,13 +38,12 @@ class Document extends Module{
         $this->api->addRoute("/^\/documents\/?$/",                         'getDocuments',          $this, 'GET',       \Auth::READ);      // Get list with 50 documents
         $this->api->addRoute("/^\/documents\/(\d+)\/?$/",                  'getDocuments',          $this, 'GET',       \Auth::READ);      // Get list with 50 documents starting at the given offset
         $this->api->addRoute("/^\/documents\/([a-zA-Z0-9-_ ]{3,}+)\/?$/",  'getDocumentsByTitle',   $this, 'GET',       \Auth::READ);      // Search for documents by title
+        $this->api->addRoute("/^\/documents\/cache\/?$/",                  'deleteExpiredCache',    $this, 'DELETE',    \Auth::EXECUTE);   // Removes all expired cached assets
         $this->api->addRoute("/^\/document\/?$/",                          'createDocument',        $this, 'POST',      \Auth::EXECUTE);   // Create a document
         $this->api->addRoute("/^\/document\/(\d+)\/?$/",                   'getDocumentById',       $this, 'GET',       \Auth::READ);      // Select specific document
         $this->api->addRoute("/^\/document\/(\d+)\/?$/",                   'deleteDocumentById',    $this, 'DELETE',    \Auth::EXECUTE);   // Delete specific document
-        $this->api->addRoute("/^\/documents\/cache\/?$/",                  'deleteExpiredCache',    $this, 'DELETE',    \Auth::EXECUTE);   // Removes all expired cached assets
-        $this->api->addRoute("/^\/image\/(\d+)\/?$/",                      'getImageById',          $this, 'GET',       \AUTH::READ);      // Retrieves an image document type
+        $this->api->addRoute("/^\/document\/(\d+)\/image\/?$/",            'getDocumentImageById',  $this, 'GET',       \AUTH::READ);      // Retrieves an image document type
     }
-
 
     /**
      * Gets a list of documents starting at the given argument offset
@@ -204,7 +203,19 @@ class Document extends Module{
         return $result;
     }
 
-    public function getImageById($args) {
-        return '';
+    /**
+     *
+     * @param type $args
+     * @throws \Exception
+     */
+    public function getDocumentImageById($args) {
+        $document = new \Models\Document($args[1]);
+        $document->getInfoFromDatabase();
+        if($document->getType() != 'image') {
+            throw new \Exception('Document with ID '+ $args[1] +' is not an image.');
+        }
+        require_once dirname(__FILE__) .'/../includes/class.Images.php';
+        $image = new \Image($document->getPath() . DS . $document->getId() .'.'. IMAGE_TYPE);
+        $image->display();
     }
 }
