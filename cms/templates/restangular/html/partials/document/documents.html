@@ -72,7 +72,7 @@
                 <td>{{document.ownerId}}</td>
                 <td>{{document.creationDate}}</td>
                 <td>{{document.modificationDate}}</td>
-                <td><button class="btn btn-danger btn-xs" confirmed-click="deleteDocument(index)" ng-confirm-click="Are you sure you want to delete {{document.title}}?" ng-show="allowDelete(document.ownerId)"><i class="glyphicon glyphicon-remove"></i></button></td>
+                <td><button class="btn btn-danger btn-xs" confirmed-click="deleteDocument(document.id)" ng-confirm-click="Are you sure you want to delete {{document.title}}?" ng-show="allowDelete(document.ownerId)"><i class="glyphicon glyphicon-remove"></i></button></td>
             </tr>
         </tbody>
     </table>

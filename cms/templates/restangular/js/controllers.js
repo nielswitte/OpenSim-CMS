@@ -612,10 +612,9 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
                     Cache.clearCachedUrl(requestDocumentsUrl);
                     modal.hide();
                     $route.reload();
-
-                    // Remove loading screen
-                    jQuery('#loading').hide();
                 }
+                // Remove loading screen
+                jQuery('#loading').hide();
             });
         };
 
@@ -632,23 +631,38 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
             } else {
                 return false;
             }
-         };
+        };
+
+        // Get document index by ID
+        var getDocumentIndexById = function(id) {
+            for(var i = 0; i < $scope.documentsList.length; i++) {
+                if($scope.documentsList[i].id == id) {
+                    return i;
+                }
+            }
+            return false;
+        };
 
         // Remove a document
-        $scope.deleteDocument = function(index) {
+        $scope.deleteDocument = function(id) {
             // Show loading screen
             jQuery('#loading').show();
 
-            Restangular.one('document', $scope.documentsList[index].id).remove().then(function(resp) {
+            // Remove document by ID
+            Restangular.one('document', id).remove().then(function(resp) {
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
                 } else {
-                    $alert({title: 'Document removed!', content: $sce.trustAsHtml('The document '+ $scope.documentsList[index].title +' has been removed from the CMS.'), type: 'success'});
-                    $scope.documentsList.splice(index, 1);
+                    var index = getDocumentIndexById(id);
+                    if(index !== false) {
+                        $alert({title: 'Document removed!', content: $sce.trustAsHtml('The document '+ $scope.documentsList[index].title +' has been removed from the CMS.'), type: 'success'});
+                        $scope.documentsList.splice(index, 1);
+                    } else {
+                        $alert({title: 'Document removed!', content: $sce.trustAsHtml('The document has been removed from the CMS. However, some unexpected events happend. Check if everything is still OK!'), type: 'success'});
+                    }
                     Cache.clearCachedUrl(requestDocumentsUrl);
                     $route.reload();
                 }
-
                 // Remove loading screen
                 jQuery('#loading').hide();
             });
