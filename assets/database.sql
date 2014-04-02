@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS `documents` (
   `creationDate` timestamp NULL DEFAULT NULL,
   `modificationDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `ownerId` int(11) NOT NULL,
+  `file` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_presentations_users` (`ownerId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
