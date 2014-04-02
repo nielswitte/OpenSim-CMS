@@ -118,12 +118,15 @@ class Presentation extends Module {
      */
     public function getPresentationData(\Models\Presentation $presentation, $full = TRUE) {
         $data       = $this->api->getModule('document')->getDocumentData($presentation);
-        $slides     = array();
-        foreach($presentation->getSlides() as $slide) {
-            $slides[] = $this->getSlideData($presentation, $slide, $full);
+        // Include all data?
+        if($full) {
+            $slides     = array();
+            foreach($presentation->getSlides() as $slide) {
+                $slides[] = $this->getSlideData($presentation, $slide, $full);
+            }
+            $data['slides']         = $slides;
         }
-        $data['slides']             = $slides;
-
+        $data['slidesCount']        = $presentation->getNumberOfSlides();
         return $data;
     }
 
