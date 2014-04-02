@@ -565,6 +565,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
         // Show loading screen
         jQuery('#loading').show();
 
+        // Get a list with documents
         RestangularCache.all('documents').getList().then(function(documentsResponse) {
             $scope.documentsList = documentsResponse;
             Page.setTitle('Documents');
@@ -574,6 +575,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
             jQuery('#loading').hide();
         });
 
+        // Show/hide filters
         $scope.collapseFilter = true;
         $scope.toggleFilter = function() {
             $scope.collapseFilter = !$scope.collapseFilter;
@@ -618,6 +620,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
             });
         };
 
+        // Check if a user is allowed to create a new document
         $scope.allowCreate = function() {
              return sessionStorage.documentPermission >= EXECUTE;
         };

@@ -1,6 +1,9 @@
 <div class="page-header">
     <h1>Documents <small>{{document.title}}</small></h1>
 </div>
+<div class="toolbar toolbar-top">
+    <a ng-href="{{document.url}}source/?token={{token}}" target="_blank" class="btn btn-default" ng-click="downloadDocument()"><i class="glyphicon glyphicon-download"></i> Download</a>
+</div>
 <form class="form-horizontal" role="form" id="documentsForm">
     <div class="form-group">
         <label for="inputId" class="col-sm-2 control-label">ID</label>
@@ -58,6 +61,12 @@
                 </a>
             </div>
         </div>
+    </div>
+</div>
+
+<div ng-show="document.type == 'image'">
+    <div class="col-sm-12">
+        <img src="templates/restangular/img/img-placeholder.png" ng-src="{{document.url}}/image/?token={{token}}" class="img-responsive img-thumbnail" alt="{{document.title}}">
     </div>
 </div>
 

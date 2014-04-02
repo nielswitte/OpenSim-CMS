@@ -180,4 +180,17 @@ class Document implements SimpleModel {
     public function getModificationDate() {
         return $this->modificationDate;
     }
+
+    /**
+     * Returns the file with headers to the browser
+     * WARNING: Because of the headers and everything, this can only be used when not outputting any content
+     */
+    public function getOriginalFile() {
+        $file       = $this->getPath() . DS . $this->getFile();
+        $finfo      = finfo_open(FILEINFO_MIME_TYPE);
+        $mimetype   = finfo_file($finfo, $file);
+        finfo_close($finfo);
+        header("Content-Type: ". $mimetype);
+        readfile($file);
+    }
 }

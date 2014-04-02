@@ -43,6 +43,7 @@ class Document extends Module{
         $this->api->addRoute("/^\/document\/(\d+)\/?$/",                   'getDocumentById',       $this, 'GET',       \Auth::READ);      // Select specific document
         $this->api->addRoute("/^\/document\/(\d+)\/?$/",                   'deleteDocumentById',    $this, 'DELETE',    \Auth::EXECUTE);   // Delete specific document
         $this->api->addRoute("/^\/document\/(\d+)\/image\/?$/",            'getDocumentImageById',  $this, 'GET',       \AUTH::READ);      // Retrieves an image document type
+        $this->api->addRoute("/^\/document\/(\d+)\/source\/?$/",           'getDocumentSourceById', $this, 'GET',       \AUTH::READ);      // Retrieves the original file
     }
 
     /**
@@ -204,8 +205,9 @@ class Document extends Module{
     }
 
     /**
+     * Loads an image for the document with type = image
      *
-     * @param type $args
+     * @param array $args
      * @throws \Exception
      */
     public function getDocumentImageById($args) {
@@ -217,5 +219,16 @@ class Document extends Module{
         require_once dirname(__FILE__) .'/../includes/class.Images.php';
         $image = new \Image($document->getPath() . DS . $document->getId() .'.'. IMAGE_TYPE);
         $image->display();
+    }
+
+    /**
+     * Outputs the original source file
+     * 
+     * @param array $args
+     */
+    public function getDocumentSourceById($args) {
+        $document = new \Models\Document($args[1]);
+        $document->getInfoFromDatabase();
+        $document->getOriginalFile();
     }
 }
