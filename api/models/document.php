@@ -10,7 +10,7 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class is the presentation model
  *
  * @author Niels Witte
- * @version 0.3
+ * @version 0.4
  * @date April 2nd, 2014
  * @since February 10th, 2014
  */
@@ -46,10 +46,10 @@ class Document implements SimpleModel {
      */
     private $type;
     /**
-     * Document file type (extension)
+     * Document source file (extension)
      * @var string
      */
-    private $fileType;
+    private $file;
 
     /**
      * Constructs a new document with the given id and optional the given slide
@@ -60,16 +60,16 @@ class Document implements SimpleModel {
      * @param integer $ownerId - [Optional] ID of the owner
      * @param string $creationDate - [Optional] Creation date time, YYYY-MM-DD HH:mm:ss
      * @param string $modificationDate - [Optional] Date of last modification, YYYY-MM-DD HH:mm:ss
-     * @param string $fileType - [Optional] The file extension of this file
+     * @param string $file - [Optional] The file name and extension of this source file
      */
-	public function __construct($id, $type = '', $title = '', $ownerId = '', $creationDate = '', $modificationDate = '', $fileType = '') {
+	public function __construct($id, $type = '', $title = '', $ownerId = '', $creationDate = '', $modificationDate = '', $file = '') {
 		$this->id               = $id;
         $this->type             = $type;
         $this->title            = $title;
         $this->creationDate     = $creationDate;
         $this->modificationDate = $modificationDate;
         $this->ownerId          = $ownerId;
-        $this->fileType         = $fileType;
+        $this->file             = $file;
 	}
 
     /**
@@ -88,14 +88,14 @@ class Document implements SimpleModel {
             $this->creationDate     = $result['creationDate'];
             $this->modificationDate = $result['modificationDate'];
             $this->ownerId          = $result['ownerId'];
-            $this->fileType         = $result['fileType'];
+            $this->file             = $result['file'];
         } else {
             throw new \Exception('Document not found', 5);
         }
     }
 
     /**
-     * Returns the title from this presentation
+     * Returns the title from this document
      *
      * @return string
      */
@@ -104,7 +104,7 @@ class Document implements SimpleModel {
     }
 
     /**
-     * Returns the ID of this presentation
+     * Returns the ID of this document
      *
      * @return integer
      */
@@ -113,7 +113,7 @@ class Document implements SimpleModel {
 	}
 
     /**
-     * Get the UUID of the owner of this presentation
+     * Get the UUID of the owner of this document
      *
      * @return string
      */
@@ -122,7 +122,7 @@ class Document implements SimpleModel {
     }
 
     /**
-     * Returns the local path to the presentation's folder
+     * Returns the local path to the document's folder
      *
      * @return string
      */
@@ -140,12 +140,12 @@ class Document implements SimpleModel {
     }
 
     /**
-     * Returns the file type (extension) for this document
+     * Returns the source file for this document
      *
      * @return string
      */
-    public function getFileType() {
-        return $this->fileType;
+    public function getFile() {
+        return $this->file;
     }
 
     /**
@@ -160,7 +160,7 @@ class Document implements SimpleModel {
     }
 
     /**
-     * Returns the creation date of this presentation
+     * Returns the creation date of this document
      *
      * @return string yyyy-mm-dd hh:mm:ss
      */
@@ -169,7 +169,7 @@ class Document implements SimpleModel {
     }
 
     /**
-     * Returns the modification date of this presentation
+     * Returns the modification date of this document
      *
      * @return string yyyy-mm-dd hh:mm:ss
      */
