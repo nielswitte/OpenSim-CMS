@@ -45,6 +45,7 @@ class Presentation extends Module {
         $this->api->addRoute("/^\/presentations\/(\d+)\/?$/",                                  'getPresentations',             $this, 'GET',  \Auth::READ);  // Get list with 50 presentations starting at the given offset
         $this->api->addRoute("/^\/presentation\/?$/",                                          'createPresentation',           $this, 'POST', \Auth::EXECUTE); // Create a presentation
         $this->api->addRoute("/^\/presentation\/(\d+)\/?$/",                                   'getPresentationById',          $this, 'GET',  \Auth::READ);  // Select specific presentation
+        $this->api->addRoute("/^\/presentation\/(\d+)\/source\/?$/",                           'getPresentationSourceById',    $this, 'GET',  \Auth::READ);  // Download this presentation
         $this->api->addRoute("/^\/presentation\/(\d+)\/slide\/(\d+)\/?$/",                     'getSlideById',                 $this, 'GET',  \Auth::READ);  // Get slide from presentation
         $this->api->addRoute("/^\/presentation\/(\d+)\/slide\/number\/(\d+)\/?$/",             'getSlideByNumber',             $this, 'GET',  \Auth::READ);  // Get slide from presentation
         $this->api->addRoute("/^\/presentation\/(\d+)\/slide\/number\/(\d+)\/?$/",             'updateSlideUuidByNumber',      $this, 'PUT',  \Auth::WRITE); // Update slide UUID for given slide of presentation
@@ -263,5 +264,14 @@ class Presentation extends Module {
         );
 
         return $result;
+    }
+
+    /**
+     * Gets the presentation's source file
+     *
+     * @param array $args
+     */
+    public function getPresentationSourceById($args) {
+        $this->api->getModule('document')->getDocumentSourceById($args);
     }
 }

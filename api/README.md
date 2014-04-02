@@ -474,7 +474,20 @@ The image of documents with type `image` can be retrieved by using the following
 GET /api/document/<DOCUMENT-ID>/image/ HTTP/1.1
 ```
 
-### Presentations
+### Source file
+Retrieve the original file uploaded before being processed by the API.
+
+```http
+GET /api/document/<DOCUMENT-ID>/source/ HTTP/1.1
+```
+
+Or for presentations this alias could be used:
+
+```http
+GET /api/presentation/<DOCUMENT-ID>/source/ HTTP/1.1
+```
+
+## Presentations
 A list with presentations can be requested by using the following GET request.
 
 ```http
