@@ -9,6 +9,7 @@ defined('EXEC') or die('Config not loaded');
  * @author OpenSim (original)
  * @author Niels Witte (modified by)
  * @version 0.1
+ * @date April 3rd, 2014
  * @since February 13th, 2014
  */
 class OpenSimRPC {
@@ -35,7 +36,7 @@ class OpenSimRPC {
      *
      * @param string $command - The name of the function to execute
      * @param array $parameters - Array with parameters for the function
-     * @return XML
+     * @return XML or boolean FALSE when failed to connect
      */
     public function call($command, $parameters) {
         $parameters['password'] = $this->password;
@@ -48,9 +49,9 @@ class OpenSimRPC {
         curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
         $result = curl_exec($ch);
+        $error  = curl_error($ch);
         curl_close($ch);
-
-        return xmlrpc_decode($result);
+        return $error == '' ? xmlrpc_decode($result) : FALSE;
     }
 
 }
