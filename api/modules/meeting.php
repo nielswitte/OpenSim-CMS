@@ -353,7 +353,7 @@ class Meeting extends Module{
     }
 
     /**
-     * Returns the agenda for the meeting as an json array
+     * Returns the agenda for the meeting as an array
      *
      * @param \Models\Meeting $meeting
      * @return array
