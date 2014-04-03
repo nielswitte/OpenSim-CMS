@@ -27,8 +27,8 @@ defined('EXEC') or die('Config not loaded');
 
         <!-- Important JavaScript files that need to be loaded before body -->
         <script type="text/javascript">
-            var server_address = "<?php echo SERVER_PROTOCOL; ?>://<?php echo SERVER_ADDRESS; ?>";
-            var base_url = "<?php echo SERVER_ROOT; ?>";
+            var server_address  = "<?php echo SERVER_PROTOCOL; ?>://<?php echo SERVER_ADDRESS; ?>";
+            var base_url        = "<?php echo SERVER_ROOT; ?>";
         </script>
     </head>
     <body>
