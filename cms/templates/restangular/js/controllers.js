@@ -716,7 +716,7 @@ angularRest.controller('documentController', ['Restangular', 'RestangularCache',
         };
 
         // Load comments
-        RestangularCache.all('comments').one('meeting', $routeParams.documentId).get().then(function(commentResponse) {
+        RestangularCache.all('comments').one('document', $routeParams.documentId).get().then(function(commentResponse) {
             $scope.comments = commentResponse;
         });
 
