@@ -90,8 +90,10 @@ class Helper {
                 $max = $max * 1024;
             }
 
-            $result = ($max > $_SERVER['CONTENT_LENGTH'] ? TRUE : FALSE);
-            throw new \Exception('Received '. $_SERVER['CONTENT_LENGTH'] .' bytes where only '. $max .' bytes can be handled by the server. Please check the filesize of uploaded documents.');
+            // Check content-length
+            if($_SERVER['CONTENT_LENGTH'] > $max) {
+                throw new \Exception('Received '. $_SERVER['CONTENT_LENGTH'] .' bytes where only '. $max .' bytes can be handled by the server. Please check the filesize of uploaded documents.');
+            }
         }
 
         return $result;
