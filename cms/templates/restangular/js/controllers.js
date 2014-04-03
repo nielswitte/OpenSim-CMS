@@ -844,11 +844,11 @@ angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page',
 );
 
 // gridController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('gridController', ['Restangular', '$scope', '$routeParams', 'Page', function(Restangular, $scope, $routeParams, Page) {
+angularRest.controller('gridController', ['RestangularCache', '$scope', '$routeParams', 'Page', function(RestangularCache, $scope, $routeParams, Page) {
         // Show loading screen
         jQuery('#loading').show();
 
-        Restangular.one('grid', $routeParams.gridId).get().then(function(gridResponse) {
+        RestangularCache.one('grid', $routeParams.gridId).get().then(function(gridResponse) {
             Page.setTitle(gridResponse.name);
             $scope.grid = gridResponse;
             // Token required to request grid images
@@ -882,7 +882,7 @@ angularRest.controller('meetingsController', ['Restangular', 'RestangularCache',
         var meetingRequestUrl;
 
         // Get all meetings for the calendar
-        Restangular.one('meetings', date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).all('calendar').getList().then(function(meetingsResponse) {
+        RestangularCache.one('meetings', date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).all('calendar').getList().then(function(meetingsResponse) {
             // Show loading screen
             jQuery('#loading').show();
 
