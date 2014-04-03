@@ -562,6 +562,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
         $scope.reverseSort          = false;
         var requestDocumentsUrl     = '';
         $scope.documentsList        = [];
+        $scope.types                = ['document', 'image', 'presentation'];
 
         // Show loading screen
         jQuery('#loading').show();
