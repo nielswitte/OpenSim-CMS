@@ -9,6 +9,7 @@ defined('EXEC') or die('Config not loaded');
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ Page.title() }}</title>
+        <link rel="shortcut icon" href="favicon.ico" />
 
         <!-- Bootstrap CSS -->
         <link href="templates/restangular/css/bootstrap.min.css" rel="stylesheet" type="text/css">
