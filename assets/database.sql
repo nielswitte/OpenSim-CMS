@@ -1,7 +1,7 @@
 -- --------------------------------------------------------
--- Host:                         localhost
--- Server versie:                5.5.35-0ubuntu0.13.10.2 - (Ubuntu)
--- Server OS:                    debian-linux-gnu
+-- Host:                         127.0.0.1
+-- Server versie:                5.6.16 - MySQL Community Server (GPL)
+-- Server OS:                    Win32
 -- HeidiSQL Versie:              8.3.0.4744
 -- --------------------------------------------------------
 
@@ -10,7 +10,7 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
--- Structuur van  tabel OpenSim-CMS.avatars wordt geschreven
+-- Structuur van  tabel opensim-cms.avatars wordt geschreven
 CREATE TABLE IF NOT EXISTS `avatars` (
   `userId` int(11) NOT NULL DEFAULT '0',
   `gridId` int(11) NOT NULL DEFAULT '0',
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `avatars` (
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.cached_assets wordt geschreven
+-- Structuur van  tabel opensim-cms.cached_assets wordt geschreven
 CREATE TABLE IF NOT EXISTS `cached_assets` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `gridId` int(11) NOT NULL,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS `cached_assets` (
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.chats wordt geschreven
+-- Structuur van  tabel opensim-cms.chats wordt geschreven
 CREATE TABLE IF NOT EXISTS `chats` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `gridId` int(11) DEFAULT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `chats` (
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.comments wordt geschreven
+-- Structuur van  tabel opensim-cms.comments wordt geschreven
 CREATE TABLE IF NOT EXISTS `comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `parentId` int(11) DEFAULT NULL,
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.documents wordt geschreven
+-- Structuur van  tabel opensim-cms.documents wordt geschreven
 CREATE TABLE IF NOT EXISTS `documents` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '0',
@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS `documents` (
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.document_pages wordt geschreven
+-- Structuur van  tabel opensim-cms.document_pages wordt geschreven
 CREATE TABLE IF NOT EXISTS `document_pages` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `documentId` int(11) NOT NULL DEFAULT '0',
@@ -105,20 +105,20 @@ CREATE TABLE IF NOT EXISTS `document_pages` (
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.document_pages_cache wordt geschreven
+-- Structuur van  tabel opensim-cms.document_pages_cache wordt geschreven
 CREATE TABLE IF NOT EXISTS `document_pages_cache` (
   `pageId` int(11) NOT NULL,
   `cacheId` int(11) NOT NULL,
   PRIMARY KEY (`pageId`,`cacheId`),
   KEY `FK_document_pages_cache_cached_assets` (`cacheId`),
-  CONSTRAINT `FK_document_pages_cache_document_pages` FOREIGN KEY (`pageId`) REFERENCES `document_pages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_document_pages_cache_cached_assets` FOREIGN KEY (`cacheId`) REFERENCES `cached_assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `FK_document_pages_cache_cached_assets` FOREIGN KEY (`cacheId`) REFERENCES `cached_assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_document_pages_cache_document_pages` FOREIGN KEY (`pageId`) REFERENCES `document_pages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.document_slides wordt geschreven
+-- Structuur van  tabel opensim-cms.document_slides wordt geschreven
 CREATE TABLE IF NOT EXISTS `document_slides` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `documentId` int(11) NOT NULL DEFAULT '0',
@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS `document_slides` (
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.document_slides_cache wordt geschreven
+-- Structuur van  tabel opensim-cms.document_slides_cache wordt geschreven
 CREATE TABLE IF NOT EXISTS `document_slides_cache` (
   `slideId` int(11) NOT NULL AUTO_INCREMENT,
   `cacheId` int(11) NOT NULL DEFAULT '0',
@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS `document_slides_cache` (
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.grids wordt geschreven
+-- Structuur van  tabel opensim-cms.grids wordt geschreven
 CREATE TABLE IF NOT EXISTS `grids` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
@@ -169,7 +169,7 @@ CREATE TABLE IF NOT EXISTS `grids` (
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.grid_regions wordt geschreven
+-- Structuur van  tabel opensim-cms.grid_regions wordt geschreven
 CREATE TABLE IF NOT EXISTS `grid_regions` (
   `gridId` int(11) NOT NULL,
   `uuid` varchar(36) COLLATE utf8_bin NOT NULL,
@@ -182,7 +182,7 @@ CREATE TABLE IF NOT EXISTS `grid_regions` (
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.meetings wordt geschreven
+-- Structuur van  tabel opensim-cms.meetings wordt geschreven
 CREATE TABLE IF NOT EXISTS `meetings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `userId` int(11) DEFAULT NULL,
@@ -200,7 +200,7 @@ CREATE TABLE IF NOT EXISTS `meetings` (
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.meeting_agenda_items wordt geschreven
+-- Structuur van  tabel opensim-cms.meeting_agenda_items wordt geschreven
 CREATE TABLE IF NOT EXISTS `meeting_agenda_items` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `meetingId` int(11) NOT NULL,
@@ -210,14 +210,14 @@ CREATE TABLE IF NOT EXISTS `meeting_agenda_items` (
   PRIMARY KEY (`id`,`meetingId`),
   KEY `FK_meeting_agenda_items_meetings` (`meetingId`),
   KEY `FK_meeting_agenda_items_meeting_agenda_items` (`parentId`),
-  CONSTRAINT `FK_meeting_agenda_items_meeting_agenda_items` FOREIGN KEY (`parentId`) REFERENCES `meeting_agenda_items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_meeting_agenda_items_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `FK_meeting_agenda_items_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_meeting_agenda_items_meeting_agenda_items` FOREIGN KEY (`parentId`) REFERENCES `meeting_agenda_items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.meeting_documents wordt geschreven
+-- Structuur van  tabel opensim-cms.meeting_documents wordt geschreven
 CREATE TABLE IF NOT EXISTS `meeting_documents` (
   `meetingId` int(11) NOT NULL,
   `documentId` int(11) NOT NULL,
@@ -231,7 +231,7 @@ CREATE TABLE IF NOT EXISTS `meeting_documents` (
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.meeting_minutes wordt geschreven
+-- Structuur van  tabel opensim-cms.meeting_minutes wordt geschreven
 CREATE TABLE IF NOT EXISTS `meeting_minutes` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `meetingId` int(11) DEFAULT '0',
@@ -248,7 +248,7 @@ CREATE TABLE IF NOT EXISTS `meeting_minutes` (
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.meeting_participants wordt geschreven
+-- Structuur van  tabel opensim-cms.meeting_participants wordt geschreven
 CREATE TABLE IF NOT EXISTS `meeting_participants` (
   `meetingId` int(11) NOT NULL,
   `userId` int(11) NOT NULL,
@@ -261,7 +261,7 @@ CREATE TABLE IF NOT EXISTS `meeting_participants` (
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.meeting_rooms wordt geschreven
+-- Structuur van  tabel opensim-cms.meeting_rooms wordt geschreven
 CREATE TABLE IF NOT EXISTS `meeting_rooms` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `gridId` int(11) DEFAULT NULL,
@@ -281,7 +281,7 @@ CREATE TABLE IF NOT EXISTS `meeting_rooms` (
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.tokens wordt geschreven
+-- Structuur van  tabel opensim-cms.tokens wordt geschreven
 CREATE TABLE IF NOT EXISTS `tokens` (
   `token` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '',
   `userId` int(11) DEFAULT NULL,
@@ -295,7 +295,7 @@ CREATE TABLE IF NOT EXISTS `tokens` (
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.users wordt geschreven
+-- Structuur van  tabel opensim-cms.users wordt geschreven
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '0',
@@ -311,13 +311,14 @@ CREATE TABLE IF NOT EXISTS `users` (
 -- Data exporteren was gedeselecteerd
 
 
--- Structuur van  tabel OpenSim-CMS.user_permissions wordt geschreven
+-- Structuur van  tabel opensim-cms.user_permissions wordt geschreven
 CREATE TABLE IF NOT EXISTS `user_permissions` (
   `userId` int(11) NOT NULL AUTO_INCREMENT,
   `auth` tinyint(1) unsigned NOT NULL,
   `chat` tinyint(1) unsigned NOT NULL,
   `comment` tinyint(1) unsigned NOT NULL,
   `document` tinyint(1) unsigned NOT NULL,
+  `file` tinyint(1) unsigned NOT NULL,
   `grid` tinyint(1) unsigned NOT NULL,
   `meeting` tinyint(1) unsigned NOT NULL,
   `meetingroom` tinyint(1) unsigned NOT NULL,
