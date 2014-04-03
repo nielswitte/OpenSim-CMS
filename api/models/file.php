@@ -155,10 +155,10 @@ class File implements SimpleModel {
      * @return string
      */
     public function getApiUrl() {
-        if($this->getType() == 'presentation') {
+        if(in_array($this->getType(), array('presentation', 'document'))) {
             return SERVER_PROTOCOL .'://'. SERVER_ADDRESS .':'.SERVER_PORT . SERVER_ROOT .'/api/'. $this->getType() .'/'. $this->getId() .'/';
         } else {
-            return SERVER_PROTOCOL .'://'. SERVER_ADDRESS .':'.SERVER_PORT . SERVER_ROOT .'/api/document/'. $this->getId() .'/';
+            return SERVER_PROTOCOL .'://'. SERVER_ADDRESS .':'.SERVER_PORT . SERVER_ROOT .'/api/file/'. $this->getId() .'/';
         }
     }
 
