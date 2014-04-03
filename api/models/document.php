@@ -39,7 +39,7 @@ class Document extends File {
 	public function __construct($id, $currentPage = 0, $title = '', $user = NULL, $creationDate = '', $modificationDate = '', $file = '') {
         $this->currentPage = $currentPage;
 
-        parent::__construct($id, 'document', $title, $ownerId, $creationDate, $modificationDate, $file);
+        parent::__construct($id, 'document', $title, $user, $creationDate, $modificationDate, $file);
     }
 
     /**

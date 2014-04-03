@@ -30,7 +30,7 @@ class Presentation extends File {
      */
 	public function __construct($id, $slide = 0, $title = '', $user = NULL, $creationDate = '', $modificationDate = '', $file = '') {
 		$this->currentSlide     = $slide;
-        parent::__construct($id, 'presentation', $title, $ownerId, $creationDate, $modificationDate, $file);
+        parent::__construct($id, 'presentation', $title, $user, $creationDate, $modificationDate, $file);
 	}
 
     /**
