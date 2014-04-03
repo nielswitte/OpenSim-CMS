@@ -14,7 +14,7 @@ require_once dirname(__FILE__) .'/../controllers/fileController.php';
  *
  * @author Niels Witte
  * @version 0.4
- * @date April 2nd, 2014
+ * @date April 3rd, 2014
  * @since March 3rd, 2014
  */
 class File extends Module{
@@ -58,14 +58,16 @@ class File extends Module{
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 presentations from the given offset
+        $db->join('users u', 'd.ownerId = u.id', 'LEFT');
         $db->orderBy('creationDate', 'DESC');
-        $resutls        = $db->get('documents', array($args[1], 50));
+        $resutls        = $db->get('documents d', array($args[1], 50), '*, d.id AS documentId, u.id AS userId');
 
         // Process results
         $data           = array();
         foreach($resutls as $result) {
-            $file       = new \Models\File($result['id'], $result['type'], $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate'], $result['file']);
-            $data[]         = $this->getFileData($file, FALSE);
+            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $file       = new \Models\File($result['documentId'], $result['type'], $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
+            $data[]     = $this->getFileData($file, FALSE);
         }
         return $data;
     }
@@ -79,11 +81,25 @@ class File extends Module{
     public function getFilesByTitle($args) {
         $db             = \Helper::getDB();
         $params         = array("%". strtolower($db->escape($args[1])) ."%");
-        $results        = $db->rawQuery('SELECT * FROM documents WHERE LOWER(title) LIKE ? ORDER BY LOWER(title) ASC', $params);
+        $results        = $db->rawQuery('
+            SELECT
+                *,
+                d.id AS documentId,
+                u.id AS userId
+            FROM
+                documents d,
+                users u
+            WHERE
+                LOWER(d.title) LIKE ?
+            AND
+                d.ownerId = u.id
+            ORDER BY
+                LOWER(d.title) ASC'
+            , $params);
         $data           = array();
         foreach($results as $result) {
-            $file   = new \Models\File($result['id']);
-            $file->getInfoFromDatabase();
+            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $file       = new \Models\File($result['documentId'], $result['type'], $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
             $data[]     = $this->getFileData($file, FALSE);
         }
         return $data;
@@ -101,11 +117,11 @@ class File extends Module{
 
         // If the given file is a presentation, return it as a presentation
         if($file->getType() == 'presentation') {
-            $presentation = new \Models\Presentation($file->getId(), 0, $file->getTitle(), $file->getOwnerId(), $file->getCreationDate(), $file->getModificationDate());
+            $presentation = new \Models\Presentation($file->getId(), 0, $file->getTitle(), $file->getUser(), $file->getCreationDate(), $file->getModificationDate());
             return $this->api->getModule('presentation')->getPresentationData($presentation, TRUE);
         // If the given file is a document, return it as a document
         } elseif($file->getType() == 'document') {
-            $document = new \Models\Document($file->getId(), 0, $file->getTitle(), $file->getOwnerId(), $file->getCreationDate(), $file->getModificationDate());
+            $document = new \Models\Document($file->getId(), 0, $file->getTitle(), $file->getUser(), $file->getCreationDate(), $file->getModificationDate());
             return $this->api->getModule('document')->getDocumentData($document, TRUE);
         // Return it as a file
         } else {
@@ -154,7 +170,7 @@ class File extends Module{
         $file->getInfoFromDatabase();
 
         // Only allow when the user has write access or wants to update his/her own files
-        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $file->getOwnerId() != \Auth::getUser()->getId()) {
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $file->getUser() != \Auth::getUser()->getId()) {
             throw new \Exception('You do not have permissions to update this user.', 6);
         }
 
@@ -178,8 +194,8 @@ class File extends Module{
         $data = array(
             'id'                => $file->getId(),
             'type'              => $file->getType(),
+            'user'              => $this->api->getModule('user')->getUserData($file->getUser(), FALSE),
             'title'             => $file->getTitle(),
-            'ownerId'           => $file->getOwnerId(),
             'creationDate'      => $file->getCreationDate(),
             'modificationDate'  => $file->getModificationDate(),
             'sourceFile'        => $file->getFile(),

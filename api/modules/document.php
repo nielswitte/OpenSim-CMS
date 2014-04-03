@@ -14,7 +14,7 @@ require_once dirname(__FILE__) .'/../controllers/fileController.php';
  *
  * @author Niels Witte
  * @version 0.4
- * @date April 2nd, 2014
+ * @date April 3rd, 2014
  * @since March 3rd, 2014
  */
 class Document extends Module{
@@ -54,14 +54,15 @@ class Document extends Module{
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 presentations from the given offset
-        $db->orderBy('creationDate', 'DESC');
+        $db->join('users u', 'd.ownerId = u.id', 'LEFT');
         $db->where('type', 'document');
-        $resutls        = $db->get('documents', array($args[1], 50));
-
+        $db->orderBy('creationDate', 'DESC');
+        $resutls        = $db->get('documents d', array($args[1], 50), '*, d.id AS documentId, u.id AS userId');
         // Process results
         $data           = array();
         foreach($resutls as $result) {
-            $document       = new \Models\Document($result['id'], 1, $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate'], $result['file']);
+            $user           = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $document       = new \Models\Document($result['documentId'], 0, $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
             $data[]         = $this->getDocumentData($document, FALSE);
         }
         return $data;
@@ -76,11 +77,27 @@ class Document extends Module{
     public function getDocumentsByTitle($args) {
         $db             = \Helper::getDB();
         $params         = array("%". strtolower($db->escape($args[1])) ."%", 'document');
-        $results        = $db->rawQuery('SELECT * FROM documents WHERE LOWER(title) LIKE ? AND type = ? ORDER BY LOWER(title) ASC', $params);
+        $results        = $db->rawQuery('
+            SELECT
+                *,
+                d.id AS documentId,
+                u.id AS userId
+            FROM
+                documents d,
+                users u
+            WHERE
+                LOWER(d.title) LIKE ?
+            AND
+                d.type = ?
+            AND
+                d.ownerId = u.id
+            ORDER BY
+                LOWER(d.title) ASC'
+            , $params);
         $data           = array();
         foreach($results as $result) {
-            $document   = new \Models\Document($result['id']);
-            $document->getInfoFromDatabase();
+            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $document   = new \Models\Document($result['documentId'], 1, $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
             $data[]     = $this->getDocumentData($document, FALSE);
         }
         return $data;
@@ -129,17 +146,16 @@ class Document extends Module{
      * @return array
      */
     public function getDocumentData(\Models\Document $document, $full = TRUE) {
-        $data = array(
-            'id'                => $document->getId(),
-            'type'              => $document->getType(),
-            'title'             => $document->getTitle(),
-            'ownerId'           => $document->getOwnerId(),
-            'creationDate'      => $document->getCreationDate(),
-            'modificationDate'  => $document->getModificationDate(),
-            'sourceFile'        => $document->getFile(),
-            'url'               => $document->getApiUrl()
-        );
-
+        $data       = $this->api->getModule('document')->getDocumentData($presentation);
+        // Include all data?
+        if($full) {
+            $pages  = array();
+            foreach($document->getPages() as $page) {
+                $pages[] = $this->getPageData($document, $page, $full);
+            }
+            $data['pages']         = $pages;
+        }
+        $data['pagesCount']        = $document->getNumberOfPages();
         return $data;
     }
 }

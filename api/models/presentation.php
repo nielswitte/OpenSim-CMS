@@ -10,7 +10,7 @@ require_once dirname(__FILE__) .'/file.php';
  *
  * @author Niels Witte
  * @version 0.3
- * @date April 2nd, 2014
+ * @date April 3rd, 2014
  * @since February 10th, 2014
  */
 class Presentation extends File {
@@ -23,12 +23,12 @@ class Presentation extends File {
      * @param integer $id - ID of this presentation
      * @param integer $slide - [optional] Slide to show
      * @param string $title - [optional] Title of presentation
-     * @param integer $ownerId - [optional] ID of the owner
+     * @param integer $user - [optional] The owner of this document
      * @param datetime $creationDate - [optional] Creation date time, yyyy-mm-dd hh:mm:ss
      * @param datetime $modificationDate - [optional] Date of last modification, yyyy-mm-dd hh:mm:ss
      * @param string $file - [Optional] The file name and extension of this source file
      */
-	public function __construct($id, $slide = 0, $title = '', $ownerId = '', $creationDate = '', $modificationDate = '', $file = '') {
+	public function __construct($id, $slide = 0, $title = '', $user = NULL, $creationDate = '', $modificationDate = '', $file = '') {
 		$this->currentSlide     = $slide;
         parent::__construct($id, 'presentation', $title, $ownerId, $creationDate, $modificationDate, $file);
 	}

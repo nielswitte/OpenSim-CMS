@@ -10,7 +10,7 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  *
  * @author Niels Witte
  * @version 0.1
- * @date April 2nd, 2014
+ * @date April 3rd, 2014
  * @since April 2nd, 2014
  */
 class File implements SimpleModel {
@@ -36,9 +36,9 @@ class File implements SimpleModel {
     private $modificationDate;
     /**
      * The id of the owner
-     * @var integer
+     * @var \Models\User
      */
-    private $ownerId;
+    private $user;
     /**
      * Type of document
      * @var string
@@ -56,18 +56,18 @@ class File implements SimpleModel {
      * @param integer $id - ID of this presentation
      * @param string $type - [Optional] document type
      * @param string $title - [Optional] Title of document
-     * @param integer $ownerId - [Optional] ID of the owner
+     * @param \Models\User $user - [Optional] the owner of this document
      * @param string $creationDate - [Optional] Creation date time, YYYY-MM-DD HH:mm:ss
      * @param string $modificationDate - [Optional] Date of last modification, YYYY-MM-DD HH:mm:ss
      * @param string $file - [Optional] The file name and extension of this source file
      */
-	public function __construct($id, $type = '', $title = '', $ownerId = '', $creationDate = '', $modificationDate = '', $file = '') {
+	public function __construct($id, $type = '', $title = '', $user = NULL, $creationDate = '', $modificationDate = '', $file = '') {
 		$this->id               = $id;
         $this->type             = $type;
         $this->title            = $title;
         $this->creationDate     = $creationDate;
         $this->modificationDate = $modificationDate;
-        $this->ownerId          = $ownerId;
+        $this->user             = $user;
         $this->file             = $file;
 	}
 
@@ -78,15 +78,16 @@ class File implements SimpleModel {
      */
     public function getInfoFromDatabase() {
         $db = \Helper::getDB();
-        $db->where('id', $db->escape((int) $this->getId()));
-        $result = $db->getOne('documents');
+        $db->join('users u', 'd.ownerId = u.id', 'LEFT');
+        $db->where('d.id', $db->escape((int) $this->getId()));
+        $result = $db->getOne('documents d', '*, d.id AS documentId, u.id AS userId');
 
         if($result) {
             $this->title            = $result['title'];
             $this->type             = $result['type'];
             $this->creationDate     = $result['creationDate'];
             $this->modificationDate = $result['modificationDate'];
-            $this->ownerId          = $result['ownerId'];
+            $this->user             = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
             $this->file             = $result['file'];
         } else {
             throw new \Exception('Document not found', 5);
@@ -112,12 +113,12 @@ class File implements SimpleModel {
 	}
 
     /**
-     * Get the UUID of the owner of this document
+     * Get the owner of this document
      *
-     * @return string
+     * @return \Models\User
      */
-    public function getOwnerId() {
-        return $this->ownerId;
+    public function getUser() {
+        return $this->user;
     }
 
     /**

@@ -10,7 +10,7 @@ require_once dirname(__FILE__) .'/page.php';
  *
  * @author Niels Witte
  * @version 0.4
- * @date April 2nd, 2014
+ * @date April 3rd, 2014
  * @since February 10th, 2014
  */
 class Document extends File {
@@ -31,12 +31,12 @@ class Document extends File {
      * @param integer $id - ID of this presentation
      * @param integer $currentPage - [Optional] The currently selected page
      * @param string $title - [Optional] Title of document
-     * @param integer $ownerId - [Optional] ID of the owner
+     * @param \Models\User $user - [Optional] Owner of this document
      * @param string $creationDate - [Optional] Creation date time, YYYY-MM-DD HH:mm:ss
      * @param string $modificationDate - [Optional] Date of last modification, YYYY-MM-DD HH:mm:ss
      * @param string $file - [Optional] The file name and extension of this source file
      */
-	public function __construct($id, $currentPage = 0, $title = '', $ownerId = '', $creationDate = '', $modificationDate = '', $file = '') {
+	public function __construct($id, $currentPage = 0, $title = '', $user = NULL, $creationDate = '', $modificationDate = '', $file = '') {
         $this->currentPage = $currentPage;
 
         parent::__construct($id, 'document', $title, $ownerId, $creationDate, $modificationDate, $file);

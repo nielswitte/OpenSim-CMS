@@ -64,13 +64,15 @@ class Presentation extends Module {
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 presentations from the given offset
+        $db->join('users u', 'd.ownerId = u.id', 'LEFT');
         $db->where('type', 'presentation');
         $db->orderBy('creationDate', 'DESC');
-        $resutls        = $db->get('documents', array($args[1], 50));
+        $resutls        = $db->get('documents d', array($args[1], 50), '*, d.id AS documentId, u.id AS userId');
         // Process results
         $data           = array();
         foreach($resutls as $result) {
-            $presentation   = new \Models\Presentation($result['id'], 0, $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate'], $result['file']);
+            $user           = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $presentation   = new \Models\Presentation($result['documentId'], 0, $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
             $data[]         = $this->getPresentationData($presentation, FALSE);
         }
         return $data;
