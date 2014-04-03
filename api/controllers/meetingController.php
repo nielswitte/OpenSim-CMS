@@ -227,20 +227,20 @@ class MeetingController {
     /**
      * Inserts the documents array into the database
      *
-     * @param array $documents - List with document IDs
+     * @param array $files - List with file IDs
      * @return boolean
      */
-    private function setDocuments($documents) {
+    private function setDocuments($files) {
         $db = \Helper::getDB();
         $result = FALSE;
-        foreach($documents as $document) {
-            $doc = new \Models\Document($document);
-            $this->getMeeting()->getDocuments()->addDocument($doc);
+        foreach($files as $fileId) {
+            $file = new \Models\File($fileId);
+            $this->getMeeting()->getDocuments()->addDocument($file);
 
             // DB data
             $data = array(
                 'meetingId'     => $db->escape($this->getMeeting()->getId()),
-                'documentId'    => $db->escape($doc->getId())
+                'documentId'    => $db->escape($file->getId())
             );
             $result = $db->insert('meeting_documents', $data);
         }
