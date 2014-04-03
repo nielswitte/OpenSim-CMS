@@ -335,13 +335,13 @@ class Meeting extends Module{
             $data['participants'] = $participants;
             $data['agenda']       = $meeting->getAgenda()->toString();
 
-            // Make a list of documents
-            $documents = array();
-            foreach($meeting->getDocuments()->getDocuments() as $document) {
-                $documents[] = $this->api->getModule('document')->getDocumentData($document, FALSE);
+            // Make a list of files
+            $files = array();
+            foreach($meeting->getDocuments()->getDocuments() as $file) {
+                $files[] = $this->api->getModule('file')->getFileData($file, FALSE);
             }
 
-            $data['documents']    = $documents;
+            $data['documents']    = $files;
         // Show minimal information
         } else {
             $data['roomId']     = $meeting->getRoom()->getId();

@@ -4,10 +4,11 @@ namespace Models;
 defined('EXEC') or die('Config not loaded');
 
 /**
- * This class represents a meeting
+ * This class takes care of the documents/files attached to a meeting
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
+ * @date April 3rd, 2014
  * @since March 18th, 2014
  */
 class MeetingDocuments {
@@ -26,7 +27,7 @@ class MeetingDocuments {
     }
 
     /**
-     * Returns the array with document instances
+     * Returns the array with file instances
      *
      * @return array
      */
@@ -35,11 +36,11 @@ class MeetingDocuments {
     }
 
     /**
-     * Adds a document to the list
+     * Adds a file to the list
      *
-     * @param \Models\Document $document
+     * @param \Models\File $file
      */
-    public function addDocument(\Models\Document $document) {
-        $this->documents[] = $document;
+    public function addDocument(\Models\File $file) {
+        $this->documents[] = $file;
     }
 }
