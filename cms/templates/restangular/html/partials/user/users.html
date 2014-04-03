@@ -63,7 +63,7 @@
                 <td><a href="#!/user/{{user.id}}">{{user.username}}</a></td>
                 <td>{{user.firstName}}</td>
                 <td>{{user.lastName}}</td>
-                <td>{{user.email}}</td>
+                <td><a ng-href="mailto:{{user.email}}">{{user.email}}</a></td>
                 <td>
                     <a href="#!/user/{{user.id}}/edit" class="btn btn-default btn-xs" title="Edit user" ng-show="allowUpdate(user.id)"><i class="glyphicon glyphicon-edit"></i></a>
                     <button class="btn btn-danger btn-xs" confirmed-click="deleteUser(index)" ng-confirm-click="Are you sure you want to delete {{user.username}}?" ng-show="allowDelete(user.id)" title="Delete user"><i class="glyphicon glyphicon-remove"></i></button>
