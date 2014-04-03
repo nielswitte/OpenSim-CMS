@@ -68,6 +68,36 @@ class Helper {
     }
 
     /**
+     * Some checks to process the input the server received.
+     * For example: Checks if the content length does not exceed the maximum post length
+     *
+     * @return boolean
+     * @throws \Exception
+     */
+    public static function checkInput() {
+        $result  = TRUE;
+        $request = $_SERVER['REQUEST_METHOD'];
+        // Only for PUT and POST requests
+        if($request == 'PUT' || $request == 'POST') {
+            $max = ini_get('post_max_size');
+
+            // Convert to bytes
+            if(substr($max, -1) == 'G') {
+                $max = $max * 1024 * 1024 * 1024;
+            } elseif(substr($max, -1) == 'M') {
+                $max = $max * 1024 * 1024;
+            } elseif(substr($max, -1) == 'K') {
+                $max = $max * 1024;
+            }
+
+            $result = ($max > $_SERVER['CONTENT_LENGTH'] ? TRUE : FALSE);
+            throw new \Exception('Received '. $_SERVER['CONTENT_LENGTH'] .' bytes where only '. $max .' bytes can be handled by the server. Please check the filesize of uploaded documents.');
+        }
+
+        return $result;
+    }
+
+    /**
      * Gets the input data from the request
      *
      * @param boolean $parse - Parse the input data to an array or return it raw string?
@@ -86,7 +116,7 @@ class Helper {
     }
 
     /**
-     * Helper function to parse PUT requests
+     * Helper function to parse PUT/POST requests
      * @source: https://stackoverflow.com/questions/5483851/manually-parse-raw-http-data-with-php/5488449#5488449
      *
      * @param string $input

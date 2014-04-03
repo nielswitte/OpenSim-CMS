@@ -5,6 +5,7 @@
     define('CMS_ADMIN_NAME',            'OpenSim-CMS');                         // The sender's name of OpenSim CMS emails
     // Server settings
     define('SERVER_DEBUG',              TRUE);                                  // Show debugging output
+    define('SERVER_PHP_ERRORS',         TRUE);                                  // Show PHP errors (error_reporting)
     define('SERVER_PROTOCOL',           'http');                                // use HTTP or HTTPS
     define('SERVER_ADDRESS',            'localhost');                           // server address, can also be an IP
     define('SERVER_PORT',               80);                                    // server port
@@ -25,6 +26,10 @@
     define('TEMP_LOCATION',             'C:\\Soas\\www\\temp');                 // Absolute path to tmp folder
 	define('DS',                        '\\');                                  // Directory separator
 
+    // Max upload limits
+    ini_set('post_max_size',            '16M');                                 // Max post size
+    ini_set('upload_max_filesize',      '16M');                                 // Max file size
+
     // Image settings
     define('IMAGE_THUMBNAIL_WIDTH',     256);                                   // width of thumnails
 	define('IMAGE_THUMBNAIL_HEIGHT',    256);                                   // height of thumnails
@@ -44,8 +49,10 @@
     \Helper::setDB($db);                                                         // Save database to static class to be accessed by the rest of the program
 
     // Show php errors
-    if(SERVER_DEBUG) {
+    if(SERVER_PHP_ERRORS !== FALSE) {
         error_reporting(E_ALL);
+        ini_set('display_errors', 'on');
     } else {
         error_reporting(0);
+        ini_set('display_errors', 'off');
     }

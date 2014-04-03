@@ -29,6 +29,9 @@ require_once dirname(__FILE__) .'/modules/user.php';
 
 // Try to parse the requested URL and paramters to a function of the API
 try {
+    // Validate input before doing anything else
+    $inputValidation = \Helper::checkInput();
+
 	// Input
 	$get                = filter_input(INPUT_GET, '_url', FILTER_SANITIZE_SPECIAL_CHARS);
     $token              = filter_input(INPUT_GET, 'token', FILTER_SANITIZE_SPECIAL_CHARS);
