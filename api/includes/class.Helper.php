@@ -327,9 +327,10 @@ class Helper {
      * @param string $destination - The destination to save the file, including filename and extension
      * @param integer $height - [Optional] Height in pixels
      * @param integer $width - [Optional] Width in pixels
+     * @param integer $quality - [Optional] The JPEG compression quality
      * @return boolean
      */
-    public static function imageResize($source, $destination, $height = IMAGE_HEIGHT, $width = IMAGE_WIDTH) {
+    public static function imageResize($source, $destination, $height = IMAGE_HEIGHT, $width = IMAGE_WIDTH, $quality = 95) {
         $destinationDir     = dirname($destination);
         $destinationExt     = @end(explode('.', $destination));
         $destinationFile    = @end(explode(DS, preg_replace("/\\.[^.\\s]{3,4}$/", "", $destination)));
@@ -365,7 +366,7 @@ class Helper {
 
                 // resize when needed
                 if($resize->getWidth() > $width || $resize->getHeight() > $height) {
-                    $resize->resize($width, $height, 'fit', 'c', 'c');
+                    $resize->resize($width, $height, 'fit', 'c', 'c', $quality);
                     $resize->save($destinationFile, $destinationDir, $destinationExt);
                     // Now use destination as source, since it is resized
                     $source = $destination;
@@ -373,7 +374,7 @@ class Helper {
                 unset($resize);
 
                 // Fill remaining of image with black
-                $image->resize($width, $height, 'fit');
+                $image->resize($width, $height, 'fit', 'c', 'c', $quality);
                 $image->addWatermark($source);
                 $image->writeWatermark(100, 0, 0, 'c', 'c');
                 return $image->save($destinationFile, $destinationDir, $destinationExt);
