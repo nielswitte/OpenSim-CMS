@@ -1642,6 +1642,7 @@ angularRest.controller('pageController', ['RestangularCache', '$scope', 'Page', 
             commentCount: 0
         };
         $scope.currentPage = 0;
+        $scope.documentId = $routeParams.documentId;
 
         // Get the page details
         RestangularCache.one('document', $routeParams.documentId).one('page', $routeParams.pageId).get().then(function(pageResponse) {
@@ -1722,6 +1723,7 @@ angularRest.controller('slideController', ['RestangularCache', '$scope', 'Page',
             commentCount: 0
         };
         $scope.currentSlide = 0;
+        $scope.documentId = $routeParams.documentId;
 
         // Get the slide details
         RestangularCache.one('presentation', $routeParams.documentId).one('slide', $routeParams.slideId).get().then(function(slideResponse) {
