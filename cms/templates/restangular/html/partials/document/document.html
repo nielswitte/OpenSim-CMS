@@ -2,7 +2,7 @@
     <h1>Documents <small>{{document.title}}</small></h1>
 </div>
 <div class="toolbar toolbar-top">
-    <a ng-href="{{document.url}}source/?token={{token}}" target="_blank" class="btn btn-default" ng-click="downloadDocument()"><i class="glyphicon glyphicon-download"></i> Download</a>
+    <a ng-href="{{document.url}}source/?token={{token}}" target="_blank" class="btn btn-default" ng-click="downloadDocument()" bs-tooltip title="Download the original file"><i class="glyphicon glyphicon-download"></i> Download</a>
 </div>
 <form class="form-horizontal" role="form" id="documentsForm">
     <div class="form-group">
