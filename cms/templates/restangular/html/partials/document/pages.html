@@ -5,7 +5,7 @@
         <div class="thumbnail">
             <a ng-href="#!/document/{{document.id}}/page/{{page.id}}" class="btn btn-success" ng-show="{{page.hasComments}}" title="There are comments attached to this page" bs-tooltip><i class="glyphicon glyphicon-comment"></i></a>
             <a ng-href="#!/document/{{document.id}}/page/{{page.id}}" class="btn btn-default" ng-hide="{{page.hasComments}}" title="Be the first to attach a comment to this page" bs-tooltip><i class="glyphicon glyphicon-comment"></i></a>
-            <a href="javascript:void(0);" ng-click="lightbox(page.number, page.image)" title="Click for larger version of slide {{page.number}}">
+            <a href="javascript:void(0);" ng-click="lightbox(page.number, page.image)" title="Click for larger version of page {{page.number}}">
                 <img src="templates/restangular/img/img-placeholder.png" ng-src="{{page.thumbnail}}?token={{token}}">
             </a>
         </div>
