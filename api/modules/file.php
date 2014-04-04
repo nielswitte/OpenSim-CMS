@@ -142,6 +142,10 @@ class File extends Module{
         if($input['type'] == 'presentation') {
             $presentation = $this->api->getModule('presentation')->createPresentation($args);
             $data = is_array($presentation) ? $presentation['id'] : $data;
+        // Documents are handled by the documents module
+        } elseif($input['type'] == 'document') {
+            $document = $this->api->getModule('document')->createDocument($args);
+            $data = is_array($document) ? $document['id'] : $data;
         // Process other files
         } else {
             $fileCtrl   = new \Controllers\FileController();

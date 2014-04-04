@@ -5,8 +5,8 @@ defined('EXEC') or die('Config not loaded');
  * Helper class to support the CMS and API
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 2nd, 2014
+ * @version 0.3
+ * @date April 4th, 2014
  * @since February 12th, 2014
  */
 class Helper {
@@ -261,15 +261,27 @@ class Helper {
      *
      * @param string $file
      * @param string $destination
+     * @param boolean $fit - [Optional] Fit the image in the max width & height when TRUE, when false uses the largest of width/height as limit
+     * @param integer $width - [Optional] The image max width
+     * @param integer $height - [Optional] The image max height
      */
-    public static function pdf2jpeg($file, $destination) {
+    public static function pdf2jpeg($file, $destination, $fit = TRUE, $width = IMAGE_WIDTH, $height = IMAGE_HEIGHT) {
         // Create the full path if needed
         $path    = dirname($destination);
         mkdir($path, 0777, TRUE);
         // Command requires jpeg instead of jpg
         $image_type = IMAGE_TYPE == 'jpg' ? 'jpeg' : IMAGE_TYPE;
-        // Exec the command uses the larges of the image width or height as limit
-        $command = 'pdftoppm -'. $image_type .' -scale-to '. (IMAGE_WIDTH > IMAGE_HEIGHT ? IMAGE_WIDTH : IMAGE_HEIGHT) .' -aa yes -aaVector yes '. $file .' '. $destination;
+        // Exec the command uses the largest of the image width or height as limit
+        if($fit) {
+            $command = 'pdftoppm -'. $image_type .' -scale-to '. ($width >= $height ? $width : $height) .' -aa yes -aaVector yes '. $file .' '. $destination;
+        } else {
+            // Scale the image to the largest max side or use height (especially for documents) when equal
+            if($width > $height) {
+                $command = 'pdftoppm -'. $image_type .' -scale-to-x '. $width .' -scale-to-y -1 -aa yes -aaVector yes '. $file .' '. $destination;
+            } else {
+                $command = 'pdftoppm -'. $image_type .' -scale-to-x -1 -scale-to-y '. $height .' -aa yes -aaVector yes '. $file .' '. $destination;
+            }
+        }
         exec($command);
     }
 
@@ -353,7 +365,7 @@ class Helper {
 
                 // resize when needed
                 if($resize->getWidth() > $width || $resize->getHeight() > $height) {
-                    $resize->resize($width, $height, 'fit');
+                    $resize->resize($width, $height, 'fit', 'c', 'c');
                     $resize->save($destinationFile, $destinationDir, $destinationExt);
                     // Now use destination as source, since it is resized
                     $source = $destination;

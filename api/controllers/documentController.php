@@ -4,40 +4,36 @@ namespace Controllers;
 defined('EXEC') or die('Config not loaded');
 
 /**
- * This class is the presentation controller
+ * This class is the Document controller
  *
  * @author Niels Witte
- * @version 0.3
+ * @version 0.1
  * @date April 4th, 2014
- * @since March 10th, 2014
+ * @since April 4th, 2014
  */
-class PresentationController {
-    /**
-     * The presentation object
-     * @var \Models\Presentation
-     */
-    private $presentation;
+class DocumentController {
+    private $document;
 
     /**
      * Constructs a new controller with the given presentation
      *
-     * @param \Models\Presentation $presentation
+     * @param \Models\Document $document
      */
-    public function __construct(\Models\Presentation $presentation = NULL) {
-        $this->presentation = $presentation;
+    public function __construct(\Models\Document $document = NULL) {
+        $this->document = $document;
     }
 
     /**
-     * Creates a presentation
+     * Creates a document
      *
      * @param array $parameters
      *              * string file - Base64 encoded file
      *              * string title - The document title
-     *              * string type - Should be presentation
+     *              * string type - Should be document
      * @return integer or boolean FALSE on failure
      * @throws \Exception
      */
-    public function createPresentation($parameters) {
+    public function createDocument($parameters) {
         $result         = FALSE;
         // Prepare additional information
         $file           = \Helper::getBase64Content($parameters['file'], TRUE);
@@ -62,13 +58,13 @@ class PresentationController {
             // File saved successful to temp?
             if($filename !== FALSE && file_exists($filename)) {
                 // Save slides as separate JPGs
-                $slidesDirectory = FILES_LOCATION . DS . $parameters['type'] . DS . $fileId;
-                $slidesPath      = $slidesDirectory . DS . 'slide';
-                \Helper::pdf2jpeg($filename, $slidesPath);
+                $pagesDirectory = FILES_LOCATION . DS . $parameters['type'] . DS . $fileId;
+                $pagesPath      = $pagesDirectory . DS . 'page';
+                \Helper::pdf2jpeg($filename, $pagesPath, FALSE);
                 // Move temp file
-                \Helper::moveFile($filename, $slidesDirectory . DS .'source.'. $extension);
+                \Helper::moveFile($filename, $pagesDirectory . DS .'source.'. $extension);
                 // Save successful?
-                $result = $this->setPresentationSlides($fileId) ? $fileId : $result;
+                $result = $this->setDocumentPages($fileId) ? $fileId : $result;
             }
         }
 
@@ -82,57 +78,57 @@ class PresentationController {
 
                 // Remove slides from DB
                 $db->where('documentId', $db->escape($fileId));
-                $db->delete('document_slides');
+                $db->delete('document_pages');
 
                 // Remove document from DB
                 $db->where('id', $db->escape($fileId));
                 $db->delete('documents');
 
                 // Remove the created files
-                if(isset($slidesDirectory)) {
-                    \Helper::removeDirAndContents($slidesDirectory);
+                if(isset($pagesDirectory)) {
+                    \Helper::removeDirAndContents($pagesDirectory);
 
-                    throw new \Exception('Failed to save slides to storage', 7);
+                    throw new \Exception('Failed to save paeges to storage', 7);
                 } else {
                     throw new \Exception('Failed to save pdf to temp storage', 6);
                 }
             } else {
-                throw new \Exception('Failed to insert presentation into database', 5);
+                throw new \Exception('Failed to insert document into database', 5);
             }
         }
         return $result;
     }
 
     /**
-     * Links the slides found in the directory of the given presentation to the presentation
+     * Links the pages found in the directory of the given document to the document
      *
-     * @param integer $presentationId
+     * @param integer $documentId
      * @return boolean
      */
-    public function setPresentationSlides($presentationId) {
+    public function setDocumentPages($documentId) {
         $db              = \Helper::getDB();
-        $slidesDirectory = FILES_LOCATION . DS . 'presentation' . DS . $presentationId;
+        $pagesDirectory  = FILES_LOCATION . DS . 'document' . DS . $documentId;
         $result          = FALSE;
-        if (file_exists($slidesDirectory) && glob($slidesDirectory . DS . '*.' . IMAGE_TYPE) != false) {
-            $slidesCount = count(glob($slidesDirectory . DS . '*.' . IMAGE_TYPE));
+        if (file_exists($pagesDirectory) && glob($pagesDirectory . DS . '*.' . IMAGE_TYPE) != false) {
+            $pagesCount = count(glob($pagesDirectory . DS . '*.' . IMAGE_TYPE));
             // Save all slides to the database
-            for ($i = 1; $i <= $slidesCount; $i++) {
+            for ($i = 1; $i <= $pagesCount; $i++) {
                 // Has to be done one by one...
                 // @todo improve this for multiple insert
-                $slides = array(
+                $pages = array(
                     'id'         => '',
-                    'documentId' => $db->escape($presentationId)
+                    'documentId' => $db->escape($documentId)
                 );
-                $slideId = $db->insert('document_slides', $slides);
+                $pageId = $db->insert('document_pages', $pages);
             }
             // Finally update the result?
-            $result = ($slideId !== FALSE ? TRUE : FALSE);
+            $result = ($pageId !== FALSE ? TRUE : FALSE);
         }
         return $result;
     }
 
     /**
-     * Parses the array with parameters to check whether or not a presentation will be created
+     * Parses the array with parameters to check whether or not a document will be created
      *
      * @param array $parameters
      * @return boolean
@@ -144,8 +140,8 @@ class PresentationController {
             throw new \Exception('Expected 3 parameters, '. count($parameters) .' given', 1);
         } elseif(!isset($parameters['title'])) {
             throw new \Exception('Missing parameter (string) "title"', 2);
-        } elseif(!isset($parameters['type']) || $parameters['type'] != 'presentation') {
-            throw new \Exception('Missing parameter (string) "type" which should be "presentation"', 3);
+        } elseif(!isset($parameters['type']) || $parameters['type'] != 'document') {
+            throw new \Exception('Missing parameter (string) "type" which should be "document"', 3);
         } elseif (!isset($parameters['file'])) {
             throw new \Exception('Missing parameter (file) "file" with a valid file type', 4);
         } elseif(!in_array(\Helper::getBase64Header($parameters['file']), array('application/pdf'))) {
