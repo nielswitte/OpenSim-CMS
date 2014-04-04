@@ -218,12 +218,11 @@ class File extends Module{
      */
     public function deleteExpiredCache($args) {
         $fileCtrl = new \Controllers\FileController(NULL);
-        $data         = $fileCtrl->removeExpiredCache();
+        $data     = $fileCtrl->removeExpiredCache();
 
         // Format the result
         $result = array(
-            'success'       => ($data !== FALSE ? TRUE : FALSE),
-            'removedAssets' => $data
+            'success' => $data
         );
 
         return $result;

@@ -7,7 +7,7 @@ defined('EXEC') or die('Config not loaded');
  * This class is the File controller
  *
  * @author Niels Witte
- * @version 0.2a
+ * @version 0.2b
  * @date April 4th, 2014
  * @since March 10th, 2014
  */
@@ -82,7 +82,7 @@ class FileController {
     /**
      * Removes all expired cache files
      *
-     * @return integer (number of cached assets removed) or boolean FALSE when failed
+     * @return boolean - TRUE when actual items are removed
      */
     public function removeExpiredCache() {
         $db = \Helper::getDB();

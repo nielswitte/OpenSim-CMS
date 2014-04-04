@@ -676,6 +676,17 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
             });
         };
 
+        // Clear expired cache
+        $scope.clearExpiredCache = function() {
+            Restangular.one('files', 'cache').remove().then(function(resp) {
+                if(!resp.success) {
+                    $alert({title: 'Error!', content: $sce.trustAsHtml('No expired cache items to clear. Try again later.'), type: 'danger'});
+                } else {
+                    $alert({title: 'Cache cleared!', content: $sce.trustAsHtml('Cleared '+ resp.removedAssets +' expired items from the cache.'), type: 'success'});
+                }
+            });
+        };
+
         // Dialog function handler
         $scope.call = function(func) {
             if(func == 'hide') {
