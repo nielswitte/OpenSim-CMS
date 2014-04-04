@@ -7,7 +7,7 @@ defined('EXEC') or die('Config not loaded');
  * This class is the File controller
  *
  * @author Niels Witte
- * @version 0.2
+ * @version 0.2a
  * @date April 4th, 2014
  * @since March 10th, 2014
  */
@@ -51,6 +51,17 @@ class FileController {
             // First slides before parent file!
             $db->where('documentId', $db->escape($this->file->getId()));
             $db->delete('document_slides');
+        // If it's a document, remove all comments from pages as well
+        } elseif($this->file->getType() == 'document') {
+            $document = new \Models\Document($this->file->getId());
+
+            foreach($document->getPages() as $page) {
+                $commentCtrl->removeCommentsByItem('page', $page->getId());
+            }
+
+            // First slides before parent file!
+            $db->where('documentId', $db->escape($this->file->getId()));
+            $db->delete('document_pages');
         }
 
         // Remove the file itself
