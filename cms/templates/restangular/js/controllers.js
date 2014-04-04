@@ -1074,7 +1074,7 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
                 } else {
                     $alert({title: 'Meeting updated!', content: $sce.trustAsHtml('The meeting has been updated.'), type: 'success'});
                     Cache.clearCache();
-                    $location.path('meetings');
+                    $location.path('meeting/'+ $scope.meeting.id);
                 }
             });
         };
@@ -1566,7 +1566,7 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
                 } else {
                     $alert({title: 'Meeting scheduled!', content: $sce.trustAsHtml('The meeting for '+ $scope.meeting.startDate +' has been created with ID: '+ resp.meetingId +'.'), type: 'success'});
                     Cache.clearCache();
-                    $location.path('meetings');
+                    $location.path('meeting/'+ resp.meetingId);
                 }
             });
         };
