@@ -663,7 +663,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
                 } else {
                     var index = getDocumentIndexById(id);
                     if(index !== false) {
-                        $alert({title: 'Document removed!', content: $sce.trustAsHtml('The document '+ $scope.documentsList[index].title +' has been removed from the CMS.'), type: 'success'});
+                        $alert({title: 'Document removed!', content: $sce.trustAsHtml('The document (#'+ $scope.documentsList[index].id +') '+ $scope.documentsList[index].title +' has been removed from the CMS.'), type: 'success'});
                         $scope.documentsList.splice(index, 1);
                     } else {
                         $alert({title: 'Document removed!', content: $sce.trustAsHtml('The document has been removed from the CMS. However, some unexpected events happend. Check if everything is still OK!'), type: 'success'});
