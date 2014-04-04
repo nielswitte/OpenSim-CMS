@@ -1926,7 +1926,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 );
 
 // userController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('userController', ['Restangular', 'RestangularCache', '$scope', '$route', '$routeParams', 'Page', '$alert', '$modal', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, $route, $routeParams, Page, $alert, $modal, $sce, Cache) {
+angularRest.controller('userController', ['Restangular', 'RestangularCache', '$scope', '$route', '$routeParams', 'Page', '$alert', '$modal', '$sce', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $route, $routeParams, Page, $alert, $modal, $sce, Cache, $location) {
         var userRequestUrl   = '';
         var userOld          = {};
         $scope.grids         = [];
@@ -2026,6 +2026,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                 } else {
                     $alert({title: 'User updated!', content: $sce.trustAsHtml('The user information has been updated.'), type: 'success'});
                     Cache.clearCache();
+                    $location.path('user/'+ $routeParams.userId);
                 }
                 // Remove loading screen
                 jQuery('#loading').hide();
