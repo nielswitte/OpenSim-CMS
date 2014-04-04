@@ -48,21 +48,8 @@
         </div>
     </div>
 </form>
-<div ng-show="document.type == 'presentation'">
-    <h2>Slides ({{document.slidesCount}})</h2>
-    <hr>
-    <div class="row">
-        <div class="col-sm-3" ng-repeat="slide in document.slides">
-            <div class="thumbnail">
-                <a ng-href="#!/document/{{document.id}}/slide/{{slide.id}}" class="btn btn-success" ng-show="{{slide.hasComments}}" title="There are comments attached to this slide" bs-tooltip><i class="glyphicon glyphicon-comment"></i></a>
-                <a ng-href="#!/document/{{document.id}}/slide/{{slide.id}}" class="btn btn-default" ng-hide="{{slide.hasComments}}" title="Be the first to attach a comment to this slide" bs-tooltip><i class="glyphicon glyphicon-comment"></i></a>
-                <a href="javascript:void(0);" ng-click="lightbox(slide.number, slide.image)" title="Click for larger version of slide {{slide.number}}">
-                    <img src="templates/restangular/img/img-placeholder.png" ng-src="{{slide.thumbnail}}?token={{token}}">
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+<div ng-show="document.type == 'presentation'" ng-include src="'templates/restangular/html/partials/document/slides.html'"></div>
+<div ng-show="document.type == 'document'" ng-include src="'templates/restangular/html/partials/document/pages.html'"></div>
 
 <div ng-show="document.type == 'image'" class="row">
     <div class="col-sm-12">

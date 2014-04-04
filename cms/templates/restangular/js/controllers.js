@@ -783,7 +783,7 @@ angularRest.controller('documentController', ['Restangular', 'RestangularCache',
         // Open dialog with the Slide preview
         $scope.lightbox = function(number, url) {
             $modal({
-                title: $sce.trustAsHtml('Slide '+ number),
+                title: $sce.trustAsHtml('Preview '+ number),
                 content: $sce.trustAsHtml('<img src="'+ url+'?token='+ sessionStorage.token +'" class="img-responsive">'),
                 html: true,
                 show: true,
@@ -1609,6 +1609,88 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
         });
     }]
 );
+
+/****************************************************************************************************************************************************
+ *  _____
+ * |  __ \
+ * | |__) |_ _  __ _  ___
+ * |  ___/ _` |/ _` |/ _ \
+ * | |  | (_| | (_| |  __/
+ * |_|   \__,_|\__, |\___|
+ *              __/ |
+ *             |___/
+ */
+// pageController ----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('pageController', ['RestangularCache', '$scope', 'Page', '$routeParams', '$location', function(RestangularCache, $scope, Page, $routeParams, $location) {
+        $scope.page = {};
+        $scope.comments = {
+            comments: [],
+            commentCount: 0
+        };
+        $scope.currentPage = 0;
+
+        // Get the page details
+        RestangularCache.one('document', $routeParams.documentId).one('page', $routeParams.pageId).get().then(function(pageResponse) {
+            $scope.page = pageResponse;
+            Page.setTitle('Page '+ pageResponse.number);
+            $scope.currentPage = pageResponse.number;
+
+            if(pageResponse.hasComments !== false) {
+                // Load comments
+                RestangularCache.all('comments').one('page', pageResponse.id).get().then(function(commentResponse) {
+                    $scope.comments = commentResponse;
+                });
+            }
+        });
+
+        // Show comments and set the comment Type to: page and the id of the page
+        $scope.showComments = function() {
+            $scope.commentType      = 'page';
+            $scope.commentItemId    = $routeParams.pageId;
+            return partial_path +'/comment/commentContainer.html';
+        };
+
+        // Convert page number to page id
+        $scope.goToPageNumber = function(pageNumber) {
+            var currentPageNumber  = parseInt($scope.page.number);
+            var currentPageId      = parseInt($scope.page.id);
+
+            if($scope.currentPage > pageNumber) {
+                $scope.goToPageId(currentPageId - (currentPageNumber - pageNumber));
+            } else {
+                $scope.goToPageId(currentPageId + (pageNumber - currentPageNumber));
+            }
+        };
+
+        // Go to specific page
+        $scope.goToPageId = function(pageId) {
+            $location.path('document/'+ $routeParams.documentId +'/page/'+ pageId);
+        };
+
+        // Go to the next page
+        $scope.nextPage = function() {
+            $scope.goToPageId(parseInt($routeParams.pageId) + 1);
+        };
+
+        // Go to the previous page
+        $scope.previousPage = function() {
+            $scope.goToPageId(parseInt($routeParams.pageId) - 1);
+        };
+
+        /**
+         * Gets the page image with the token for this session
+         * @returns {String}
+         */
+        $scope.getPageImage = function() {
+            if($scope.page.image !== undefined) {
+                return $scope.page.image +'?token='+ sessionStorage.token;
+            } else {
+                return '';
+            }
+        };
+    }]
+);
+
 /****************************************************************************************************************************************************
  *    _____ _ _     _
  *   / ____| (_)   | |
@@ -1619,7 +1701,7 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
  *
  */
 // slideController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('slideController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$alert', '$sce', 'Cache', '$routeParams', '$location', function(RestangularCache, Restangular, $scope, Page, $alert, $sce, Cache, $routeParams, $location) {
+angularRest.controller('slideController', ['RestangularCache', '$scope', 'Page', '$routeParams', '$location', function(RestangularCache, $scope, Page, $routeParams, $location) {
         $scope.slide = {};
         $scope.comments = {
             comments: [],
