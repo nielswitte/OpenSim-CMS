@@ -11,7 +11,11 @@ var angularRest = angular.module('OpenSim-CMS', [
     'ngAnimate'
 ]).config(function($routeProvider, $locationProvider) {
     $routeProvider
-    .when('/documents', {
+    .when('/dashboard', {
+        templateUrl: partial_path +'/dashboard.html',
+        controller: 'dashboardController',
+        requireLogin: true
+    }).when('/documents', {
         templateUrl: partial_path +'/document/documents.html',
         controller: 'documentsController',
         requireLogin: true
