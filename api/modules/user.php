@@ -15,7 +15,7 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  *
  * @author Niels Witte
  * @version 0.4
- * @date April 1st, 2014
+ * @date April 4th, 2014
  * @since February 24th, 2014
  */
 class User extends Module {
@@ -459,10 +459,12 @@ class User extends Module {
     public function getUserFilesById($args) {
         $data = array();
         $db = \Helper::getDB();
-        $db->where('ownerId', $db->escape($args[1]));
-        $documents = $db->get('documents');
+        $db->join('users u', 'u.id = d.ownerId', 'LEFT');
+        $db->where('d.ownerId', $db->escape($args[1]));
+        $documents = $db->get('documents d', NULL, '*, d.id as documentId, u.id AS userId');
         foreach($documents as $document) {
-            $file   = new \Models\File($document['id'], $document['type'], $document['title'], $document['ownerId'], $document['creationDate'], $document['modificationDate'], $document['file']);
+            $user   = new \Models\User($document['userId'], $document['username'], $document['email'], $document['firstName'], $document['lastName']);
+            $file   = new \Models\File($document['documentId'], $document['type'], $document['title'], $user, $document['creationDate'], $document['modificationDate'], $document['file']);
             $data[] = $this->api->getModule('file')->getFileData($file);
         }
 
