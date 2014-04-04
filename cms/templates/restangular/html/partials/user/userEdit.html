@@ -32,25 +32,21 @@
             <input type="email" class="form-control" id="inputEmail" ng-model="user.email" required placeholder="E-mail address">
         </div>
     </div>
-    <div class="form-group" ng-show="allowPermissions()">
-        <label class="col-sm-2 control-label">Permissions</label>
-        <div class="col-sm-10">
-            <table>
-                <tr ng-repeat="(type, permission) in user.permissions">
-                    <th class="col-sm-3">{{type}}</th>
-                    <td>
-                        <div class="btn-group" ng-model="user.permissions[type]" bs-radio-group>
-                            <label class="btn btn-default"><input type="radio" class="btn btn-default" value="0"> None</label>
-                            <label class="btn btn-default"><input type="radio" class="btn btn-default" value="4"> Read</label>
-                            <label class="btn btn-default"><input type="radio" class="btn btn-default" value="5"> Execute</label>
-                            <label class="btn btn-default"><input type="radio" class="btn btn-default" value="6"> Write</label>
-                            <label class="btn btn-default"><input type="radio" class="btn btn-default" value="7"> All</label>
-                        </div>
-                    </td>
-                </tr>
-            </table>
+    <fieldset>
+        <legend>Permissions</legend>
+        <div class="form-group" ng-show="allowPermissions()" ng-repeat="(type, permission) in user.permissions">
+            <label class="col-sm-2 control-label">{{type}}</label>
+            <div class="col-sm-10">
+                <div class="btn-group" ng-model="user.permissions[type]" bs-radio-group>
+                    <label class="btn btn-default"><input type="radio" name="permission_{{type}}" class="btn btn-default" value="0"> None</label>
+                    <label class="btn btn-default"><input type="radio" name="permission_{{type}}" class="btn btn-default" value="4"> Read</label>
+                    <label class="btn btn-default"><input type="radio" name="permission_{{type}}" class="btn btn-default" value="5"> Execute</label>
+                    <label class="btn btn-default"><input type="radio" name="permission_{{type}}" class="btn btn-default" value="6"> Write</label>
+                    <label class="btn btn-default"><input type="radio" name="permission_{{type}}" class="btn btn-default" value="7"> All</label>
+                </div>
+            </div>
         </div>
-    </div>
+    </fieldset>
     <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10" ng-show="allowUpdate()">
             <button class="btn btn-primary" type="submit"><i class="glyphicon glyphicon-ok"></i> Save Changes</button>
