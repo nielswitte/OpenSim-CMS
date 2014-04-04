@@ -418,9 +418,14 @@ state presentation {
             integer length      = (integer) JsonGetValue(json_body, "slidesCount");
             // Get from each slide the URL or the UUID
             for (x = 0; x < length; x++) {
-                string slideUuid        = JsonGetValue(json_slides, "["+ x +"].{cache}.{"+ serverId +"}.{uuid}");
-                string slideUrl         = JsonGetValue(json_slides, "["+ x +"].{image}");
-                string slideExpired     = JsonGetValue(json_slides, "["+ x +"].{cache}.{"+ serverId +"}.{isExpired}");
+                string slideUuid     = "";
+                string slideExpired  = "";
+                // Only process if there is a cache (to prevent console warnings)
+                if(JsonGetJson(json_slides, "["+ x +"].cache") != "[]") {
+                    slideUuid        = JsonGetValue(json_slides, "["+ x +"].cache.{"+ serverId +"}.uuid");
+                    slideExpired     = JsonGetValue(json_slides, "["+ x +"].cache.{"+ serverId +"}.isExpired");
+                }
+                string slideUrl      = JsonGetValue(json_slides, "["+ x +"].image");
 
                 // UUID set and not expired?
                 if(slideUuid != "" && slideExpired == "0") {
@@ -459,8 +464,8 @@ state presentation {
 
                 // List all presentations
                 for(x = 0; x < documentCount; x++) {
-                    if(JsonGetValue(json_body, "["+ x +"].{type}") == "presentation") {
-                        presentations += [JsonGetValue(json_body, "["+ x +"].{id}")];
+                    if(JsonGetValue(json_body, "["+ x +"].type") == "presentation") {
+                        presentations += [JsonGetValue(json_body, "["+ x +"].id")];
                     }
                 }
 
@@ -644,9 +649,14 @@ state document {
             integer length      = (integer) JsonGetValue(json_body, "pagesCount");
             // Get from each page the URL or the UUID
             for (x = 0; x < length; x++) {
-                string pageUuid        = JsonGetValue(json_pages, "["+ x +"].{cache}.{"+ serverId +"}.{uuid}");
-                string pageUrl         = JsonGetValue(json_pages, "["+ x +"].{image}");
-                string pageExpired     = JsonGetValue(json_pages, "["+ x +"].{cache}.{"+ serverId +"}.{isExpired}");
+                string pageUuid     = "";
+                string pageExpired  = "";
+                // Only process if there is a cache (to prevent console warnings)
+                if(JsonGetJson(json_pages, "["+ x +"].cache") != "[]") {
+                    pageUuid        = JsonGetValue(json_pages, "["+ x +"].cache.{"+ serverId +"}.uuid");
+                    pageExpired     = JsonGetValue(json_pages, "["+ x +"].cache.{"+ serverId +"}.isExpired");
+                }
+                string pageUrl      = JsonGetValue(json_pages, "["+ x +"].image");
 
                 // UUID set and not expired?
                 if(pageUuid != "" && pageExpired == "0") {
@@ -683,8 +693,8 @@ state document {
                 integer x;
                 // List all presentations
                 for(x = 0; x < documentCount; x++) {
-                    if(JsonGetValue(json_body, "["+ x +"].{type}") == "document") {
-                        documents += [JsonGetValue(json_body, "["+ x +"].{id}")];
+                    if(JsonGetValue(json_body, "["+ x +"].type") == "document") {
+                        documents += [JsonGetValue(json_body, "["+ x +"].id")];
                     }
                 }
 
