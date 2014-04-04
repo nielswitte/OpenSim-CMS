@@ -637,7 +637,7 @@ This is done by using the PUT function for a single slide (see below).
 The slide details for just one specific slide can be accessed through its ID:
 
 ```http
-GET /api/presentation/<ID>/slide/<SLIDE#>/ HTTP/1.1
+GET /api/presentation/<ID>/slide/<SLIDE-ID>/ HTTP/1.1
 ```
 
 However, it is often easier to navigate based on page/slide number:

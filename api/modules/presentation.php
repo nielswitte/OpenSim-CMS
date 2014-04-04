@@ -14,7 +14,7 @@ require_once dirname(__FILE__) .'/../controllers/presentationController.php';
  *
  * @author Niels Witte
  * @version 0.4
- * @date April 2nd, 2014
+ * @date April 4th, 2014
  * @since February 24th, 2014
  */
 class Presentation extends Module {
@@ -120,7 +120,7 @@ class Presentation extends Module {
      * @return array
      */
     public function getPresentationData(\Models\Presentation $presentation, $full = TRUE) {
-        $data       = $this->api->getModule('document')->getDocumentData($presentation);
+        $data       = $this->api->getModule('file')->getFileData($presentation);
         // Include all data?
         if($full) {
             $slides     = array();
@@ -145,6 +145,7 @@ class Presentation extends Module {
         $data = array(
             'id'            => $slide->getId(),
             'number'        => $slide->getNumber(),
+            'total'         => $presentation->getNumberOfSlides(),
             'hasComments'   => $slide->hasComments(),
             'image'         => $presentation->getApiUrl() . 'slide/number/' . $slide->getNumber() . '/image/',
             'thumbnail'     => $presentation->getApiUrl() . 'slide/number/' . $slide->getNumber() . '/thumbnail/'
@@ -274,6 +275,6 @@ class Presentation extends Module {
      * @param array $args
      */
     public function getPresentationSourceById($args) {
-        $this->api->getModule('document')->getDocumentSourceById($args);
+        $this->api->getModule('file')->getFileSourceById($args);
     }
 }
