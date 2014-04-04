@@ -300,3 +300,21 @@ angularRest.directive('ngConfirmClick', [
         };
     }
 ]);
+
+/**
+ * Create a range filter for select options
+ * @example: <select ng-options="n for n in [] | range:1:30"></select>
+ *
+ * @source: http://stackoverflow.com/a/11161353
+ * @param {integer} start
+ * @param {integer} stop
+ */
+angularRest.filter('range', function() {
+    return function(input, min, max) {
+        min = parseInt(min); //Make string input int
+        max = parseInt(max);
+        for (var i = min; i < max; i++)
+            input.push(i);
+        return input;
+    };
+});

@@ -1625,11 +1625,13 @@ angularRest.controller('slideController', ['RestangularCache', 'Restangular', '$
             comments: [],
             commentCount: 0
         };
+        $scope.currentSlide = 0;
 
         // Get the slide details
         RestangularCache.one('presentation', $routeParams.documentId).one('slide', $routeParams.slideId).get().then(function(slideResponse) {
             $scope.slide = slideResponse;
             Page.setTitle('Slide '+ slideResponse.number);
+            $scope.currentSlide = slideResponse.number;
 
             if(slideResponse.hasComments !== false) {
                 // Load comments
@@ -1646,14 +1648,31 @@ angularRest.controller('slideController', ['RestangularCache', 'Restangular', '$
             return partial_path +'/comment/commentContainer.html';
         };
 
+        // Convert slide number to slide id
+        $scope.goToSlideNumber = function(slideNumber) {
+            var currentSlideNumber  = parseInt($scope.slide.number);
+            var currentSlideId      = parseInt($scope.slide.id);
+
+            if($scope.currentSlide > slideNumber) {
+                $scope.goToSlideId(currentSlideId - (currentSlideNumber - slideNumber));
+            } else {
+                $scope.goToSlideId(currentSlideId + (slideNumber - currentSlideNumber));
+            }
+        };
+
+        // Go to specific slide
+        $scope.goToSlideId = function(slideId) {
+            $location.path('document/'+ $routeParams.documentId +'/slide/'+ slideId);
+        };
+
         // Go to the next slide
         $scope.nextSlide = function() {
-            $location.path('document/'+ $routeParams.documentId +'/slide/'+ (parseInt($routeParams.slideId) + 1));
+            $scope.goToSlideId(parseInt($routeParams.slideId) + 1);
         };
 
         // Go to the previous slide
         $scope.previousSlide = function() {
-            $location.path('document/'+ $routeParams.documentId +'/slide/'+ (parseInt($routeParams.slideId) - 1));
+            $scope.goToSlideId(parseInt($routeParams.slideId) - 1);
         };
 
         /**

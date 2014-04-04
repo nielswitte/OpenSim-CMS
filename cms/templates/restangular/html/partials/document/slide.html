@@ -3,7 +3,10 @@
 </div>
 <div class="toolbar toolbar-top">
     <button ng-click="previousSlide()" type="button" class="btn btn-default" ng-show="slide.number > 1"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
-    <button ng-click="nextSlide()" type="button" class="btn btn-default">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
+    <button ng-click="nextSlide()" type="button" class="btn btn-default" ng-show="slide.number < slide.total">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
+    <div class="col-sm-1">
+        <select class="form-control" id="jumpSlideList" title="Jump to a specific slide" bs-tooltip ng-model="currentSlide" ng-options="n for n in [] | range:1:slide.total" ng-change="goToSlideNumber(currentSlide)"></select>
+    </div>
 </div>
 <div class="row">
     <div class="col-sm-12">
