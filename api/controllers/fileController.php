@@ -8,7 +8,7 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author Niels Witte
  * @version 0.2
- * @date April 2nd, 2014
+ * @date April 4th, 2014
  * @since March 10th, 2014
  */
 class FileController {
@@ -168,8 +168,10 @@ class FileController {
             throw new \Exception('Missing parameter (string) "title"', 2);
         } elseif(!isset($parameters['type'])) {
             throw new \Exception('Missing parameter (string) "type"', 3);
-        } elseif (!isset($parameters['file'])) {
+        } elseif(!isset($parameters['file'])) {
             throw new \Exception('Missing parameter (file) "file" with a valid file type', 4);
+        } elseif(in_array($parameters['type'], array('document', 'presentation')) && !in_array(\Helper::getBase64Header($parameters['file']), array('application/pdf'))) {
+            throw new \Exception('Type set to "'. $parameters['type'] .'" but file isn\'t a PDF', 5);
         } else {
             $result = TRUE;
         }
