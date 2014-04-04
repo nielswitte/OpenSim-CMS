@@ -9,8 +9,8 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class is the presentation model
  *
  * @author Niels Witte
- * @version 0.1
- * @date April 3rd, 2014
+ * @version 0.2
+ * @date April 4th, 2014
  * @since April 2nd, 2014
  */
 class File implements SimpleModel {
@@ -80,6 +80,10 @@ class File implements SimpleModel {
         $db = \Helper::getDB();
         $db->join('users u', 'd.ownerId = u.id', 'LEFT');
         $db->where('d.id', $db->escape((int) $this->getId()));
+        // Prevent getting a document with a presentation ID or some other wrong combination
+        if($this->getType() != '') {
+            $db->where('d.type', $db->escape($this->getType()));
+        }
         $result = $db->getOne('documents d', '*, d.id AS documentId, u.id AS userId');
 
         if($result) {
