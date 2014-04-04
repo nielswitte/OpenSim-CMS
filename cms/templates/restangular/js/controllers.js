@@ -524,6 +524,9 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
         // Toggle collapse of the navigation bar
         $scope.toggleNavigation = function() {
             jQuery('#bs-navbar').toggleClass('collapse');
+            jQuery('#bs-navbar').on('click', 'a[href^="#!"]', function() {
+                jQuery('#bs-navbar').addClass('collapse');
+            });
         };
 
         // Get the right main navigation (left area of navbar)
