@@ -9,6 +9,7 @@
     <time>{{comment.timestamp}}</time>
 </header>
 <span ng-bind-html="markdown(comment.message)" class="message" data-message="{{comment.message}}" ng-hide="showUpdateForm(comment.id)"></span>
+<span class="edited" ng-show="comment.editTimestamp && !showUpdateForm(comment.id)">Edited: {{comment.editTimestamp}}</span>
 <form ng-submit="updateComment(comment.id)" ng-show="showUpdateForm(comment.id)">
     <div class="form-group">
         <textarea class="form-control" ng-model="message" id="commentUpdate-{{comment.id}}" rows="8" data-message="{{comment.message}}" name="message"></textarea>
