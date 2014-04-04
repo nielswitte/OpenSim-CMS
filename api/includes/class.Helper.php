@@ -470,6 +470,8 @@ END:VCALENDAR";
             $parent = new \Models\Slide($id, 1, '');
         } elseif($type == 'meeting') {
             $parent = new \Models\Meeting($id);
+        } elseif($type == 'page') {
+            $parent = new \Models\Page($id, 1, '');
         } else {
             $parent = FALSE;
         }

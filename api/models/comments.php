@@ -10,8 +10,8 @@ require_once dirname(__FILE__) .'/comment.php';
  * This class handles comments on a given object
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 1st, 2014
+ * @version 0.2a
+ * @date April 4th, 2014
  * @since March 28th, 2014
  */
 class Comments implements SimpleModel {
@@ -48,6 +48,8 @@ class Comments implements SimpleModel {
             $type = 'slide';
         } elseif($this->getParent() instanceof \Models\Meeting) {
             $type = 'meeting';
+        } elseif($this->getParent() instanceof \Models\Page) {
+            $type = 'page';
         } else {
             $type = FALSE;
         }
