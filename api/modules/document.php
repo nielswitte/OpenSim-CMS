@@ -13,7 +13,7 @@ require_once dirname(__FILE__) .'/../controllers/pageController.php';
  * Implements the functions for documents
  *
  * @author Niels Witte
- * @version 0.4a
+ * @version 0.4b
  * @date April 4th, 2014
  * @since March 3rd, 2014
  */
@@ -155,9 +155,10 @@ class Document extends Module {
      */
     public function getPageImageByNumber($args) {
         // Get document and page details
-        $document   = new \Models\Document($args[1], $args[2]);
+        $document       = new \Models\Document($args[1], $args[2]);
         $document->getPages();
-        $pagePath   = $document->getPath() . DS .'page-'. ($document->getCurrentPage() < 10 && $document->getNumberOfPages() >= 10 ? '0'. $document->getCurrentPage() : $document->getCurrentPage()) .'.'. IMAGE_TYPE;
+        $pageNr         = str_pad($document->getCurrentPage(), strlen($document->getNumberOfPages()), '0', STR_PAD_LEFT);
+        $pagePath       = $document->getPath() . DS .'page-'. $pageNr .'.'. IMAGE_TYPE;
 
         if(!\Helper::imageResize($pagePath, $pagePath, IMAGE_HEIGHT, IMAGE_WIDTH)) {
             throw new \Exception('Requested page does not exists', 5);
@@ -177,8 +178,9 @@ class Document extends Module {
     public function getPageThumbnailByNumber($args) {
         $document       = new \Models\Document($args[1], $args[2]);
         $document->getPages();
-        $pagePath       = $document->getPath() . DS .'page-'. ($document->getCurrentPage() < 10 && $document->getNumberOfPages() >= 10 ? '0'. $document->getCurrentPage() : $document->getCurrentPage()) .'.'. IMAGE_TYPE;
-        $thumbPath      = $document->getThumbnailPath() . DS .'page-'. ($document->getCurrentPage() < 10 && $document->getNumberOfPages() >= 10 ? '0'. $document->getCurrentPage() : $document->getCurrentPage()) .'.jpg';
+        $pageNr         = str_pad($document->getCurrentPage(), strlen($document->getNumberOfPages()), '0', STR_PAD_LEFT);
+        $pagePath       = $document->getPath() . DS .'page-'. $pageNr .'.'. IMAGE_TYPE;
+        $thumbPath      = $document->getThumbnailPath() . DS .'page-'. $pageNr .'.jpg';
 
         if(!\Helper::imageResize($pagePath, $thumbPath, IMAGE_THUMBNAIL_HEIGHT, IMAGE_THUMBNAIL_WIDTH)) {
             throw new \Exception('Requested page does not exists', 5);

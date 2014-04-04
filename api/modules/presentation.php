@@ -13,7 +13,7 @@ require_once dirname(__FILE__) .'/../controllers/presentationController.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.4
+ * @version 0.4a
  * @date April 4th, 2014
  * @since February 24th, 2014
  */
@@ -203,7 +203,8 @@ class Presentation extends Module {
         // Get presentation and slide details
         $presentation   = new \Models\Presentation($args[1], $args[2]);
         $presentation->getSlides();
-        $slidePath      = $presentation->getPath() . DS .'slide-'. ($presentation->getCurrentSlide() < 10 && $presentation->getNumberOfSlides() >= 10 ? '0'. $presentation->getCurrentSlide() : $presentation->getCurrentSlide()) .'.'. IMAGE_TYPE;
+        $slidenr        = str_pad($presentation->getCurrentSlide(), strlen($presentation->getNumberOfSlides()), '0', STR_PAD_LEFT);
+        $slidePath      = $presentation->getPath() . DS .'slide-'. $slidenr .'.'. IMAGE_TYPE;
 
         if(!\Helper::imageResize($slidePath, $slidePath, IMAGE_HEIGHT, IMAGE_WIDTH)) {
             throw new \Exception('Requested slide does not exists', 5);
@@ -223,8 +224,9 @@ class Presentation extends Module {
     public function getSlideThumbnailByNumber($args) {
         $presentation   = new \Models\Presentation($args[1], $args[2]);
         $presentation->getSlides();
-        $slidePath      = $presentation->getPath() . DS .'slide-'. ($presentation->getCurrentSlide() < 10 && $presentation->getNumberOfSlides() >= 10 ? '0'. $presentation->getCurrentSlide() : $presentation->getCurrentSlide()) .'.'. IMAGE_TYPE;
-        $thumbPath      = $presentation->getThumbnailPath() . DS .'slide-'. ($presentation->getCurrentSlide() < 10 && $presentation->getNumberOfSlides() >= 10 ? '0'. $presentation->getCurrentSlide() : $presentation->getCurrentSlide()) .'.jpg';
+        $slidenr        = str_pad($presentation->getCurrentSlide(), strlen($presentation->getNumberOfSlides()), '0', STR_PAD_LEFT);
+        $slidePath      = $presentation->getPath() . DS .'slide-'. $slidenr .'.'. IMAGE_TYPE;
+        $thumbPath      = $presentation->getThumbnailPath() . DS .'slide-'. $slidenr .'.jpg';
 
         if(!\Helper::imageResize($slidePath, $thumbPath, IMAGE_THUMBNAIL_HEIGHT, IMAGE_THUMBNAIL_WIDTH)) {
             throw new \Exception('Requested slide does not exists', 5);
