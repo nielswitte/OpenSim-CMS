@@ -1,7 +1,16 @@
 <ol class="breadcrumb">
-    <li><a href="#!/home">Home</a></li>
+    <li><a href="#!/"><i class="glyphicon glyphicon-home"></i> Home</a></li>
     <li class="active">Dashboard</li>
 </ol>
 <div class="page-header">
     <h1>Dashboard</h1>
+    <div class="row">
+        <div class="col-sm-4">
+            <h2>Meetings</h2>
+            <div class="" ng-repeat="meeting in meetings">
+                <span class="label label-info">{{meeting.startDate}}</span>
+                {{meeting.name}}
+            </div>
+        </div>
+    </div>
 </div>

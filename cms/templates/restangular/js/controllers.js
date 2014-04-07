@@ -561,7 +561,10 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
  */
 // documentsController ------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('dashboardController', ['Restangular', 'RestangularCache', '$scope', 'Page', function(Restangular, RestangularCache, $scope, Page) {
-
+        // Load all meetings the user is a participant for
+        RestangularCache.one('user', sessionStorage.id).getList('meetings').then(function(meetingsResponse) {
+            $scope.meetings = meetingsResponse;
+        });
     }]
 );
 /****************************************************************************************************************************************************
@@ -911,7 +914,7 @@ angularRest.controller('meetingsController', ['Restangular', 'RestangularCache',
         var meetingRequestUrl;
 
         // Get all meetings for the calendar
-        RestangularCache.one('meetings', date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).all('calendar').getList().then(function(meetingsResponse) {
+        RestangularCache.one('meetings', date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).getList('calendar').then(function(meetingsResponse) {
             // Show loading screen
             jQuery('#loading').show();
 
@@ -1086,7 +1089,7 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
 
         // Get meeting rooms for selected region
         $scope.getMeetingRooms = function() {
-            RestangularCache.one('grid', $scope.meeting.room.grid.id).one('region', $scope.meeting.room.region.uuid).all('rooms').getList().then(function(roomsResponse){
+            RestangularCache.one('grid', $scope.meeting.room.grid.id).one('region', $scope.meeting.room.region.uuid).getList('rooms').then(function(roomsResponse){
                 $scope.rooms = roomsResponse;
             });
         };
@@ -1274,7 +1277,7 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
 
                 // Load meetings on same day
                 var date = new moment().subtract('week', 2).format('YYYY-MM-DD');
-                Restangular.one('meetings', date).all('calendar').getList().then(function(meetingsResponse) {
+                Restangular.one('meetings', date).getList('calendar').then(function(meetingsResponse) {
                     calendar = jQuery('#calendar').calendar({
                         language:       'en-US',
                         events_source:  meetingsResponse,
@@ -1454,7 +1457,7 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
 
         // Get meeting rooms for selected region
         $scope.getMeetingRooms = function() {
-            RestangularCache.one('grid', $scope.meeting.room.grid.id).one('region', $scope.meeting.room.region.uuid).all('rooms').getList().then(function(roomsResponse){
+            RestangularCache.one('grid', $scope.meeting.room.grid.id).one('region', $scope.meeting.room.region.uuid).getList('rooms').then(function(roomsResponse){
                 $scope.rooms = roomsResponse;
             });
         };
@@ -1605,7 +1608,7 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
 
         // Load meetings on same day
         var date = new moment().format('YYYY-MM-DD');
-        Restangular.one('meetings', date).all('calendar').getList().then(function(meetingsResponse) {
+        Restangular.one('meetings', date).getList('calendar').then(function(meetingsResponse) {
             calendar = jQuery('#calendar').calendar({
                 language:       'en-US',
                 events_source:  meetingsResponse,
