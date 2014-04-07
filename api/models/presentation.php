@@ -101,7 +101,6 @@ class Presentation extends File {
             $this->getSlides();
         }
 
-        $result = FALSE;
         // Slide exists? (array starts counting at 1)
         if(count($this->getSlides()) > 0) {
             foreach($this->getSlides() as $slide) {
