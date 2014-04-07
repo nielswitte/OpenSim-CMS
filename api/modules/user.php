@@ -15,7 +15,7 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  *
  * @author Niels Witte
  * @version 0.4
- * @date April 4th, 2014
+ * @date April 7th, 2014
  * @since February 24th, 2014
  */
 class User extends Module {
@@ -263,6 +263,7 @@ class User extends Module {
         $data['firstName']          = $user->getFirstName();
         $data['lastName']           = $user->getLastName();
         $data['email']              = $user->getEmail();
+        $data['lastLogin']          = $user->getLastLogin();
 
         if($full) {
             $data['permissions']        = $user->getRights();

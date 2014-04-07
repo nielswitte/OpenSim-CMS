@@ -29,7 +29,8 @@ This request will return, on succes the following JSON:
     "token": "53048c5375b1d2.66536292",
     "ip": "192.168.1.102",
     "expires": "2014-02-19 12:19:55",
-    "userId": 1
+    "userId": 1,
+    "lastLogin": "2014-02-16 15:32:14"
 }
 ```
 

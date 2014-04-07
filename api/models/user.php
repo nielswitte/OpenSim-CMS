@@ -9,8 +9,8 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class is the user model
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 1st, 2014
+ * @version 0.3
+ * @date April 7th, 2014
  * @since February 10th, 2014
  */
 class User implements SimpleModel {
@@ -18,7 +18,7 @@ class User implements SimpleModel {
     private $username;
     private $firstName, $lastName;
     private $email;
-    private $presentationIds = array();
+    private $lastLogin;
     private $avatars;
     private $rights = array();
 
@@ -26,17 +26,19 @@ class User implements SimpleModel {
      * Construct a new User with the given UUID
      *
      * @param integer $id - [Optional] The ID of the user
-     * @param string $username - [Optional] the user's user name
-     * @param string $email - [Optional] the user's email address
-     * @param string $firstName - [Optional] the user's first name
-     * @param string $lastName- [Optional] the user's last name
+     * @param string $username - [Optional] The user's user name
+     * @param string $email - [Optional] The user's email address
+     * @param string $firstName - [Optional] The user's first name
+     * @param string $lastName - [Optional] The user's last name
+     * @param string $lastLogin - [Optional] The last timestamp the user logged in (format: YYYY-MM-DD HH:mm:ss)
      */
-    public function __construct($id = -1, $username = '', $email = '', $firstName = '', $lastName = '') {
+    public function __construct($id = -1, $username = '', $email = '', $firstName = '', $lastName = '', $lastLogin = '0000-00-00 00:00:00') {
         $this->id           = $id;
         $this->username     = $username;
         $this->email        = $email;
         $this->firstName    = $firstName;
         $this->lastName     = $lastName;
+        $this->lastLogin    = $lastLogin;
     }
 
     /**
@@ -64,6 +66,7 @@ class User implements SimpleModel {
                 $this->firstName        = $user['firstName'];
                 $this->lastName         = $user['lastName'];
                 $this->email            = $user['email'];
+                $this->lastLogin        = $user['lastLogin'];
             } else {
                 throw new \Exception("User not found", 3);
             }
@@ -139,6 +142,15 @@ class User implements SimpleModel {
      */
     public function getEmail() {
         return $this->email;
+    }
+
+    /**
+     * Returns the last login timestamp of the user
+     *
+     * @return string - Format YYYY-MM-DD HH:mm:ss
+     */
+    public function getLastLogin() {
+        return $this->lastLogin;
     }
 
     /**

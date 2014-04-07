@@ -442,6 +442,7 @@ angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$
                         sessionStorage.id           = userResponse.id;
                         sessionStorage.firstName    = userResponse.firstName;
                         sessionStorage.lastName     = userResponse.lastName;
+                        sessionStorage.lastLogin    = authResponse.lastLogin;
 
                         // Store permissions
                         sessionStorage.authPermission          = userResponse.permissions.auth;
@@ -466,7 +467,7 @@ angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$
                         sessionStorage.tokenTimeOut = moment().add(30, 'minutes').unix();
 
                         // Feedback to user
-                        $alert({title: 'Logged In!', content: $sce.trustAsHtml('You are now logged in as '+ userResponse.username), type: 'success'});
+                        $alert({title: 'Logged In!', content: $sce.trustAsHtml('You are now logged in as '+ userResponse.username +'. Your previous authentication was on '+ authResponse.lastLogin), type: 'success'});
                         // Remove all cached items (if any)
                         Cache.clearCache();
                         // Back to previous page

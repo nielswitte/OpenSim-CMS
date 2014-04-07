@@ -80,10 +80,15 @@ class Auth extends Module {
             // User has permission to use Auth?
             if($user->checkRights($this->getName(), \Auth::READ)) {
                 // Store token
-                $result = !$db->insert('tokens', $data);
+                $result             = $db->insert('tokens', $data);
+                // Get the last login timestamp
+                $data['lastLogin']  = $user->getLastLogin();
                 // Query should affect one row, if not something went wrong
-                if($result != 1) {
+                if($result === FALSE) {
                     throw new \Exception('Storing token at the server side failed', 3);
+                } else {
+                    $db->where('id', $db->escape($user->getId()));
+                    $db->update('users', array('lastLogin' => $db->now()));
                 }
             // User lacks permission
             } else {
