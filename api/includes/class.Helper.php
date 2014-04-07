@@ -5,8 +5,8 @@ defined('EXEC') or die('Config not loaded');
  * Helper class to support the CMS and API
  *
  * @author Niels Witte
- * @version 0.3
- * @date April 4th, 2014
+ * @version 0.3a
+ * @date April 7th, 2014
  * @since February 12th, 2014
  */
 class Helper {
@@ -429,9 +429,10 @@ VERSION:2.0
 CALSCALE:GREGORIAN
 METHOD:REQUEST
 BEGIN:VEVENT
-DTSTART:". date('Ymd\THis\Z', $start) ."
-DTEND:". date('Ymd\THis\Z', $end) ."
-DTSTAMP:". date('Ymd\THis\Z') ."
+TZID:". date('e') ."
+DTSTART:". date('Ymd\THis', $start) ."
+DTEND:". date('Ymd\THis', $end) ."
+DTSTAMP:". date('Ymd\THis') ."
 ORGANIZER;CN=". $creatorName .":mailto:". $creatorEmail ."
 UID:". uniqid();
         // Add attendees
