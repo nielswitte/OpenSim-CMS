@@ -566,8 +566,10 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
  *
  */
 // documentsController ------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('dashboardController', ['Restangular', 'RestangularCache', '$scope', 'Page', function(Restangular, RestangularCache, $scope, Page) {
+angularRest.controller('dashboardController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$sce', function(Restangular, RestangularCache, $scope, Page, $sce) {
         $scope.meetings = [];
+        $scope.comments = [];
+        Page.setTitle('Dashboard');
 
         // Load all meetings the user is a participant for
         RestangularCache.one('user', sessionStorage.id).getList('meetings').then(function(meetingsResponse) {
@@ -576,10 +578,10 @@ angularRest.controller('dashboardController', ['Restangular', 'RestangularCache'
 
         // Meeting offsets
         $scope.meetingOffset = 0;
-        var stepSize         = 10;
+        var stepSizeMeetings = 8;
         // Get previous set of meetings in the list
         $scope.previousMeetingOffset = function() {
-            var newOffset = parseInt($scope.meetingOffset) - parseInt(stepSize);
+            var newOffset = parseInt($scope.meetingOffset) - parseInt(stepSizeMeetings);
             if(newOffset < 0) {
                 newOffset = 0;
             }
@@ -587,9 +589,12 @@ angularRest.controller('dashboardController', ['Restangular', 'RestangularCache'
         };
         // Get next set off meetings in the list
         $scope.nextMeetingOffset = function() {
-            var newOffset = parseInt($scope.meetingOffset) + parseInt(stepSize);
+            var newOffset = parseInt($scope.meetingOffset) + parseInt(stepSizeMeetings);
             if(newOffset >= $scope.meetings.length) {
-                newOffset = $scope.meetings.length - parseInt(stepSize);
+                newOffset = $scope.meetings.length - parseInt(stepSizeMeetings);
+                if(newOffset < 0) {
+                    newOffset = 0;
+                }
             }
             $scope.meetingOffset = newOffset;
         };
@@ -599,7 +604,7 @@ angularRest.controller('dashboardController', ['Restangular', 'RestangularCache'
         };
         // Get ending point for meeting offset
         $scope.getMeetingTo = function() {
-            return parseInt($scope.meetingOffset) + parseInt(stepSize);
+            return parseInt($scope.meetingOffset) + parseInt(stepSizeMeetings);
         };
 
         // Option to convert the timestamp to the given moment.js format
@@ -610,6 +615,48 @@ angularRest.controller('dashboardController', ['Restangular', 'RestangularCache'
         // Determine if the given timestamp is in the future
         $scope.inFuture = function(timestamp) {
             return new moment(timestamp, 'YYYY-MM-DD HH:mm:ss').unix() > new moment().unix();
+        };
+
+        // Comment offsets
+        $scope.commentOffset = 0;
+        var stepSizeComments = 6;
+        // Get previous set of comments in the list
+        $scope.previousCommentOffset = function() {
+            var newOffset = parseInt($scope.commentOffset) - parseInt(stepSizeComments);
+            if(newOffset < 0) {
+                newOffset = 0;
+            }
+            $scope.commentOffset = newOffset;
+        };
+        // Get next set off comments in the list
+        $scope.nextCommentOffset = function() {
+            var newOffset = parseInt($scope.commentOffset) + parseInt(stepSizeComments);
+            if(newOffset >= $scope.comments.comments.length) {
+                newOffset = $scope.comments.comments.length - parseInt(stepSizeComments);
+                if(newOffset < 0) {
+                    newOffset = 0;
+                }
+            }
+
+            $scope.commentOffset = newOffset;
+        };
+        // Get starting point for comment offset
+        $scope.getCommentFrom = function() {
+            return $scope.commentOffset;
+        };
+        // Get ending point for comment offset
+        $scope.getCommentTo = function() {
+            return parseInt($scope.commentOffset) + parseInt(stepSizeComments);
+        };
+
+        // Load all comments since the user last visited
+        RestangularCache.one('comments', moment(sessionStorage.lastLogin, 'YYYY-MM-DD HH:mm:ss').unix()).get().then(function(commentsResponse) {
+            $scope.comments = commentsResponse;
+        });
+
+        // Trust the message as safe markdown html
+        $scope.markdown = function(message) {
+            return $sce.trustAsHtml(markdown.toHTML(""+ message));
         };
     }]
 );

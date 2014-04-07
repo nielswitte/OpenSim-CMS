@@ -21,5 +21,18 @@
             </a>
         </div>
     </div>
+    <div class="col-sm-8" id="comments">
+        <h2>New comments ({{comments.commentCount}})</h2>
+        <div class="toolbar toolbar-top">
+            <button class="btn btn-default" ng-click="nextCommentOffset()"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
+            <button class="btn btn-default"  ng-click="previousCommentOffset()">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
+        </div>
+        <div class="list-group">
+            <a ng-href="#!/{{comment.type}}" class="list-group-item list-group-hover" ng-repeat="comment in comments.comments | limitFromTo: getCommentFrom():getCommentTo()">
+                <h4 class="list-group-item-heading">{{comment.user.username}}</h4>
+                <p class="list-group-item-text" ng-bind-html="markdown(comment.message)"></p>
+            </a>
+        </div>
+    </div>
 </div>
 

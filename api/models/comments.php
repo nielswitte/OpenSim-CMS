@@ -16,13 +16,6 @@ require_once dirname(__FILE__) .'/comment.php';
  */
 class Comments implements SimpleModel {
     /**
-     * The class instance from which the parent is a child
-     * @example Slide is child of Presentation
-     *
-     * @var object
-     */
-    private $parentParent;
-    /**
      * The class instance to which these comments are linked, for example a Document
      * @var object
      */
@@ -53,12 +46,10 @@ class Comments implements SimpleModel {
             $type = 'document';
         } elseif($this->getParent() instanceof \Models\Slide) {
             $type = 'slide';
-            $this->getParentParentInforFromDatabase($type);
         } elseif($this->getParent() instanceof \Models\Meeting) {
             $type = 'meeting';
         } elseif($this->getParent() instanceof \Models\Page) {
             $type = 'page';
-            $this->getParentParentInforFromDatabase($type);
         } else {
             $type = FALSE;
         }
@@ -99,54 +90,12 @@ class Comments implements SimpleModel {
     }
 
     /**
-     * Gets the parent's parent from the database
-     *
-     * @param string $type
-     */
-    public function getParentParentInforFromDatabase($type) {
-        $db = \Helper::getDB();
-        if($type == 'slide') {
-            // Get the presentation
-            $db->where('s.id', $db->escape($this->getParent()->getId()));
-            $db->join('document_slides s', 's.documentId = d.id', 'LEFT');
-            $result = $db->getOne('documents d', 's.*');
-            if($result) {
-                $user               = new \Models\User($result['ownerId']);
-                $this->parentParent = new \Models\Presentation($result['id'], 0, $result['title'], $user, $result['creationTime'], $result['modificationTime'], $result['file']);
-            }
-        } elseif($type == 'page') {
-            // Get the document
-            $db->where('p.id', $db->escape($this->getParent()->getId()));
-            $db->join('document_pages p', 'p.documentId = d.id', 'LEFT');
-            $result = $db->getOne('documents d', 'd.*');
-
-            if($result) {
-                $user               = new \Models\User($result['ownerId']);
-                $this->parentParent = new \Models\Document($result['id'], 0, $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
-            }
-        } else {
-
-        }
-    }
-
-    /**
      * Returns the instance to which the comments are linked
      *
      * @return object
      */
     public function getParent() {
         return $this->parent;
-    }
-
-    /**
-     * Returns the parent of the parent object
-     *
-     * @example Slide has a parent Presentation, this will return presentation
-     *
-     * @return object
-     */
-    public function getParentParent() {
-        return $this->parentParent;
     }
 
     /**

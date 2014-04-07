@@ -11,8 +11,8 @@ require_once dirname(__FILE__) .'/../controllers/commentController.php';
  * Implements the functions for comments
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 1st, 2014
+ * @version 0.3
+ * @date April 7th, 2014
  * @since March 28th, 2014
  */
 class Comment extends Module {
@@ -40,9 +40,12 @@ class Comment extends Module {
      */
     public function setRoutes() {
         $this->api->addRoute("/^\/comments\/([a-z]+)\/(\d+)\/?$/",                      'getComments',           $this, 'GET',       \Auth::READ);    // Get list with comments
+        $this->api->addRoute("/^\/comments\/(\d+)\/?$/",                                'getCommentsByTime',     $this, 'GET',       \Auth::READ);    // Get 50 comments after a given timestamp
+        $this->api->addRoute("/^\/comments\/(\d+)\/(\d+)\/?$/",                         'getCommentsByTime',     $this, 'GET',       \Auth::READ);    // Get 50 comments after a given timestamp with offset
         $this->api->addRoute("/^\/comment\/([a-z]+)\/(\d+)\/?$/",                       'createComment',         $this, 'POST',      \Auth::EXECUTE); // Create a new comment
         $this->api->addRoute("/^\/comment\/(\d+)\/?$/",                                 'updateCommentById',     $this, 'PUT',       \Auth::READ);    // Updates the given comment
         $this->api->addRoute("/^\/comment\/(\d+)\/?$/",                                 'deleteCommentById',     $this, 'DELETE',    \Auth::READ);    // Removes the given comment
+        $this->api->addRoute("/^\/comment\/(\d+)\/parents\/?$/",                        'getCommentParentsById', $this, 'GET',       \Auth::READ);    // Gets a list containing the parent id path to the given comment
     }
 
     /**
@@ -68,15 +71,70 @@ class Comment extends Module {
     }
 
     /**
+     * Returns all comments since the given timestamp as a flat list (not threaded)
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getCommentsByTime($args) {
+        $offset     = isset($args[2]) ? $args[2] : 0;
+        $db         = \Helper::getDB();
+        $db->where('c.timestamp', array('>=' => date('Y-m-d H:i:s', $args[1])));
+        $db->join('users u', 'c.userId = u.id', 'LEFT');
+        $db->orderBy('c.timestamp', 'DESC');
+        $results    = $db->get('comments c', array($offset, 50), '*, c.id AS commentID, u.id AS userId');
+        $comments   = new \Models\Comments(NULL);
+        $number     = 1;
+        foreach($results as $result) {
+            $user    = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
+            $comment = new \Models\Comment($result['id'], $result['parentId'], $number, $user, $result['type'], $result['timestamp'], $result['message'], $result['editTimestamp']);
+            $comments->addComment($comment);
+            $number++;
+        }
+
+        return $this->getCommentsData($comments, TRUE);
+    }
+
+    /**
+     * Returns a list which represents the path from parent to child for this comment
+     * @example for a comment with ID 6 which is of type slide it will return [0] => presentation, [1] => presentationId, [2] => slide, [3] => slideId
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getCommentParentsById($args) {
+        //@todo implement
+
+        $data = array(
+            'document',
+            1,
+            'page',
+            2
+        );
+
+        return $data;
+    }
+
+    /**
      * Used for formatting the root Level
      *
      * @param \Models\Comments $comments
+     * @param boolean $flat - [Optional] Returns the comments as a flat list
      * @return array
      */
-    public function getCommentsData(\Models\Comments $comments) {
+    public function getCommentsData(\Models\Comments $comments, $flat = FALSE) {
         $data = array();
-        foreach($comments->getCommentsThreaded($comments->getComments()) as $comment) {
-            $data["comments"][] = array(
+
+        // Flat list or threaded?
+        if($flat) {
+            $commentsList = $comments->getComments();
+        } else {
+            $commentsList = $comments->getCommentsThreaded($comments->getComments());
+        }
+
+        // Process list
+        foreach($commentsList as $comment) {
+            $commentdata = array(
                 'id'            => $comment->getId(),
                 'parentId'      => $comment->getParentId(),
                 'number'        => $comment->getNumber(),
@@ -87,17 +145,19 @@ class Comment extends Module {
                     'lastName'  => $comment->getUser()->getLastName(),
                     'email'     => $comment->getUser()->getEmail()
                 ),
+                'type'          => $comment->getType(),
                 'timestamp'     => $comment->getTimestamp(),
                 'editTimestamp' => $comment->getEditTimestamp(),
-                'message'       => $comment->getMessage(),
-                'childrenCount' => count($comment->getChildren()),
-                'children'      => $this->getCommentData($comment)
+                'message'       => $comment->getMessage()
             );
+            // Flat list or get children?
+            if(!$flat) {
+                $commentdata['childrenCount'] = count($comment->getChildren());
+                $commentdata['children']      = $this->getCommentData($comment);
+            }
+            $data['comments'][] = $commentdata;
         }
         $data['commentCount']   = $comments->getCommentCount();
-        if($comments->getParentParent()) {
-            $data['parentId']   = $comments->getParentParent()->getId();
-        }
 
         return $data;
     }
@@ -122,6 +182,7 @@ class Comment extends Module {
                     'lastName'  => $comment->getUser()->getLastName(),
                     'email'     => $comment->getUser()->getEmail()
                 ),
+                'type'          => $comment->getType(),
                 'timestamp'     => $comment->getTimestamp(),
                 'editTimestamp' => $comment->getEditTimestamp(),
                 'message'       => $comment->getMessage(),

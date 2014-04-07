@@ -709,7 +709,7 @@ On almost everything users can leave comments (when the user has sufficient perm
 The comments can be saved, retrieved and removed through the API by using the following functions:
 
 ### Get comments
-Getting the latest comments by using this URL.
+Getting the latest comments by using this URL. The comments are returned as a threaded array.
 
 ```http
 GET /api/comments/<TYPE>/<ID>/ HTTP/1.1
@@ -718,7 +718,21 @@ GET /api/comments/<TYPE>/<ID>/ HTTP/1.1
 |---------------|------------------------------------------------------------------|
 | document      | Get comments for the document with id = <ID>.                    |
 | meeting       | Get comments on the meeting with the given id.                   |
+| page          | Get comments for the page with id = <ID>.                        |
 | slide         | Get comments for the slide with id = <ID>.                       |
+
+### Get comments after given timestamp
+
+Returns a flat list with 50 comments.
+```http
+GET /api/comments/<UNIX-TIMESTAMP>/ HTTP/1.1
+```
+
+Or with an offset:
+
+```http
+GET /api/comments/<UNIX-TIMESTAMP>/<OFFSET>/ HTTP/1.1
+```
 
 ### Post a comment
 
