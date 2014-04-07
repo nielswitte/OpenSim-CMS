@@ -25,6 +25,7 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
         var timer;
         var chatAside;
         var selectedGridId;
+        var updateInterval    = 2000;
 
         // Get chat template
         $scope.getChat = function() {
@@ -69,7 +70,7 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
             // Check if grid is known and re-init chat
             } else {
                 if(selectedGridId !== undefined) {
-                    timer = setInterval(updateChat, 2000);
+                    timer = setInterval(updateChat, updateInterval);
                 }
             }
 
@@ -132,7 +133,7 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
             // Set autoscroll to true (overwrites it when switching grid)
             autoScroll       = true;
             // Start auto refreshing chat
-            timer            = setInterval(updateChat, 2000);
+            timer            = setInterval(updateChat, updateInterval);
         };
 
         // Update the chat
@@ -187,11 +188,11 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
                 jQuery('#chatAside .aside-header').removeClass('highlight');
                 // Back to 2 seconds
                 clearInterval(timer);
-                timer            = setInterval(updateChat, 2000);
+                timer            = setInterval(updateChat, updateInterval);
             } else {
                 // Change update to 5 seconds when in background
                 clearInterval(timer);
-                timer            = setInterval(updateChat, 5000);
+                timer            = setInterval(updateChat, updateInterval*5);
             }
         };
     }]
@@ -561,10 +562,50 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
  */
 // documentsController ------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('dashboardController', ['Restangular', 'RestangularCache', '$scope', 'Page', function(Restangular, RestangularCache, $scope, Page) {
+        $scope.meetings = [];
+
         // Load all meetings the user is a participant for
         RestangularCache.one('user', sessionStorage.id).getList('meetings').then(function(meetingsResponse) {
             $scope.meetings = meetingsResponse;
         });
+
+        // Meeting offsets
+        $scope.meetingOffset = 0;
+        var stepSize         = 10;
+        // Get previous set of meetings in the list
+        $scope.previousMeetingOffset = function() {
+            var newOffset = parseInt($scope.meetingOffset) - parseInt(stepSize);
+            if(newOffset < 0) {
+                newOffset = 0;
+            }
+            $scope.meetingOffset = newOffset;
+        };
+        // Get next set off meetings in the list
+        $scope.nextMeetingOffset = function() {
+            var newOffset = parseInt($scope.meetingOffset) + parseInt(stepSize);
+            if(newOffset >= $scope.meetings.length) {
+                newOffset = $scope.meetings.length - parseInt(stepSize);
+            }
+            $scope.meetingOffset = newOffset;
+        };
+        // Get starting point for meeting offset
+        $scope.getMeetingFrom = function() {
+            return $scope.meetingOffset;
+        };
+        // Get ending point for meeting offset
+        $scope.getMeetingTo = function() {
+            return parseInt($scope.meetingOffset) + parseInt(stepSize);
+        };
+
+        // Option to convert the timestamp to the given moment.js format
+        $scope.convertTimestamp = function(timestamp, format) {
+            return new moment(timestamp, 'YYYY-MM-DD HH:mm:ss').format(format);
+        };
+
+        // Determine if the given timestamp is in the future
+        $scope.inFuture = function(timestamp) {
+            return new moment(timestamp, 'YYYY-MM-DD HH:mm:ss').unix() > new moment().unix();
+        };
     }]
 );
 /****************************************************************************************************************************************************
@@ -1119,10 +1160,10 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
 
         // Parse dates to working Angular-Strap date strings (somehow Date-objects do not work with min/max date/time)
         function setDateTimes() {
-            $scope.startDateString  = new moment($scope.meeting.startDate).format('YYYY/MM/DD');
-            $scope.startTimeString  = new moment($scope.meeting.startDate).format('HH:mm');
-            $scope.endDateString    = new moment($scope.meeting.endDate).format('YYYY/MM/DD');
-            $scope.endTimeString    = new moment($scope.meeting.endDate).format('HH:mm');
+            $scope.startDateString  = new moment($scope.meeting.startDate, 'YYYY-MM-DD HH:mm:ss').format('YYYY/MM/DD');
+            $scope.startTimeString  = new moment($scope.meeting.startDate, 'YYYY-MM-DD HH:mm:ss').format('HH:mm');
+            $scope.endDateString    = new moment($scope.meeting.endDate, 'YYYY-MM-DD HH:mm:ss').format('YYYY/MM/DD');
+            $scope.endTimeString    = new moment($scope.meeting.endDate, 'YYYY-MM-DD HH:mm:ss').format('HH:mm');
             // Manually update input since angular-strap does not do this...
             jQuery('#inputStartDate').val($scope.startDateString);
             jQuery('#inputStartTime').val($scope.startTimeString);
@@ -1258,6 +1299,10 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
             $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
             Page.setTitle('Meeting '+ meetingResponse.name);
             meetingRequestUrl       = meetingResponse.getRequestedUrl();
+
+            // Set the dates and times
+            setDateTimes();
+
             // When not editing, reformat the agenda
             if($location.path().indexOf('/edit') == -1) {
                 $scope.meeting.agenda   = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
@@ -1271,9 +1316,6 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
 
                 // Get additional meeting rooms
                 $scope.getMeetingRooms();
-
-                // Set the dates and times
-                setDateTimes();
 
                 // Load meetings on same day
                 var date = new moment().subtract('week', 2).format('YYYY-MM-DD');
