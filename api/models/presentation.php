@@ -23,7 +23,7 @@ class Presentation extends File {
      * @param integer $id - ID of this presentation
      * @param integer $slide - [optional] Slide to show
      * @param string $title - [optional] Title of presentation
-     * @param integer $user - [optional] The owner of this document
+     * @param \Models\User $user - [optional] The owner of this document
      * @param datetime $creationDate - [optional] Creation date time, yyyy-mm-dd hh:mm:ss
      * @param datetime $modificationDate - [optional] Date of last modification, yyyy-mm-dd hh:mm:ss
      * @param string $file - [Optional] The file name and extension of this source file

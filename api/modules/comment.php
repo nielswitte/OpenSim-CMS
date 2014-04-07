@@ -95,6 +95,9 @@ class Comment extends Module {
             );
         }
         $data['commentCount']   = $comments->getCommentCount();
+        if($comments->getParentParent()) {
+            $data['parentId']   = $comments->getParentParent()->getId();
+        }
 
         return $data;
     }
@@ -120,6 +123,7 @@ class Comment extends Module {
                     'email'     => $comment->getUser()->getEmail()
                 ),
                 'timestamp'     => $comment->getTimestamp(),
+                'editTimestamp' => $comment->getEditTimestamp(),
                 'message'       => $comment->getMessage(),
                 'childrenCount' => count($comment->getChildren()),
                 'children'      => $this->getCommentData($comment)
