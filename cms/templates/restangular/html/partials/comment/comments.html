@@ -1,4 +1,4 @@
 <article class="comment" ng-include src="'templates/restangular/html/partials/comment/comment.html'" id="comment-{{comment.id}}"></article>
 <ul class="comments">
-    <li ng-repeat="comment in comment.children" ng-include src="'templates/restangular/html/partials/comment/comments.html'" class="well"></li>
+    <li ng-repeat="comment in comment.children" ng-include src="'templates/restangular/html/partials/comment/comments.html'" class="well {{isNewComment(comment.timestamp)}}"></li>
 </ul>

@@ -362,6 +362,11 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
             }
         };
 
+        // Is the comment posted after the previous login of the user?
+        $scope.isNewComment = function(timestamp) {
+            return new moment(timestamp, 'YYYY-MM-DD HH:mm:ss').unix() > moment(sessionStorage.lastLogin, 'YYYY-MM-DD HH:mm:ss').unix() ? 'highlighted' : '';
+        };
+
         // Trust the message as safe markdown html
         $scope.markdown = function(message) {
             return $sce.trustAsHtml(markdown.toHTML(""+ message));
