@@ -388,6 +388,13 @@ PUT /api/meeting/<MEETING-ID>/ HTTP/1.1
 ```http
 GET /api/meeting/<MEETING-ID>/agenda HTTP/1.1
 ```
+
+### Get meetings by participant
+
+```http
+GET /api/user/<USER-ID>/meetings/ HTTP/1.1
+```
+
 ### Minutes
 
 ```http

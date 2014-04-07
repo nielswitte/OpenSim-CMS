@@ -45,7 +45,9 @@ class User extends Module {
         $this->api->addRoute("/^\/user\/(\d+)\/?$/",                                    'getUserById',              $this, 'GET',    \Auth::READ);     // Get a user by ID
         $this->api->addRoute("/^\/user\/(\d+)\/?$/",                                    'updateUserById',           $this, 'PUT',    \Auth::READ);     // Update the given user
         $this->api->addRoute("/^\/user\/(\d+)\/?$/",                                    'deleteUserById',           $this, 'DELETE', \Auth::WRITE);    // Delete the given user
-        $this->api->addRoute("/^\/user\/(\d+)\/files\/?$/",                             'getUserFilesById',         $this, 'GET',    \Auth::READ);     // Load all files for the user
+        $this->api->addRoute("/^\/user\/(\d+)\/files\/?$/",                             'getUserFilesByUserId',     $this, 'GET',    \Auth::READ);     // Load all files for the user
+        $this->api->addRoute("/^\/user\/(\d+)\/meetings\/?$/",                          'getUserMeetingsByUserId',  $this, 'GET',    \Auth::READ);     // Load 50 meetings for the user
+        $this->api->addRoute("/^\/user\/(\d+)\/meetings\/(\d+)\/?$/",                   'getUserMeetingsByUserId',  $this, 'GET',    \Auth::READ);     // Load 50 meetings for the user with offset
         $this->api->addRoute("/^\/user\/(\d+)\/password\/?$/",                          'updateUserPasswordById',   $this, 'PUT',    \Auth::READ);     // Updates the user's password
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/teleport\/?$/", 'teleportAvatarByUuid',     $this, 'PUT',    \Auth::READ);     // Teleports a user
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'getUserByAvatar',          $this, 'GET',    \Auth::READ);     // Gets an user by the avatar of this grid
@@ -457,7 +459,7 @@ class User extends Module {
      * @param array $args
      * @return array
      */
-    public function getUserFilesById($args) {
+    public function getUserFilesByUserId($args) {
         $data = array();
         $db = \Helper::getDB();
         $db->join('users u', 'u.id = d.ownerId', 'LEFT');
@@ -493,5 +495,34 @@ class User extends Module {
         } else {
             throw new \Exception('Invalid UUID provided', 1);
         }
+    }
+
+    /**
+     * Returns a list with 50 meetings starting at the given offset for the currently logged in user
+     * in reversed chronological order
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getUserMeetingsByUserId($args) {
+        // Determine offset
+        $offset = isset($args[2]) ? $args[2] : 0;
+        // Get info from DB
+        $db     = \Helper::getDB();
+        $db->where('mp.userId', $db->escape($args[1]));
+        $db->join('meeting_participants mp', 'mp.meetingId = m.id', 'LEFT');
+        $db->orderBy('m.startDate', 'DESC');
+        $results = $db->get('meetings m', array($offset, 50));
+        // Get user info
+        $user = \Auth::getUser();
+        // Process results
+        $data = array();
+        foreach($results as $result) {
+            $room    = new \Models\MeetingRoom($result['roomId']);
+            $meeting = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room, $result['name']);
+            $data[]  = $this->api->getModule('meeting')->getMeetingData($meeting, FALSE);
+        }
+
+        return $data;
     }
 }

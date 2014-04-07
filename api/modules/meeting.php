@@ -57,7 +57,7 @@ class Meeting extends Module{
         $db             = \Helper::getDB();
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
-        // Get 50 presentations from the given offset
+        // Get 50 meetings from the given offset
         $db->where('u.id', 'm.userId');
         $db->orderBy('m.startDate', 'DESC');
         $results = $db->get('meetings m, users u', array($db->escape($args[1]), 50), '*, m.id as meetingId');
@@ -81,7 +81,7 @@ class Meeting extends Module{
      */
     public function getMeetingsByDate($args) {
         $db             = \Helper::getDB();
-        // Get presentations past the given date
+        // Get meetings past the given date
         $db->where('u.id', 'm.userId');
         $db->where('m.startDate', array('>=' => $db->escape($args[1])));
         $db->orderBy('m.startDate', 'DESC');
