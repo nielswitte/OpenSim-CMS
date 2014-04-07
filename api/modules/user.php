@@ -488,7 +488,7 @@ class User extends Module {
             $db->where('gridId', $db->escape($args[1]));
             $avatarQuery = $db->getOne('avatars');
             if($avatarQuery) {
-                return $this->getUserFilesById(array('', $avatarQuery['userId']));
+                return $this->getUserFilesByUserId(array('', $avatarQuery['userId']));
             } else {
                 throw new \Exception('Avatar not found on this Grid', 2);
             }
