@@ -793,7 +793,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
                 if(!resp.success) {
                     $alert({title: 'Error!', content: $sce.trustAsHtml('No expired cache items to clear. Try again later.'), type: 'danger'});
                 } else {
-                    $alert({title: 'Cache cleared!', content: $sce.trustAsHtml('Cleared '+ resp.removedAssets +' expired items from the cache.'), type: 'success'});
+                    $alert({title: 'Cache cleared!', content: $sce.trustAsHtml('Cleared all expired items from the cache.'), type: 'success'});
                 }
             });
         };
