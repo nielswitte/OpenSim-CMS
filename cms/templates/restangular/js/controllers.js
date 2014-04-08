@@ -632,8 +632,8 @@ angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Pa
         // Get next set off files in the list
         $scope.nextFileOffset = function() {
             var newOffset = parseInt($scope.fileOffset) + parseInt(stepSizeFiles);
-            if(newOffset >= $scope.files.files.length) {
-                newOffset = $scope.files.files.length - parseInt(stepSizeFiles);
+            if(newOffset >= $scope.files.length) {
+                newOffset = $scope.files.length - parseInt(stepSizeFiles);
                 if(newOffset < 0) {
                     newOffset = 0;
                 }
@@ -669,8 +669,8 @@ angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Pa
         // Get next set off comments in the list
         $scope.nextCommentOffset = function() {
             var newOffset = parseInt($scope.commentOffset) + parseInt(stepSizeComments);
-            if(newOffset >= $scope.comments.comments.length) {
-                newOffset = $scope.comments.comments.length - parseInt(stepSizeComments);
+            if(newOffset >= $scope.comments.length) {
+                newOffset = $scope.comments.length - parseInt(stepSizeComments);
                 if(newOffset < 0) {
                     newOffset = 0;
                 }
