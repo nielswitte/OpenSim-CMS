@@ -62,7 +62,7 @@ class MeetingController {
             'roomId'    => $db->escape($room),
             'name'      => $db->escape($parameters['name'])
         );
-        $meetingId = $db->insert('meetings', $data);
+        $meetingId = @$db->insert('meetings', $data);
         // Create a new meeting object for this meeting
         $this->meeting = new \Models\Meeting($meetingId);
         // Attach a new meeting participants list

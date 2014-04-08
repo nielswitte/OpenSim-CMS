@@ -13,13 +13,18 @@
             <button class="btn btn-default" ng-click="nextMeetingOffset()"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
             <button class="btn btn-default"  ng-click="previousMeetingOffset()">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
         </div>
-        <div class="list-group">
-            <a ng-href="#!/meeting/{{meeting.id}}" class="list-group-item list-group-hover list-group-item-{{inFuture(meeting.startDate) ? 'info' : (inFuture(meeting.endDate) ? 'success' : 'default')}}" ng-repeat="meeting in meetings | limitFromTo: getMeetingFrom():getMeetingTo()">
-                <time datetime="{{meeting.startDate}}">{{convertTimestamp(meeting.startDate, "D")}}<br>{{convertTimestamp(meeting.startDate, "MMM")}}</time>
-                <h4 class="list-group-item-heading">{{meeting.name}}</h4>
-                <p class="list-group-item-text">{{convertTimestamp(meeting.startDate, 'HH:mm')}} till {{convertTimestamp(meeting.endDate, 'HH:mm')}}</p>
-            </a>
-        </div>
+        <ul class="list-group list-group-hover">
+            <li class="list-group-item list-group-item-{{inFuture(meeting.startDate) ? 'info' : (inFuture(meeting.endDate) ? 'success' : 'default')}}" ng-repeat="meeting in meetings | limitFromTo: getMeetingFrom():getMeetingTo()">
+                <a ng-href="#!/meeting/{{meeting.id}}">
+                    <time datetime="{{meeting.startDate}}">{{convertTimestamp(meeting.startDate, "D")}}<br>{{convertTimestamp(meeting.startDate, "MMM")}}</time>
+                    <h4 class="list-group-item-heading">{{meeting.name}}</h4>
+                </a>
+                <p class="list-group-item-text">
+                    {{convertTimestamp(meeting.startDate, 'HH:mm')}} till {{convertTimestamp(meeting.endDate, 'HH:mm')}}
+                </p>
+                <a class="btn btn-default btn-xs" ng-href="#!/meeting/{{meeting.id}}/minutes" ng-hide="inFuture(meeting.startDate)"><i class="glyphicon glyphicon-comment"></i> Minutes</a>
+            </li>
+        </ul>
     </div>
     <div class="col-sm-4" id="comments">
         <h2>New comments ({{comments.commentCount}})</h2>
@@ -33,7 +38,7 @@
                 <span class="posted">{{comment.timestamp}}</span>
                 <p class="list-group-item-text" ng-bind-html="markdown(comment.message)"></p>
                 <span class="edited" ng-show="comment.editTimestamp && !showUpdateForm(comment.id)">Edited: {{comment.editTimestamp}}</span>
-                <button ng-click="showComment(comment.id)" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-eye-open"></i> Read more</button>
+                <button ng-click="showComment(comment.id)" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-eye-open"></i> Show comment</button>
             </li>
         </ul>
     </div>
@@ -53,7 +58,7 @@
                     </div>
                     <h4 class="list-group-item-heading">{{file.title}}</h4>
                 </a>
-                <span class="posted">{{file.creationDate}}</span> - <a ng-href="#!/user/{{user.id}}">{{file.user.firstName}} {{file.user.lastName}} ({{file.user.username}})</a></p>
+                <span class="posted">{{file.creationDate}}</span> - <a ng-href="#!/user/{{user.id}}">{{file.user.firstName}} {{file.user.lastName}} ({{file.user.username}})</a>
             </li>
         </ul>
     </div>

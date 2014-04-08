@@ -15,7 +15,7 @@ function MainCntl($scope, $route, $routeParams, $location, Page) {
  *
  */
 // chatController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$scope', '$aside', '$sce', '$timeout', '$alert', function(Restangular, RestangularCache, $scope, $aside, $sce, $timeout, $alert) {
+angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$scope', '$aside', '$timeout', '$alert', function(Restangular, RestangularCache, $scope, $aside, $timeout, $alert) {
         $scope.grids          = [];
         var lastMsgTimestamp;
         $scope.chats          = [];
@@ -104,7 +104,7 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
             Restangular.one('grid', selectedGridId).post('chats', { userId: sessionStorage.id, message: message, timestamp: moment().format('YYYY-MM-DD HH:mm:ss'), fromCMS: 1 }).then(function(resp) {
                 // On error show message
                 if(!resp.success) {
-                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                    $alert({title: 'Error!', content: resp.error, type: 'danger'});
                 }
             });
         };
@@ -234,9 +234,9 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
 
             Restangular.one('comment', id).remove().then(function(resp) {
                 if(!resp.success) {
-                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                    $alert({title: 'Error!', content: resp.error, type: 'danger'});
                 } else {
-                    $alert({title: 'Comment removed!', content: $sce.trustAsHtml('The comment with ID '+ id +' has been removed from the CMS.'), type: 'success'});
+                    $alert({title: 'Comment removed!', content: 'The comment with ID '+ id +' has been removed from the CMS.', type: 'success'});
                     Cache.clearCache();
                     $route.reload();
                 }
@@ -298,9 +298,9 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
             // Post comment
             Restangular.one('comment', $scope.commentType).all($scope.comment.itemId).post($scope.comment).then(function(resp) {
                 if(!resp.success) {
-                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                    $alert({title: 'Error!', content: resp.error, type: 'danger'});
                 } else {
-                    $alert({title: 'Comment added!', content: $sce.trustAsHtml('Comment has been posted with ID: '+ resp.commentId +'.'), type: 'success'});
+                    $alert({title: 'Comment added!', content: 'Comment has been posted with ID: '+ resp.commentId +'.', type: 'success'});
                     Cache.clearCache();
                     $route.reload();
                 }
@@ -333,9 +333,9 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
         $scope.updateComment = function(id) {
             Restangular.one('comment', id).customPUT({message: this.message}).then(function(resp) {
                 if(!resp.success) {
-                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                    $alert({title: 'Error!', content: resp.error, type: 'danger'});
                 } else {
-                    $alert({title: 'Comment updated!', content: $sce.trustAsHtml('Comment with ID: '+ id +' has been updated.'), type: 'success'});
+                    $alert({title: 'Comment updated!', content: 'Comment with ID: '+ id +' has been updated.', type: 'success'});
                     $scope.updateCommentReset();
                     Cache.clearCache();
                     $route.reload();
@@ -395,7 +395,7 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
  *
  */
 // homeController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('homeController', ['Restangular', '$scope', 'Page', function(Restangular, $scope, Page) {
+angularRest.controller('homeController', ['Page', function(Page) {
         Page.setTitle('Home');
     }]
 );
@@ -412,13 +412,13 @@ angularRest.controller('homeController', ['Restangular', '$scope', 'Page', funct
  *
  */
 // loginController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$scope', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, $alert, $sce, Cache) {
+angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$scope', '$alert', 'Cache', function(Restangular, RestangularCache, $scope, $alert, Cache) {
         $scope.isLoggedIn = false;
 
         // Check login
         $scope.isLoggedInCheck = function() {
             if(sessionStorage.token && sessionStorage.id) {
-                $alert({title: 'Already logged in!', content: $sce.trustAsHtml('You are already logged in as '+ sessionStorage.username), type: 'warning'});
+                $alert({title: 'Already logged in!', content: 'You are already logged in as '+ sessionStorage.username, type: 'warning'});
                 $scope.isLoggedIn = true;
             } else {
                 $scope.isLoggedIn = false;
@@ -473,7 +473,7 @@ angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$
                         sessionStorage.tokenTimeOut = moment().add(30, 'minutes').unix();
 
                         // Feedback to user
-                        $alert({title: 'Logged In!', content: $sce.trustAsHtml('You are now logged in as '+ userResponse.username +'. Your previous authentication was on '+ authResponse.lastLogin), type: 'success'});
+                        $alert({title: 'Logged In!', content: 'You are now logged in as '+ userResponse.username +'. Your previous authentication was on '+ authResponse.lastLogin, type: 'success'});
                         // Remove all cached items (if any)
                         Cache.clearCache();
                         // Back to previous page
@@ -482,7 +482,7 @@ angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$
                 // Failed auth
                 } else {
                     sessionStorage.clear();
-                    $alert({title: 'Error!', content: $sce.trustAsHtml(authResponse.error +'.'), type: 'danger'});
+                    $alert({title: 'Error!', content: authResponse.error +'.', type: 'danger'});
                 }
                 // Remove loading screen
                 jQuery('#loading').hide();
@@ -500,14 +500,14 @@ angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$
  *
  */
 // toolbarController --------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$location', '$alert', function($scope, $sce, Cache, $location, $alert) {
+angularRest.controller('toolbarController', ['$scope', 'Cache', '$location', '$alert', function($scope, Cache, $location, $alert) {
         $scope.currentLocation = $location.path();
 
         // Handle logout events
         $scope.logout = function() {
             sessionStorage.clear();
             Cache.clearCache();
-            $alert({title: 'Logged Out!', content: $sce.trustAsHtml('You are now logged out'), type: 'success'});
+            $alert({title: 'Logged Out!', content: 'You are now logged out', type: 'success'});
             $scope.getUserToolbar();
             $location.path('home');
         };
@@ -566,7 +566,7 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
  *
  */
 // documentsController ------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('dashboardController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$sce', '$location', function(Restangular, RestangularCache, $scope, Page, $sce, $location) {
+angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Page', '$sce', '$location', function(RestangularCache, $scope, Page, $sce, $location) {
         $scope.files = [];
         $scope.meetings  = [];
         $scope.comments  = [];
@@ -725,8 +725,8 @@ angularRest.controller('dashboardController', ['Restangular', 'RestangularCache'
  *
  */
 // documentsController ------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$modal', '$sce', 'Cache', '$route',
-    function(Restangular, RestangularCache, $scope, Page, $alert, $modal, $sce, Cache, $route) {
+angularRest.controller('documentsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$modal', 'Cache', '$route',
+    function(Restangular, RestangularCache, $scope, Page, $alert, $modal, Cache, $route) {
         $scope.orderByField         = 'title';
         $scope.reverseSort          = false;
         var requestDocumentsUrl     = '';
@@ -762,7 +762,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
                 $scope.document.file = e.target.result;
             };
             reader.onerror = function(e) {
-                $alert({title: 'Error!', content: $sce.trustAsHtml('Processing file failed.'), type: 'danger'});
+                $alert({title: 'Error!', content: 'Processing file failed.', type: 'danger'});
             };
         });
 
@@ -773,9 +773,9 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 
             Restangular.all('file').post($scope.document).then(function(resp) {
                 if(!resp.success) {
-                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                    $alert({title: 'Error!', content: resp.error, type: 'danger'});
                 } else {
-                    $alert({title: 'File created!', content: $sce.trustAsHtml('The file: '+ $scope.document.title + ' has been created with ID: '+ resp.id +'.'), type: 'success'});
+                    $alert({title: 'File created!', content: 'The file: '+ $scope.document.title + ' has been created with ID: '+ resp.id +'.', type: 'success'});
                     $scope.document.id                  = resp.id;
                     $scope.document.ownerId             = sessionStorage.id;
                     $scope.document.creationDate        = new moment().format('YYYY-MM-DD HH:mm:ss');
@@ -825,14 +825,14 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
             // Remove document by ID
             Restangular.one('file', id).remove().then(function(resp) {
                 if(!resp.success) {
-                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                    $alert({title: 'Error!', content: resp.error, type: 'danger'});
                 } else {
                     var index = getDocumentIndexById(id);
                     if(index !== false) {
-                        $alert({title: 'Document removed!', content: $sce.trustAsHtml('The document (#'+ $scope.documentsList[index].id +') '+ $scope.documentsList[index].title +' has been removed from the CMS.'), type: 'success'});
+                        $alert({title: 'Document removed!', content: 'The document (#'+ $scope.documentsList[index].id +') '+ $scope.documentsList[index].title +' has been removed from the CMS.', type: 'success'});
                         $scope.documentsList.splice(index, 1);
                     } else {
-                        $alert({title: 'Document removed!', content: $sce.trustAsHtml('The document has been removed from the CMS. However, some unexpected events happend. Check if everything is still OK!'), type: 'success'});
+                        $alert({title: 'Document removed!', content: 'The document has been removed from the CMS. However, some unexpected events happend. Check if everything is still OK!', type: 'success'});
                     }
                     Cache.clearCachedUrl(requestDocumentsUrl);
                     $route.reload();
@@ -846,9 +846,9 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
         $scope.clearExpiredCache = function() {
             Restangular.one('files', 'cache').remove().then(function(resp) {
                 if(!resp.success) {
-                    $alert({title: 'Error!', content: $sce.trustAsHtml('No expired cache items to clear. Try again later.'), type: 'danger'});
+                    $alert({title: 'Error!', content: 'No expired cache items to clear. Try again later.', type: 'danger'});
                 } else {
-                    $alert({title: 'Cache cleared!', content: $sce.trustAsHtml('Cleared all expired items from the cache.'), type: 'success'});
+                    $alert({title: 'Cache cleared!', content: 'Cleared all expired items from the cache.', type: 'success'});
                 }
             });
         };
@@ -886,7 +886,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 );
 
 // documentController -------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$modal', '$sce', function(Restangular, RestangularCache, $scope, $routeParams, Page, $modal, $sce) {
+angularRest.controller('documentController', ['RestangularCache', '$scope', '$routeParams', 'Page', '$modal', function(RestangularCache, $scope, $routeParams, Page, $modal) {
         // Show loading screen
         jQuery('#loading').show();
         // List with comments
@@ -963,8 +963,8 @@ angularRest.controller('documentController', ['Restangular', 'RestangularCache',
         // Open dialog with the Slide preview
         $scope.lightbox = function(number, url) {
             $modal({
-                title: $sce.trustAsHtml('Preview '+ number),
-                content: $sce.trustAsHtml('<img src="'+ url+'?token='+ sessionStorage.token +'" class="img-responsive">'),
+                title: 'Preview '+ number,
+                content: '<img src="'+ url+'?token='+ sessionStorage.token +'" class="img-responsive">',
                 html: true,
                 show: true,
                 template: 'templates/restangular/html/bootstrap/modalDialogBasic.html',
@@ -1054,12 +1054,8 @@ angularRest.controller('gridController', ['RestangularCache', '$scope', '$routeP
  *                                |___/
  */
 // meetingsController -------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('meetingsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$modal', '$tooltip', '$sce', 'Cache', '$location',  function(Restangular, RestangularCache, $scope, Page, $modal, $tooltip, $sce, Cache, $location) {
+angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Page', '$tooltip', '$sce',  function(RestangularCache, $scope, Page, $tooltip, $sce) {
         var date = new Date(new Date - (1000*60*60*24*14));
-        var modal;
-        var meeting;
-        var eventId;
-        var meetingRequestUrl;
 
         // Get all meetings for the calendar
         RestangularCache.one('meetings', date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).getList('calendar').then(function(meetingsResponse) {
@@ -1207,14 +1203,14 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
                             posZ: $scope.meeting.room.coordinates.z,
                             regionName: $scope.meeting.room.region.name
                         }, 'teleport').then(function(teleportResponse) {
-                            $alert({title: 'Teleported!', content: $sce.trustAsHtml('Avatar teleported to '+ $scope.meeting.room.name +' in region: '+ $scope.meeting.room.region.name +' on grid '+ $scope.meeting.room.grid.name), type: 'success'});
+                            $alert({title: 'Teleported!', content: 'Avatar teleported to '+ $scope.meeting.room.name +' in region: '+ $scope.meeting.room.region.name +' on grid '+ $scope.meeting.room.grid.name, type: 'success'});
                             return true;
                         });
                     }
                 }
                 // No match found?
                 if(!avatarFound) {
-                    $alert({title: 'No avatar found!', content: $sce.trustAsHtml('Currently there is no avatar online, linked to your user account, on this grid to teleport.'), type: 'danger'});
+                    $alert({title: 'No avatar found!', content: 'Currently there is no avatar online, linked to your user account, on this grid to teleport.', type: 'danger'});
                 }
             });
             return false;
@@ -1250,9 +1246,9 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
 
             $scope.meeting.put().then(function(resp) {
                 if(!resp.success) {
-                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                    $alert({title: 'Error!', content: resp.error, type: 'danger'});
                 } else {
-                    $alert({title: 'Meeting updated!', content: $sce.trustAsHtml('The meeting has been updated.'), type: 'success'});
+                    $alert({title: 'Meeting updated!', content: 'The meeting has been updated.', type: 'success'});
                     Cache.clearCache();
                     $location.path('meeting/'+ $scope.meeting.id);
                 }
@@ -1310,7 +1306,7 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
                     if(!isDuplicateDocument()) {
                         $scope.meeting.documents.push(documentSearchResults[i]);
                     } else {
-                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The document '+ documentSearchResults[i].title + ' is already added to this meeting'), type: 'warning'});
+                        $alert({title: 'Duplicate!', content: 'The document '+ documentSearchResults[i].title + ' is already added to this meeting', type: 'warning'});
                     }
                 }
             }
@@ -1358,7 +1354,7 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
                     if(!isDuplicateParticipant()) {
                         $scope.meeting.participants.push(usernameSearchResults[i]);
                     } else {
-                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The user '+ usernameSearchResults[i].username + ' is already a participant for this meeting'), type: 'warning'});
+                        $alert({title: 'Duplicate!', content: 'The user '+ usernameSearchResults[i].username + ' is already a participant for this meeting', type: 'warning'});
                     }
                 }
             }
@@ -1454,7 +1450,7 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
 );
 
 // meetingMinutesController -------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('meetingMinutesController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$alert', '$sce', 'Cache', '$location', '$compile', function(Restangular, RestangularCache, $scope, $routeParams, Page, $alert, $sce, Cache, $location, $compile) {
+angularRest.controller('meetingMinutesController', ['RestangularCache', '$scope', '$routeParams', 'Page', '$sce', function(RestangularCache, $scope, $routeParams, Page, $sce) {
         $scope.meeting = {};
         RestangularCache.one('meeting', $routeParams.meetingId).one('minutes').get().then(function(meetingResponse) {
             meetingResponse.agenda = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
@@ -1543,7 +1539,7 @@ angularRest.controller('meetingMinutesController', ['Restangular', 'RestangularC
 );
 
 // meetingNewController -----------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$location', '$alert', '$sce', 'Cache', function(Restangular, RestangularCache, $scope, Page, $location, $alert, $sce, Cache) {
+angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$location', '$alert', 'Cache', function(Restangular, RestangularCache, $scope, Page, $location, $alert, Cache) {
         Page.setTitle('Schedule meeting');
         var gridsRequestUrl;
         var calendar;
@@ -1660,7 +1656,7 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
                     if(!isDuplicateDocument()) {
                         $scope.meeting.documents.push(documentSearchResults[i]);
                     } else {
-                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The document '+ documentSearchResults[i].title + ' is already added to this meeting'), type: 'warning'});
+                        $alert({title: 'Duplicate!', content: 'The document '+ documentSearchResults[i].title + ' is already added to this meeting', type: 'warning'});
                     }
                 }
             }
@@ -1708,7 +1704,7 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
                     if(!isDuplicateParticipant()) {
                         $scope.meeting.participants.push(usernameSearchResults[i]);
                     } else {
-                        $alert({title: 'Duplicate!', content: $sce.trustAsHtml('The user '+ usernameSearchResults[i].username + ' is already a participant for this meeting'), type: 'warning'});
+                        $alert({title: 'Duplicate!', content: 'The user '+ usernameSearchResults[i].username + ' is already a participant for this meeting', type: 'warning'});
                     }
                 }
             }
@@ -1743,9 +1739,9 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
 
             Restangular.all('meeting').post($scope.meeting).then(function(resp) {
                 if(!resp.success) {
-                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                    $alert({title: 'Error!', content: resp.error, type: 'danger'});
                 } else {
-                    $alert({title: 'Meeting scheduled!', content: $sce.trustAsHtml('The meeting for '+ $scope.meeting.startDate +' has been created with ID: '+ resp.meetingId +'.'), type: 'success'});
+                    $alert({title: 'Meeting scheduled!', content: 'The meeting for '+ $scope.meeting.startDate +' has been created with ID: '+ resp.meetingId +'.', type: 'success'});
                     Cache.clearCache();
                     $location.path('meeting/'+ resp.meetingId);
                 }
@@ -1964,7 +1960,7 @@ angularRest.controller('slideController', ['RestangularCache', '$scope', 'Page',
  *
  */
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', '$sce', 'Cache', '$route', function(RestangularCache, Restangular, $scope, Page, $modal, $alert, $sce, Cache, $route) {
+angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', 'Cache', '$route', function(RestangularCache, Restangular, $scope, Page, $modal, $alert, Cache, $route) {
         $scope.orderByField     = 'username';
         $scope.reverseSort      = false;
         var requestUsersUrl     = '';
@@ -1994,9 +1990,9 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
             Restangular.all('user').post($scope.user).then(function(resp) {
                 if(!resp.success) {
-                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                    $alert({title: 'Error!', content: resp.error, type: 'danger'});
                 } else {
-                    $alert({title: 'User created!', content: $sce.trustAsHtml('The user: '+ $scope.user.username + ' has been created with ID: '+ resp.userId +'.'), type: 'success'});
+                    $alert({title: 'User created!', content: 'The user: '+ $scope.user.username + ' has been created with ID: '+ resp.userId +'.', type: 'success'});
                     $scope.user.id = resp.userId;
                     $scope.usersList.push($scope.user);
 
@@ -2041,9 +2037,9 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
             Restangular.one('user', $scope.usersList[index].id).remove().then(function(resp) {
                 if(!resp.success) {
-                    $alert({title: 'Error!', content: $sce.trustAsHtml(resp.error), type: 'danger'});
+                    $alert({title: 'Error!', content: resp.error, type: 'danger'});
                 } else {
-                    $alert({title: 'User removed!', content: $sce.trustAsHtml('The user '+ $scope.usersList[index].username +' has been removed from the CMS.'), type: 'success'});
+                    $alert({title: 'User removed!', content: 'The user '+ $scope.usersList[index].username +' has been removed from the CMS.', type: 'success'});
                     delete $scope.usersList[index];
                     Cache.clearCachedUrl(requestUsersUrl);
                     $route.reload();
@@ -2095,7 +2091,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 );
 
 // userController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('userController', ['Restangular', 'RestangularCache', '$scope', '$route', '$routeParams', 'Page', '$alert', '$modal', '$sce', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $route, $routeParams, Page, $alert, $modal, $sce, Cache, $location) {
+angularRest.controller('userController', ['Restangular', 'RestangularCache', '$scope', '$route', '$routeParams', 'Page', '$alert', '$modal', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $route, $routeParams, Page, $alert, $modal, Cache, $location) {
         var userRequestUrl   = '';
         var userOld          = {};
         $scope.grids         = [];
@@ -2112,7 +2108,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                 $scope.user.avatarCount = Object.keys(userResponse.avatars).length;
                 userRequestUrl          = userResponse.getRequestedUrl();
             } else {
-                $alert({title: 'Loading user failed!', content: $sce.trustAsHtml(userResponse.error), type: 'danger'});
+                $alert({title: 'Loading user failed!', content: userResponse.error, type: 'danger'});
             }
 
             // Remove loading screen
@@ -2164,9 +2160,9 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             $scope.user.customPUT($scope.user, 'password').then(function(putResponse) {
                 angular.copy($scope.user, $scope.userOld);
                 if(!putResponse.success) {
-                    $alert({title: 'Change password failed!', content: $sce.trustAsHtml(putResponse.error), type: 'danger'});
+                    $alert({title: 'Change password failed!', content: putResponse.error, type: 'danger'});
                 } else {
-                    $alert({title: 'Password changed!', content: $sce.trustAsHtml('The user\'s password has been updated.'), type: 'success'});
+                    $alert({title: 'Password changed!', content: 'The user\'s password has been updated.', type: 'success'});
                     Cache.clearCachedUrl(userRequestUrl);
                 }
                 // Remove loading screen
@@ -2191,9 +2187,9 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             $scope.user.put().then(function(putResponse) {
                 angular.copy($scope.user, $scope.userOld);
                 if(!putResponse.success) {
-                    $alert({title: 'User updating failed!', content: $sce.trustAsHtml(putResponse.error), type: 'danger'});
+                    $alert({title: 'User updating failed!', content: putResponse.error, type: 'danger'});
                 } else {
-                    $alert({title: 'User updated!', content: $sce.trustAsHtml('The user information has been updated.'), type: 'success'});
+                    $alert({title: 'User updated!', content: 'The user information has been updated.', type: 'success'});
                     Cache.clearCache();
                     $location.path('user/'+ $routeParams.userId);
                 }
@@ -2235,11 +2231,11 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             for(var i = 0; i < $scope.grids.length; i++) {
                 if($scope.grids[i].id == $scope.avatar.gridId) {
                     if($scope.grids[i].isOnline == 0) {
-                        $alert({title: 'Error!', content: $sce.trustAsHtml('The selected Grid ('+ $scope.grids[i].name +') is offline, therefore it is not possible to create an avatar for the selected Grid.'), type: 'danger'});
+                        $alert({title: 'Error!', content: 'The selected Grid ('+ $scope.grids[i].name +') is offline, therefore it is not possible to create an avatar for the selected Grid.', type: 'danger'});
                     } else if($scope.grids[i].remoteAdmin.url == null) {
-                        $alert({title: 'Error!', content: $sce.trustAsHtml('The selected Grid\'s ('+ $scope.grids[i].name +') remoteadmin is not configured, therefore it is not possible to create an avatar for the selected Grid.'), type: 'danger'});
+                        $alert({title: 'Error!', content: 'The selected Grid\'s ('+ $scope.grids[i].name +') remoteadmin is not configured, therefore it is not possible to create an avatar for the selected Grid.', type: 'danger'});
                     } else {
-                        $alert({title: 'Info!', content: $sce.trustAsHtml('Avatars can be created on the selected grid ('+ $scope.grids[i].name +').'), type: 'info'});
+                        $alert({title: 'Info!', content: 'Avatars can be created on the selected grid ('+ $scope.grids[i].name +').', type: 'info'});
                     }
                     return true;
                 }
@@ -2291,17 +2287,17 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             // Create the avatar
             Restangular.one('grid', $scope.avatar.gridId).all('avatar').post($scope.avatar).then(function(avatarCreateResponse) {
                 if(!avatarCreateResponse.success) {
-                    $alert({title: 'Error!', content: $sce.trustAsHtml(avatarCreateResponse.error), type: 'danger'});
+                    $alert({title: 'Error!', content: avatarCreateResponse.error, type: 'danger'});
                 } else {
-                    $alert({title: 'Avatar created!', content: $sce.trustAsHtml('The avatar '+ $scope.avatar.firstName +' '+ $scope.avatar.lastName +' has been created.'), type: 'success'});
+                    $alert({title: 'Avatar created!', content: 'The avatar '+ $scope.avatar.firstName +' '+ $scope.avatar.lastName +' has been created.', type: 'success'});
                     Cache.clearCachedUrl(userRequestUrl);
 
                     // Link the avatar to this user
                     Restangular.one('grid', $scope.avatar.gridId).one('avatar', avatarCreateResponse.avatar_uuid).post('', {username: $scope.user.username}).then(function(avatarLinkResponse) {
                         if(!avatarLinkResponse.success) {
-                            $alert({title: 'Error!', content: $sce.trustAsHtml(avatarLinkResponse.error), type: 'danger'});
+                            $alert({title: 'Error!', content: avatarLinkResponse.error, type: 'danger'});
                         } else {
-                            $alert({title: 'Avatar linked!', content: $sce.trustAsHtml('The avatar '+ $scope.avatar.firstName +' '+ $scope.avatar.lastName +' has been linked to this user.'), type: 'success'});
+                            $alert({title: 'Avatar linked!', content: 'The avatar '+ $scope.avatar.firstName +' '+ $scope.avatar.lastName +' has been linked to this user.', type: 'success'});
                         }
                     });
                     modal.hide();
@@ -2320,10 +2316,10 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
 
             Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).put().then(function(confirmationResponse) {
                 if(!confirmationResponse.success) {
-                    $alert({title: 'Error!', content: $sce.trustAsHtml(confirmationResponse.error), type: 'danger'});
+                    $alert({title: 'Error!', content: confirmationResponse.error, type: 'danger'});
                 } else {
                     $scope.user.avatars[index].confirmed = 1;
-                    $alert({title: 'Avatar confirmed!', content: $sce.trustAsHtml('The avatar is confirmed user.'), type: 'success'});
+                    $alert({title: 'Avatar confirmed!', content: 'The avatar is confirmed user.', type: 'success'});
                     Cache.clearCachedUrl(userRequestUrl);
                 }
 
@@ -2339,11 +2335,11 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
 
             Restangular.one('grid', avatar.gridId).one('avatar', avatar.uuid).remove().then(function(unlinkResponse) {
                 if(!unlinkResponse.success) {
-                    $alert({title: 'Error!', content: $sce.trustAsHtml(unlinkResponse.error), type: 'danger'});
+                    $alert({title: 'Error!', content: unlinkResponse.error, type: 'danger'});
                 } else {
                     delete $scope.user.avatars[index];
                     $scope.user.avatarCount--;
-                    $alert({title: 'Avatar unlinked!', content: $sce.trustAsHtml('The avatar is no longer linked to this user.'), type: 'success'});
+                    $alert({title: 'Avatar unlinked!', content: 'The avatar is no longer linked to this user.', type: 'success'});
                     Cache.clearCachedUrl(userRequestUrl);
                     $route.reload();
                 }

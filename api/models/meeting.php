@@ -72,7 +72,7 @@ class Meeting implements simpleModel {
             $this->endDate      = $meeting['endDate'];
             $this->name         = $meeting['name'];
         } else {
-            throw new Exception('Meeting not found', 1);
+            throw new \Exception('Meeting not found', 1);
         }
     }
 
