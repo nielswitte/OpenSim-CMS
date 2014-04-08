@@ -566,7 +566,7 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
  *
  */
 // documentsController ------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('dashboardController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$sce', function(Restangular, RestangularCache, $scope, Page, $sce) {
+angularRest.controller('dashboardController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$sce', '$location', function(Restangular, RestangularCache, $scope, Page, $sce, $location) {
         $scope.meetings = [];
         $scope.comments = [];
         Page.setTitle('Dashboard');
@@ -657,6 +657,23 @@ angularRest.controller('dashboardController', ['Restangular', 'RestangularCache'
         // Trust the message as safe markdown html
         $scope.markdown = function(message) {
             return $sce.trustAsHtml(markdown.toHTML(""+ message));
+        };
+
+        // Returns the list with the full path to the comment in context
+        $scope.showComment = function(id) {
+            RestangularCache.one('comment', id).one('parents').get().then(function(parentsResponse) {
+                if(parentsResponse[0] == 'presentation' || parentsResponse[0] == 'document') {
+                    if(parentsResponse[2] == 'slide') {
+                        $location.path('document/'+ parentsResponse[1] +'/slide/'+ parentsResponse[3]);
+                    } else if(parentsResponse[2] == 'page') {
+                        $location.path('document/'+ parentsResponse[1] +'/page/'+ parentsResponse[3]);
+                    } else {
+                        $location.path('document/'+ parentsResponse[1]);
+                    }
+                } else {
+                    $location.path(parentsResponse[0] +'/'+ parentsResponse[1]);
+                }
+            });
         };
     }]
 );

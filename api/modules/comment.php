@@ -11,8 +11,8 @@ require_once dirname(__FILE__) .'/../controllers/commentController.php';
  * Implements the functions for comments
  *
  * @author Niels Witte
- * @version 0.3
- * @date April 7th, 2014
+ * @version 0.3a
+ * @date April 8th, 2014
  * @since March 28th, 2014
  */
 class Comment extends Module {
@@ -87,7 +87,7 @@ class Comment extends Module {
         $number     = 1;
         foreach($results as $result) {
             $user    = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
-            $comment = new \Models\Comment($result['id'], $result['parentId'], $number, $user, $result['type'], $result['timestamp'], $result['message'], $result['editTimestamp']);
+            $comment = new \Models\Comment($result['commentID'], $result['parentId'], $number, $user, $result['type'], $result['timestamp'], $result['message'], $result['editTimestamp']);
             $comments->addComment($comment);
             $number++;
         }
@@ -97,20 +97,55 @@ class Comment extends Module {
 
     /**
      * Returns a list which represents the path from parent to child for this comment
-     * @example for a comment with ID 6 which is of type slide it will return [0] => presentation, [1] => presentationId, [2] => slide, [3] => slideId
+     * @example for a comment with ID 6 which is of type slide it will return
+     *          [0] => presentation,
+     *          [1] => 3 (presentationId),
+     *          [2] => slide,
+     *          [3] => 6 (slideId)
+     *          [4] => comment
+     *          [5] => 21 (commentId)
      *
      * @param array $args
      * @return array
+     * @throws \Exception
      */
     public function getCommentParentsById($args) {
-        //@todo implement
+        $db         = \Helper::getDB();
+        $db->where('id', $db->escape($args[1]));
+        $query      = $db->getOne('comments');
+        // Comment found?
+        if($query) {
+            // Empty path array
+            $data       = array();
 
-        $data = array(
-            'document',
-            1,
-            'page',
-            2
-        );
+            // Create objects
+            $user       = new \Models\User($query['userId']);
+            $comment    = new \Models\Comment($query['id'], $query['parentId'], 1, $user, $query['type'], $query['timestamp'], $query['message'], $query['editTimestamp']);
+            // If page get additional document data
+            if($comment->getType() == 'page') {
+                $data[] = 'document';
+                // Get document ID
+                $db->join('document_pages p', 'p.documentId = d.id', 'LEFT');
+                $db->where('p.id', $db->escape($query['itemId']));
+                $document = $db->getOne('documents d', 'd.*');
+                $data[] = $document['id'];
+            // Get additional presentation data
+            } elseif($comment->getType() == 'slide') {
+                $data[] = 'presentation';
+                // Get presentation ID
+                $db->join('document_slides s', 's.documentId = d.id', 'LEFT');
+                $db->where('s.id', $db->escape($query['itemId']));
+                $presentation = $db->getOne('documents d', 'd.*');
+                $data[] = $presentation['id'];
+            }
+            // Get last part of the path
+            $data[] = $comment->getType();
+            $data[] = $query['itemId'];
+            $data[] = 'comment';
+            $data[] = $comment->getId();
+        } else {
+            throw new \Exception('Comment does not exists', 1);
+        }
 
         return $data;
     }

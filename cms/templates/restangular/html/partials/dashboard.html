@@ -27,12 +27,15 @@
             <button class="btn btn-default" ng-click="nextCommentOffset()"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
             <button class="btn btn-default"  ng-click="previousCommentOffset()">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
         </div>
-        <div class="list-group">
-            <a ng-href="#!/{{comment.type}}" class="list-group-item list-group-hover" ng-repeat="comment in comments.comments | limitFromTo: getCommentFrom():getCommentTo()">
-                <h4 class="list-group-item-heading">{{comment.user.username}}</h4>
+        <ul class="list-group list-group-hover">
+            <li class="list-group-item" ng-repeat="comment in comments.comments | limitFromTo: getCommentFrom():getCommentTo()">
+                <span class="label label-default">{{comment.type}}</span> <a ng-href="#!/user/{{comment.user.id}}" bs-tooltip title="Profile of {{comment.user.username}}">{{comment.user.firstName}} {{comment.user.lastName}}</a><br>
+                <span class="posted">{{comment.timestamp}}</span>
                 <p class="list-group-item-text" ng-bind-html="markdown(comment.message)"></p>
-            </a>
-        </div>
+                <span class="edited" ng-show="comment.editTimestamp && !showUpdateForm(comment.id)">Edited: {{comment.editTimestamp}}</span>
+                <button ng-click="showComment(comment.id)" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-eye-open"></i> Read more</button>
+            </li>
+        </ul>
     </div>
 </div>
 

@@ -7,8 +7,8 @@ defined('EXEC') or die('Invalid request');
  * This class represents a single comment
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 1st, 2014
+ * @version 0.2a
+ * @date April 8th, 2014
  * @since March 28st, 2014
  */
 class Comment {
@@ -46,7 +46,7 @@ class Comment {
      * The actual comment
      * @var string
      */
-    private $msg;
+    private $message;
     /**
      * Datetime string YYYY-MM-DD HH:mm:ss, for when the message was last edited
      * @var string
@@ -72,17 +72,17 @@ class Comment {
      * @param \Models\User $user
      * @param string $type
      * @param string $timestamp
-     * @param string $msg
+     * @param string $message
      * @param string $editTimestamp - [Optional]
      */
-    public function __construct($id, $parentId, $number, \Models\User $user, $type, $timestamp, $msg, $editTimestamp = NULL) {
+    public function __construct($id, $parentId, $number, \Models\User $user, $type, $timestamp, $message, $editTimestamp = NULL) {
         $this->id               = $id;
         $this->parentId         = $parentId;
         $this->number           = $number;
         $this->user             = $user;
         $this->type             = $type;
         $this->timestamp        = $timestamp;
-        $this->msg              = $msg;
+        $this->message          = $message;
         $this->editTimestamp    = $editTimestamp;
     }
 
@@ -146,7 +146,7 @@ class Comment {
      * @return string
      */
     public function getMessage() {
-        return $this->msg;
+        return $this->message;
     }
 
     /**
