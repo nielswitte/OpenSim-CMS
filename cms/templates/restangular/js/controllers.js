@@ -567,8 +567,9 @@ angularRest.controller('toolbarController', ['$scope', '$sce', 'Cache', '$locati
  */
 // documentsController ------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('dashboardController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$sce', '$location', function(Restangular, RestangularCache, $scope, Page, $sce, $location) {
-        $scope.meetings = [];
-        $scope.comments = [];
+        $scope.files = [];
+        $scope.meetings  = [];
+        $scope.comments  = [];
         Page.setTitle('Dashboard');
 
         // Load all meetings the user is a participant for
@@ -616,6 +617,43 @@ angularRest.controller('dashboardController', ['Restangular', 'RestangularCache'
         $scope.inFuture = function(timestamp) {
             return new moment(timestamp, 'YYYY-MM-DD HH:mm:ss').unix() > new moment().unix();
         };
+
+        // File offsets
+        $scope.fileOffset = 0;
+        var stepSizeFiles = 6;
+        // Get previous set of files in the list
+        $scope.previousFileOffset = function() {
+            var newOffset = parseInt($scope.fileOffset) - parseInt(stepSizeFiles);
+            if(newOffset < 0) {
+                newOffset = 0;
+            }
+            $scope.fileOffset = newOffset;
+        };
+        // Get next set off files in the list
+        $scope.nextFileOffset = function() {
+            var newOffset = parseInt($scope.fileOffset) + parseInt(stepSizeFiles);
+            if(newOffset >= $scope.files.files.length) {
+                newOffset = $scope.files.files.length - parseInt(stepSizeFiles);
+                if(newOffset < 0) {
+                    newOffset = 0;
+                }
+            }
+
+            $scope.fileOffset = newOffset;
+        };
+        // Get starting point for file offset
+        $scope.getFileFrom = function() {
+            return $scope.fileOffset;
+        };
+        // Get ending point for file offset
+        $scope.getFileTo = function() {
+            return parseInt($scope.fileOffset) + parseInt(stepSizeFiles);
+        };
+
+        // Load all files
+        RestangularCache.all('files').getList().then(function(filesResponse) {
+            $scope.files = filesResponse;
+        });
 
         // Comment offsets
         $scope.commentOffset = 0;

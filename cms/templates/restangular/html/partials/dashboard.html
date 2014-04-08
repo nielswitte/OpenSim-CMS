@@ -21,7 +21,7 @@
             </a>
         </div>
     </div>
-    <div class="col-sm-8" id="comments">
+    <div class="col-sm-4" id="comments">
         <h2>New comments ({{comments.commentCount}})</h2>
         <div class="toolbar toolbar-top">
             <button class="btn btn-default" ng-click="nextCommentOffset()"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
@@ -34,6 +34,26 @@
                 <p class="list-group-item-text" ng-bind-html="markdown(comment.message)"></p>
                 <span class="edited" ng-show="comment.editTimestamp && !showUpdateForm(comment.id)">Edited: {{comment.editTimestamp}}</span>
                 <button ng-click="showComment(comment.id)" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-eye-open"></i> Read more</button>
+            </li>
+        </ul>
+    </div>
+    <div class="col-sm-4">
+        <h2>Latest files ({{files.length}})</h2>
+        <div class="toolbar toolbar-top">
+            <button class="btn btn-default" ng-click="nextFileOffset()"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
+            <button class="btn btn-default"  ng-click="previousFileOffset()">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
+        </div>
+        <ul class="list-group list-group-hover">
+            <li class="list-group-item" ng-repeat="file in files | limitFromTo: getFileFrom():getFileTo()">
+                <a ng-href="#!/document/{{file.id}}">
+                    <div class="type type-{{file.type}}" title="{{file.type}}" bs-tooltip>
+                        <i class="glyphicon glyphicon-th" ng-show="file.type == 'presentation'"></i>
+                        <i class="glyphicon glyphicon-file" ng-show="file.type == 'document'"></i>
+                        <i class="glyphicon glyphicon-picture" ng-show="file.type == 'image'"></i>
+                    </div>
+                    <h4 class="list-group-item-heading">{{file.title}}</h4>
+                </a>
+                <span class="posted">{{file.creationDate}}</span> - <a ng-href="#!/user/{{user.id}}">{{file.user.firstName}} {{file.user.lastName}} ({{file.user.username}})</a></p>
             </li>
         </ul>
     </div>

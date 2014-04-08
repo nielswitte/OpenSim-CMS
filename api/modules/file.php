@@ -38,7 +38,7 @@ class File extends Module{
     public function setRoutes() {
         $this->api->addRoute("/^\/files\/?$/",                         'getFiles',              $this, 'GET',       \Auth::READ);      // Get list with 50 files
         $this->api->addRoute("/^\/files\/(\d+)\/?$/",                  'getFiles',              $this, 'GET',       \Auth::READ);      // Get list with 50 files starting at the given offset
-        $this->api->addRoute("/^\/files\/([a-zA-Z0-9-_ \.\(\)\[\]]{3,}+)\/?$/",'getFilesByTitle',       $this, 'GET',       \Auth::READ);      // Search for files by title
+        $this->api->addRoute("/^\/files\/([a-zA-Z0-9-_ \.\(\)\[\]]{3,}+)\/?$/",'getFilesByTitle', $this, 'GET',     \Auth::READ);      // Search for files by title
         $this->api->addRoute("/^\/files\/cache\/?$/",                  'deleteExpiredCache',    $this, 'DELETE',    \Auth::EXECUTE);   // Removes all expired cached assets
         $this->api->addRoute("/^\/file\/?$/",                          'createFile',            $this, 'POST',      \Auth::EXECUTE);   // Create a files
         $this->api->addRoute("/^\/file\/(\d+)\/?$/",                   'getFileById',           $this, 'GET',       \Auth::READ);      // Select specific files
