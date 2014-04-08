@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the Meeting controller
  *
  * @author Niels Witte
- * @version 0.3
- * @date April 1st, 2014
+ * @version 0.3a
+ * @date April 7th, 2014
  * @since March 13th, 2014
  */
 class MeetingController {
@@ -62,7 +62,7 @@ class MeetingController {
             'roomId'    => $db->escape($room),
             'name'      => $db->escape($parameters['name'])
         );
-        $meetingId = $db->insert('meetings', $data);
+        $meetingId = @$db->insert('meetings', $data);
         // Create a new meeting object for this meeting
         $this->meeting = new \Models\Meeting($meetingId);
         // Attach a new meeting participants list
@@ -227,20 +227,20 @@ class MeetingController {
     /**
      * Inserts the documents array into the database
      *
-     * @param array $documents - List with document IDs
+     * @param array $files - List with file IDs
      * @return boolean
      */
-    private function setDocuments($documents) {
+    private function setDocuments($files) {
         $db = \Helper::getDB();
         $result = FALSE;
-        foreach($documents as $document) {
-            $doc = new \Models\Document($document);
-            $this->getMeeting()->getDocuments()->addDocument($doc);
+        foreach($files as $fileId) {
+            $file = new \Models\File($fileId);
+            $this->getMeeting()->getDocuments()->addDocument($file);
 
             // DB data
             $data = array(
                 'meetingId'     => $db->escape($this->getMeeting()->getId()),
-                'documentId'    => $db->escape($doc->getId())
+                'documentId'    => $db->escape($file->getId())
             );
             $result = $db->insert('meeting_documents', $data);
         }
@@ -539,8 +539,8 @@ class MeetingController {
     public function validateParametersUpdate($parameters) {
         $result = FALSE;
 
-        if(count($parameters) < 5) {
-            throw new \Exception('Expected atleast 5 parameters, '. count($parameters) .' given', 1);
+        if(count($parameters) < 6) {
+            throw new \Exception('Expected atleast 6 parameters, '. count($parameters) .' given', 1);
         } elseif(!isset($parameters['name']) || strlen($parameters['name']) == 0) {
             throw new \Exception('Missing parameter (string) "name"', 2);
         } elseif(!isset($parameters['agenda'])) {
@@ -551,7 +551,7 @@ class MeetingController {
             throw new \Exception('Missing parameter (string) "endDate", which should be in the format YYYY-MM-DD HH:mm:ss and past "startDate"', 4);
         } elseif(!isset($parameters['room']) || (!isset($parameters['room']['id']) && !is_numeric($parameters['room']))) {
             throw new \Exception('Missing parameter (integer or array) "room", which should be a room id or a room array which contains a room id ', 5);
-        } elseif(isset($parameters['participants']) && (!empty($parameters['participants']) && !isset($parameters['participants'][0]['id']) && !is_numeric($parameters['participants'][0]))) {
+        } elseif(!isset($parameters['participants']) || !is_array($parameters['participants']) || empty($parameters['participants']) || (!isset($parameters['participants'][0]['id']) && !is_numeric($parameters['participants'][0]))) {
             throw new \Exception('Missing parameter (array) "participants", which should be array which contains ids of the participants or contains an array of users which have an id ', 6);
         } elseif(isset($parameters['documents']) && (!empty($parameters['documents']) && !isset($parameters['documents'][0]['id']) && !is_numeric($parameters['documents'][0]))) {
             throw new \Exception('Missing parameter (array) "documents", which should be array which contains ids of the documents or contains an array of documents which have an id ', 9);
@@ -560,6 +560,7 @@ class MeetingController {
         } else {
             $result = TRUE;
         }
+
         return $result;
     }
 

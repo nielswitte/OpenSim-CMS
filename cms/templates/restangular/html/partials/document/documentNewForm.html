@@ -11,11 +11,7 @@
 <div class="form-group">
     <label for="inputType" class="col-sm-4 control-label">Type</label>
     <div class="col-sm-8">
-        <select class="form-control" id="inputType" name="docType" required ng-model="document.type">
-            <option value="document">Document</option>
-            <option value="image">Image</option>
-            <option value="presentation">Presentation</option>
-        </select>
+        <select class="form-control" id="inputType" name="docType" required ng-model="document.type" ng-options="type for type in types" ng-init="document.type='document'"></select>
     </div>
 </div>
 <div class="form-group">

@@ -5,7 +5,7 @@
             <map>
             <key>group_body</key>
                 <map>
-                <key>3220679527</key>
+                <key>2426747773</key>
                     <map>
                     <key>description</key>
                         <string>Shows presentations</string>
@@ -17,9 +17,9 @@
                         <integer>0</integer>
                     <key>position</key>
                         <array>
-                            <real>129.02301025390625</real>
-                            <real>111.89783477783203</real>
-                            <real>29.7623291015625</real>
+                            <real>129.20872497558594</real>
+                            <real>135.31040954589844</real>
+                            <real>29.661176681518555</real>
                         </array>
                     <key>rotation</key>
                         <array>
@@ -32,7 +32,7 @@
                         <array>
                             <real>10</real>
                             <real>0.10000000149011612</real>
-                            <real>7.5</real>
+                            <real>10</real>
                         </array>
                     <key>shadows</key>
                         <integer>0</integer>
@@ -43,9 +43,9 @@
                                 <integer>0</integer>
                             <key>colors</key>
                                 <array>
-                                    <real>1</real>
-                                    <real>1</real>
-                                    <real>1</real>
+                                    <real>0</real>
+                                    <real>0</real>
+                                    <real>0</real>
                                     <real>1</real>
                                 </array>
                             <key>fullbright</key>
@@ -53,7 +53,36 @@
                             <key>glow</key>
                                 <real>0</real>
                             <key>imageid</key>
-                                <uuid>56e4a221-0c28-44f3-883a-2cf524f68ab0</uuid>
+                                <uuid>5748decc-f629-461c-9a36-a35a221fe21f</uuid>
+                            <key>imagerot</key>
+                                <real>0</real>
+                            <key>media_flags</key>
+                                <integer>0</integer>
+                            <key>offsets</key>
+                                <real>0</real>
+                            <key>offsett</key>
+                                <real>0</real>
+                            <key>scales</key>
+                                <real>1</real>
+                            <key>scalet</key>
+                                <real>0.010000000707805157</real>
+                            </map>
+                            <map>
+                            <key>bump</key>
+                                <integer>0</integer>
+                            <key>colors</key>
+                                <array>
+                                    <real>0</real>
+                                    <real>0</real>
+                                    <real>0</real>
+                                    <real>1</real>
+                                </array>
+                            <key>fullbright</key>
+                                <integer>1</integer>
+                            <key>glow</key>
+                                <real>0</real>
+                            <key>imageid</key>
+                                <uuid>5748decc-f629-461c-9a36-a35a221fe21f</uuid>
                             <key>imagerot</key>
                                 <real>0</real>
                             <key>media_flags</key>
@@ -72,9 +101,9 @@
                                 <integer>0</integer>
                             <key>colors</key>
                                 <array>
-                                    <real>1</real>
-                                    <real>1</real>
-                                    <real>1</real>
+                                    <real>0</real>
+                                    <real>0</real>
+                                    <real>0</real>
                                     <real>1</real>
                                 </array>
                             <key>fullbright</key>
@@ -82,7 +111,36 @@
                             <key>glow</key>
                                 <real>0</real>
                             <key>imageid</key>
-                                <uuid>56e4a221-0c28-44f3-883a-2cf524f68ab0</uuid>
+                                <uuid>5748decc-f629-461c-9a36-a35a221fe21f</uuid>
+                            <key>imagerot</key>
+                                <real>0</real>
+                            <key>media_flags</key>
+                                <integer>0</integer>
+                            <key>offsets</key>
+                                <real>0</real>
+                            <key>offsett</key>
+                                <real>0</real>
+                            <key>scales</key>
+                                <real>0.010000000707805157</real>
+                            <key>scalet</key>
+                                <real>1</real>
+                            </map>
+                            <map>
+                            <key>bump</key>
+                                <integer>0</integer>
+                            <key>colors</key>
+                                <array>
+                                    <real>0</real>
+                                    <real>0</real>
+                                    <real>0</real>
+                                    <real>1</real>
+                                </array>
+                            <key>fullbright</key>
+                                <integer>1</integer>
+                            <key>glow</key>
+                                <real>0</real>
+                            <key>imageid</key>
+                                <uuid>5748decc-f629-461c-9a36-a35a221fe21f</uuid>
                             <key>imagerot</key>
                                 <real>0</real>
                             <key>media_flags</key>
@@ -101,9 +159,9 @@
                                 <integer>0</integer>
                             <key>colors</key>
                                 <array>
-                                    <real>1</real>
-                                    <real>1</real>
-                                    <real>1</real>
+                                    <real>0</real>
+                                    <real>0</real>
+                                    <real>0</real>
                                     <real>1</real>
                                 </array>
                             <key>fullbright</key>
@@ -111,7 +169,7 @@
                             <key>glow</key>
                                 <real>0</real>
                             <key>imageid</key>
-                                <uuid>56e4a221-0c28-44f3-883a-2cf524f68ab0</uuid>
+                                <uuid>5748decc-f629-461c-9a36-a35a221fe21f</uuid>
                             <key>imagerot</key>
                                 <real>0</real>
                             <key>media_flags</key>
@@ -121,7 +179,7 @@
                             <key>offsett</key>
                                 <real>0</real>
                             <key>scales</key>
-                                <real>1</real>
+                                <real>0.010000000707805157</real>
                             <key>scalet</key>
                                 <real>1</real>
                             </map>
@@ -130,9 +188,9 @@
                                 <integer>0</integer>
                             <key>colors</key>
                                 <array>
-                                    <real>1</real>
-                                    <real>1</real>
-                                    <real>1</real>
+                                    <real>0</real>
+                                    <real>0</real>
+                                    <real>0</real>
                                     <real>1</real>
                                 </array>
                             <key>fullbright</key>
@@ -140,7 +198,7 @@
                             <key>glow</key>
                                 <real>0</real>
                             <key>imageid</key>
-                                <uuid>56e4a221-0c28-44f3-883a-2cf524f68ab0</uuid>
+                                <uuid>5748decc-f629-461c-9a36-a35a221fe21f</uuid>
                             <key>imagerot</key>
                                 <real>0</real>
                             <key>media_flags</key>
@@ -152,65 +210,7 @@
                             <key>scales</key>
                                 <real>1</real>
                             <key>scalet</key>
-                                <real>1</real>
-                            </map>
-                            <map>
-                            <key>bump</key>
-                                <integer>0</integer>
-                            <key>colors</key>
-                                <array>
-                                    <real>1</real>
-                                    <real>1</real>
-                                    <real>1</real>
-                                    <real>1</real>
-                                </array>
-                            <key>fullbright</key>
-                                <integer>1</integer>
-                            <key>glow</key>
-                                <real>0</real>
-                            <key>imageid</key>
-                                <uuid>56e4a221-0c28-44f3-883a-2cf524f68ab0</uuid>
-                            <key>imagerot</key>
-                                <real>0</real>
-                            <key>media_flags</key>
-                                <integer>0</integer>
-                            <key>offsets</key>
-                                <real>0</real>
-                            <key>offsett</key>
-                                <real>0</real>
-                            <key>scales</key>
-                                <real>1</real>
-                            <key>scalet</key>
-                                <real>1</real>
-                            </map>
-                            <map>
-                            <key>bump</key>
-                                <integer>0</integer>
-                            <key>colors</key>
-                                <array>
-                                    <real>1</real>
-                                    <real>1</real>
-                                    <real>1</real>
-                                    <real>1</real>
-                                </array>
-                            <key>fullbright</key>
-                                <integer>1</integer>
-                            <key>glow</key>
-                                <real>0</real>
-                            <key>imageid</key>
-                                <uuid>56e4a221-0c28-44f3-883a-2cf524f68ab0</uuid>
-                            <key>imagerot</key>
-                                <real>0</real>
-                            <key>media_flags</key>
-                                <integer>0</integer>
-                            <key>offsets</key>
-                                <real>0</real>
-                            <key>offsett</key>
-                                <real>0</real>
-                            <key>scales</key>
-                                <real>1</real>
-                            <key>scalet</key>
-                                <real>1</real>
+                                <real>0.010000000707805157</real>
                             </map>
                         </array>
                     <key>volume</key>
@@ -269,9 +269,9 @@
                 </map>
             <key>root_position</key>
                 <array>
-                    <real>129.02301025390625</real>
-                    <real>111.89783477783203</real>
-                    <real>29.7623291015625</real>
+                    <real>129.20872497558594</real>
+                    <real>135.31040954589844</real>
+                    <real>29.661176681518555</real>
                 </array>
             <key>root_rotation</key>
                 <array>

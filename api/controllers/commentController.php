@@ -8,7 +8,7 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author Niels Witte
  * @version 0.2
- * @date April 1st, 2014
+ * @date April 2nd, 2014
  * @since March 28th, 2014
  */
 class CommentController {
@@ -38,6 +38,21 @@ class CommentController {
         $db->where('id', $db->escape($this->comment->getId()));
         $result = $db->delete('comments');
         return $result;
+    }
+
+    /**
+     * Removes all comments for the given type and itemId
+     * @example All slides for slideId 23: $commentController->removeCommentsByItem('slide', 23);
+     *
+     * @param string $type
+     * @param integer $itemId
+     * @return integer - Number of removed rows
+     */
+    public function removeCommentsByItem($type, $itemId) {
+        $db = \Helper::getDB();
+        $db->where('type', $db->escape($type));
+        $db->where('itemId', $db->escape($itemId));
+        return $db->delete('comments');
     }
 
     /**

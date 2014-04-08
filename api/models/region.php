@@ -9,8 +9,8 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class represents a region
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 1st, 2014
+ * @version 0.3
+ * @date April 3rd, 2014
  * @since February 17th, 2014
  */
 class Region implements SimpleModel {
@@ -62,39 +62,47 @@ class Region implements SimpleModel {
      * Gets information about the region
      */
     public function getInfoFromDatabase() {
-        $raXML  = new \OpenSimRPC($this->grid->getRaUrl(), $this->grid->getRaPort(), $this->grid->getRaPassword());
-        $result = $raXML->call('admin_region_query', array('region_id' => $this->getUuid()));
+        // Only when no timeout occured this instance
+        if(!$this->getGrid()->getTimedOut()) {
+            $raXML  = new \OpenSimRPC($this->grid->getRaUrl(), $this->grid->getRaPort(), $this->grid->getRaPassword());
+            $result = $raXML->call('admin_region_query', array('region_id' => $this->getUuid()));
 
-        if(isset($result['error'])) {
-            throw new Exception($result['error'], 3);
-        }
-
-        $this->setOnlineStatus($result['success']);
-
-        // Updates the online status of the grid, when so far the status is offline
-        // This means that if one region responds it is online, the grid is online, however not all regions
-        if(!$this->getGrid()->getOnlineStatus()) {
-            $this->getGrid()->setOnlineStatus($result['success']);
-        }
-
-        // Additional actions when MySQL database is accessable
-        if($this->grid->getDbUrl() && $this->getOnlineStatus()) {
-            $osdb = new \MysqliDb($this->grid->getDbUrl(), $this->grid->getDbUsername(), $this->grid->getDbPassword(), $this->grid->getDbName(), $this->grid->getDbPort());
-            // Get user's
-            $osdb->where('LastRegionID', $osdb->escape($this->getUuid()));
-            $results = $osdb->get('GridUser');
-
-            $this->activeUsers  = 0;
-            $this->totalUsers   = 0;
-
-            // Count active and total users
-            foreach($results as $result) {
-                if($result['Online'] == 'True') {
-                    $this->activeUsers++;
-                }
-                $this->totalUsers++;
+            // Requesting XML went wrong?
+            if($result === FALSE) {
+                $this->getGrid()->setTimedOut(TRUE);
             }
 
+            // Catch error returned by OpenSim
+            if(isset($result['error'])) {
+                throw new Exception($result['error'], 3);
+            }
+
+            $this->setOnlineStatus($result['success']);
+
+            // Updates the online status of the grid, when so far the status is offline
+            // This means that if one region responds it is online, the grid is online, however not all regions
+            if(!$this->getGrid()->getOnlineStatus()) {
+                $this->getGrid()->setOnlineStatus($result['success']);
+            }
+
+            // Additional actions when MySQL database is accessable
+            if($this->grid->getDbUrl() && $this->getOnlineStatus()) {
+                $osdb = new \MysqliDb($this->grid->getDbUrl(), $this->grid->getDbUsername(), $this->grid->getDbPassword(), $this->grid->getDbName(), $this->grid->getDbPort());
+                // Get user's
+                $osdb->where('LastRegionID', $osdb->escape($this->getUuid()));
+                $results = $osdb->get('GridUser');
+
+                $this->activeUsers  = 0;
+                $this->totalUsers   = 0;
+
+                // Count active and total users
+                foreach($results as $result) {
+                    if($result['Online'] == 'True') {
+                        $this->activeUsers++;
+                    }
+                    $this->totalUsers++;
+                }
+            }
         }
     }
 

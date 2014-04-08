@@ -1,8 +1,13 @@
+<ol class="breadcrumb">
+    <li><a href="#!/"><i class="glyphicon glyphicon-home"></i> Home</a></li>
+    <li class="active">Documents</li>
+</ol>
 <div class="page-header">
     <h1>Documents <small>Overview</small></h1>
 </div>
 <div class="toolbar toolbar-top" ng-show="allowCreate()">
-    <button ng-click="newDocument()" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> New document</button>
+    <button ng-click="newDocument()" type="button" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> New document</button>
+    <button ng-click="clearExpiredCache()" type="button" class="btn btn-primary"><i class="glyphicon glyphicon-floppy-remove"></i> Clear expired cache</button>
 </div>
 <div class="panel panel-primary filter">
     <div class="panel-heading">
@@ -41,8 +46,8 @@
                     </span>
                 </th>
                 <th>
-                    <a ng-click="orderByField='ownerId'; reverseSort = !reverseSort" title="Sort by owner ID">Owner ID</a>
-                    <span ng-show="orderByField == 'ownerId'">
+                    <a ng-click="orderByField='user.username'; reverseSort = !reverseSort" title="Sort by owner">Owner</a>
+                    <span ng-show="orderByField == 'user.username'">
                         <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
                         <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
                     </span>
@@ -67,12 +72,12 @@
         <tbody>
             <tr ng-repeat="(index, document) in documentsList | orderBy:orderByField:reverseSort | filter:searchText">
                 <td>{{document.id}}</td>
-                <td><a href="document/{{document.id}}/">{{document.title}}</a></td>
+                <td><a ng-href="#!/document/{{document.id}}">{{document.title}}</a></td>
                 <td>{{document.type}}</td>
-                <td>{{document.ownerId}}</td>
+                <td><a ng-href="#!/user/{{document.user.id}}">{{document.user.username}} ({{document.user.firstName}} {{document.user.lastName}})</a></td>
                 <td>{{document.creationDate}}</td>
                 <td>{{document.modificationDate}}</td>
-                <td><button class="btn btn-danger btn-xs" confirmed-click="deleteDocument(index)" ng-confirm-click="Are you sure you want to delete {{document.title}}?" ng-show="allowDelete(document.ownerId)"><i class="glyphicon glyphicon-remove"></i></button></td>
+                <td><button class="btn btn-danger btn-xs" confirmed-click="deleteDocument(document.id)" ng-confirm-click="Are you sure you want to delete {{document.title}}?" ng-show="allowDelete(document.ownerId)"><i class="glyphicon glyphicon-trash"></i> Delete</button></td>
             </tr>
         </tbody>
     </table>

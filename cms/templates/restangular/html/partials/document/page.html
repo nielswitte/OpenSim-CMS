@@ -1,0 +1,22 @@
+<ol class="breadcrumb">
+    <li><a href="#!/"><i class="glyphicon glyphicon-home"></i> Home</a></li>
+    <li><a href="#!/documents">Documents</a></li>
+    <li><a ng-href="#!/document/{{documentId}}">{{documentId}}</a></li>
+    <li class="active">Page {{page.number}}</li>
+</ol>
+<div class="page-header">
+    <h1>Page <small>{{page.number}}/{{page.total}}</small></h1>
+</div>
+<div class="toolbar toolbar-top">
+    <button ng-click="previousPage()" type="button" class="btn btn-default" ng-show="page.number > 1"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
+    <button ng-click="nextPage()" type="button" class="btn btn-default" ng-show="page.number < page.total">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
+    <div class="col-sm-1">
+        <select class="form-control" id="jumpPageList" title="Jump to a specific page" bs-tooltip ng-model="currentPage" ng-options="n for n in [] | range: 1:page.total" ng-change="goToPageNumber(currentPage)"></select>
+    </div>
+</div>
+<div class="row">
+    <div class="col-sm-12">
+        <img src="templates/restangular/img/img-placeholder.png" ng-src="{{getPageImage()}}" class="img-responsive img-thumbnail" alt="Page {{page.number}}">
+    </div>
+</div>
+<div ng-include src="showComments()"></div>

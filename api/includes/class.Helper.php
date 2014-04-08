@@ -5,8 +5,8 @@ defined('EXEC') or die('Config not loaded');
  * Helper class to support the CMS and API
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 1st, 2014
+ * @version 0.3a
+ * @date April 7th, 2014
  * @since February 12th, 2014
  */
 class Helper {
@@ -68,6 +68,38 @@ class Helper {
     }
 
     /**
+     * Some checks to process the input the server received.
+     * For example: Checks if the content length does not exceed the maximum post length
+     *
+     * @return boolean
+     * @throws \Exception
+     */
+    public static function checkInput() {
+        $result  = TRUE;
+        $request = $_SERVER['REQUEST_METHOD'];
+        // Only for PUT and POST requests
+        if($request == 'PUT' || $request == 'POST') {
+            $max = ini_get('post_max_size');
+
+            // Convert to bytes
+            if(substr($max, -1) == 'G') {
+                $max = $max * 1024 * 1024 * 1024;
+            } elseif(substr($max, -1) == 'M') {
+                $max = $max * 1024 * 1024;
+            } elseif(substr($max, -1) == 'K') {
+                $max = $max * 1024;
+            }
+
+            // Check content-length
+            if($_SERVER['CONTENT_LENGTH'] > $max) {
+                throw new \Exception('Received '. $_SERVER['CONTENT_LENGTH'] .' bytes where only '. $max .' bytes can be handled by the server. Please check the filesize of uploaded documents.');
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Gets the input data from the request
      *
      * @param boolean $parse - Parse the input data to an array or return it raw string?
@@ -86,7 +118,7 @@ class Helper {
     }
 
     /**
-     * Helper function to parse PUT requests
+     * Helper function to parse PUT/POST requests
      * @source: https://stackoverflow.com/questions/5483851/manually-parse-raw-http-data-with-php/5488449#5488449
      *
      * @param string $input
@@ -189,10 +221,14 @@ class Helper {
         switch ($type) {
             case "application/pdf":
                 return 'pdf';
-            break;
+            case "image/jpeg":
+                return 'jpg';
+            case "image/png":
+                return 'png';
+            case "image/gif":
+                return 'gif';
             default:
                 return 'txt';
-            break;
         }
     }
 
@@ -202,7 +238,7 @@ class Helper {
      * @param string $filename - Filename and extension
      * @param string $location - File location
      * @param string $data - Data to store in file
-     * @return string full path to file or boolean when failed
+     * @return string - full path to file or boolean when failed
      */
     public static function saveFile($filename, $location, $data) {
         $filepath = $location .DS. $filename;
@@ -210,17 +246,42 @@ class Helper {
     }
 
     /**
+     * Moves the source file to the target file
+     *
+     * @param string $source - File path, name and extension of source
+     * @param string $destination - File path, name and extension of target
+     * @return boolean
+     */
+    public static function moveFile($source, $destination) {
+        return rename($source, $destination);
+    }
+
+    /**
      * Converts the given pdf to IMAGE_TYPE for each slide
      *
      * @param string $file
      * @param string $destination
+     * @param boolean $fit - [Optional] Fit the image in the max width & height when TRUE, when false uses the largest of width/height as limit
+     * @param integer $width - [Optional] The image max width
+     * @param integer $height - [Optional] The image max height
      */
-    public static function pdf2jpeg($file, $destination) {
+    public static function pdf2jpeg($file, $destination, $fit = TRUE, $width = IMAGE_WIDTH, $height = IMAGE_HEIGHT) {
         // Create the full path if needed
         $path    = dirname($destination);
         mkdir($path, 0777, TRUE);
-        // Exec the command uses the larges of the image width or height as limit
-        $command = 'pdftoppm -'. IMAGE_TYPE .' -scale-to '. (IMAGE_WIDTH > IMAGE_HEIGHT ? IMAGE_WIDTH : IMAGE_HEIGHT) .' -aa yes -aaVector yes '. $file .' '. $destination;
+        // Command requires jpeg instead of jpg
+        $image_type = IMAGE_TYPE == 'jpg' ? 'jpeg' : IMAGE_TYPE;
+        // Exec the command uses the largest of the image width or height as limit
+        if($fit) {
+            $command = 'pdftoppm -'. $image_type .' -scale-to '. ($width >= $height ? $width : $height) .' -aa yes -aaVector yes '. $file .' '. $destination;
+        } else {
+            // Scale the image to the largest max side or use height (especially for documents) when equal
+            if($width > $height) {
+                $command = 'pdftoppm -'. $image_type .' -scale-to-x '. $width .' -scale-to-y -1 -aa yes -aaVector yes '. $file .' '. $destination;
+            } else {
+                $command = 'pdftoppm -'. $image_type .' -scale-to-x -1 -scale-to-y '. $height .' -aa yes -aaVector yes '. $file .' '. $destination;
+            }
+        }
         exec($command);
     }
 
@@ -266,9 +327,10 @@ class Helper {
      * @param string $destination - The destination to save the file, including filename and extension
      * @param integer $height - [Optional] Height in pixels
      * @param integer $width - [Optional] Width in pixels
+     * @param integer $quality - [Optional] The JPEG compression quality
      * @return boolean
      */
-    public static function imageResize($source, $destination, $height = IMAGE_HEIGHT, $width = IMAGE_WIDTH) {
+    public static function imageResize($source, $destination, $height = IMAGE_HEIGHT, $width = IMAGE_WIDTH, $quality = 95) {
         $destinationDir     = dirname($destination);
         $destinationExt     = @end(explode('.', $destination));
         $destinationFile    = @end(explode(DS, preg_replace("/\\.[^.\\s]{3,4}$/", "", $destination)));
@@ -296,7 +358,7 @@ class Helper {
             if(!file_exists($destination) || $resizeRequired) {
                 // Load the background
                 $averageColor = $resize->getAverageColor();
-                if(($averageColor['red'] + $averageColor['green'] + $averageColor['blue'] / 4) >= 128) {
+                if((($averageColor['red'] + $averageColor['green'] + $averageColor['blue']) / 3) >= 128) {
                     $image = new \Image(FILES_LOCATION . DS . 'background_light.jpg');
                 } else {
                     $image = new \Image(FILES_LOCATION . DS . 'background_dark.jpg');
@@ -304,14 +366,16 @@ class Helper {
 
                 // resize when needed
                 if($resize->getWidth() > $width || $resize->getHeight() > $height) {
-                    $resize->resize($width, $height, 'fit');
+                    $resize->resize($width, $height, 'fit', 'c', 'c', $quality);
                     $resize->save($destinationFile, $destinationDir, $destinationExt);
+                    // Now use destination as source, since it is resized
+                    $source = $destination;
                 }
                 unset($resize);
 
                 // Fill remaining of image with black
-                $image->resize($width, $height, 'fit');
-                $image->addWatermark($destination);
+                $image->resize($width, $height, 'fit', 'c', 'c', $quality);
+                $image->addWatermark($source);
                 $image->writeWatermark(100, 0, 0, 'c', 'c');
                 return $image->save($destinationFile, $destinationDir, $destinationExt);
             // Thumbnail already exists?
@@ -365,9 +429,10 @@ VERSION:2.0
 CALSCALE:GREGORIAN
 METHOD:REQUEST
 BEGIN:VEVENT
-DTSTART:". date('Ymd\THis\Z', $start) ."
-DTEND:". date('Ymd\THis\Z', $end) ."
-DTSTAMP:". date('Ymd\THis\Z') ."
+TZID:". date('e') ."
+DTSTART:". date('Ymd\THis', $start) ."
+DTEND:". date('Ymd\THis', $end) ."
+DTSTAMP:". date('Ymd\THis') ."
 ORGANIZER;CN=". $creatorName .":mailto:". $creatorEmail ."
 UID:". uniqid();
         // Add attendees
@@ -398,14 +463,18 @@ END:VCALENDAR";
      *
      * @param string $type - Type of the parent
      * @param integer $id - The parent's ID
-     * @return \Models\Document or \Models\Slide or boolean FALSE when type not found
+     * @return \Models\Documents or other \Models\* instance or boolean FALSE when type not found
      */
     public static function getCommentType($type, $id) {
         if($type == 'document') {
             $parent = new \Models\Document($id);
         } elseif($type == 'slide') {
             $parent = new \Models\Slide($id, 1, '');
-        }else {
+        } elseif($type == 'meeting') {
+            $parent = new \Models\Meeting($id);
+        } elseif($type == 'page') {
+            $parent = new \Models\Page($id, 1, '');
+        } else {
             $parent = FALSE;
         }
         return $parent;

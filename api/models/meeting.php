@@ -72,7 +72,7 @@ class Meeting implements simpleModel {
             $this->endDate      = $meeting['endDate'];
             $this->name         = $meeting['name'];
         } else {
-            throw new Exception('Meeting not found', 1);
+            throw new \Exception('Meeting not found', 1);
         }
     }
 
@@ -123,17 +123,19 @@ class Meeting implements simpleModel {
     public function getDocumentsFromDabatase() {
         $db = \Helper::getDB();
         $db->join('documents d', 'md.documentId = d.id', 'LEFT');
-        $db->where('meetingId', $db->escape($this->getId()));
-        $db->orderBy('agendaId', 'ASC');
-        $results = $db->get('meeting_documents md');
+        $db->join('users u', 'd.ownerId = u.id', 'LEFT');
+        $db->where('md.meetingId', $db->escape($this->getId()));
+        $db->orderBy('LOWER(d.title)', 'ASC');
+        $results = $db->get('meeting_documents md', NULL, '*, d.id AS documentId, u.id AS userId');
 
         $documents = new \Models\MeetingDocuments($this);
         $this->setDocuments($documents);
 
         // Add all items to the agenda
         foreach($results as $result) {
-            $document = new \Models\Document($result['documentId'], $result['type'], $result['title'], $result['ownerId'], $result['creationDate'], $result['modificationDate']);
-            $documents->addDocument($document);
+            $user     = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $file     = new \Models\File($result['documentId'], $result['type'], $result['title'], $user, $result['creationDate'], $result['modificationDate']);
+            $documents->addDocument($file);
         }
     }
 

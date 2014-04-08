@@ -53,7 +53,7 @@ class MeetingRoom implements simpleModel {
         // Match found?
         if($room) {
             $grid               = new \Models\Grid($room['gridId']);
-            $grid->getInfoFromDatabase();
+            $grid->getInfoFromDatabase(FALSE);
             $this->region       = $grid->getRegionByUuid($room['regionUuid']);
             $this->name         = $room['name'];
             $this->description  = $room['description'];

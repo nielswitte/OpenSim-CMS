@@ -29,7 +29,8 @@ This request will return, on succes the following JSON:
     "token": "53048c5375b1d2.66536292",
     "ip": "192.168.1.102",
     "expires": "2014-02-19 12:19:55",
-    "userId": 1
+    "userId": 1,
+    "lastLogin": "2014-02-16 15:32:14"
 }
 ```
 
@@ -124,11 +125,6 @@ Example of output
     "firstName": "Test",
     "lastName": "User",
     "email": "testuser@email.com",
-    "presentationIds": [
-        "1",
-        "5",
-        "8"
-    ],
     "permissions" : {
         "auth": 7,
         "document": 5,
@@ -386,12 +382,19 @@ PUT /api/meeting/<MEETING-ID>/ HTTP/1.1
 | endDate           | string           | The end date time of the meeting (format: YYYY-MM-DD HH:mm:ss)   |
 | room              | integer or array | Room ID, can be submitted as an integer or as a json array `[{id: 1, (...)}, {id: 2, (...)}, (...) }]` |
 | agenda            | string           | A string with each agenda item on a new line and starting with a number and separated by a space, the topic. For example `1. Opening\n2. Minutes\n2.1 Questions\n3. (...)`   |
-| participants      | array            | [Optional] A array with user IDs. Can be an array `{1, 2, 3, 4, (...)}` or a json array with users that contain an id field  `[{id: 1, (...)}, {id: 2, (...)}, (...) }]`         |
+| participants      | array            | A array with user IDs. Can be an array `{1, 2, 3, 4, (...)}` or a json array with users that contain an id field  `[{id: 1, (...)}, {id: 2, (...)}, (...) }]`         |
 | documents         | array            | [Optional] A array with document IDs. Can be an array `{1, 2, 3, 4, (...)}` or a json array with documents that contain an id field  `[{id: 1, (...)}, {id: 2, (...)}, (...) }]` |
 
 ```http
 GET /api/meeting/<MEETING-ID>/agenda HTTP/1.1
 ```
+
+### Get meetings by participant
+
+```http
+GET /api/user/<USER-ID>/meetings/ HTTP/1.1
+```
+
 ### Minutes
 
 ```http
@@ -425,6 +428,86 @@ GET /api/grid/<GRID-ID>/room/<ROOM-ID/ HTTP/1.1
 GET /api/grid/<GRID-ID>/region/<REGION-UUID>/rooms/ HTTP/1.1
 ```
 
+## Files
+
+```http
+GET /api/files/ HTTP/1.1
+```
+
+```http
+GET /api/files/<OFFSET>/ HTTP/1.1
+```
+
+Search for a files by title, at least 3 characters.
+```http
+GET /api/files/<SEARCH>/ HTTP/1.1
+```
+
+### Add a new file
+
+```http
+POST /api/file/ HTTP/1.1
+```
+| Parameter         | Type      | Description                                                 |
+|-------------------|-----------|-------------------------------------------------------------|
+| title             | string    | The title of the document                                   |
+| type              | string    | The document type                                           |
+| file              | file      | Base64 encoded file                                         |
+
+### Remove a file
+
+```http
+DELETE /api/file/<FILE-ID>/ HTTP/1.1
+```
+
+### Images
+The image of file with type `image` can be retrieved by using the following API function
+
+```http
+GET /api/file/<FILE-ID>/image/ HTTP/1.1
+```
+
+### Source file
+Retrieve the original file uploaded before being processed by the API.
+
+```http
+GET /api/file/<FILE-ID>/source/ HTTP/1.1
+```
+
+Or for presentations this alias could be used:
+
+```http
+GET /api/presentation/<PRESENTATION-ID>/source/ HTTP/1.1
+```
+
+Or a document
+
+```http
+GET /api/document/<DOCUMENT-ID>/source/ HTTP/1.1
+```
+
+
+### Owned by a specific user
+It is possible to retrieve a list with documents owned by a specific user. This can be done by
+using the user's ID:
+
+```http
+GET /api/user/<USER-ID>/files/ HTTP/1.1
+```
+
+Or by using an UUID of an avatar linked to the user.
+
+```http
+GET /api/grid/<GRID-ID>/avatar/<AVATAR-UUID>/files/ HTTP/1.1
+```
+
+### Clear the cache
+Removes all expired items from the cache. The functions returns the number of removed
+cache items.
+
+```http
+DELETE /api/files/cache/ HTTP/1.1
+```
 ## Documents
 
 ```http
@@ -439,11 +522,7 @@ Search for a document by title, at least 3 characters.
 ```http
 GET /api/documents/<SEARCH>/ HTTP/1.1
 ```
-
-```http
-DELETE /api/documents/cache/ HTTP/1.1
-```
-
+### Get a single document
 ```http
 GET /api/document/<DOCUMENT-ID>/ HTTP/1.1
 ```
@@ -451,7 +530,7 @@ GET /api/document/<DOCUMENT-ID>/ HTTP/1.1
 ### Add a new document
 
 ```http
-POST /api/presentation/ HTTP/1.1
+POST /api/document/ HTTP/1.1
 ```
 | Parameter         | Type      | Description                                                 |
 |-------------------|-----------|-------------------------------------------------------------|
@@ -459,14 +538,39 @@ POST /api/presentation/ HTTP/1.1
 | type              | string    | The document type                                           |
 | file              | file      | Base64 encoded file                                         |
 
-
-### Remove a document
+### Specific document page
+The page details for just one specific page can be accessed through its ID:
 
 ```http
-DELETE /api/document/<DOCUMENT-ID>/ HTTP/1.1
+GET /api/document/<ID>/page/<PAGE-ID>/ HTTP/1.1
 ```
 
-### Presentations
+However, it is often easier to navigate based on page number:
+
+```http
+GET /api/document/<ID>/page/number/<PAGE#>/ HTTP/1.1
+```
+
+The given image url will provide an IMAGE_TYPE of the page resized and centered at IMAGE_WIDTH x IMAGE_HEIGHT with a black or white background.
+
+```http
+GET /api/document/<ID>/page/number/<PAGE#>/image/ HTTP/1.1
+```
+
+When an page has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with
+the page to speed up future use. The cache period (`FileCacheTimeout`) is set in the `FlotsamCache.ini` configuration and needs to be
+matched by the configuration value for the grid in the CMS.
+
+```http
+PUT /api/document/<ID>/page/number/<PAGE#>/ HTTP/1.1
+```
+
+| Parameter         | Type      | Description                                     |
+|-------------------|-----------|-------------------------------------------------|
+| uuid              | string    | UUID of the page to be saved                    |
+| gridId            | integer   | The ID of the grid, as used in the CMS database |
+
+## Presentations
 A list with presentations can be requested by using the following GET request.
 
 ```http
@@ -572,7 +676,7 @@ This is done by using the PUT function for a single slide (see below).
 The slide details for just one specific slide can be accessed through its ID:
 
 ```http
-GET /api/presentation/<ID>/slide/<SLIDE#>/ HTTP/1.1
+GET /api/presentation/<ID>/slide/<SLIDE-ID>/ HTTP/1.1
 ```
 
 However, it is often easier to navigate based on page/slide number:
@@ -588,8 +692,8 @@ GET /api/presentation/<ID>/slide/number/<SLIDE#>/image/ HTTP/1.1
 ```
 
 When an slide has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with
-the slide to speed up future use. The cache periode is set in the `OpenSim.ini` configuration and needs to be
-matched by the config value for the grid in the CMS.
+the slide to speed up future use. The cache period (`FileCacheTimeout`) is set in the `FlotsamCache.ini`  configuration and needs to be
+matched by the configuration value for the grid in the CMS.
 
 ```http
 PUT /api/presentation/<ID>/slide/number/<SLIDE#>/ HTTP/1.1
@@ -605,7 +709,7 @@ On almost everything users can leave comments (when the user has sufficient perm
 The comments can be saved, retrieved and removed through the API by using the following functions:
 
 ### Get comments
-Getting the latest comments by using this URL.
+Getting the latest comments by using this URL. The comments are returned as a threaded array.
 
 ```http
 GET /api/comments/<TYPE>/<ID>/ HTTP/1.1
@@ -614,7 +718,21 @@ GET /api/comments/<TYPE>/<ID>/ HTTP/1.1
 |---------------|------------------------------------------------------------------|
 | document      | Get comments for the document with id = <ID>.                    |
 | meeting       | Get comments on the meeting with the given id.                   |
+| page          | Get comments for the page with id = <ID>.                        |
 | slide         | Get comments for the slide with id = <ID>.                       |
+
+### Get comments after given timestamp
+
+Returns a flat list with 50 comments.
+```http
+GET /api/comments/<UNIX-TIMESTAMP>/ HTTP/1.1
+```
+
+Or with an offset:
+
+```http
+GET /api/comments/<UNIX-TIMESTAMP>/<OFFSET>/ HTTP/1.1
+```
 
 ### Post a comment
 

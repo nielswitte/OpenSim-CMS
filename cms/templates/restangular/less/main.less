@@ -1,3 +1,10 @@
+@color-primary: #428bca;
+@color-success: #5cb85c;
+@color-info: #5bc0de;
+@color-warning: #f0ad4e;
+@color-danger: #d9534f;
+@color-default: #e8e8e8;
+
 body {
     min-height: 500px;
     padding-top: 70px;
@@ -115,7 +122,7 @@ div.thumbnail {
     }
 
     .cube1, .cube2 {
-        background-color: #428bca;
+        background-color: @color-primary;
         width: 10px;
         height: 10px;
         position: absolute;
@@ -261,36 +268,64 @@ div.thumbnail {
 }
 
 .list-group {
+    time,
+    .type {
+        background-color: #999;
+        color: #fff;
+        font-size: 15px;
+        font-weight: bold;
+        text-align: center;
+        display: block;
+        float: left;
+        height: 50px;
+        width: 55px;
+        padding: 5px;
+        margin: -5px 10px 5px -5px;
+    }
+
+    .list-group-item-primary {
+        time { background-color: @color-primary; }
+    }
+
+    .list-group-item-success {
+        time { background-color: @color-success; }
+    }
+
+    .list-group-item-info {
+        time { background-color: @color-info; }
+    }
+
+    .list-group-item-warning {
+        time { background-color: @color-warning; }
+    }
+
+    .list-group-item-danger {
+        time { background-color: @color-danger; }
+    }
+
     &.list-group-hover {
         .list-group-item:hover {
-            background-color: #e8e8e8;
+            background-color: @color-default;
+        }
+    }
+
+    .type {
+        font-size: 30px;
+        text-align: center;
+        vertical-align: middle;
+        padding-right: 2px;
+        padding-top: 7px;
+
+        &.type-presentation { background-color: @color-primary; }
+        &.type-document { background-color: @color-info; }
+        &.type-image {
+            background-color: @color-danger;
+            padding-right: 4px;
         }
     }
 
     .list-group-item {
         button { float: right; }
-    }
-}
-
-// Agenda list
-ol {
-    counter-reset: item;
-    margin: 0;
-    padding: 0;
-    font-weight: bold;
-
-    li {
-        display: block;
-
-        &:before {
-            content: counters(item, ".") " ";
-            counter-increment: item;
-        }
-    }
-
-    ol {
-        font-weight: normal;
-        margin-left: 20px;
     }
 }
 
@@ -301,12 +336,12 @@ ol {
             background-color: #f9f9f9;
         }
         &:nth-child(even) {
-            background-color: #ffffff;
+            background-color: #fff;
         }
     }
 
     &.row-hover:hover {
-        background-color: #e8e8e8;
+        background-color: @color-default;
     }
 }
 
@@ -351,7 +386,7 @@ ol {
 
     .aside-header {
         &.highlight {
-            background-color: #5cb85c;
+            background-color: @color-success;
         }
 
         .minimize {
@@ -403,8 +438,11 @@ ol {
         list-style: none;
 
         li {
-            article.comment {
+            &.highlighted {
+                border-left: 5px solid @color-success;
+            }
 
+            article.comment {
                 header {
                     .number {
                         color: #999;
@@ -428,7 +466,7 @@ ol {
             }
 
             &:nth-child(odd) {
-                background-color: #ffffff;
+                background-color: #fff;
             }
             &:nth-child(even) {
                 background-color: #f9f9f9;
@@ -436,11 +474,42 @@ ol {
         }
     }
 
+    .list-group-item-heading {
+        font-weight: bold;
+        font-size: 14px;
+    }
+
     #commentPreview,
-    .message {
+    .message,
+    .list-group-item-text {
         font-size: 14px;
         blockquote {
             font-size: 14px;
+        }
+    }
+}
+
+// Comments and Dashboard
+li.list-group-item {
+    a.btn,
+    button {
+        float: right;
+        position: relative;
+        z-index: 2;
+    }
+}
+
+.posted,
+.edited {
+    font-size: 10px;
+    color: #999;
+}
+
+// Page headers with no visible text
+.page-header {
+    &.no-text {
+        h1 {
+            display: none;
         }
     }
 }

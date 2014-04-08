@@ -3,3 +3,6 @@
 /temp/test.php
 /api/config.php
 /cms/config.php
+/storage/image/
+/storage/presentation/
+/storage/ical/

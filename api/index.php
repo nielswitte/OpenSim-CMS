@@ -1,13 +1,6 @@
 <?php
 namespace API;
 
-// Default headers to disable caching
-header("Expires: ". gmdate("D, d M Y H:i:s") ." GMT");
-header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-header("Cache-Control: no-store, no-cache, must-revalidate");
-header("Cache-Control: post-check=0, pre-check=0", false);
-header("Pragma: no-cache");
-
 require_once dirname(__FILE__) .'/config.php';
 require_once dirname(__FILE__) .'/includes/class.Auth.php';
 require_once dirname(__FILE__) .'/api.php';
@@ -15,6 +8,7 @@ require_once dirname(__FILE__) .'/modules/auth.php';
 require_once dirname(__FILE__) .'/modules/chat.php';
 require_once dirname(__FILE__) .'/modules/comment.php';
 require_once dirname(__FILE__) .'/modules/document.php';
+require_once dirname(__FILE__) .'/modules/file.php';
 require_once dirname(__FILE__) .'/modules/grid.php';
 require_once dirname(__FILE__) .'/modules/meeting.php';
 require_once dirname(__FILE__) .'/modules/meetingroom.php';
@@ -25,8 +19,8 @@ require_once dirname(__FILE__) .'/modules/user.php';
  * This class is catches the API calls and searches for the matching function
  *
  * @author Niels Witte
- * @version 0.5
- * @date March 28th, 2014
+ * @version 0.6
+ * @date April 2nd, 2014
  * @since February 10th, 2014
  */
 
@@ -35,6 +29,9 @@ require_once dirname(__FILE__) .'/modules/user.php';
 
 // Try to parse the requested URL and paramters to a function of the API
 try {
+    // Validate input before doing anything else
+    $inputValidation = \Helper::checkInput();
+
 	// Input
 	$get                = filter_input(INPUT_GET, '_url', FILTER_SANITIZE_SPECIAL_CHARS);
     $token              = filter_input(INPUT_GET, 'token', FILTER_SANITIZE_SPECIAL_CHARS);
@@ -51,8 +48,9 @@ try {
     // Add modules
     $chatApi            = new \API\Modules\Chat($api);
     $commentsApi        = new \API\Modules\Comment($api);
-    $gridApi            = new \API\Modules\Grid($api);
     $documentApi        = new \API\Modules\Document($api);
+    $fileApi            = new \API\Modules\File($api);
+    $gridApi            = new \API\Modules\Grid($api);
     $meetingsApi        = new \API\Modules\Meeting($api);
     $presentationApi    = new \API\Modules\Presentation($api);
     $roomApi            = new \API\Modules\MeetingRoom($api);
@@ -85,6 +83,7 @@ $headers = getallheaders();
 
 // Any result to parse?
 if($result != '') {
+    // Content is JSON
     header('Content-Type: application/json');
 
     // Output to human readable or compact fast parsable code?

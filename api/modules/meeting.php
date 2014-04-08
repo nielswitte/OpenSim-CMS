@@ -11,8 +11,8 @@ require_once dirname(__FILE__) .'/../controllers/meetingController.php';
  * Implements the functions for meetings
  *
  * @author Niels Witte
- * @version 0.4
- * @date April 1st, 2014
+ * @version 0.4a
+ * @date April 7th, 2014
  * @since February 25th, 2014
  */
 class Meeting extends Module{
@@ -57,7 +57,7 @@ class Meeting extends Module{
         $db             = \Helper::getDB();
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
-        // Get 50 presentations from the given offset
+        // Get 50 meetings from the given offset
         $db->where('u.id', 'm.userId');
         $db->orderBy('m.startDate', 'DESC');
         $results = $db->get('meetings m, users u', array($db->escape($args[1]), 50), '*, m.id as meetingId');
@@ -81,18 +81,19 @@ class Meeting extends Module{
      */
     public function getMeetingsByDate($args) {
         $db             = \Helper::getDB();
-        // Get presentations past the given date
-        $db->where('u.id', 'm.userId');
+        // Get meetings past the given date
+        $db->join('users u','u.id = m.userId', 'LEFT');
+        $db->join('meeting_rooms mr', 'm.roomId = mr.id', 'LEFT');
         $db->where('m.startDate', array('>=' => $db->escape($args[1])));
         $db->orderBy('m.startDate', 'DESC');
-        $results        = $db->get('meetings m, users u', NULL, '*, m.id as meetingId');
+        $results        = $db->get('meetings m', NULL, '*, m.id AS meetingId, mr.id AS roomId, mr.name AS roomName, m.name AS name');
 
         // Process results
         $data           = array();
 
         foreach($results as $result) {
             $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
-            $room       = new \Models\MeetingRoom($result['roomId']);
+            $room       = new \Models\MeetingRoom($result['roomId'], NULL, $result['roomName']);
             $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room, $result['name']);
             if(strpos($args[0], 'calendar') !== FALSE) {
                 $startTimestamp = strtotime($meeting->getStartDate());
@@ -108,7 +109,7 @@ class Meeting extends Module{
                     // Meeting has ended ? => event-default
                     // Meeting still has to start => event-info
                     'class'         => ($startTimestamp < time() && $endTimestamp > time() ? 'event-success' : ($startTimestamp > time() ? 'event-info' : 'event-default')),
-                    'title'         => $meeting->getName() .' (Room: '. $meeting->getRoom()->getId() .')',
+                    'title'         => $meeting->getName() .' (Room: '. $meeting->getRoom()->getName() .')',
                     'description'   => 'Reservation made by: '. $meeting->getCreator()->getUsername()
                 );
             } else {
@@ -277,16 +278,8 @@ class Meeting extends Module{
                 'uuid'       => $minute['uuid'],
                 'name'       => $minute['name'],
                 'message'    => $minute['message'],
-                'user'       => ($minute['user'] ? array(
-                    // When a user is found
-                    'id'        => $minute['user']->getId(),
-                    'firstName' => $minute['user']->getFirstName(),
-                    'lastName'  => $minute['user']->getLastName(),
-                    'username'  => $minute['user']->getUsername()
-                    )
-                    // No user found
-                    : ''
-                )
+                // User match is found?
+                'user'       => ($minute['user'] ? $this->api->getModule('user')->getUserData($minute['user'], FALSE) : '')
             );
         }
 
@@ -306,14 +299,8 @@ class Meeting extends Module{
             'name'      => $meeting->getName(),
             'startDate' => $meeting->getStartDate(),
             'endDate'   => $meeting->getEndDate(),
-            'creator'   => array(
-                'id'            => $meeting->getCreator()->getId(),
-                'username'      => $meeting->getCreator()->getUsername(),
-                'firstName'     => $meeting->getCreator()->getFirstName(),
-                'lastName'      => $meeting->getCreator()->getLastName(),
-                'email'         => $meeting->getCreator()->getEmail()
-                )
-            );
+            'creator'   => $this->api->getModule('user')->getUserData($meeting->getCreator(), FALSE)
+        );
         // Show detailed information?
         if($full) {
             $room = $meeting->getRoom();
@@ -344,30 +331,18 @@ class Meeting extends Module{
             // Make a list of participants
             $participants = array();
             foreach($meeting->getParticipants()->getParticipants() as $user) {
-                $participants[] = array(
-                    'id'            => $user->getId(),
-                    'username'      => $user->getUsername(),
-                    'firstName'     => $user->getFirstName(),
-                    'lastName'      => $user->getLastName(),
-                    'email'         => $user->getEmail()
-                );
+                $participants[] = $this->api->getModule('user')->getUserData($user, FALSE);
             }
             $data['participants'] = $participants;
             $data['agenda']       = $meeting->getAgenda()->toString();
-            // Make a list of documents
-            $documents = array();
-            foreach($meeting->getDocuments()->getDocuments() as $document) {
-                $documents[] = array(
-                    'id'                => $document->getId(),
-                    'title'             => $document->getTitle(),
-                    'type'              => $document->getType(),
-                    'ownerId'           => $document->getOwnerId(),
-                    'creationDate'      => $document->getCreationDate(),
-                    'modificationDate'  => $document->getModificationDate()
-                );
+
+            // Make a list of files
+            $files = array();
+            foreach($meeting->getDocuments()->getDocuments() as $file) {
+                $files[] = $this->api->getModule('file')->getFileData($file, FALSE);
             }
 
-            $data['documents']    = $documents;
+            $data['documents']    = $files;
         // Show minimal information
         } else {
             $data['roomId']     = $meeting->getRoom()->getId();
@@ -379,7 +354,7 @@ class Meeting extends Module{
     }
 
     /**
-     * Returns the agenda for the meeting as an json array
+     * Returns the agenda for the meeting as an array
      *
      * @param \Models\Meeting $meeting
      * @return array

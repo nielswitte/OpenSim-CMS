@@ -11,7 +11,11 @@ var angularRest = angular.module('OpenSim-CMS', [
     'ngAnimate'
 ]).config(function($routeProvider, $locationProvider) {
     $routeProvider
-    .when('/documents', {
+    .when('/dashboard', {
+        templateUrl: partial_path +'/dashboard.html',
+        controller: 'dashboardController',
+        requireLogin: true
+    }).when('/documents', {
         templateUrl: partial_path +'/document/documents.html',
         controller: 'documentsController',
         requireLogin: true
@@ -22,6 +26,10 @@ var angularRest = angular.module('OpenSim-CMS', [
     }).when('/document/:documentId/slide/:slideId', {
         templateUrl: partial_path +'/document/slide.html',
         controller: 'slideController',
+        requireLogin: true
+    }).when('/document/:documentId/page/:pageId', {
+        templateUrl: partial_path +'/document/page.html',
+        controller: 'pageController',
         requireLogin: true
     }).when('/grids', {
         templateUrl: partial_path +'/grid/grids.html',
@@ -150,13 +158,13 @@ angularRest.service('Cache', ['$cacheFactory', function($cacheFactory) {
 
 // Handeling of the page title
 angularRest.factory('Page', function() {
-    var title = 'OpenSim-CMS';
+    var title = '';
     return {
         title: function() {
-            return title;
+            return title +' - OpenSim-CMS';
         },
         setTitle: function(newTitle) {
-            title = newTitle +' - '+ title;
+            title = newTitle;
         }
     };
 });
@@ -165,7 +173,7 @@ angularRest.factory('Page', function() {
 angularRest.config(['RestangularProvider', function(RestangularProvider) {
         var timeout;
         RestangularProvider.setBaseUrl('' + server_address + base_url + '/api');
-        RestangularProvider.setDefaultHttpFields({cache: false, timeout: 10000});
+        RestangularProvider.setDefaultHttpFields({cache: false, timeout: 30000});
 
         // Add token to request when available (this line is required for page refreshes to keep the token)
         if(sessionStorage.token && sessionStorage.tokenTimeOut >= moment().unix()) {
@@ -173,8 +181,8 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
         }
 
         RestangularProvider.addRequestInterceptor(function() {
-            // Hide loading screen after 10 seconds
-            timeout = setTimeout(function() { jQuery('#loading').hide(); }, 10000);
+            // Hide loading screen after 30 seconds
+            timeout = setTimeout(function() { jQuery('#loading').hide(); }, 30000);
         });
 
         RestangularProvider.setErrorInterceptor(function(resp) {
@@ -196,7 +204,7 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
 // Restangular service with cache
 angularRest.factory('RestangularCache', function(Restangular) {
     return Restangular.withConfig(function(RestangularProvider) {
-        RestangularProvider.setDefaultHttpFields({cache: true, timeout: 10000});
+        RestangularProvider.setDefaultHttpFields({cache: true, timeout: 30000});
     });
 });
 
@@ -300,3 +308,76 @@ angularRest.directive('ngConfirmClick', [
         };
     }
 ]);
+
+/**
+ * Create a range filter for select options
+ * @example: <select ng-options="n for n in [] | range:1:30"></select>
+ *
+ * @source: http://stackoverflow.com/a/11161353
+ * @param {integer} start
+ * @param {integer} stop
+ */
+angularRest.filter('range', function() {
+    return function(input, min, max) {
+        min = parseInt(min); //Make string input int
+        max = parseInt(max);
+        for (var i = min; i <= max; i++)
+            input.push(i);
+        return input;
+    };
+});
+
+/**
+* @name limitFromTo
+* @by Sven Anders Robbestad, 2013
+* @license CC0 1.0 Universal (CC0 1.0)
+* @description
+* Limit From-To filter for AngularJS.
+* Creates a new array or string containing only a specified number of elements with an extra
+* parameter specifying the starting point..
+* The elements are taken from either the beginning or the end of the source array or string, as
+* specified by the value and sign (positive or negative) of `limit`.
+*
+* Usage:
+* <div ng-repeat="data in array|limitFromTo:2:8"></div>
+* Returns a copy of the array with the remaining elements from the selected position. In the example above, the div will be populated with 6 elements from position 2.
+*
+*/
+angularRest.filter('limitFromTo', function() {
+    return function(input, offset, limit) {
+        if (!(input instanceof Array) && !(input instanceof String))
+            return input;
+
+        limit = parseInt(limit, 10);
+
+        if (input instanceof String) {
+            if (limit) {
+                return limit >= 0 ? input.slice(offset, limit) : input.slice(limit, input.length);
+            } else {
+                return "";
+            }
+        }
+
+        var out = [],
+                i, n;
+
+        if (limit > input.length)
+            limit = input.length;
+        else if (limit < -input.length)
+            limit = -input.length;
+
+        if (limit > 0) {
+            i = offset;
+            n = limit;
+        } else {
+            i = input.length + limit;
+            n = input.length;
+        }
+
+        for (; i < n; i++) {
+            out.push(input[i]);
+        }
+
+        return out;
+    };
+});

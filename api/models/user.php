@@ -9,8 +9,8 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class is the user model
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 1st, 2014
+ * @version 0.3
+ * @date April 7th, 2014
  * @since February 10th, 2014
  */
 class User implements SimpleModel {
@@ -18,7 +18,7 @@ class User implements SimpleModel {
     private $username;
     private $firstName, $lastName;
     private $email;
-    private $presentationIds = array();
+    private $lastLogin;
     private $avatars;
     private $rights = array();
 
@@ -26,17 +26,19 @@ class User implements SimpleModel {
      * Construct a new User with the given UUID
      *
      * @param integer $id - [Optional] The ID of the user
-     * @param string $username - [Optional] the user's user name
-     * @param string $email - [Optional] the user's email address
-     * @param string $firstName - [Optional] the user's first name
-     * @param string $lastName- [Optional] the user's last name
+     * @param string $username - [Optional] The user's user name
+     * @param string $email - [Optional] The user's email address
+     * @param string $firstName - [Optional] The user's first name
+     * @param string $lastName - [Optional] The user's last name
+     * @param string $lastLogin - [Optional] The last timestamp the user logged in (format: YYYY-MM-DD HH:mm:ss)
      */
-    public function __construct($id = -1, $username = '', $email = '', $firstName = '', $lastName = '') {
+    public function __construct($id = -1, $username = '', $email = '', $firstName = '', $lastName = '', $lastLogin = '0000-00-00 00:00:00') {
         $this->id           = $id;
         $this->username     = $username;
         $this->email        = $email;
         $this->firstName    = $firstName;
         $this->lastName     = $lastName;
+        $this->lastLogin    = $lastLogin;
     }
 
     /**
@@ -64,29 +66,12 @@ class User implements SimpleModel {
                 $this->firstName        = $user['firstName'];
                 $this->lastName         = $user['lastName'];
                 $this->email            = $user['email'];
+                $this->lastLogin        = $user['lastLogin'];
             } else {
                 throw new \Exception("User not found", 3);
             }
         } else {
             throw new \Exception("No username or ID provided", 4);
-        }
-    }
-
-    /**
-     * Gets the user's presentations from the database
-     */
-    public function getPresentationsFromDatabase() {
-        $db = \Helper::getDB();
-        // Get user's presentations
-        $db->where("ownerId", $db->escape($this->getId()));
-        $db->where('type', $db->escape('presentation'));
-        $presentations = $db->get("documents");
-
-        // Convert presentation Ids to array
-        if(!empty($presentations)) {
-            foreach($presentations as $presentation) {
-                $this->presentationIds[] = $presentation['id'];
-            }
         }
     }
 
@@ -160,12 +145,12 @@ class User implements SimpleModel {
     }
 
     /**
-     * Returns an array with presentation IDs of the user
+     * Returns the last login timestamp of the user
      *
-     * @return array
+     * @return string - Format YYYY-MM-DD HH:mm:ss
      */
-    public function getPresentationIds() {
-        return $this->presentationIds;
+    public function getLastLogin() {
+        return $this->lastLogin;
     }
 
     /**
@@ -217,6 +202,7 @@ class User implements SimpleModel {
                 'chat'              => (int) \Auth::NONE, // 0
                 'comment'           => (int) \Auth::NONE, // 0
                 'document'          => (int) \Auth::NONE, // 0
+                'file'              => (int) \Auth::NONE, // 0
                 'grid'              => (int) \Auth::NONE, // 0
                 'meeting'           => (int) \Auth::NONE, // 0
                 'meetingroom'       => (int) \Auth::NONE, // 0
@@ -236,6 +222,7 @@ class User implements SimpleModel {
                     'comment'           => $result['comment'],
                     'document'          => $result['document'],
                     'grid'              => $result['grid'],
+                    'file'              => $result['file'],
                     'meeting'           => $result['meeting'],
                     'meetingroom'       => $result['meetingroom'],
                     'presentation'      => $result['presentation'],

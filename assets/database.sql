@@ -2,7 +2,7 @@
 -- Host:                         localhost
 -- Server versie:                5.5.35-0ubuntu0.13.10.2 - (Ubuntu)
 -- Server OS:                    debian-linux-gnu
--- HeidiSQL Versie:              8.3.0.4744
+-- HeidiSQL Versie:              8.3.0.4752
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -85,9 +85,35 @@ CREATE TABLE IF NOT EXISTS `documents` (
   `creationDate` timestamp NULL DEFAULT NULL,
   `modificationDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `ownerId` int(11) NOT NULL,
+  `file` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_presentations_users` (`ownerId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.document_pages wordt geschreven
+CREATE TABLE IF NOT EXISTS `document_pages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `documentId` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `FK_document_pages_documents` (`documentId`),
+  CONSTRAINT `FK_document_pages_documents` FOREIGN KEY (`documentId`) REFERENCES `documents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.document_pages_cache wordt geschreven
+CREATE TABLE IF NOT EXISTS `document_pages_cache` (
+  `pageId` int(11) NOT NULL,
+  `cacheId` int(11) NOT NULL,
+  PRIMARY KEY (`pageId`,`cacheId`),
+  KEY `FK_document_pages_cache_cached_assets` (`cacheId`),
+  CONSTRAINT `FK_document_pages_cache_document_pages` FOREIGN KEY (`pageId`) REFERENCES `document_pages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_document_pages_cache_cached_assets` FOREIGN KEY (`cacheId`) REFERENCES `cached_assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- Data exporteren was gedeselecteerd
 
@@ -277,6 +303,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `lastName` varchar(50) COLLATE utf8_bin NOT NULL DEFAULT '',
   `email` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '',
   `password` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '0',
+  `lastLogin` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `userName` (`username`)
@@ -292,6 +319,7 @@ CREATE TABLE IF NOT EXISTS `user_permissions` (
   `chat` tinyint(1) unsigned NOT NULL,
   `comment` tinyint(1) unsigned NOT NULL,
   `document` tinyint(1) unsigned NOT NULL,
+  `file` tinyint(1) unsigned NOT NULL,
   `grid` tinyint(1) unsigned NOT NULL,
   `meeting` tinyint(1) unsigned NOT NULL,
   `meetingroom` tinyint(1) unsigned NOT NULL,

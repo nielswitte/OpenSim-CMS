@@ -13,7 +13,7 @@
  *
  * @author Niels Witte
  * @date March 19th, 2014
- * @version 0.1
+ * @version 0.2
  */
 string title;                       // Meeting title
 string agenda;                      // Meeting agenda
@@ -70,8 +70,19 @@ writeAgenda() {
         }
     }
 
+    // Get the old texture
+    string oldtexture = llGetTexture(0);
+
     // Now draw the image
-    osSetDynamicTextureData( "", "vector", agendaList, "width:1024,height:1024", 0 );
+    string texture = osSetDynamicTextureData( "", "vector", agendaList, "width:1024,height:1024", 0 );
+    // Keep trying to fetch the new texture from object
+    while((texture = llGetTexture(0)) == oldtexture)
+        llSleep(1.0);
+
+    // Remove previous texture
+    llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
+    llSetTexture(TEXTURE_BLANK, ALL_SIDES);
+    llSetTexture(texture, 1);
 }
 
 /**

@@ -9,20 +9,103 @@ require_once dirname(__FILE__) . '/simpleModel.php';
  * This class provides information about the Grid
  *
  * @author Niels Witte
- * @version 0.1
- * @date April 1st, 2014
+ * @version 0.2
+ * @date April 3rd, 2014
  * @since February 21th, 2014
  */
 class Grid implements SimpleModel {
+    /**
+     * The ID of this grid
+     * @var integer
+     */
     private $id;
+    /**
+     * A recognizable name for this grid
+     * @var string
+     */
     private $name;
-    private $osProtocol, $osIp, $osPort;
-    private $raUrl, $raPort, $raPassword;
-    private $dbUrl, $dbPort, $dbUsername, $dbPassword, $dbName;
+    /**
+     * The protocol used by the server (often HTTP or HTTPS)
+     * @var string
+     */
+    private $osProtocol;
+    /**
+     * The IP or URL of the server
+     * @var string
+     */
+    private $osIp;
+    /**
+     * The port used by OpenSim
+     * @var integer
+     */
+    private $osPort;
+    /**
+     * The Remote Admin URL for OpenSim
+     * @var string
+     */
+    private $raUrl;
+    /**
+     * The port used by Remote Admin
+     * @var integer
+     */
+    private $raPort;
+    /**
+     * The password required for Remote Admin
+     * @var string
+     */
+    private $raPassword;
+    /**
+     * The MySQL database URL for OpenSim
+     * @var string
+     */
+    private $dbUrl;
+    /**
+     * The port used by MySQL
+     * @var integer
+     */
+    private $dbPort;
+    /**
+     * The OpenSim MySQL username
+     * @var string
+     */
+    private $dbUsername;
+    /**
+     * The OpenSim MySQL password
+     * @var string
+     */
+    private $dbPassword;
+    /**
+     * The OpenSim MySQL database name
+     * @var string
+     */
+    private $dbName;
+    /**
+     * The time cache remains valid in OpenSim
+     * Can be found in: "FlotsamCache.ini" use the value for: "FileCacheTimeout"
+     * Value needs to be parsable by strtotime, so i.e. "48 hours"
+     * @var string
+     */
     private $cachetime;
+    /**
+     * List with regions attached to this grid
+     * @var array
+     */
     private $regions = array();
+    /**
+     * The UUID of the default region
+     * @var string
+     */
     private $defaultRegionUuid;
+    /**
+     * Boolean to save the online status of the grid
+     * @var boolean
+     */
     private $online = FALSE;
+    /**
+     * Boolean to store if the grid timedout by performing a remote query (database or remote admin)
+     * @var boolean
+     */
+    private $timedOut = FALSE;
 
     /**
      * Constructs a new grid with the given ID
@@ -33,7 +116,7 @@ class Grid implements SimpleModel {
      * @param string $osIp - [Optional] The IP address of the grid used by OpenSim
      * @param integer $osPort - [Optional] The port to access the grid used by OpenSim
      */
-    public function __construct($id, $name = '', $osProtocol = '', $osIp = '', $osPort = '') {
+    public function __construct($id, $name = '', $osProtocol = 'http', $osIp = '127.0.0.1', $osPort = '9000') {
         $this->id           = $id;
         $this->name         = $name;
         $this->osProtocol   = $osProtocol;
@@ -53,9 +136,10 @@ class Grid implements SimpleModel {
     /**
      * Gets the information about the grid from the database
      *
+     * @param boolean $full - [Optional] set to FALSE when you do not want to load all Region data
      * @throws \Exception
      */
-    public function getInfoFromDatabase() {
+    public function getInfoFromDatabase($full = TRUE) {
         $db = \Helper::getDB();
         $db->where('id', $db->escape($this->getId()));
         $result = $db->getOne('grids');
@@ -83,13 +167,35 @@ class Grid implements SimpleModel {
 
             foreach($regions as $region) {
                 $newRegion = new \Models\Region($region['uuid'], $this);
-                $newRegion->getInfoFromDatabase();
+                // Get additional data?
+                if($full) {
+                    $newRegion->getInfoFromDatabase();
+                }
                 $newRegion->setName($region['name']);
                 $this->addRegion($newRegion);
             }
         } else {
             throw new \Exception('Grid ID does not exist', 1);
         }
+    }
+
+    /**
+     * Did one of the remote access requests time out on this server,
+     * set this to TRUE to prevent more timeouts during this session
+     *
+     * @param boolean $timedOut
+     */
+    public function setTimedOut($timedOut){
+        $this->timedOut = $timedOut;
+    }
+
+    /**
+     * Returns TRUE when the server timedout on a request
+     *
+     * @return boolean
+     */
+    public function getTimedOut() {
+        return $this->timedOut;
     }
 
     /**

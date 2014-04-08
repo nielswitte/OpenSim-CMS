@@ -1,0 +1,66 @@
+<ol class="breadcrumb">
+    <li><a href="#!/"><i class="glyphicon glyphicon-home"></i> Home</a></li>
+    <li class="active">Dashboard</li>
+</ol>
+<div class="page-header">
+    <h1>Dashboard</h1>
+</div>
+
+<div class="row">
+    <div class="col-sm-4">
+        <h2>Your meetings ({{meetings.length}})</h2>
+        <div class="toolbar toolbar-top">
+            <button class="btn btn-default" ng-click="nextMeetingOffset()"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
+            <button class="btn btn-default"  ng-click="previousMeetingOffset()">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
+        </div>
+        <ul class="list-group list-group-hover">
+            <li class="list-group-item list-group-item-{{inFuture(meeting.startDate) ? 'info' : (inFuture(meeting.endDate) ? 'success' : 'default')}}" ng-repeat="meeting in meetings | limitFromTo: getMeetingFrom():getMeetingTo()">
+                <a ng-href="#!/meeting/{{meeting.id}}">
+                    <time datetime="{{meeting.startDate}}">{{convertTimestamp(meeting.startDate, "D")}}<br>{{convertTimestamp(meeting.startDate, "MMM")}}</time>
+                    <h4 class="list-group-item-heading">{{meeting.name}}</h4>
+                </a>
+                <p class="list-group-item-text">
+                    {{convertTimestamp(meeting.startDate, 'HH:mm')}} till {{convertTimestamp(meeting.endDate, 'HH:mm')}}
+                </p>
+                <a class="btn btn-default btn-xs" ng-href="#!/meeting/{{meeting.id}}/minutes" ng-hide="inFuture(meeting.startDate)"><i class="glyphicon glyphicon-comment"></i> Minutes</a>
+            </li>
+        </ul>
+    </div>
+    <div class="col-sm-4" id="comments">
+        <h2>New comments ({{comments.commentCount}})</h2>
+        <div class="toolbar toolbar-top">
+            <button class="btn btn-default" ng-click="nextCommentOffset()"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
+            <button class="btn btn-default"  ng-click="previousCommentOffset()">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
+        </div>
+        <ul class="list-group list-group-hover">
+            <li class="list-group-item" ng-repeat="comment in comments.comments | limitFromTo: getCommentFrom():getCommentTo()">
+                <span class="label label-default">{{comment.type}}</span> <a ng-href="#!/user/{{comment.user.id}}" bs-tooltip title="Profile of {{comment.user.username}}">{{comment.user.firstName}} {{comment.user.lastName}}</a><br>
+                <span class="posted">{{comment.timestamp}}</span>
+                <p class="list-group-item-text" ng-bind-html="markdown(comment.message)"></p>
+                <span class="edited" ng-show="comment.editTimestamp && !showUpdateForm(comment.id)">Edited: {{comment.editTimestamp}}</span>
+                <button ng-click="showComment(comment.id)" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-eye-open"></i> Show comment</button>
+            </li>
+        </ul>
+    </div>
+    <div class="col-sm-4">
+        <h2>Latest files ({{files.length}})</h2>
+        <div class="toolbar toolbar-top">
+            <button class="btn btn-default" ng-click="nextFileOffset()"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
+            <button class="btn btn-default"  ng-click="previousFileOffset()">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
+        </div>
+        <ul class="list-group list-group-hover">
+            <li class="list-group-item" ng-repeat="file in files | limitFromTo: getFileFrom():getFileTo()">
+                <a ng-href="#!/document/{{file.id}}">
+                    <div class="type type-{{file.type}}" title="{{file.type}}" bs-tooltip>
+                        <i class="glyphicon glyphicon-th" ng-show="file.type == 'presentation'"></i>
+                        <i class="glyphicon glyphicon-file" ng-show="file.type == 'document'"></i>
+                        <i class="glyphicon glyphicon-picture" ng-show="file.type == 'image'"></i>
+                    </div>
+                    <h4 class="list-group-item-heading">{{file.title}}</h4>
+                </a>
+                <span class="posted">{{file.creationDate}}</span> - <a ng-href="#!/user/{{user.id}}">{{file.user.firstName}} {{file.user.lastName}} ({{file.user.username}})</a>
+            </li>
+        </ul>
+    </div>
+</div>
+

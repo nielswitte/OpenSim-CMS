@@ -3,17 +3,17 @@ namespace Models;
 
 defined('EXEC') or die('Config not loaded');
 
-require_once dirname(__FILE__) .'/document.php';
+require_once dirname(__FILE__) .'/file.php';
 
 /**
  * This class is the presentation model
  *
  * @author Niels Witte
  * @version 0.3
- * @date April 1st, 2014
+ * @date April 3rd, 2014
  * @since February 10th, 2014
  */
-class Presentation extends Document {
+class Presentation extends File {
 	private $currentSlide;
     private $slides = array();
 
@@ -23,18 +23,18 @@ class Presentation extends Document {
      * @param integer $id - ID of this presentation
      * @param integer $slide - [optional] Slide to show
      * @param string $title - [optional] Title of presentation
-     * @param integer $ownerId - [optional] ID of the owner
+     * @param \Models\User $user - [optional] The owner of this document
      * @param datetime $creationDate - [optional] Creation date time, yyyy-mm-dd hh:mm:ss
      * @param datetime $modificationDate - [optional] Date of last modification, yyyy-mm-dd hh:mm:ss
+     * @param string $file - [Optional] The file name and extension of this source file
      */
-	public function __construct($id, $slide = 0, $title = '', $ownerId = '', $creationDate = '', $modificationDate = '') {
+	public function __construct($id, $slide = 0, $title = '', $user = NULL, $creationDate = '', $modificationDate = '', $file = '') {
 		$this->currentSlide     = $slide;
-        $type                   = 'presentation';
-        parent::__construct($id, $type, $title, $ownerId, $creationDate, $modificationDate);
+        parent::__construct($id, 'presentation', $title, $user, $creationDate, $modificationDate, $file);
 	}
 
     /**
-     * Returns the slide number, starts at 0
+     * Returns the slide number, starts at 1
      *
      * @return integer
      */
@@ -52,7 +52,7 @@ class Presentation extends Document {
             $db = \Helper::getDB();
             $db->where('documentId', $db->escape($this->getId()));
             $db->orderBy('s.id', 'asc');
-            $db->join('comments c', 'c.itemId = s.id', 'LEFT');
+            $db->join('comments c', 'c.itemId = s.id AND c.type = "slide"', 'LEFT');
             $db->groupBy('s.id');
             $results = $db->get('document_slides s', NULL, '*, count(c.id) as commentsCount, s.id as id');
 
@@ -101,7 +101,6 @@ class Presentation extends Document {
             $this->getSlides();
         }
 
-        $result = FALSE;
         // Slide exists? (array starts counting at 1)
         if(count($this->getSlides()) > 0) {
             foreach($this->getSlides() as $slide) {

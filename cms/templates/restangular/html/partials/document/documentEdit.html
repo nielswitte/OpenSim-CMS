@@ -1,0 +1,79 @@
+<ol class="breadcrumb">
+    <li><a href="#!/"><i class="glyphicon glyphicon-home"></i> Home</a></li>
+    <li><a href="#!/documents">Documents</a></li>
+    <li><a ng-href="#!/document/{{document.id}}">{{document.title}}</a></li>
+    <li class="active">Edit</li>
+</ol>
+<div class="page-header">
+    <h1>Documents <small>{{document.title}}</small></h1>
+</div>
+<div class="toolbar toolbar-top">
+    <a ng-href="{{document.url}}source/?token={{token}}" target="_blank" class="btn btn-default" ng-click="downloadDocument()"><i class="glyphicon glyphicon-download"></i> Download</a>
+</div>
+<form class="form-horizontal" role="form" id="documentsForm">
+    <div class="form-group">
+        <label for="inputId" class="col-sm-2 control-label">ID</label>
+        <div class="col-sm-10">
+            <p class="form-control-static">{{document.id}}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputType" class="col-sm-2 control-label">Type</label>
+        <div class="col-sm-10">
+            <p class="form-control-static">{{document.type}}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputTitle" class="col-sm-2 control-label">Title</label>
+        <div class="col-sm-10">
+            <p class="form-control-static">{{document.title}}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputOwner" class="col-sm-2 control-label">Owner ID</label>
+        <div class="col-sm-10">
+            <input type="hidden" class="form-control" id="inputOwner" placeholder="Owner ID" value="{{document.ownerId}}">
+        </div>
+    </div>
+    <div class="form-group" ng-show="document.type == 'presentation'">
+        <label for="inputSlidesCount" class="col-sm-2 control-label">Slides count</label>
+        <div class="col-sm-10">
+            <p class="form-control-static">{{document.slidesCount}}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputCreationDate" class="col-sm-2 control-label">Creation date</label>
+        <div class="col-sm-10">
+            <p class="form-control-static">{{document.creationDate}}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="inputModificationDate" class="col-sm-2 control-label">Modification date</label>
+        <div class="col-sm-10">
+            <p class="form-control-static">{{document.modificationDate}}</p>
+        </div>
+    </div>
+</form>
+<div ng-show="document.type == 'presentation'">
+    <h2>Slides ({{document.slidesCount}})</h2>
+    <hr>
+    <div class="row">
+        <div class="col-sm-3" ng-repeat="slide in document.slides">
+            <div class="thumbnail">
+                <a ng-href="#!/document/{{document.id}}/slide/{{slide.id}}" class="btn btn-success" ng-show="{{slide.hasComments}}" title="There are comments attached to this slide" bs-tooltip><i class="glyphicon glyphicon-comment"></i></a>
+                <a ng-href="#!/document/{{document.id}}/slide/{{slide.id}}" class="btn btn-default" ng-hide="{{slide.hasComments}}" title="Be the first to attach a comment to this slide" bs-tooltip><i class="glyphicon glyphicon-comment"></i></a>
+                <a href="javascript:void(0);" ng-click="lightbox(slide.number, slide.image)" title="Click for larger version of slide {{slide.number}}">
+                    <img src="templates/restangular/img/img-placeholder.png" ng-src="{{slide.thumbnail}}?token={{token}}">
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div ng-show="document.type == 'image'" class="row">
+    <div class="col-sm-12">
+        <img src="templates/restangular/img/img-placeholder.png" ng-src="{{getDocumentImage()}}" class="img-responsive img-thumbnail" alt="{{document.title}}">
+    </div>
+</div>
+
+<div ng-include src="showComments()" ng-hide="document.type == 'presentation'"></div>

@@ -3,131 +3,143 @@ namespace Models;
 
 defined('EXEC') or die('Invalid request');
 
-require_once dirname(__FILE__) .'/document.php';
-require_once dirname(__FILE__) .'/simpleModel.php';
-
+require_once dirname(__FILE__) .'/file.php';
+require_once dirname(__FILE__) .'/page.php';
 /**
  * This class is the presentation model
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 1st, 2014
+ * @version 0.4
+ * @date April 3rd, 2014
  * @since February 10th, 2014
  */
-class Document implements SimpleModel {
-	private $id;
-    private $title;
-    private $creationDate;
-    private $modificationDate;
-    private $ownerId;
-    private $type;
+class Document extends File {
+    /**
+     * The currently active page
+     * @var integer
+     */
+    private $currentPage;
+    /**
+     * List with pages
+     * @var array
+     */
+    private $pages = array();
 
     /**
-     * Constructs a new document with the given id and optional the given slide
+     * Constructs a new document with the given id and optional the given page
      *
      * @param integer $id - ID of this presentation
-     * @param integer $type - [optional] document type
-     * @param string $title - [optional] Title of document
-     * @param integer $ownerId - [optional] ID of the owner
-     * @param datetime $creationDate - [optional] Creation date time, yyyy-mm-dd hh:mm:ss
-     * @param datetime $modificationDate - [optional] Date of last modification, yyyy-mm-dd hh:mm:ss
+     * @param integer $currentPage - [Optional] The currently selected page
+     * @param string $title - [Optional] Title of document
+     * @param \Models\User $user - [Optional] Owner of this document
+     * @param string $creationDate - [Optional] Creation date time, YYYY-MM-DD HH:mm:ss
+     * @param string $modificationDate - [Optional] Date of last modification, YYYY-MM-DD HH:mm:ss
+     * @param string $file - [Optional] The file name and extension of this source file
      */
-	public function __construct($id, $type = '', $title = '', $ownerId = '', $creationDate = '', $modificationDate = '') {
-		$this->id               = $id;
-        $this->type             = $type;
-        $this->title            = $title;
-        $this->creationDate     = $creationDate;
-        $this->modificationDate = $modificationDate;
-        $this->ownerId          = $ownerId;
-	}
+	public function __construct($id, $currentPage = 0, $title = '', $user = NULL, $creationDate = '', $modificationDate = '', $file = '') {
+        $this->currentPage = $currentPage;
 
-    /**
-     * Fetches the meta data from the database
-     *
-     * @throws Exception
-     */
-    public function getInfoFromDatabase() {
-        $db = \Helper::getDB();
-        $db->where('id', $db->escape((int) $this->getId()));
-        $result = $db->getOne('documents');
-
-        if($result) {
-            $this->title            = $result['title'];
-            $this->type             = $result['type'];
-            $this->creationDate     = $result['creationDate'];
-            $this->modificationDate = $result['modificationDate'];
-            $this->ownerId          = $result['ownerId'];
-        } else {
-            throw new \Exception('Document not found', 5);
-        }
+        parent::__construct($id, 'document', $title, $user, $creationDate, $modificationDate, $file);
     }
 
     /**
-     * Returns the title from this presentation
-     *
-     * @return string
-     */
-    public function getTitle() {
-        return $this->title;
-    }
-
-    /**
-     * Returns the ID of this presentation
+     * Returns the page number, starts at 1
      *
      * @return integer
      */
-	public function getId() {
-		return $this->id;
+	public function getCurrentPage() {
+		return $this->currentPage;
 	}
 
     /**
-     * Get the UUID of the owner of this presentation
+     * Returns an array with pages of this presentation
+     *
+     * @return array
+     */
+    public function getPages() {
+        if(empty($this->pages)) {
+            $db = \Helper::getDB();
+            $db->where('documentId', $db->escape($this->getId()));
+            $db->orderBy('p.id', 'ASC');
+            $db->join('comments c', 'c.itemId = p.id AND c.type = "page" ', 'LEFT');
+            $db->groupBy('p.id');
+            $results = $db->get('document_pages p', NULL, '*, count(c.id) as commentsCount, p.id as id');
+
+            $i = 1;
+            foreach($results as $result) {
+                $hasComments = $result['commentsCount'] > 0 ? TRUE : FALSE;
+                $this->pages[$i] = new \Models\Page($result['id'], $i, $this->getPath(). DS . $i .'.'. IMAGE_TYPE, $hasComments);
+                $i++;
+            }
+        }
+
+        return $this->pages;
+    }
+
+    /**
+     * Get the page with the given number
+     *
+     * @param integer $number
+     * @return \Models\Page
+     * @throws \Exception
+     */
+    public function getPageByNumber($number) {
+        if(empty($this->pages)) {
+            $this->getPages();
+        }
+
+        $page = FALSE;
+        // Page exists? (array starts counting at 1)
+        if(isset($this->pages[$number])) {
+            $page = $this->pages[$number];
+        } else {
+            throw new \Exception('Page does not exist', 6);
+        }
+        return $page;
+    }
+
+    /**
+     * Get the page with the given id
+     *
+     * @param integer $id
+     * @return \Models\Page
+     * @throws \Exception
+     */
+    public function getPageById($id) {
+        if(empty($this->pages)) {
+            $this->getPages();
+        }
+
+        $result = FALSE;
+        // Page exists? (array starts counting at 1)
+        if(count($this->getPages()) > 0) {
+            foreach($this->getPages() as $page) {
+                if($page->getId() == $id) {
+                    return $page;
+                }
+            }
+        }
+        throw new \Exception('Page does not exist', 6);
+    }
+
+    /**
+     * Counts the number of pages
+     *
+     * @return integer
+     */
+    public function getNumberOfPages() {
+        if(empty($this->pages)) {
+            $this->getPages();
+        }
+        return count($this->pages);
+    }
+
+    /**
+     * Returns the path to the thumbnails of this presentation
      *
      * @return string
      */
-    public function getOwnerId() {
-        return $this->ownerId;
-    }
-
-    /**
-     * Returns the local path to the presentation's folder
-     *
-     * @return string
-     */
-    public function getPath() {
-        return FILES_LOCATION . DS . $this->getType() . DS . $this->getId();
-    }
-
-    public function getType() {
-        return $this->type;
-    }
-
-    /**
-     * Returns the API url of this presentation
-     * This can be extended by adding: 'slide/x/'
-     * to retrieve slide number x
-     *
-     * @return string
-     */
-    public function getApiUrl() {
-        return SERVER_PROTOCOL .'://'. SERVER_ADDRESS .':'.SERVER_PORT . SERVER_ROOT .'/api/'. $this->getType() .'/'. $this->getId() .'/';
-    }
-
-    /**
-     * Returns the creation date of this presentation
-     *
-     * @return string yyyy-mm-dd hh:mm:ss
-     */
-    public function getCreationDate() {
-        return $this->creationDate;
-    }
-
-    /**
-     * Returns the modification date of this presentation
-     *
-     * @return string yyyy-mm-dd hh:mm:ss
-     */
-    public function getModificationDate() {
-        return $this->modificationDate;
+    public function getThumbnailPath() {
+        return $this->getPath() . DS . 'thumbs';
     }
 }
