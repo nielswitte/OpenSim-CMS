@@ -50,7 +50,7 @@ class PresentationController {
             'title'         => $db->escape($parameters['title']),
             'type'          => $db->escape($parameters['type']),
             'ownerId'       => $db->escape(\Auth::getUser()->getId()),
-            'creationDate'  => $db->escape(date('Y-m-d H:m:s')),
+            'creationDate'  => $db->escape($db->now()),
             'file'          => $db->escape('source.'. $extension)
         );
         $fileId = $db->insert('documents', $data);

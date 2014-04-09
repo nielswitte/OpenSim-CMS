@@ -13,8 +13,8 @@ require_once dirname(__FILE__) .'/../controllers/fileController.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.4
- * @date April 3rd, 2014
+ * @version 0.4a
+ * @date April 9th, 2014
  * @since March 3rd, 2014
  */
 class File extends Module{
@@ -199,7 +199,7 @@ class File extends Module{
             'id'                => $file->getId(),
             'type'              => $file->getType(),
             'user'              => $this->api->getModule('user')->getUserData($file->getUser(), FALSE),
-            'title'             => $file->getTitle(),
+            'title'             => stripslashes($file->getTitle()),
             'creationDate'      => $file->getCreationDate(),
             'modificationDate'  => $file->getModificationDate(),
             'sourceFile'        => $file->getFile(),

@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the File controller
  *
  * @author Niels Witte
- * @version 0.2b
- * @date April 4th, 2014
+ * @version 0.2c
+ * @date April 9th, 2014
  * @since March 10th, 2014
  */
 class FileController {
@@ -116,7 +116,7 @@ class FileController {
             'title'         => $db->escape($parameters['title']),
             'type'          => $db->escape($parameters['type']),
             'ownerId'       => $db->escape(\Auth::getUser()->getId()),
-            'creationDate'  => $db->escape(date('Y-m-d H:m:s')),
+            'creationDate'  => $db->escape($db->now()),
             'file'          => $db->escape('source.'. $extension)
         );
         $fileId = $db->insert('documents', $data);
@@ -129,7 +129,7 @@ class FileController {
 
                 // Finally process images
                 if($data['type'] == 'image' && in_array($extension, array('png', 'jpg', 'jpeg', 'gif'))) {
-                    $destination = $targetDir . DS . $fileId .'.'. $extension;
+                    $destination = $targetDir . DS . $fileId .'.'. IMAGE_TYPE;
                     $result = \Helper::imageResize($filename, $destination);
                 } else {
                     $result = TRUE;

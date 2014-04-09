@@ -11,8 +11,8 @@ require_once dirname(__FILE__) .'/../controllers/meetingController.php';
  * Implements the functions for meetings
  *
  * @author Niels Witte
- * @version 0.4a
- * @date April 7th, 2014
+ * @version 0.4b
+ * @date April 9th, 2014
  * @since February 25th, 2014
  */
 class Meeting extends Module{
@@ -109,7 +109,7 @@ class Meeting extends Module{
                     // Meeting has ended ? => event-default
                     // Meeting still has to start => event-info
                     'class'         => ($startTimestamp < time() && $endTimestamp > time() ? 'event-success' : ($startTimestamp > time() ? 'event-info' : 'event-default')),
-                    'title'         => $meeting->getName() .' (Room: '. $meeting->getRoom()->getName() .')',
+                    'title'         => stripslashes(str_replace('"', '\'\'', $meeting->getName()) .' (Room: '. $meeting->getRoom()->getName() .')'),
                     'description'   => 'Reservation made by: '. $meeting->getCreator()->getUsername()
                 );
             } else {
@@ -296,7 +296,7 @@ class Meeting extends Module{
     public function getMeetingData(\Models\Meeting $meeting, $full = TRUE) {
         $data       = array(
             'id'        => $meeting->getId(),
-            'name'      => $meeting->getName(),
+            'name'      => stripslashes($meeting->getName()),
             'startDate' => $meeting->getStartDate(),
             'endDate'   => $meeting->getEndDate(),
             'creator'   => $this->api->getModule('user')->getUserData($meeting->getCreator(), FALSE)
