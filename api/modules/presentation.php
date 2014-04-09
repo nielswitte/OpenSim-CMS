@@ -13,8 +13,8 @@ require_once dirname(__FILE__) .'/../controllers/presentationController.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.4a
- * @date April 4th, 2014
+ * @version 0.4b
+ * @date April 9th, 2014
  * @since February 24th, 2014
  */
 class Presentation extends Module {
@@ -161,8 +161,12 @@ class Presentation extends Module {
                     'isExpired' => strtotime($cache['uuidExpires']) > time() ? 0 : 1
                 );
             }
-
-            $data['cache'] = $cachedTextures;
+            // Retrieve title if not available
+            if($presentation->getTitle() == '') {
+                $presentation->getInfoFromDatabase();
+            }
+            $data['presentationTitle']  = $presentation->getTitle();
+            $data['cache']              = $cachedTextures;
         }
         return $data;
     }

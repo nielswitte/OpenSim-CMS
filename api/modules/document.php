@@ -13,8 +13,8 @@ require_once dirname(__FILE__) .'/../controllers/pageController.php';
  * Implements the functions for documents
  *
  * @author Niels Witte
- * @version 0.4b
- * @date April 4th, 2014
+ * @version 0.4c
+ * @date April 9th, 2014
  * @since March 3rd, 2014
  */
 class Document extends Module {
@@ -306,8 +306,12 @@ class Document extends Module {
                     'isExpired' => strtotime($cache['uuidExpires']) > time() ? 0 : 1
                 );
             }
-
-            $data['cache'] = $cachedTextures;
+            // Retrieve title if not available
+            if($presentation->getTitle() == '') {
+                $presentation->getInfoFromDatabase();
+            }
+            $data['documentTitle']  = $presentation->getTitle();
+            $data['cache']          = $cachedTextures;
         }
         return $data;
     }
