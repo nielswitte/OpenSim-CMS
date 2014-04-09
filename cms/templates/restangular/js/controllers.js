@@ -2134,7 +2134,6 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
         // Open modal dialog to change the user's password
         $scope.changePasswordForm = function() {
             $scope.template         = partial_path +'/user/userPasswordForm.html';
-            $scope.avatar           = {};
             $scope.formSubmit       = 'changePassword';
             $scope.buttons          = [{
                         text: 'Update',
@@ -2164,6 +2163,60 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                 } else {
                     $alert({title: 'Password changed!', content: 'The user\'s password has been updated.', type: 'success'});
                     Cache.clearCachedUrl(userRequestUrl);
+                    modal.hide();
+                }
+                // Remove loading screen
+                jQuery('#loading').hide();
+            });
+        };
+
+        // Process file input type on change
+        jQuery('body').on('change', '#inputProfilePicture', function(e) {
+             // Process File
+            var reader = new FileReader();
+            reader.readAsDataURL(jQuery('#inputProfilePicture')[0].files[0], "UTF-8");
+            reader.onload = function (e) {
+                $scope.user.picture = e.target.result;
+            };
+            reader.onerror = function(e) {
+                $alert({title: 'Error!', content: 'Processing file failed.', type: 'danger'});
+            };
+        });
+
+
+        // Open modal dialog to change the user's profile picture
+        $scope.changePictureForm = function() {
+            $scope.template         = partial_path +'/user/userPictureForm.html';
+            $scope.formSubmit       = 'changePicture';
+            $scope.buttons          = [{
+                        text: 'Update',
+                        func: '',
+                        class: 'primary',
+                        type: 'submit'
+                    },
+                    {
+                        text: 'Cancel',
+                        func: 'hide',
+                        class: 'danger',
+                        type: 'button'
+                    }
+                ];
+            modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
+        };
+
+        // Change the user's profile picture
+        $scope.changePicture = function() {
+            // Show loading screen
+            jQuery('#loading').show();
+
+            $scope.user.customPUT($scope.user, 'picture').then(function(putResponse) {
+                angular.copy($scope.user, $scope.userOld);
+                if(!putResponse.success) {
+                    $alert({title: 'Uploading picture failed!', content: putResponse.error, type: 'danger'});
+                } else {
+                    $alert({title: 'Profile picture changed!', content: 'The user\'s profile picture has been updated.', type: 'success'});
+                    Cache.clearCachedUrl(userRequestUrl);
+                    modal.hide();
                 }
                 // Remove loading screen
                 jQuery('#loading').hide();
@@ -2250,6 +2303,8 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                 $scope.saveAvatar();
             } else if(func == 'changePassword') {
                 $scope.changePassword();
+            } else if(func == 'changePicture') {
+                $scope.changePicture();
             }
         };
 

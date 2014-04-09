@@ -48,6 +48,7 @@ class User extends Module {
         $this->api->addRoute("/^\/user\/(\d+)\/files\/?$/",                             'getUserFilesByUserId',     $this, 'GET',    \Auth::READ);     // Load all files for the user
         $this->api->addRoute("/^\/user\/(\d+)\/meetings\/?$/",                          'getUserMeetingsByUserId',  $this, 'GET',    \Auth::READ);     // Load 50 meetings for the user
         $this->api->addRoute("/^\/user\/(\d+)\/meetings\/(\d+)\/?$/",                   'getUserMeetingsByUserId',  $this, 'GET',    \Auth::READ);     // Load 50 meetings for the user with offset
+        $this->api->addRoute("/^\/user\/(\d+)\/picture\/?$/",                           'updateUserPictureByUserID',$this, 'PUT',    \Auth::READ);     // Updates the user's profile picture with the given image
         $this->api->addRoute("/^\/user\/(\d+)\/password\/?$/",                          'updateUserPasswordById',   $this, 'PUT',    \Auth::READ);     // Updates the user's password
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/teleport\/?$/", 'teleportAvatarByUuid',     $this, 'PUT',    \Auth::READ);     // Teleports a user
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'getUserByAvatar',          $this, 'GET',    \Auth::READ);     // Gets an user by the avatar of this grid
@@ -120,6 +121,36 @@ class User extends Module {
             'success' => ($data !== FALSE || $permissions !== FALSE ? TRUE : FALSE)
         );
 
+        return $result;
+    }
+
+    /**
+     * Sets the profile picture for the given user
+     *
+     * @param array $args
+     * @return array
+     * @throws \Exception
+     */
+    public function updateUserPictureByUserID($args) {
+        // Only allow when the user has write access or wants to update his/her own profile
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $args[1] != \Auth::getUser()->getId()) {
+            throw new \Exception('You do not have permissions to update this user.', 6);
+        }
+        $data       = FALSE;
+        // Create user object to validate userId
+        $user       = new \Models\User($args[1]);
+        $user->getInfoFromDatabase();
+        $userCtrl   = new \Controllers\UserController($user);
+        // Process data
+        $input      = \Helper::getInput(TRUE);
+        if($userCtrl->validateParameterPicture($input)) {
+            $data       = $userCtrl->updateUserPicture($input);
+        }
+
+        // Format the result
+        $result = array(
+            'success' => ($data !== FALSE)
+        );
         return $result;
     }
 

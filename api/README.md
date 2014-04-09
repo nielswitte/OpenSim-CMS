@@ -183,6 +183,17 @@ PUT /api/user/<USER-ID>/ HTTP/1.1
 | lastName          | String    | The last name of the new user                                     |
 | permissions       | Array     | The permission levels for the user (see permissions)              |
 
+### Change profile picture
+
+```http
+PUT /api/user/<USER-ID>/picture/ HTTP/1.1
+```
+
+| Parameter         | Type      | Description                                                                               |
+|-------------------|-----------|-------------------------------------------------------------------------------------------|
+| image             | file      | Base64 encoded file, needs to be jpeg, jpg, png or gif                                    |
+
+
 ### Change password
 
 ```http

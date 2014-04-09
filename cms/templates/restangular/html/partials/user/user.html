@@ -9,6 +9,7 @@
 <div class="toolbar toolbar-top" ng-show="allowUpdate()">
     <a ng-href="#!/user/{{user.id}}/edit" type="button" class="btn btn-default"><i class="glyphicon glyphicon-edit"></i> Edit user</a>
     <a ng-click="changePasswordForm()" type="button" class="btn btn-default"><i class="glyphicon glyphicon-lock"></i> Change password</a>
+    <a ng-click="changePictureForm()" type="button" class="btn btn-default"><i class="glyphicon glyphicon-picture"></i> Change profile picture</a>
 </div>
 <form class="form-horizontal" role="form" id="userForm" ng-submit="updateUser()">
     <div class="form-group">
