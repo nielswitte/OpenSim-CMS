@@ -210,6 +210,8 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
  */
 // chatController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '$route', '$alert', 'Cache', function(Restangular, $scope, $sce, $route, $alert, Cache) {
+        $scope.token = sessionStorage.token;
+        
         // Clear the comment form
         $scope.clearComment = function() {
             $scope.comment = {

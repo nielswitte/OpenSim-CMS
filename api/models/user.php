@@ -9,8 +9,8 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class is the user model
  *
  * @author Niels Witte
- * @version 0.3
- * @date April 7th, 2014
+ * @version 0.4
+ * @date April 9th, 2014
  * @since February 10th, 2014
  */
 class User implements SimpleModel {
@@ -231,5 +231,30 @@ class User implements SimpleModel {
             }
         }
         return $this->rights;
+    }
+
+    /**
+     * If file exists show the path to the file or return FALSE when no profile picture exists
+     *
+     * @return string or boolean FALSE when file does not exists
+     */
+    public function getPicture() {
+        $path = FILES_LOCATION . DS .'users'. DS . $this->getId() . DS . $this->getId() .'.'. IMAGE_TYPE;
+        if(file_exists($path)) {
+            $result = $path;
+        } else {
+            $result = FALSE;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Returns the path to retrieve the picture for this user
+     *
+     * @return string
+     */
+    public function getPictureApiUrl() {
+        return SERVER_PROTOCOL .'://'. SERVER_ADDRESS .':'.SERVER_PORT . SERVER_ROOT .'/api/user/'. $this->getId() .'/picture/';
     }
 }

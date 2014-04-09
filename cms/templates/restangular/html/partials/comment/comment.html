@@ -5,6 +5,8 @@
         <button type="button" class="btn btn-default btn-xs" ng-click="editComment(comment.id)" ng-show="allowUpdate()"><i class="glyphicon glyphicon-edit"></i> Edit</button>
         <button type="button" class="btn btn-danger btn-xs" confirmed-click="deleteComment(comment.id)" ng-confirm-click="Are you sure you want to delete comment #{{comment.number}} by {{comment.user.username}}? All replies to this comment will also be removed!" ng-show="allowDelete(comment.user.id)"><i class="glyphicon glyphicon-trash"></i> Delete</button>
     </div>
+    <img ng-src="{{comment.user.picture}}?token={{token}}" ng-show="comment.user.picture" class="img-thumbnail img-picture">
+    <img ng-src="templates/restangular/img/profile_picture.jpg" ng-hide="comment.user.picture" class="img-thumbnail img-picture">
     <a ng-href="#!/user/{{comment.user.id}}" bs-tooltip title="Profile of {{comment.user.username}}">{{comment.user.firstName}} {{comment.user.lastName}}</a><br>
     <time>{{comment.timestamp}}</time>
 </header>
@@ -17,3 +19,4 @@
     <button type="submit" class="btn btn-primary"><i class="glyphicon glyphicon-comment"></i> Update</button>
     <button type="reset" ng-click="updateCommentReset()" class="btn btn-danger"><i class="glyphicon glyphicon-remove"></i> Cancel</button>
 </form>
+<div class="clearfix"></div>

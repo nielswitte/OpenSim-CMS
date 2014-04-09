@@ -14,8 +14,8 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  * Implements the functions for users
  *
  * @author Niels Witte
- * @version 0.4
- * @date April 7th, 2014
+ * @version 0.5
+ * @date April 9th, 2014
  * @since February 24th, 2014
  */
 class User extends Module {
@@ -48,6 +48,7 @@ class User extends Module {
         $this->api->addRoute("/^\/user\/(\d+)\/files\/?$/",                             'getUserFilesByUserId',     $this, 'GET',    \Auth::READ);     // Load all files for the user
         $this->api->addRoute("/^\/user\/(\d+)\/meetings\/?$/",                          'getUserMeetingsByUserId',  $this, 'GET',    \Auth::READ);     // Load 50 meetings for the user
         $this->api->addRoute("/^\/user\/(\d+)\/meetings\/(\d+)\/?$/",                   'getUserMeetingsByUserId',  $this, 'GET',    \Auth::READ);     // Load 50 meetings for the user with offset
+        $this->api->addRoute("/^\/user\/(\d+)\/picture\/?$/",                           'getUserPictureById',       $this, 'GET',    \Auth::READ);     // Shows the user's profile picture
         $this->api->addRoute("/^\/user\/(\d+)\/picture\/?$/",                           'updateUserPictureByUserID',$this, 'PUT',    \Auth::READ);     // Updates the user's profile picture with the given image
         $this->api->addRoute("/^\/user\/(\d+)\/password\/?$/",                          'updateUserPasswordById',   $this, 'PUT',    \Auth::READ);     // Updates the user's password
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/teleport\/?$/", 'teleportAvatarByUuid',     $this, 'PUT',    \Auth::READ);     // Teleports a user
@@ -255,6 +256,19 @@ class User extends Module {
     }
 
     /**
+     * Returns the user's profile picture
+     *
+     * @param array $args
+     */
+    public function getUserPictureById($args) {
+        $user = new \Models\User($args[1]);
+        $user->getInfoFromDatabase();
+        require_once dirname(__FILE__) .'/../includes/class.Images.php';
+        $image = new \Image($user->getPicture());
+        $image->display();
+    }
+
+    /**
      * Gets an User by its Avatar on the Grid
      * Needs args[1] to be the Grid ID and args[2] the avatar UUID
      *
@@ -297,6 +311,7 @@ class User extends Module {
         $data['lastName']           = $user->getLastName();
         $data['email']              = $user->getEmail();
         $data['lastLogin']          = $user->getLastLogin();
+        $data['picture']            = $user->getPicture() !== FALSE ? $user->getPictureApiUrl() : FALSE;
 
         if($full) {
             $data['permissions']        = $user->getRights();

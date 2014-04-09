@@ -173,13 +173,7 @@ class Comment extends Module {
                 'id'            => $comment->getId(),
                 'parentId'      => $comment->getParentId(),
                 'number'        => $comment->getNumber(),
-                'user'          => array(
-                    'id'        => $comment->getUser()->getId(),
-                    'username'  => $comment->getUser()->getUsername(),
-                    'firstName' => $comment->getUser()->getFirstName(),
-                    'lastName'  => $comment->getUser()->getLastName(),
-                    'email'     => $comment->getUser()->getEmail()
-                ),
+                'user'          => $this->api->getModule('user')->getUserData($comment->getUser(), FALSE),
                 'type'          => $comment->getType(),
                 'timestamp'     => $comment->getTimestamp(),
                 'editTimestamp' => $comment->getEditTimestamp(),
@@ -210,13 +204,7 @@ class Comment extends Module {
                 'id'            => $comment->getId(),
                 'parentId'      => $comment->getParentId(),
                 'number'        => $comment->getNumber(),
-                'user'          => array(
-                    'id'        => $comment->getUser()->getId(),
-                    'username'  => $comment->getUser()->getUsername(),
-                    'firstName' => $comment->getUser()->getFirstName(),
-                    'lastName'  => $comment->getUser()->getLastName(),
-                    'email'     => $comment->getUser()->getEmail()
-                ),
+                'user'          => $this->api->getModule('user')->getUserData($comment->getUser(), FALSE),
                 'type'          => $comment->getType(),
                 'timestamp'     => $comment->getTimestamp(),
                 'editTimestamp' => $comment->getEditTimestamp(),
