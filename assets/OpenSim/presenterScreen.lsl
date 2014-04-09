@@ -325,6 +325,11 @@ default {
         llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
         // Get new API token
         request_api_token();
+        
+        // Listen at channel
+        mListener = llListen(channel,"", userUuid,"");
+        // Open main menu
+        open_menu(userUuid, mainNavigationText, mainNavigationButtons);
     }
 
     /**
@@ -437,6 +442,10 @@ state presentation {
             // Close any open menu's
             close_menu();
             state off;
+        // Back to main menu
+        } else if(llList2String(commands, 0) == "Main") {
+            state default;
+        // New document
         } else if(llList2String(commands, 0) == "New") {
             load_users_documents();
         }
@@ -575,7 +584,7 @@ state presentation {
                 }
             }
 
-            presentationButtons += ["Ok","Quit","Load #"];
+            presentationButtons += ["Main","Quit","Load #"];
             // Open presentation selection menu
             open_menu(userUuid, "Found "+ presentationCount +" presentation(s).\nShowing only the latest 9 presentations below.\nCommand: '/"+ channel +" Load <#>' can be used to load a presentation that is not listed.\nIf your avatar is not linked to your CMS user account, the list will be empty." , presentationButtons);
         // Update slide uuid
@@ -672,6 +681,10 @@ state document {
             // Close any open menu's
             close_menu();
             state off;
+        // Back to main menu
+        } else if(llList2String(commands, 0) == "Main") {
+            state default;
+        // New document
         } else if(llList2String(commands, 0) == "New") {
             load_users_documents();
         }
@@ -809,7 +822,7 @@ state document {
                     documentButtons += ["Load "+ llList2String(documents, x)];
                 }
             }
-            documentButtons += ["Ok","Quit","Load #"];
+            documentButtons += ["Main","Quit","Load #"];
             // Open presentation selection menu
             open_menu(userUuid, "Found "+ documentCount +" document(s).\nShowing only the latest 9 documents below.\nCommand: '/"+ channel +" Load <#>' can be used to load a document that is not listed.\nIf your avatar is not linked to your CMS user account, the list will be empty." , documentButtons);
         // Update page uuid
