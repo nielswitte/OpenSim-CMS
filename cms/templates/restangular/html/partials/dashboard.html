@@ -19,8 +19,8 @@
                     <time datetime="{{meeting.startDate}}">{{convertTimestamp(meeting.startDate, "D")}}<br>{{convertTimestamp(meeting.startDate, "MMM")}}</time>
                     <h4 class="list-group-item-heading">{{meeting.name}}</h4>
                 </a>
-                <p class="list-group-item-text">
-                    {{convertTimestamp(meeting.startDate, 'HH:mm')}} till {{convertTimestamp(meeting.endDate, 'HH:mm')}}
+                <p class="posted">
+                    {{convertTimestamp(meeting.startDate, 'HH:mm')}} to {{convertTimestamp(meeting.endDate, 'HH:mm')}}
                 </p>
                 <a class="btn btn-default btn-xs" ng-href="#!/meeting/{{meeting.id}}/minutes" ng-hide="inFuture(meeting.startDate)"><i class="glyphicon glyphicon-comment"></i> Minutes</a>
             </li>
@@ -58,7 +58,7 @@
                     </div>
                     <h4 class="list-group-item-heading">{{file.title}}</h4>
                 </a>
-                <span class="posted">{{file.creationDate}}</span> - <a ng-href="#!/user/{{user.id}}">{{file.user.firstName}} {{file.user.lastName}} ({{file.user.username}})</a>
+                <span class="posted">{{file.creationDate}} - <a ng-href="#!/user/{{user.id}}">{{file.user.firstName}} {{file.user.lastName}} ({{file.user.username}})</a></span>
             </li>
         </ul>
     </div>
