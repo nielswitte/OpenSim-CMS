@@ -34,7 +34,7 @@
         </div>
         <ul class="list-group list-group-hover">
             <li class="list-group-item" ng-repeat="comment in comments.comments | limitFromTo: getCommentFrom():getCommentTo()">
-                <span class="label label-default">{{comment.type}}</span> <a ng-href="#!/user/{{comment.user.id}}" bs-tooltip title="Profile of {{comment.user.username}}">{{comment.user.firstName}} {{comment.user.lastName}}</a><br>
+                <span class="label label-default">{{comment.type}}</span> <a ng-href="#!/user/{{comment.user.id}}" bs-tooltip title="Profile of {{comment.user.username}}">{{comment.user.username}} ({{comment.user.firstName}} {{comment.user.lastName}})</a><br>
                 <span class="posted">{{comment.timestamp}}</span>
                 <p class="list-group-item-text" ng-bind-html="markdown(comment.message)"></p>
                 <span class="edited" ng-show="comment.editTimestamp && !showUpdateForm(comment.id)">Edited: {{comment.editTimestamp}}</span>
@@ -58,7 +58,7 @@
                     </div>
                     <h4 class="list-group-item-heading">{{file.title}}</h4>
                 </a>
-                <span class="posted">{{file.creationDate}} - <a ng-href="#!/user/{{user.id}}">{{file.user.firstName}} {{file.user.lastName}} ({{file.user.username}})</a></span>
+                <span class="posted">{{file.creationDate}} - <a ng-href="#!/user/{{user.id}}">{{file.user.username}} ({{file.user.firstName}} {{file.user.lastName}})</a></span>
             </li>
         </ul>
     </div>

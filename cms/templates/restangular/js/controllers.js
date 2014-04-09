@@ -211,7 +211,7 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
 // chatController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '$route', '$alert', 'Cache', function(Restangular, $scope, $sce, $route, $alert, Cache) {
         $scope.token = sessionStorage.token;
-        
+
         // Clear the comment form
         $scope.clearComment = function() {
             $scope.comment = {
@@ -2096,7 +2096,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 angularRest.controller('userController', ['Restangular', 'RestangularCache', '$scope', '$route', '$routeParams', 'Page', '$alert', '$modal', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $route, $routeParams, Page, $alert, $modal, Cache, $location) {
         var userRequestUrl   = '';
         var userOld          = {};
-        $scope.grids         = [];
+        $scope.user          = [];
 
         // Show loading screen
         jQuery('#loading').show();
@@ -2116,6 +2116,15 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             // Remove loading screen
             jQuery('#loading').hide();
         });
+
+        // Load profile picture
+        $scope.getProfilePicture = function() {
+            if($scope.user.picture !== undefined && $scope.user.picture !== false) {
+                return $scope.user.picture +'?token='+ sessionStorage.token;
+            } else {
+                return '';
+            }
+        };
 
         // User is allowed to add new avatars
         $scope.allowCreate = function() {
