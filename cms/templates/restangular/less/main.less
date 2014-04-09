@@ -10,9 +10,7 @@ body {
     padding-top: 70px;
 }
 
-#calendar {
-    margin-top: 25px;
-}
+#calendar { margin-top: 25px; }
 
 // Login form
 .form-signin {
@@ -20,9 +18,7 @@ body {
     padding: 15px;
     margin: 0 auto;
 
-    .form-signin-heading {
-        margin-bottom: 10px;
-    }
+    .form-signin-heading { margin-bottom: 10px; }
 
     .form-control {
         position: relative;
@@ -32,9 +28,8 @@ body {
         box-sizing: border-box;
         padding: 10px;
         font-size: 16px;
-        &:focus {
-            z-index: 2;
-        }
+
+        &:focus { z-index: 2; }
     }
     input[type="text"] {
         margin-bottom: -1px;
@@ -50,13 +45,8 @@ body {
 
 // Toolbars
 .toolbar {
-    &.toolbar-top {
-        margin-bottom: 15px;
-    }
-
-    &.toolbar-bottom {
-        margin-top: 15px;
-    }
+    &.toolbar-top { margin-bottom: 15px; }
+    &.toolbar-bottom { margin-top: 15px; }
 }
 
 // Filters for table lists
@@ -66,26 +56,20 @@ body {
         padding: 0 10px;
     }
 
-    .clickable{
-        cursor: pointer;
-    }
+    .clickable{ cursor: pointer; }
 
     .panel-heading {
         div {
             margin-top: -18px;
             font-size: 15px;
-            span{
-                margin-left: 5px;
-            }
+            span { margin-left: 5px; }
         }
     }
 }
 
 // Region thumbnail images
 #regionThumbs {
-    div.region {
-        min-height: 500px;
-    }
+    div.region { min-height: 500px; }
 }
 
 // Slide thumbnails
@@ -186,7 +170,6 @@ div.thumbnail {
 .alert {
     width: 100%;
 
-
     &.top,
     &.top-left,
     &.top-right {
@@ -204,16 +187,13 @@ div.thumbnail {
     &.top-right {
         right: 0;
 
-        .close {
-            padding-left: 10px
-        }
+        .close { padding-left: 10px }
     }
 
     &.top-left {
         left: 0;
-        .close {
-            padding-right: 10px;
-        }
+
+        .close { padding-right: 10px; }
     }
 }
 
@@ -222,9 +202,7 @@ div.thumbnail {
     .events-list {
         overflow: visible !important;
 
-        .tooltip {
-            min-width: 100px;
-        }
+        .tooltip { min-width: 100px; }
     }
 }
 
@@ -233,9 +211,7 @@ div.thumbnail {
     height: 550px;
 
     #calendar {
-        div.day-event {
-            position: absolute;
-        }
+        div.day-event { position: absolute; }
     }
 }
 
@@ -245,15 +221,11 @@ div.thumbnail {
     transition: opacity .15s linear;
     &.ng-enter {
         opacity: 0;
-        &.ng-enter-active {
-            opacity: .5;
-        }
+        &.ng-enter-active { opacity: .5; }
     }
     &.ng-leave {
         opacity: .5;
-        &.ng-leave-active {
-            opacity: 0;
-        }
+        &.ng-leave-active { opacity: 0; }
     }
 }
 
@@ -261,9 +233,7 @@ div.thumbnail {
 .timepicker,
 .datepicker {
     tbody {
-        button.btn-default {
-            border: none;
-        }
+        button.btn-default { border: none; }
     }
 }
 
@@ -304,9 +274,7 @@ div.thumbnail {
     }
 
     &.list-group-hover {
-        .list-group-item:hover {
-            background-color: @color-default;
-        }
+        .list-group-item:hover { background-color: @color-default; }
     }
 
     .type {
@@ -332,12 +300,8 @@ div.thumbnail {
 // Alternating rows
 .row {
     &.row-striped {
-        &:nth-child(odd) {
-            background-color: #f9f9f9;
-        }
-        &:nth-child(even) {
-            background-color: #fff;
-        }
+        &:nth-child(odd) { background-color: #f9f9f9; }
+        &:nth-child(even) { background-color: #fff; }
     }
 
     &.row-hover:hover {
@@ -385,9 +349,7 @@ div.thumbnail {
     box-shadow: 0px 0px 10px #999999;
 
     .aside-header {
-        &.highlight {
-            background-color: @color-success;
-        }
+        &.highlight { background-color: @color-success; }
 
         .minimize {
             color: #fff;
@@ -407,9 +369,7 @@ div.thumbnail {
 
         .minimize,
         .close {
-            &:hover {
-                opacity: 1.0;
-            }
+            &:hover { opacity: 1.0; }
         }
     }
 
@@ -424,9 +384,7 @@ div.thumbnail {
 // Progress bar
 .progress {
     .progress-bar {
-        &.progress-bar-default {
-            background-color: #999;
-        }
+        &.progress-bar-default { background-color: #999; }
     }
 }
 
@@ -438,18 +396,14 @@ div.thumbnail {
         list-style: none;
 
         li {
-            &.highlighted {
-                border-left: 5px solid @color-success;
-            }
+            &.highlighted { border-left: 5px solid @color-success; }
 
             article.comment {
                 header {
                     margin-bottom: 15px;
 
-                    .number {
-                        color: #999;
-                    }
-
+                    &.dashboard { margin-top: 5px; }
+                    .number { color: #999; }
                     time {
                         font-size: 10px;
                         color: #999;
@@ -463,16 +417,10 @@ div.thumbnail {
             padding: 15px;
             margin-bottom: 15px;
 
-            .well:last-child {
-                margin-bottom: 0;
-            }
+            .well:last-child { margin-bottom: 0; }
 
-            &:nth-child(odd) {
-                background-color: #fff;
-            }
-            &:nth-child(even) {
-                background-color: #f9f9f9;
-            }
+            &:nth-child(odd) { background-color: #fff; }
+            &:nth-child(even) { background-color: #f9f9f9; }
         }
     }
 
@@ -511,9 +459,7 @@ li.list-group-item {
 // Page headers with no visible text
 .page-header {
     &.no-text {
-        h1 {
-            display: none;
-        }
+        h1 { display: none; }
     }
 }
 

@@ -569,9 +569,10 @@ angularRest.controller('toolbarController', ['$scope', 'Cache', '$location', '$a
  */
 // documentsController ------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Page', '$sce', '$location', function(RestangularCache, $scope, Page, $sce, $location) {
-        $scope.files = [];
+        $scope.files     = [];
         $scope.meetings  = [];
         $scope.comments  = [];
+        $scope.token     = sessionStorage.token;
         Page.setTitle('Dashboard');
 
         // Load all meetings the user is a participant for

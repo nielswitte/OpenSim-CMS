@@ -32,13 +32,20 @@
             <button class="btn btn-default" ng-click="nextCommentOffset()"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
             <button class="btn btn-default"  ng-click="previousCommentOffset()">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
         </div>
-        <ul class="list-group list-group-hover">
+        <ul class="list-group list-group-hover comments">
             <li class="list-group-item" ng-repeat="comment in comments.comments | limitFromTo: getCommentFrom():getCommentTo()">
-                <span class="label label-default">{{comment.type}}</span> <a ng-href="#!/user/{{comment.user.id}}" bs-tooltip title="Profile of {{comment.user.username}}">{{comment.user.username}} ({{comment.user.firstName}} {{comment.user.lastName}})</a><br>
-                <span class="posted">{{comment.timestamp}}</span>
-                <p class="list-group-item-text" ng-bind-html="markdown(comment.message)"></p>
-                <span class="edited" ng-show="comment.editTimestamp && !showUpdateForm(comment.id)">Edited: {{comment.editTimestamp}}</span>
-                <button ng-click="showComment(comment.id)" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-eye-open"></i> Show comment</button>
+                <article class="comment">
+                    <header class="dashboard">
+                        <img src="templates/restangular/img/profile_picture.jpg" ng-src="{{comment.user.picture !== false ? comment.user.picture +'?token='+ token : ''}}" class="img-thumbnail img-picture">
+                        <span class="label label-default">{{comment.type}}</span> <a ng-href="#!/user/{{comment.user.id}}" bs-tooltip title="Profile of {{comment.user.username}}">{{comment.user.username}} ({{comment.user.firstName}} {{comment.user.lastName}})</a><br>
+                        <span class="posted">{{comment.timestamp}}</span>
+                        <div class="clearfix"></div>
+                    </header>
+
+                    <p class="list-group-item-text" ng-bind-html="markdown(comment.message)"></p>
+                    <span class="edited" ng-show="comment.editTimestamp && !showUpdateForm(comment.id)">Edited: {{comment.editTimestamp}}</span>
+                    <button ng-click="showComment(comment.id)" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-eye-open"></i> Show comment</button>
+                </article>
             </li>
         </ul>
     </div>
