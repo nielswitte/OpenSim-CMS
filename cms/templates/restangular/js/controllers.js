@@ -1566,7 +1566,7 @@ angularRest.controller('meetingMinutesController', ['RestangularCache', '$scope'
                 html += '<div class="progress" title="None"><div class="progress-bar progress-bar-default" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[3]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[3]) / totalVotes) * 100) +'%;">'+ parseInt(votes[3]) +'</div></div>';
                 return $sce.trustAsHtml(html);
             } else {
-                return $sce.trustAsHtml(msg);
+                return $sce.trustAsHtml(msg.replace(/\n/g,"<br>\n"));
             }
         };
 
