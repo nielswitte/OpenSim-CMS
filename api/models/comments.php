@@ -10,8 +10,8 @@ require_once dirname(__FILE__) .'/comment.php';
  * This class handles comments on a given object
  *
  * @author Niels Witte
- * @version 0.2a
- * @date April 4th, 2014
+ * @version 0.2b
+ * @date April 10th, 2014
  * @since March 28th, 2014
  */
 class Comments implements SimpleModel {
@@ -70,7 +70,7 @@ class Comments implements SimpleModel {
                 // Save all comments
                 foreach($results as $result) {
                     // The author of the comment
-                    $user    = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+                    $user    = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
                     // Create comment
                     $comment = new \Models\Comment($result['commentId'], $result['parentId'], $number, $user, $result['type'], $result['timestamp'], $result['message'], $result['editTimestamp']);
                     // Is a reaction on another comment?

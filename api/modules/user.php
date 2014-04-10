@@ -217,7 +217,7 @@ class User extends Module {
         // Process results
         $data           = array();
         foreach($resutls as $result) {
-            $user       = new \Models\User($result['id'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $user       = new \Models\User($result['id'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
             $data[]     = $this->getUserData($user, FALSE);
         }
         return $data;
@@ -310,13 +310,12 @@ class User extends Module {
         $data['firstName']          = $user->getFirstName();
         $data['lastName']           = $user->getLastName();
         $data['email']              = $user->getEmail();
-        $data['lastLogin']          = $user->getLastLogin();
         $data['picture']            = $user->getPicture() !== FALSE ? $user->getPictureApiUrl() : FALSE;
+        $data['lastLogin']          = $user->getLastLogin();
 
         if($full) {
             $data['permissions']        = $user->getRights();
-        }
-        if($full) {
+
             $avatars                    = array();
 
             // Only when avatars available
@@ -512,7 +511,7 @@ class User extends Module {
         $db->where('d.ownerId', $db->escape($args[1]));
         $documents = $db->get('documents d', NULL, '*, d.id as documentId, u.id AS userId');
         foreach($documents as $document) {
-            $user   = new \Models\User($document['userId'], $document['username'], $document['email'], $document['firstName'], $document['lastName']);
+            $user   = new \Models\User($document['userId'], $document['username'], $document['email'], $document['firstName'], $document['lastName'], $document['lastLogin']);
             $file   = new \Models\File($document['documentId'], $document['type'], $document['title'], $user, $document['creationDate'], $document['modificationDate'], $document['file']);
             $data[] = $this->api->getModule('file')->getFileData($file);
         }

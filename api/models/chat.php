@@ -82,7 +82,7 @@ class Chat implements SimpleModel {
         foreach($chats as $chat) {
             // User is known?
             if($chat['userId'] != NULL) {
-                $user   = new \Models\User($chat['userId'], $chat['username'], $chat['email'], $chat['firstName'], $chat['lastName']);
+                $user   = new \Models\User($chat['userId'], $chat['username'], $chat['email'], $chat['firstName'], $chat['lastName'], $chat['lastLogin']);
             // Unknown user
             } else {
                 $user   = $user = new \Models\User(-1, 'Anonymous', 'Anonymous', '', '');

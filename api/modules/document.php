@@ -13,8 +13,8 @@ require_once dirname(__FILE__) .'/../controllers/pageController.php';
  * Implements the functions for documents
  *
  * @author Niels Witte
- * @version 0.4c
- * @date April 9th, 2014
+ * @version 0.4d
+ * @date April 10th, 2014
  * @since March 3rd, 2014
  */
 class Document extends Module {
@@ -67,7 +67,7 @@ class Document extends Module {
         // Process results
         $data           = array();
         foreach($resutls as $result) {
-            $user           = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $user           = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
             $document       = new \Models\Document($result['documentId'], 0, $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
             $data[]         = $this->getDocumentData($document, FALSE);
         }
@@ -102,7 +102,7 @@ class Document extends Module {
             , $params);
         $data           = array();
         foreach($results as $result) {
-            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
             $document   = new \Models\Document($result['documentId'], 1, $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
             $data[]     = $this->getDocumentData($document, FALSE);
         }

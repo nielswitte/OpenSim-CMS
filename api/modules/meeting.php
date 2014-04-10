@@ -11,8 +11,8 @@ require_once dirname(__FILE__) .'/../controllers/meetingController.php';
  * Implements the functions for meetings
  *
  * @author Niels Witte
- * @version 0.4b
- * @date April 9th, 2014
+ * @version 0.4c
+ * @date April 10th, 2014
  * @since February 25th, 2014
  */
 class Meeting extends Module{
@@ -65,7 +65,7 @@ class Meeting extends Module{
         // Process results
         $data           = array();
         foreach($results as $result) {
-            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
             $room       = new \Models\MeetingRoom($result['roomId']);
             $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room, $result['name']);
             $data[]     = $this->getMeetingData($meeting, FALSE);
@@ -92,7 +92,7 @@ class Meeting extends Module{
         $data           = array();
 
         foreach($results as $result) {
-            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
             $room       = new \Models\MeetingRoom($result['roomId'], NULL, $result['roomName']);
             $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room, $result['name']);
             if(strpos($args[0], 'calendar') !== FALSE) {

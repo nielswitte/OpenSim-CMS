@@ -9,8 +9,8 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class is the presentation model
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 4th, 2014
+ * @version 0.2a
+ * @date April 10th, 2014
  * @since April 2nd, 2014
  */
 class File implements SimpleModel {
@@ -91,7 +91,7 @@ class File implements SimpleModel {
             $this->type             = $result['type'];
             $this->creationDate     = $result['creationDate'];
             $this->modificationDate = $result['modificationDate'];
-            $this->user             = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $this->user             = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
             $this->file             = $result['file'];
         } else {
             throw new \Exception('Document not found', 5);

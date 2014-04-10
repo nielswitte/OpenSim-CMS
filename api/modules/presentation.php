@@ -13,8 +13,8 @@ require_once dirname(__FILE__) .'/../controllers/presentationController.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.4b
- * @date April 9th, 2014
+ * @version 0.4c
+ * @date April 10th, 2014
  * @since February 24th, 2014
  */
 class Presentation extends Module {
@@ -71,7 +71,7 @@ class Presentation extends Module {
         // Process results
         $data           = array();
         foreach($resutls as $result) {
-            $user           = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $user           = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
             $presentation   = new \Models\Presentation($result['documentId'], 0, $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
             $data[]         = $this->getPresentationData($presentation, FALSE);
         }
