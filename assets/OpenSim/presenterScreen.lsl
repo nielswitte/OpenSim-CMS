@@ -13,7 +13,7 @@
  *
  * @author Niels Witte
  * @date February 11th, 2014
- * @version 0.7
+ * @version 0.8a
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
@@ -36,6 +36,7 @@ list textureCache;              // Cache the textures to only require loading on
 integer item = 1;               // The current page/slide
 integer totalItems = 0;         // Total number of pages/slides
 list itemsList;                 // List with all pages/slides
+list itemIds;                   // List with IDs of all pages/slides
 string itemTitle;               // Title of the document/presentation
 string itemId;                  // The ID of the document/presentation
 
@@ -44,14 +45,15 @@ key http_request_api_token;     // HTTP Request for fetching API token
 key http_request_id;            // HTTP Request for loading file
 key http_request_documents;     // HTTP Request for loading user's files
 key http_request_set;           // HTTP Request to set UUID of object for future use
+key http_request_comments;      // HTTP Request for loading comments
 
 // Menu's
 string mainNavigationText           = "What type of content do you want to use?";
 list mainNavigationButtons          = ["Presentation", "Document", "Image", "Quit"];
 string presentationNavigationText   = "Slide show navigation";
-list presentationNavigationButtons  = ["First", "Back", "Next", "Quit", "New"];
+list presentationNavigationButtons  = ["First", "Back", "Next", "Quit", "New", "Comments"];
 string documentNavigationText       = "Document navigation";
-list documentNavigationButtons      = ["First", "Back", "Next", "Quit", "New"];
+list documentNavigationButtons      = ["First", "Back", "Next", "Quit", "New", "Comments"];
 
 
 /**
@@ -136,6 +138,107 @@ request_api_token() {
 load_users_documents() {
     llInstantMessage(userUuid, "Searching for your documents... Please be patient");
     http_request_documents = llHTTPRequest(serverUrl +"/grid/"+ serverId +"/avatar/"+ userUuid +"/files/?token="+ APIToken, [], "");
+}
+
+
+/**
+ * Load the comments for the selected item
+ *
+ * @param integer id
+ * @param string type
+ */
+load_item_comments(integer index, string type) {
+    if(!debug) llInstantMessage(userUuid, "Loading comments for "+ type +" with ID: "+ llList2String(itemIds, index));
+    http_request_comments = llHTTPRequest(serverUrl +"/comments/"+ type +"/"+ llList2String(itemIds, index) +"/?token="+ APIToken, [], "");
+}
+
+// Comment buffers
+string buffer   = "";
+
+/**
+ * Processes all comments and return them as a string
+ *
+ * @param string rawComments
+ */
+parse_comments(string rawComments) {
+    key json        = JsonCreateStore(rawComments);
+    integer count   = (integer) JsonGetValue(json, "commentCount");
+    integer i       = 0;
+    llSay(0, "Showing "+ count +" comments --------------------------------------------------------");
+
+    for(i = 0; i < JsonGetArrayLength(json, "comments"); i++) {
+        buffer += "["+ JsonGetValue(json, "comments["+ i +"].timestamp") +"] "+ JsonGetValue(json, "comments["+ i +"].user.{username}") +" ("+ JsonGetValue(json, "comments["+ i +"].user.{firstName}") +" "+ JsonGetValue(json, "comments["+ i +"].user.{firstName}") + "):\n"+ JsonGetValue(json, "comments["+ i +"].message") +"\n\n";
+
+        if((integer) JsonGetValue(json, "comments["+ i +"].childrenCount") > 0) {
+            buffer += parse_comment_childs(JsonGetJson(json, "comments["+ i +"].children"), 1);
+        }
+    }
+
+    // Output the buffer
+    integer length = 0;
+    i  = 0;
+    while(llStringLength(buffer) > 1 && i < count) {
+        if(llStringLength(buffer) > 1000) {
+            length = 1000;
+        } else {
+            length = llStringLength(buffer);
+        }
+
+        string partial  = llGetSubString(buffer, 0, length-1);
+        buffer          = llGetSubString(buffer, llStringLength(partial)-1, llStringLength(buffer) -1);
+        llSay(0, "\n"+ partial);
+        i++;
+    }
+    llSay(0, "-------------------------------------------------------------------------------------");
+}
+
+/**
+ * Recursive children parse function
+ *
+ * @param string comments
+ * @param integer level
+ * @return string
+ */
+string parse_comment_childs(string comments, integer level) {
+    key json        = JsonCreateStore(comments);
+    integer count   = JsonGetArrayLength(json, "");
+    integer i       = 0;
+    string tab      = "";
+    string result   = "";
+    for(i = 0; i < level; i++) {
+        tab = tab +"\t\t";
+    }
+
+    for(i = 0; i < count; i++) {
+        result += tab + strReplace(strReplace("["+ JsonGetValue(json, "["+ i +"].timestamp") +"] "+ JsonGetValue(json, "["+ i +"].user.{username}") +" ("+ JsonGetValue(json, "["+ i +"].user.{firstName}") +" "+ JsonGetValue(json, "["+ i +"].user.{firstName}") + "):\n"+ JsonGetValue(json, "["+ i +"].message"), "\n", "\r"), "\r", "\n"+ tab) +"\n\n";
+
+        if((integer) JsonGetValue(json, "["+ i +"].childrenCount") > 0) {
+            result += parse_comment_childs(JsonGetJson(json, "["+ i +"].children"), (level+1));
+        }
+    }
+    return result;
+}
+
+/**
+ * String replace function
+ *
+ * @source http://lslwiki.net/lslwiki/wakka.php?wakka=LibraryStringReplace
+ * @param source
+ * @param pattern
+ * @param replace
+ * @return
+ */
+string strReplace(string source, string pattern, string replace) {
+    integer last = -1;
+    while (llSubStringIndex(source, pattern) > -1) {
+        integer len = llStringLength(pattern);
+        integer pos = llSubStringIndex(source, pattern);
+        if (llStringLength(source) == len) { source = replace; }
+        else if (pos == 0) { source = replace+llGetSubString(source, pos+len, -1); }
+        else if (pos == llStringLength(source)-len) { source = llGetSubString(source, 0, pos-1)+replace; }
+        else { source = llGetSubString(source, 0, pos-1)+replace+llGetSubString(source, pos+len, -1); }
+    }
+    return source;
 }
 
 /**
@@ -226,6 +329,11 @@ default {
         llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
         // Get new API token
         request_api_token();
+
+        // Listen at channel
+        mListener = llListen(channel,"", userUuid,"");
+        // Open main menu
+        open_menu(userUuid, mainNavigationText, mainNavigationButtons);
     }
 
     /**
@@ -338,6 +446,10 @@ state presentation {
             // Close any open menu's
             close_menu();
             state off;
+        // Back to main menu
+        } else if(llList2String(commands, 0) == "Main") {
+            state default;
+        // New document
         } else if(llList2String(commands, 0) == "New") {
             load_users_documents();
         }
@@ -356,6 +468,8 @@ state presentation {
             } else if(llList2String(commands, 0) == "First") {
                 nav(1, "slide");
                 open_menu(userUuid, presentationNavigationText, presentationNavigationButtons);
+            } else if(llList2String(commands, 0) == "Comments") {
+                load_item_comments((item - 1), "slide");
             // Invalid command
             } else {
                 // Other
@@ -404,6 +518,7 @@ state presentation {
             list empty          = [];
             textureCache        = empty;
             itemsList           = empty;
+            itemIds             = empty;
             if(debug) llInstantMessage(userUuid, "[Debug] Slide list is currently: "+ (string) itemsList);
             integer x;
             integer length      = (integer) JsonGetValue(json_body, "slidesCount");
@@ -417,7 +532,7 @@ state presentation {
                     slideExpired     = JsonGetValue(json_slides, "["+ x +"].cache.{"+ serverId +"}.isExpired");
                 }
                 string slideUrl      = JsonGetValue(json_slides, "["+ x +"].image");
-
+                itemIds             += [JsonGetValue(json_slides, "["+ x +"].id")];
                 // UUID set and not expired?
                 if(slideUuid != "" && slideExpired == "0") {
                     itemsList += [(key) slideUuid];
@@ -473,12 +588,15 @@ state presentation {
                 }
             }
 
-            presentationButtons += ["Ok","Quit","Load #"];
+            presentationButtons += ["Main","Quit","Load #"];
             // Open presentation selection menu
             open_menu(userUuid, "Found "+ presentationCount +" presentation(s).\nShowing only the latest 9 presentations below.\nCommand: '/"+ channel +" Load <#>' can be used to load a presentation that is not listed.\nIf your avatar is not linked to your CMS user account, the list will be empty." , presentationButtons);
         // Update slide uuid
         } else if(request_id = http_request_set) {
             if(debug) llInstantMessage(userUuid, "[Debug] UUID set for slide "+ item +": "+ (string) body);
+        // Loaded comments
+        } else if(request_id = http_request_comments) {
+            parse_comments(body);
         // HTTP response which isn't requested?
         } else {
             return;
@@ -567,6 +685,10 @@ state document {
             // Close any open menu's
             close_menu();
             state off;
+        // Back to main menu
+        } else if(llList2String(commands, 0) == "Main") {
+            state default;
+        // New document
         } else if(llList2String(commands, 0) == "New") {
             load_users_documents();
         }
@@ -585,6 +707,8 @@ state document {
             } else if(llList2String(commands, 0) == "First") {
                 nav(1, "page");
                 open_menu(userUuid, presentationNavigationText, presentationNavigationButtons);
+            } else if(llList2String(commands, 0) == "Comments") {
+                load_item_comments((item - 1), "page");
             // Invalid command
             } else {
                 // Other
@@ -633,6 +757,7 @@ state document {
             list empty          = [];
             textureCache        = empty;
             itemsList           = empty;
+            itemIds             = empty;
             if(debug) llInstantMessage(userUuid, "[Debug] Page list is currently: "+ (string) itemsList);
             integer x;
             integer length      = (integer) JsonGetValue(json_body, "pagesCount");
@@ -646,6 +771,7 @@ state document {
                     pageExpired     = JsonGetValue(json_pages, "["+ x +"].cache.{"+ serverId +"}.isExpired");
                 }
                 string pageUrl      = JsonGetValue(json_pages, "["+ x +"].image");
+                itemIds             += [JsonGetValue(json_pages, "["+ x +"].id")];
 
                 // UUID set and not expired?
                 if(pageUuid != "" && pageExpired == "0") {
@@ -700,12 +826,15 @@ state document {
                     documentButtons += ["Load "+ llList2String(documents, x)];
                 }
             }
-            documentButtons += ["Ok","Quit","Load #"];
+            documentButtons += ["Main","Quit","Load #"];
             // Open presentation selection menu
             open_menu(userUuid, "Found "+ documentCount +" document(s).\nShowing only the latest 9 documents below.\nCommand: '/"+ channel +" Load <#>' can be used to load a document that is not listed.\nIf your avatar is not linked to your CMS user account, the list will be empty." , documentButtons);
         // Update page uuid
         } else if(request_id = http_request_set) {
             if(debug) llInstantMessage(userUuid, "[Debug] UUID set for page "+ item +": "+ (string) body);
+        // Loaded comments
+        } else if(request_id = http_request_comments) {
+            parse_comments(body);
         // HTTP response which isn't requested?
         } else {
             return;

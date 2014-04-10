@@ -92,10 +92,10 @@ var angularRest = angular.module('OpenSim-CMS', [
 });
 
 // Authentication check on run
-angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', 'Cache', '$anchorScroll', function ($rootScope, Restangular, $location, $alert, $sce, Cache, $anchorScroll) {
+angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', 'Cache', '$anchorScroll', function ($rootScope, Restangular, $location, $alert, Cache, $anchorScroll) {
         $rootScope.$on("$routeChangeStart", function(event, next, current) {
             if (next.requireLogin && !sessionStorage.token) {
-                $alert({title: 'Error!', content: $sce.trustAsHtml('This page requires authentication.'), type: 'danger'});
+                $alert({title: 'Error!', content: 'This page requires authentication.', type: 'danger'});
                 $location.path('/login');
             }
 
@@ -113,7 +113,7 @@ angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', 'Ca
             if(errorCount >= 10) {
                 errorCount = 0;
                 sessionStorage.clear();
-                $alert({title: 'Session Terminated', content: $sce.trustAsHtml('You have been logged out because you caused to many errors.'), type: 'danger'});
+                $alert({title: 'Session Terminated', content: 'You have been logged out because you caused to many errors.', type: 'danger'});
                 $location.path('/login');
             }
 
@@ -121,15 +121,15 @@ angularRest.run(['$rootScope', 'Restangular', '$location', '$alert', '$sce', 'Ca
             if(sessionStorage.tokenTimeOut < moment().unix()) {
                 sessionStorage.clear();
                 Cache.clearCache();
-                $alert({title: 'Session Expired!', content: $sce.trustAsHtml('You have been logged out because your session has expired'), type: 'warning'});
+                $alert({title: 'Session Expired!', content: 'You have been logged out because your session has expired', type: 'warning'});
                 $location.path('/login');
             }
             // Unauthorized
             if(resp.status == 401) {
-                $alert({title: 'Unauthorized!', content: $sce.trustAsHtml('You have insufficient privileges to access this API.'), type: 'danger'});
+                $alert({title: 'Unauthorized!', content: 'You have insufficient privileges to access this API.', type: 'danger'});
             // Other errors
             } else {
-                $alert({title: 'Error!', content: $sce.trustAsHtml(resp.data.error), type: 'danger'});
+                $alert({title: 'Error!', content: resp.data.error, type: 'danger'});
             }
             return false; // stop the promise chain
         });

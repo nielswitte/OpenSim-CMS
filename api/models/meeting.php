@@ -12,8 +12,8 @@ require_once dirname(__FILE__) . '/meetingMinutes.php';
  * This class represents a meeting
  *
  * @author Niels Witte
- * @version 0.4
- * @date April 1st, 2014
+ * @version 0.4a
+ * @date April 10th, 2014
  * @since February 25th, 2014
  */
 class Meeting implements simpleModel {
@@ -67,7 +67,7 @@ class Meeting implements simpleModel {
         // Meeting found?
         if($meeting) {
             $this->room         = new \Models\MeetingRoom($meeting['roomId']);
-            $this->creator      = new \Models\User($meeting['userId'], $meeting['username'], $meeting['email'], $meeting['firstName'], $meeting['lastName']);
+            $this->creator      = new \Models\User($meeting['userId'], $meeting['username'], $meeting['email'], $meeting['firstName'], $meeting['lastName'], $meeting['lastLogin']);
             $this->startDate    = $meeting['startDate'];
             $this->endDate      = $meeting['endDate'];
             $this->name         = $meeting['name'];
@@ -93,7 +93,7 @@ class Meeting implements simpleModel {
 
         // Get the users on the list
         foreach($results as $result) {
-            $participant    = new \Models\User($result['id'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $participant    = new \Models\User($result['id'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
             $participants->addParticipant($participant);
         }
     }
@@ -133,7 +133,7 @@ class Meeting implements simpleModel {
 
         // Add all items to the agenda
         foreach($results as $result) {
-            $user     = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $user     = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
             $file     = new \Models\File($result['documentId'], $result['type'], $result['title'], $user, $result['creationDate'], $result['modificationDate']);
             $documents->addDocument($file);
         }

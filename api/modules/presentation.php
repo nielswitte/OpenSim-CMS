@@ -13,8 +13,8 @@ require_once dirname(__FILE__) .'/../controllers/presentationController.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.4a
- * @date April 4th, 2014
+ * @version 0.4c
+ * @date April 10th, 2014
  * @since February 24th, 2014
  */
 class Presentation extends Module {
@@ -71,7 +71,7 @@ class Presentation extends Module {
         // Process results
         $data           = array();
         foreach($resutls as $result) {
-            $user           = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $user           = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
             $presentation   = new \Models\Presentation($result['documentId'], 0, $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
             $data[]         = $this->getPresentationData($presentation, FALSE);
         }
@@ -161,8 +161,12 @@ class Presentation extends Module {
                     'isExpired' => strtotime($cache['uuidExpires']) > time() ? 0 : 1
                 );
             }
-
-            $data['cache'] = $cachedTextures;
+            // Retrieve title if not available
+            if($presentation->getTitle() == '') {
+                $presentation->getInfoFromDatabase();
+            }
+            $data['presentationTitle']  = $presentation->getTitle();
+            $data['cache']              = $cachedTextures;
         }
         return $data;
     }

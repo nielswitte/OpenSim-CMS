@@ -5,8 +5,8 @@ defined('EXEC') or die('Config not loaded');
  * Helper class to support the CMS and API
  *
  * @author Niels Witte
- * @version 0.3a
- * @date April 7th, 2014
+ * @version 0.3b
+ * @date April 10th, 2014
  * @since February 12th, 2014
  */
 class Helper {
@@ -328,9 +328,10 @@ class Helper {
      * @param integer $height - [Optional] Height in pixels
      * @param integer $width - [Optional] Width in pixels
      * @param integer $quality - [Optional] The JPEG compression quality
+     * @param boolean $force - [Optional] Force resize even when it should not be needed
      * @return boolean
      */
-    public static function imageResize($source, $destination, $height = IMAGE_HEIGHT, $width = IMAGE_WIDTH, $quality = 95) {
+    public static function imageResize($source, $destination, $height = IMAGE_HEIGHT, $width = IMAGE_WIDTH, $quality = 95, $force = FALSE) {
         $destinationDir     = dirname($destination);
         $destinationExt     = @end(explode('.', $destination));
         $destinationFile    = @end(explode(DS, preg_replace("/\\.[^.\\s]{3,4}$/", "", $destination)));
@@ -354,8 +355,8 @@ class Helper {
                 }
             }
 
-            // Resize is required?
-            if(!file_exists($destination) || $resizeRequired) {
+            // Resize is required or even forced?
+            if(!file_exists($destination) || $resizeRequired || $force) {
                 // Load the background
                 $averageColor = $resize->getAverageColor();
                 if((($averageColor['red'] + $averageColor['green'] + $averageColor['blue']) / 3) >= 128) {

@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the user controller
  *
  * @author Niels Witte
- * @version 0.3
- * @date April 1st, 2014
+ * @version 0.3a
+ * @date April 10th, 2014
  * @since February 12th, 2014
  */
 class UserController {
@@ -241,6 +241,24 @@ class UserController {
     }
 
     /**
+     * Saves the uploaded image to the user's storage directory
+     *
+     * @param array $parameters
+     *              * image -  base64 encoded image
+     * @return boolean
+     */
+    public function updateUserPicture($parameters) {
+        $file           = \Helper::getBase64Content($parameters['picture'], TRUE);
+        $header         = \Helper::getBase64Header($parameters['picture']);
+        $extension      = \Helper::getExtentionFromContentType($header);
+
+        $temp           = \Helper::saveFile($this->user->getId() .'.'. $extension, TEMP_LOCATION, $file);
+        $userfilesdir   = FILES_LOCATION . DS .'users'. DS . $this->user->getId();
+        $resize         = \Helper::imageResize($temp, $userfilesdir . DS . $this->user->getId() .'.'. IMAGE_TYPE, 250, 250, 95, TRUE);
+        return \Helper::moveFile($temp, $userfilesdir . DS . 'source.'. $extension) && $resize;
+    }
+
+    /**
      *
      * @param array $parameters - Array with parameters to set permissions to
      *              * integer auth - permission level
@@ -412,6 +430,24 @@ class UserController {
             throw new \Exception('Missing parameter (string) "password2" which should match parameter (string) "password" with a minimum length of '. SERVER_MIN_PASSWORD_LENGTH, 3);
         } elseif(!\Auth::checkRights('user', \AUTH::WRITE) && (!isset($parameters['currentPassword']) || !$this->checkPassword($parameters['currentPassword']))) {
             throw new \Exception('Missing parameter (string) "currentPassword" which should match the current user\'s password', 4);
+        } else {
+            $result = TRUE;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Validates the parameters for uploading a profile picture
+     *
+     * @param array $parameters
+     * @return boolean
+     * @throws \Exception
+     */
+    public function validateParameterPicture($parameters) {
+        $result = FALSE;
+        if(!isset($parameters['picture']) || !in_array(\Helper::getBase64Header($parameters['picture']), array('image/jpeg', 'image/png', 'image/gif'))) {
+            throw new \Exception('Missing parameter (string) "picture", which should be a base64 encoded image (jpg, jpeg, png or gif)');
         } else {
             $result = TRUE;
         }

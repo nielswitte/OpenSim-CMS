@@ -11,8 +11,8 @@ require_once dirname(__FILE__) .'/../controllers/meetingController.php';
  * Implements the functions for meetings
  *
  * @author Niels Witte
- * @version 0.4a
- * @date April 7th, 2014
+ * @version 0.4c
+ * @date April 10th, 2014
  * @since February 25th, 2014
  */
 class Meeting extends Module{
@@ -65,7 +65,7 @@ class Meeting extends Module{
         // Process results
         $data           = array();
         foreach($results as $result) {
-            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
             $room       = new \Models\MeetingRoom($result['roomId']);
             $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room, $result['name']);
             $data[]     = $this->getMeetingData($meeting, FALSE);
@@ -92,7 +92,7 @@ class Meeting extends Module{
         $data           = array();
 
         foreach($results as $result) {
-            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
             $room       = new \Models\MeetingRoom($result['roomId'], NULL, $result['roomName']);
             $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room, $result['name']);
             if(strpos($args[0], 'calendar') !== FALSE) {
@@ -109,7 +109,7 @@ class Meeting extends Module{
                     // Meeting has ended ? => event-default
                     // Meeting still has to start => event-info
                     'class'         => ($startTimestamp < time() && $endTimestamp > time() ? 'event-success' : ($startTimestamp > time() ? 'event-info' : 'event-default')),
-                    'title'         => $meeting->getName() .' (Room: '. $meeting->getRoom()->getName() .')',
+                    'title'         => stripslashes(str_replace('"', '\'\'', $meeting->getName()) .' (Room: '. $meeting->getRoom()->getName() .')'),
                     'description'   => 'Reservation made by: '. $meeting->getCreator()->getUsername()
                 );
             } else {
@@ -296,7 +296,7 @@ class Meeting extends Module{
     public function getMeetingData(\Models\Meeting $meeting, $full = TRUE) {
         $data       = array(
             'id'        => $meeting->getId(),
-            'name'      => $meeting->getName(),
+            'name'      => stripslashes($meeting->getName()),
             'startDate' => $meeting->getStartDate(),
             'endDate'   => $meeting->getEndDate(),
             'creator'   => $this->api->getModule('user')->getUserData($meeting->getCreator(), FALSE)

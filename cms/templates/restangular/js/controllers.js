@@ -210,6 +210,8 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
  */
 // chatController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '$route', '$alert', 'Cache', function(Restangular, $scope, $sce, $route, $alert, Cache) {
+        $scope.token = sessionStorage.token;
+
         // Clear the comment form
         $scope.clearComment = function() {
             $scope.comment = {
@@ -331,6 +333,9 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
 
         // Update a comment
         $scope.updateComment = function(id) {
+            // Show loading screen
+            jQuery('#loading').show();
+
             Restangular.one('comment', id).customPUT({message: this.message}).then(function(resp) {
                 if(!resp.success) {
                     $alert({title: 'Error!', content: resp.error, type: 'danger'});
@@ -340,16 +345,19 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
                     Cache.clearCache();
                     $route.reload();
                 }
+                // Remove loading screen
+                jQuery('#loading').hide();
             });
+
         };
 
         // Check if the user is allowed to update this comment
-        $scope.allowUpdate = function(userId) {
-            return $scope.allowDelete(userId);
+        $scope.allowCommentUpdate = function(userId) {
+            return $scope.allowCommentDelete(userId);
         };
 
         // Checks if the user has permission to remove a comment
-        $scope.allowDelete = function(userId) {
+        $scope.allowCommentDelete = function(userId) {
             // Read permissions or higher and own comment?
             if(sessionStorage.id == userId && sessionStorage.commentPermission >= READ) {
                 return true;
@@ -567,45 +575,167 @@ angularRest.controller('toolbarController', ['$scope', 'Cache', '$location', '$a
  */
 // documentsController ------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Page', '$sce', '$location', function(RestangularCache, $scope, Page, $sce, $location) {
-        $scope.files = [];
+        $scope.files     = [];
         $scope.meetings  = [];
-        $scope.comments  = [];
+        $scope.comments  = { comments: [] };
+        $scope.token     = sessionStorage.token;
         Page.setTitle('Dashboard');
+
+        // Get last login time or use yesterday as time
+        var lastLogin = function() {
+            if(sessionStorage.lastLogin > 0) {
+                return moment(sessionStorage.lastLogin, 'YYYY-MM-DD HH:mm:ss').unix();
+            } else {
+                return new moment().subtract('days', 1).unix();
+            }
+        };
+
+        // Load all comments since the user last visited
+        RestangularCache.one('comments', lastLogin()).get().then(function(commentsResponse) {
+            $scope.comments = commentsResponse;
+        });
+
+        // Load all files
+        RestangularCache.all('files').getList().then(function(filesResponse) {
+            $scope.files = filesResponse;
+        });
 
         // Load all meetings the user is a participant for
         RestangularCache.one('user', sessionStorage.id).getList('meetings').then(function(meetingsResponse) {
             $scope.meetings = meetingsResponse;
         });
 
+        // Calculate the total number of pages
+        $scope.getTotalPages = function(type) {
+            var pages = 0;
+            if(type == 'comments') {
+                pages = Math.ceil(parseInt($scope.comments.comments.length) / parseInt(stepSizeComments));
+            } else if(type == 'files') {
+                pages = Math.ceil(parseInt($scope.files.length) / parseInt(stepSizeFiles));
+            } else {
+                pages = Math.ceil(parseInt($scope.meetings.length) / parseInt(stepSizeMeetings));
+            }
+            // Always show at least one page
+            if(pages == 0) {
+                pages = 1;
+            }
+
+            return $sce.trustAsHtml(''+ pages);
+        };
+
+        // Get the current page number
+        $scope.getCurrentPage = function(type) {
+            var page = 0;
+            if(type == 'comments') {
+                page = Math.ceil(parseInt($scope.commentOffset) / parseInt(stepSizeComments)) + 1;
+            } else if(type == 'files') {
+                page = Math.ceil(parseInt($scope.fileOffset) / parseInt(stepSizeFiles)) + 1;
+            } else {
+                page = Math.ceil(parseInt($scope.meetingOffset) / parseInt(stepSizeMeetings)) + 1;
+            }
+
+            return $sce.trustAsHtml(''+ page);
+        };
+
+
+        // Comment offsets
+        $scope.commentOffset = 0;
+        var stepSizeComments = 4;
+        // File offsets
+        $scope.fileOffset = 0;
+        var stepSizeFiles = 6;
         // Meeting offsets
         $scope.meetingOffset = 0;
         var stepSizeMeetings = 8;
-        // Get previous set of meetings in the list
-        $scope.previousMeetingOffset = function() {
-            var newOffset = parseInt($scope.meetingOffset) - parseInt(stepSizeMeetings);
-            if(newOffset < 0) {
-                newOffset = 0;
-            }
-            $scope.meetingOffset = newOffset;
-        };
-        // Get next set off meetings in the list
-        $scope.nextMeetingOffset = function() {
-            var newOffset = parseInt($scope.meetingOffset) + parseInt(stepSizeMeetings);
-            if(newOffset >= $scope.meetings.length) {
-                newOffset = $scope.meetings.length - parseInt(stepSizeMeetings);
-                if(newOffset < 0) {
-                    newOffset = 0;
+
+        // Set offset
+        $scope.setOffset = function(type, next) {
+            if(type == 'comments') {
+                if(next) {
+                    var newOffset = parseInt($scope.commentOffset) + parseInt(stepSizeComments);
+                    if(newOffset >= $scope.comments.comments.length) {
+                        newOffset = $scope.comments.comments.length - parseInt(stepSizeComments);
+                        if(newOffset < 0) {
+                            newOffset = 0;
+                        }
+                    }
+
+                    $scope.commentOffset = newOffset;
+                } else {
+                    var newOffset = parseInt($scope.commentOffset) - parseInt(stepSizeComments);
+                    if(newOffset < 0) {
+                        newOffset = 0;
+                    }
+                    $scope.commentOffset = newOffset;
+                }
+            } else if(type == 'files') {
+                if(next) {
+                    var newOffset = parseInt($scope.fileOffset) + parseInt(stepSizeFiles);
+                    if(newOffset >= $scope.files.length) {
+                        newOffset = $scope.files.length - parseInt(stepSizeFiles);
+                        if(newOffset < 0) {
+                            newOffset = 0;
+                        }
+                    }
+
+                    $scope.fileOffset = newOffset;
+                } else {
+                    var newOffset = parseInt($scope.fileOffset) - parseInt(stepSizeFiles);
+                    if(newOffset < 0) {
+                        newOffset = 0;
+                    }
+                    $scope.fileOffset = newOffset;
+                }
+            } else {
+                if(next) {
+                    var newOffset = parseInt($scope.meetingOffset) + parseInt(stepSizeMeetings);
+                    if(newOffset >= $scope.meetings.length) {
+                        newOffset = $scope.meetings.length - parseInt(stepSizeMeetings);
+                        if(newOffset < 0) {
+                            newOffset = 0;
+                        }
+                    }
+                    $scope.meetingOffset = newOffset;
+                } else {
+                    var newOffset = parseInt($scope.meetingOffset) - parseInt(stepSizeMeetings);
+                    if(newOffset < 0) {
+                        newOffset = 0;
+                    }
+                    $scope.meetingOffset = newOffset;
                 }
             }
-            $scope.meetingOffset = newOffset;
         };
-        // Get starting point for meeting offset
-        $scope.getMeetingFrom = function() {
-            return $scope.meetingOffset;
+
+        // Get starting point
+        $scope.getFrom = function(type) {
+            if(type == 'comments') {
+                return $scope.commentOffset;
+            } else if(type == 'files') {
+                return $scope.fileOffset;
+            } else {
+                return $scope.meetingOffset;
+            }
         };
-        // Get ending point for meeting offset
-        $scope.getMeetingTo = function() {
-            return parseInt($scope.meetingOffset) + parseInt(stepSizeMeetings);
+
+        // Get ending point
+        $scope.getTo = function(type) {
+            if(type == 'comments') {
+                return parseInt($scope.commentOffset) + parseInt(stepSizeComments);
+            } else if(type == 'files') {
+                return parseInt($scope.fileOffset) + parseInt(stepSizeFiles);
+            } else {
+                return parseInt($scope.meetingOffset) + parseInt(stepSizeMeetings);
+            }
+        };
+
+        // Check to see if the current page is the last page
+        $scope.isLastPage = function(type) {
+            return parseInt($scope.getTotalPages(type)) == parseInt($scope.getCurrentPage(type));
+        };
+
+        // Check to see if the current page is the first page
+        $scope.isFirstPage = function(type) {
+            return parseInt($scope.getCurrentPage(type)) == 1;
         };
 
         // Option to convert the timestamp to the given moment.js format
@@ -617,80 +747,6 @@ angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Pa
         $scope.inFuture = function(timestamp) {
             return new moment(timestamp, 'YYYY-MM-DD HH:mm:ss').unix() > new moment().unix();
         };
-
-        // File offsets
-        $scope.fileOffset = 0;
-        var stepSizeFiles = 6;
-        // Get previous set of files in the list
-        $scope.previousFileOffset = function() {
-            var newOffset = parseInt($scope.fileOffset) - parseInt(stepSizeFiles);
-            if(newOffset < 0) {
-                newOffset = 0;
-            }
-            $scope.fileOffset = newOffset;
-        };
-        // Get next set off files in the list
-        $scope.nextFileOffset = function() {
-            var newOffset = parseInt($scope.fileOffset) + parseInt(stepSizeFiles);
-            if(newOffset >= $scope.files.length) {
-                newOffset = $scope.files.length - parseInt(stepSizeFiles);
-                if(newOffset < 0) {
-                    newOffset = 0;
-                }
-            }
-
-            $scope.fileOffset = newOffset;
-        };
-        // Get starting point for file offset
-        $scope.getFileFrom = function() {
-            return $scope.fileOffset;
-        };
-        // Get ending point for file offset
-        $scope.getFileTo = function() {
-            return parseInt($scope.fileOffset) + parseInt(stepSizeFiles);
-        };
-
-        // Load all files
-        RestangularCache.all('files').getList().then(function(filesResponse) {
-            $scope.files = filesResponse;
-        });
-
-        // Comment offsets
-        $scope.commentOffset = 0;
-        var stepSizeComments = 6;
-        // Get previous set of comments in the list
-        $scope.previousCommentOffset = function() {
-            var newOffset = parseInt($scope.commentOffset) - parseInt(stepSizeComments);
-            if(newOffset < 0) {
-                newOffset = 0;
-            }
-            $scope.commentOffset = newOffset;
-        };
-        // Get next set off comments in the list
-        $scope.nextCommentOffset = function() {
-            var newOffset = parseInt($scope.commentOffset) + parseInt(stepSizeComments);
-            if(newOffset >= $scope.comments.length) {
-                newOffset = $scope.comments.length - parseInt(stepSizeComments);
-                if(newOffset < 0) {
-                    newOffset = 0;
-                }
-            }
-
-            $scope.commentOffset = newOffset;
-        };
-        // Get starting point for comment offset
-        $scope.getCommentFrom = function() {
-            return $scope.commentOffset;
-        };
-        // Get ending point for comment offset
-        $scope.getCommentTo = function() {
-            return parseInt($scope.commentOffset) + parseInt(stepSizeComments);
-        };
-
-        // Load all comments since the user last visited
-        RestangularCache.one('comments', moment(sessionStorage.lastLogin, 'YYYY-MM-DD HH:mm:ss').unix()).get().then(function(commentsResponse) {
-            $scope.comments = commentsResponse;
-        });
 
         // Trust the message as safe markdown html
         $scope.markdown = function(message) {
@@ -1510,7 +1566,7 @@ angularRest.controller('meetingMinutesController', ['RestangularCache', '$scope'
                 html += '<div class="progress" title="None"><div class="progress-bar progress-bar-default" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[3]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[3]) / totalVotes) * 100) +'%;">'+ parseInt(votes[3]) +'</div></div>';
                 return $sce.trustAsHtml(html);
             } else {
-                return $sce.trustAsHtml(msg);
+                return $sce.trustAsHtml(msg.replace(/\n/g,"<br>\n"));
             }
         };
 
@@ -2094,7 +2150,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 angularRest.controller('userController', ['Restangular', 'RestangularCache', '$scope', '$route', '$routeParams', 'Page', '$alert', '$modal', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $route, $routeParams, Page, $alert, $modal, Cache, $location) {
         var userRequestUrl   = '';
         var userOld          = {};
-        $scope.grids         = [];
+        $scope.user          = [];
 
         // Show loading screen
         jQuery('#loading').show();
@@ -2105,7 +2161,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                 Page.setTitle(userResponse.username);
                 $scope.user             = userResponse;
                 angular.copy($scope.user, userOld);
-                $scope.user.avatarCount = Object.keys(userResponse.avatars).length;
+                $scope.user.avatarCount = userResponse.avatars.length;
                 userRequestUrl          = userResponse.getRequestedUrl();
             } else {
                 $alert({title: 'Loading user failed!', content: userResponse.error, type: 'danger'});
@@ -2115,9 +2171,24 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             jQuery('#loading').hide();
         });
 
+        // Load profile picture
+        $scope.getProfilePicture = function() {
+            if($scope.user.picture !== undefined && $scope.user.picture !== false) {
+                return $scope.user.picture +'?token='+ sessionStorage.token;
+            } else {
+                return '';
+            }
+        };
+
         // User is allowed to add new avatars
         $scope.allowCreate = function() {
-            return sessionStorage.userPermission >= WRITE;
+            if(sessionStorage.userPermission >= WRITE) {
+                return true;
+            } else if(sessionStorage.userPermission >= EXECUTE && $routeParams.userId == sessionStorage.id) {
+                return true;
+            } else {
+                return false;
+            }
         };
 
         // Allow changing general user information
@@ -2134,7 +2205,6 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
         // Open modal dialog to change the user's password
         $scope.changePasswordForm = function() {
             $scope.template         = partial_path +'/user/userPasswordForm.html';
-            $scope.avatar           = {};
             $scope.formSubmit       = 'changePassword';
             $scope.buttons          = [{
                         text: 'Update',
@@ -2164,6 +2234,61 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                 } else {
                     $alert({title: 'Password changed!', content: 'The user\'s password has been updated.', type: 'success'});
                     Cache.clearCachedUrl(userRequestUrl);
+                    modal.hide();
+                }
+                // Remove loading screen
+                jQuery('#loading').hide();
+            });
+        };
+
+        // Process file input type on change
+        jQuery('body').on('change', '#inputProfilePicture', function(e) {
+             // Process File
+            var reader = new FileReader();
+            reader.readAsDataURL(jQuery('#inputProfilePicture')[0].files[0], "UTF-8");
+            reader.onload = function (e) {
+                $scope.user.picture = e.target.result;
+            };
+            reader.onerror = function(e) {
+                $alert({title: 'Error!', content: 'Processing file failed.', type: 'danger'});
+            };
+        });
+
+
+        // Open modal dialog to change the user's profile picture
+        $scope.changePictureForm = function() {
+            $scope.template         = partial_path +'/user/userPictureForm.html';
+            $scope.formSubmit       = 'changePicture';
+            $scope.buttons          = [{
+                        text: 'Update',
+                        func: '',
+                        class: 'primary',
+                        type: 'submit'
+                    },
+                    {
+                        text: 'Cancel',
+                        func: 'hide',
+                        class: 'danger',
+                        type: 'button'
+                    }
+                ];
+            modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
+        };
+
+        // Change the user's profile picture
+        $scope.changePicture = function() {
+            // Show loading screen
+            jQuery('#loading').show();
+
+            $scope.user.customPUT($scope.user, 'picture').then(function(putResponse) {
+                angular.copy($scope.user, $scope.userOld);
+                if(!putResponse.success) {
+                    $alert({title: 'Uploading picture failed!', content: putResponse.error, type: 'danger'});
+                } else {
+                    $alert({title: 'Profile picture changed!', content: 'The user\'s profile picture has been updated.', type: 'success'});
+                    Cache.clearCachedUrl(userRequestUrl);
+                    $route.reload();
+                    modal.hide();
                 }
                 // Remove loading screen
                 jQuery('#loading').hide();
@@ -2250,6 +2375,8 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                 $scope.saveAvatar();
             } else if(func == 'changePassword') {
                 $scope.changePassword();
+            } else if(func == 'changePicture') {
+                $scope.changePicture();
             }
         };
 

@@ -14,8 +14,8 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  * Implements the functions for users
  *
  * @author Niels Witte
- * @version 0.4
- * @date April 7th, 2014
+ * @version 0.5a
+ * @date April 10th, 2014
  * @since February 24th, 2014
  */
 class User extends Module {
@@ -48,13 +48,15 @@ class User extends Module {
         $this->api->addRoute("/^\/user\/(\d+)\/files\/?$/",                             'getUserFilesByUserId',     $this, 'GET',    \Auth::READ);     // Load all files for the user
         $this->api->addRoute("/^\/user\/(\d+)\/meetings\/?$/",                          'getUserMeetingsByUserId',  $this, 'GET',    \Auth::READ);     // Load 50 meetings for the user
         $this->api->addRoute("/^\/user\/(\d+)\/meetings\/(\d+)\/?$/",                   'getUserMeetingsByUserId',  $this, 'GET',    \Auth::READ);     // Load 50 meetings for the user with offset
+        $this->api->addRoute("/^\/user\/(\d+)\/picture\/?$/",                           'getUserPictureById',       $this, 'GET',    \Auth::READ);     // Shows the user's profile picture
+        $this->api->addRoute("/^\/user\/(\d+)\/picture\/?$/",                           'updateUserPictureByUserID',$this, 'PUT',    \Auth::READ);     // Updates the user's profile picture with the given image
         $this->api->addRoute("/^\/user\/(\d+)\/password\/?$/",                          'updateUserPasswordById',   $this, 'PUT',    \Auth::READ);     // Updates the user's password
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/teleport\/?$/", 'teleportAvatarByUuid',     $this, 'PUT',    \Auth::READ);     // Teleports a user
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'getUserByAvatar',          $this, 'GET',    \Auth::READ);     // Gets an user by the avatar of this grid
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'linkAvatarToUser',         $this, 'POST',   \Auth::EXECUTE);  // Add this avatar to the user's avatar list
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'confirmAvatar',            $this, 'PUT',    \Auth::READ);     // Confirms the avatar for the authenticated user
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'unlinkAvatar',             $this, 'DELETE', \Auth::READ);     // Removes the avatar for the authenticated user's avatar list
-        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/?$/",                            'createAvatar',             $this, 'POST',   \Auth::WRITE);    // Create an avatar
+        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/?$/",                            'createAvatar',             $this, 'POST',   \Auth::EXECUTE);  // Create an avatar
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/files\/?$/",    'getUserFilesByAvatar',     $this, 'GET',    \AUTH::READ);     // Load all files for the user accociated with the avatar UUID on the given grid
     }
 
@@ -124,6 +126,36 @@ class User extends Module {
     }
 
     /**
+     * Sets the profile picture for the given user
+     *
+     * @param array $args
+     * @return array
+     * @throws \Exception
+     */
+    public function updateUserPictureByUserID($args) {
+        // Only allow when the user has write access or wants to update his/her own profile
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $args[1] != \Auth::getUser()->getId()) {
+            throw new \Exception('You do not have permissions to update this user.', 6);
+        }
+        $data       = FALSE;
+        // Create user object to validate userId
+        $user       = new \Models\User($args[1]);
+        $user->getInfoFromDatabase();
+        $userCtrl   = new \Controllers\UserController($user);
+        // Process data
+        $input      = \Helper::getInput(TRUE);
+        if($userCtrl->validateParameterPicture($input)) {
+            $data       = $userCtrl->updateUserPicture($input);
+        }
+
+        // Format the result
+        $result = array(
+            'success' => ($data !== FALSE)
+        );
+        return $result;
+    }
+
+    /**
      * Removes the given user
      * @param array $args
      * @return array
@@ -185,7 +217,7 @@ class User extends Module {
         // Process results
         $data           = array();
         foreach($resutls as $result) {
-            $user       = new \Models\User($result['id'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $user       = new \Models\User($result['id'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
             $data[]     = $this->getUserData($user, FALSE);
         }
         return $data;
@@ -221,6 +253,19 @@ class User extends Module {
         $user->getInfoFromDatabase();
         $user->getAvatarsFromDatabase();
         return $this->getUserData($user, TRUE);
+    }
+
+    /**
+     * Returns the user's profile picture
+     *
+     * @param array $args
+     */
+    public function getUserPictureById($args) {
+        $user = new \Models\User($args[1]);
+        $user->getInfoFromDatabase();
+        require_once dirname(__FILE__) .'/../includes/class.Images.php';
+        $image = new \Image($user->getPicture());
+        $image->display();
     }
 
     /**
@@ -265,12 +310,12 @@ class User extends Module {
         $data['firstName']          = $user->getFirstName();
         $data['lastName']           = $user->getLastName();
         $data['email']              = $user->getEmail();
+        $data['picture']            = $user->getPicture() !== FALSE ? $user->getPictureApiUrl() : FALSE;
         $data['lastLogin']          = $user->getLastLogin();
 
         if($full) {
             $data['permissions']        = $user->getRights();
-        }
-        if($full) {
+
             $avatars                    = array();
 
             // Only when avatars available
@@ -466,7 +511,7 @@ class User extends Module {
         $db->where('d.ownerId', $db->escape($args[1]));
         $documents = $db->get('documents d', NULL, '*, d.id as documentId, u.id AS userId');
         foreach($documents as $document) {
-            $user   = new \Models\User($document['userId'], $document['username'], $document['email'], $document['firstName'], $document['lastName']);
+            $user   = new \Models\User($document['userId'], $document['username'], $document['email'], $document['firstName'], $document['lastName'], $document['lastLogin']);
             $file   = new \Models\File($document['documentId'], $document['type'], $document['title'], $user, $document['creationDate'], $document['modificationDate'], $document['file']);
             $data[] = $this->api->getModule('file')->getFileData($file);
         }

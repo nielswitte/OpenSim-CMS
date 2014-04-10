@@ -13,8 +13,8 @@ require_once dirname(__FILE__) .'/../controllers/fileController.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.4
- * @date April 3rd, 2014
+ * @version 0.4b
+ * @date April 10th, 2014
  * @since March 3rd, 2014
  */
 class File extends Module{
@@ -65,7 +65,7 @@ class File extends Module{
         // Process results
         $data           = array();
         foreach($resutls as $result) {
-            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
             $file       = new \Models\File($result['documentId'], $result['type'], $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
             $data[]     = $this->getFileData($file, FALSE);
         }
@@ -98,7 +98,7 @@ class File extends Module{
             , $params);
         $data           = array();
         foreach($results as $result) {
-            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName']);
+            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
             $file       = new \Models\File($result['documentId'], $result['type'], $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
             $data[]     = $this->getFileData($file, FALSE);
         }
@@ -199,7 +199,7 @@ class File extends Module{
             'id'                => $file->getId(),
             'type'              => $file->getType(),
             'user'              => $this->api->getModule('user')->getUserData($file->getUser(), FALSE),
-            'title'             => $file->getTitle(),
+            'title'             => stripslashes($file->getTitle()),
             'creationDate'      => $file->getCreationDate(),
             'modificationDate'  => $file->getModificationDate(),
             'sourceFile'        => $file->getFile(),
