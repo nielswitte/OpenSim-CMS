@@ -2161,7 +2161,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                 Page.setTitle(userResponse.username);
                 $scope.user             = userResponse;
                 angular.copy($scope.user, userOld);
-                $scope.user.avatarCount = Object.keys(userResponse.avatars).length;
+                $scope.user.avatarCount = userResponse.avatars.length;
                 userRequestUrl          = userResponse.getRequestedUrl();
             } else {
                 $alert({title: 'Loading user failed!', content: userResponse.error, type: 'danger'});
