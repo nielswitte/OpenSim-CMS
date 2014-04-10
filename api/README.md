@@ -439,7 +439,7 @@ GET /api/grid/<GRID-ID>/chats/ HTTP/1.1
 Or get all messages since a given unix timestamp in seconds
 
 ```http
-GET /api/grid/<GRID-ID>/chats/<UNIX-TIMESTAMP>
+GET /api/grid/<GRID-ID>/chats/<UNIX-TIMESTAMP>/ HTTP/1.1
 ```
 
 This will return a list with chat messages and their sender. The `fromCMS` value is used to indicate if the message
