@@ -333,6 +333,9 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
 
         // Update a comment
         $scope.updateComment = function(id) {
+            // Show loading screen
+            jQuery('#loading').show();
+
             Restangular.one('comment', id).customPUT({message: this.message}).then(function(resp) {
                 if(!resp.success) {
                     $alert({title: 'Error!', content: resp.error, type: 'danger'});
@@ -342,16 +345,19 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
                     Cache.clearCache();
                     $route.reload();
                 }
+                // Remove loading screen
+                jQuery('#loading').hide();
             });
+
         };
 
         // Check if the user is allowed to update this comment
-        $scope.allowUpdate = function(userId) {
-            return $scope.allowDelete(userId);
+        $scope.allowCommentUpdate = function(userId) {
+            return $scope.allowCommentDelete(userId);
         };
 
         // Checks if the user has permission to remove a comment
-        $scope.allowDelete = function(userId) {
+        $scope.allowCommentDelete = function(userId) {
             // Read permissions or higher and own comment?
             if(sessionStorage.id == userId && sessionStorage.commentPermission >= READ) {
                 return true;

@@ -2,8 +2,8 @@
     <div class="pull-right">
         <span class="number">#{{comment.number}}</span>
         <button type="button" class="btn btn-default btn-xs" ng-click="newComment(comment.id)" ng-show="allowComments()"><i class="glyphicon glyphicon-comment"></i> Reply</button>
-        <button type="button" class="btn btn-default btn-xs" ng-click="editComment(comment.id)" ng-show="allowUpdate()"><i class="glyphicon glyphicon-edit"></i> Edit</button>
-        <button type="button" class="btn btn-danger btn-xs" confirmed-click="deleteComment(comment.id)" ng-confirm-click="Are you sure you want to delete comment #{{comment.number}} by {{comment.user.username}}? All replies to this comment will also be removed!" ng-show="allowDelete(comment.user.id)"><i class="glyphicon glyphicon-trash"></i> Delete</button>
+        <button type="button" class="btn btn-default btn-xs" ng-click="editComment(comment.id)" ng-show="allowCommentUpdate(comment.user.id)"><i class="glyphicon glyphicon-edit"></i> Edit</button>
+        <button type="button" class="btn btn-danger btn-xs" confirmed-click="deleteComment(comment.id)" ng-confirm-click="Are you sure you want to delete comment #{{comment.number}} by {{comment.user.username}}? All replies to this comment will also be removed!" ng-show="allowCommentDelete(comment.user.id)"><i class="glyphicon glyphicon-trash"></i> Delete</button>
     </div>
     <img src="templates/restangular/img/profile_picture.jpg" ng-src="{{comment.user.picture !== false ? comment.user.picture +'?token='+ token : ''}}" class="img-thumbnail img-picture">
     <a ng-href="#!/user/{{comment.user.id}}" bs-tooltip title="Profile of {{comment.user.username}}">{{comment.user.username}} ({{comment.user.firstName}} {{comment.user.lastName}})</a><br>
