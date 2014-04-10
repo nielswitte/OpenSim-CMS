@@ -11,8 +11,8 @@ require_once dirname(__FILE__) .'/../controllers/chatController.php';
  * Implements the functions called on the Grid
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 1st, 2014
+ * @version 0.2a
+ * @date April 10th, 2014
  * @since March 21st, 2014
  */
 class Chat extends Module{
@@ -75,13 +75,7 @@ class Chat extends Module{
         foreach($chat->getChatMessages() as $message) {
             $results[]  = array(
                 'id'        => $message->getId(),
-                'user'      => array(
-                    'id'        => $message->getUser()->getId(),
-                    'username'  => $message->getUser()->getUsername(),
-                    'firstName' => $message->getUser()->getFirstName(),
-                    'lastName'  => $message->getUser()->getLastName(),
-                    'email'     => $message->getUser()->getEmail()
-                ),
+                'user'      => $this->api->getModule('user')->getUserData($message->getUser(), FALSE),
                 'message'   => $message->getMessage(),
                 'timestamp' => $message->getTimestamp(),
                 'fromCMS'   => $message->isFromCMS()

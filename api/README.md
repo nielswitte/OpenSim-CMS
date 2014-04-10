@@ -1,10 +1,52 @@
-OpenSim-CMS API
-===============
+# OpenSim-CMS API
+
 The OpenSim-CMS communicates with OpenSim objects through an JSON-API, based on REST.
 For valid requests the `HTTP/1.1 200 OK` is used, for failures an exception is thrown by
 the system and displayed as output with a `HTTP/1.1 400 Bad Request` header. For most functions
 the user needs to be authorized, if the user is not authorized but should be, a `HTTP/1.1 401 Unauthorized`
 header is used.
+
+## Request handling
+@todo create index
+
+### POST, PUT and DELETE
+
+All `POST`, `PUT` and `DELETE` request will atleast return the following result when successfully processed:
+
+```json
+{
+    "success": true
+}
+```
+
+### Error messages
+When the configuration value `SERVER_DEBUG` is set to `FALSE`, bad and unauthorized requests will provide,
+beside the corresponding HTTP header, an exception message in JSON. For example the following message
+is displayed when attempting to access a protected function without a valid API token.
+
+```json
+{
+    "success": false,
+    "error": "Unauthorized to access this API URL"
+}
+```
+
+When `SERVER_DEBUG` is set to `TRUE`, additional information will be displayed. Including the
+file, line and stack trace of the error. It is recommended to disable debugging for public API servers.
+
+```json
+{
+    "success": false,
+    "error": "Unauthorized to access this API URL"
+    "Code": 0,
+    "File": "/OpenSim-CMS/api/index.php",
+    "Line": 62,
+    "Trace": [
+
+    ]
+}
+```
+
 
 ## Authorization
 Before the API can be used, an user needs to authorize himself. This can be done by using the following API:
@@ -60,6 +102,7 @@ These numbers can be used for the following parameters:
 | chat              | Integer   | Permission level regarding Chats API                          |
 | comment           | Integer   | Permission level regarding Comments API                       |
 | document          | Integer   | Permission level regarding Documents API                      |
+| file              | Integer   | Permission level regarding Files API                          |
 | grid              | Integer   | Permission level regarding Grids API                          |
 | meeting           | Integer   | Permission level regarding Meetings API                       |
 | meetingroom       | Integer   | Permission level regarding Meeting rooms API                  |
@@ -73,30 +116,56 @@ To get a list of 50 users, use:
 GET /api/users/ HTTP/1.1
 ```
 
-Or use the following API request with a offset to get more users
+Or use the following API request with a offset to get more users. For example if the total user base contains 100 users,
+use offset: 50 to get users 51 to 100;
 
 ```http
 GET /api/users/<OFFSET>/ HTTP/1.1
 ```
 
+Both will return a list similar to this:
+
+```json
+[
+    {
+        "id": 4,
+        "username": "janedoe",
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "email": "jane@doe.com",
+        "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/"
+    },
+    {
+        "id": 3,
+        "username": "johndoe",
+        "firstName": "John",
+        "lastName": "Doe",
+        "email": "john@doe.com",
+        "picture": false
+    },
+    (...)
+]
+```
+
 ### Search for users by username
 To search for a specific user by his or her username, the following API can be used.
-Atleast 3 characters are required.
+At least 3 characters are required.
 
 ```http
 GET /api/user/<SEARCH>/ HTTP/1.1
 ```
 
-The result is similar to the request by UUID, but displayed as a list ordered by username and only the basic information.
+The output is similar to the user list request, but displayed as a list ordered by username.
 
 ```json
 {
     {
-        "id": 1,
-        "username": "testuser",
-        "firstName": "Test",
-        "lastName": "User",
-        "email": "testuser@email.com"
+        "id": 4,
+        "username": "janedoe",
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "email": "jane@doe.com",
+        "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/"
     },
     { (...) },
     { (...) },
@@ -110,6 +179,7 @@ User information can be accessed by using, the UUID of the user's avatar in Open
 ```http
 GET /api/grid/<GRID-ID>/avatar/<UUID>/ HTTP/1.1
 ```
+
 Or request an user by its ID in the CMS:
 
 ```http
@@ -120,30 +190,40 @@ Example of output
 
 ```json
 {
-    "id": 1,
-    "username": "testuser",
-    "firstName": "Test",
-    "lastName": "User",
-    "email": "testuser@email.com",
-    "permissions" : {
-        "auth": 7,
+    "id": 4,
+    "username": "janedoe",
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "email": "jane@doe.com",
+    "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
+    "lastLogin": "2014-04-10 07:34:44",
+    "permissions": {
+        "auth": 4,
+        "chat": 4,
+        "comment": 5,
         "document": 5,
         "grid": 4,
-        (...)
+        "file": 5,
+        "meeting": 5,
+        "meetingroom": 4,
+        "presentation": 5,
+        "user": 5
     },
     "avatars": [
-         {
-            "uuid": "0a1811f4-7174-4e42-8bb5-26ef78335407",
+        {
+            "uuid": "6c7d2c8f-b9b9-43e9-9ce3-8d56232b51c9",
+            "firstName": "Jane",
+            "lastName": "Doe",
+            "email": "jane@doe.com",
             "gridId": 1,
-            "gridName": "OpenSim-CMS' test grid"
-        },
-        { (...) },
-        { (...) }
+            "gridName": "OpenSim's test grid",
+            "confirmed": 1
+        }
     ]
 }
 ```
 
-When OpenSim uses a MySQL database and the CMS is configered correctly, the following additional information is available
+When OpenSim uses a MySQL database and the CMS is configured correctly, the following additional information is available
 about the avatars of the user. For each avatar the following information is shown below `gridName`:
 
 ```json
@@ -156,6 +236,9 @@ about the avatars of the user. For each avatar the following information is show
 ```
 
 ### Create user
+To add a new user to the CMS user the following API URL with the parameters as described in the table below.
+The emailaddress and username need to be unique.
+
 
 ```http
 POST /api/user/ HTTP/1.1
@@ -169,6 +252,15 @@ POST /api/user/ HTTP/1.1
 | lastName          | String    | The last name of the new user                                     |
 | password          | String    | The new user's password                                           |
 | password2         | String    | The new user's password again, to check if no typo has been made  |
+
+The result of a successful request to create an user will be as follows:
+
+```json
+{
+    "success": true,
+    "userId": <NEW-USER-ID>
+}
+```
 
 ### Update user
 Change some information about the user. The username and id are locked. The password is a separate function.
@@ -184,6 +276,8 @@ PUT /api/user/<USER-ID>/ HTTP/1.1
 | permissions       | Array     | The permission levels for the user (see permissions)              |
 
 ### Change profile picture
+Attach a profile picture to the given user, which will be resized to 250x250 pixels and displayed in the CMS for example next to comments and on the user's profile page.
+When you upload a new picture the previous picture will be overwritten.
 
 ```http
 PUT /api/user/<USER-ID>/picture/ HTTP/1.1
@@ -193,8 +287,9 @@ PUT /api/user/<USER-ID>/picture/ HTTP/1.1
 |-------------------|-----------|-------------------------------------------------------------------------------------------|
 | image             | file      | Base64 encoded file, needs to be jpeg, jpg, png or gif                                    |
 
-
 ### Change password
+Use the following function to update the user's password. You can update passwords of other users when you at least have
+`WRITE` permissions or when you know the `currentPassword`.
 
 ```http
 PUT /api/user/<USER-ID>/password/ HTTP/1.1
@@ -207,12 +302,16 @@ PUT /api/user/<USER-ID>/password/ HTTP/1.1
 | currentPassword   | String    | [Optional] The user's current password, only required when no WRITE permissions for users |
 
 ### Delete user
+This will remove an user from the CMS, however it is not recommended to use. All files, comments and meetings are attached to an user,
+removing the user can cause items to disappear. The recommended solution is to set all permissions to `NONE` for an user.
 
 ```http
 DELETE /api/user/<USER-ID>/ HTTP/1.1
 ```
 
 ## Avatars
+The CMS user can not be used in the OpenSim environment. OpenSim works with Avatars, which are independent of the CMS.
+However, Avatars can be linked to an OpenSim-CMS user, to access data from a specific user.
 
 ### Link avatar to user
 To match an UUID of a user to the user in the CMS the following command can be used.
@@ -242,13 +341,12 @@ required information. Therefore no parameters are needed for this request.
 This request will also return `"success": false` when the avatar is already confirmed.
 
 ### Unlink an avatar
-This unlinks an avatar from the user. Just like confirming, this can only be performed by the useraccount associated with
-the link.
+This unlinks an avatar from the user. Just like confirming, this can only be performed by the user account associated with
+the link or when you have `WRITE` permissions for the `user` section. Please not that this will not remove the Avatar from OpenSim.
 
 ```http
 DELETE /api/grid/<GRID-ID>/avatar/<UUID>/confirm/ HTTP/1.1
 ```
-
 
 ### Create a new avatar
 To create a new avatar on the given Grid the following API url can be used with a POST request.
@@ -312,7 +410,7 @@ PUT /api/grid/<GRID-ID>/avatar/<UUID>/teleport/ HTTP/1.1
 | lookatY           | float     | [Optional] Y-coordinate to look at (default: 0)               |
 | lookatZ           | float     | [Optional] Z-coordinate to look at (default: 0)               |
 
-this will return on success:
+This will return on success:
 
 ```json
 {
@@ -320,7 +418,7 @@ this will return on success:
 }
 ```
 
-and on failure it will provide an error message, for example when the agent's uuid is not found or the user is offline:
+And on failure it will provide an error message, for example when the agent's uuid is not found or the user is offline:
 
 ```json
 {
@@ -339,8 +437,46 @@ GET /api/grid/<GRID-ID>/chats/ HTTP/1.1
 ```
 
 Or get all messages since a given unix timestamp in seconds
+
 ```http
 GET /api/grid/<GRID-ID>/chats/<UNIX-TIMESTAMP>
+```
+
+This will return a list with chat messages and their sender. The `fromCMS` value is used to indicate if the message
+was sent from the chat in the CMS (1) or was captured in the OpenSim environment (0).
+
+```json
+[
+    {
+        "id": 1,
+        "user": {
+            "id": 3,
+            "username": "johndoe",
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "john@doe.com",
+            "picture": false
+        },
+        "message": "Hi Jane",
+        "timestamp": "2014-04-08 13:15:03",
+        "fromCMS": 0
+    },
+    {
+        "id": 2,
+        "user": {
+            "id": 4,
+            "username": "janedoe",
+            "firstName": "Jane",
+            "lastName": "Doe",
+            "email": "jane@doe.com",
+            "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
+        },
+        "message": "Hello John",
+        "timestamp": "2014-04-08 13:15:04",
+        "fromCMS": 1
+    },
+    (...)
+]
 ```
 
 ### Add chat
@@ -361,30 +497,187 @@ POST /api/grid/<GRID-ID/chats/ HTTP/1.1
 | fromCMS           | integer   | 1 (True) if the message is from the CMS, 0 (false) if from OpenSim Server |
 
 ## Meetings
+The most important part of the CMS is the scheduling of meetings.
+
+### List with meetings
+
+The retrieve a list with 50 meetings, use the following function. The meetings are ordered by date in descending order.
 
 ```http
 GET /api/meetings/ HTTP/1.1
 ```
+To get more than the first 50 meetings, an offset parameter needs to be added to the URL.
 
 ```http
 GET /api/meetings/<OFFSET>/ HTTP/1.1
 ```
+Or if you only want meetings after a specific date, you can add a date as parameter.
 
 ```http
 GET /api/meetings/<YYYY-MM-DD>/ HTTP/1.1
 ```
+All above API functions return a similar result, as displayed below:
 
+```json
+[
+    {
+        "id": 41,
+        "name": "Example meeting",
+        "startDate": "2014-04-08 18:00:00",
+        "endDate": "2014-04-08 19:00:00",
+        "creator": {
+            "id": 3,
+            "username": "johndoe",
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "john@doe.com",
+            "picture": false
+        },
+        "roomId": 4,
+        "url": "http://localhost:80/OpenSim-CMS/api/meeting/42/"
+    },
+    {
+        "id": 43,
+        "name": "Next day meeting",
+        "startDate": "2014-04-09 15:00:00",
+        "endDate": "2014-04-09 17:30:00",
+        "creator": {
+            "id": 4,
+            "username": "janedoe",
+            "firstName": "jane",
+            "lastName": "Doe",
+            "email": "jane@doe.com",
+            "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/"
+        },
+        "roomId": 4,
+        "url": "http://localhost:80/OpenSim-CMS/api/meeting/43/"
+    },
+    (...)
+]
+
+```
+
+### Calendar format
 ```http
 GET /api/meetings/<YYYY-MM-DD>/calendar/ HTTP/1.1
 ```
+
+```json
+[
+    {
+        "id": 42,
+        "start": 1397109600000,
+        "end": 1397113200000,
+        "url": "http://localhost:80/OpenSim-CMS/api/meeting/42/"
+        "class": "event-default",
+        "title": "Example meeting (Room: Test room)",
+        "description": "Reservation made by: johndoe"
+    },
+    {
+        "id": 43,
+        "start": 1397109600000,
+        "end": 1397113200000,
+        "url": "http://localhost:80/OpenSim-CMS/api/meeting/43/"
+        "class": "event-default",
+        "title": "Next day meeting (Room: New room)",
+        "description": "Reservation made by: janedoe"
+    },
+    (...)
+]
+
+```
+
+### Get a specific meeting
+When retrieving a specific meeting you get a lot more details. Information such as the participants, documents and the agenda are included.
 
 ```http
 GET /api/meeting/<MEETING-ID>/ HTTP/1.1
 ```
 
-```http
-PUT /api/meeting/<MEETING-ID>/ HTTP/1.1
+The output will be something like this:
+```json
+{
+    "id": "43",
+    "name": "Next day meeting",
+    "startDate": "2014-04-09 15:00:00",
+    "endDate": "2014-04-09 17:30:00",
+    "creator": {
+        "id": 4,
+        "username": "janedoe",
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "email": "jane@doe.com",
+        "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/"
+    },
+    "room": {
+        "id": 2,
+        "name": "Board room",
+        "grid": {
+            "id": 1,
+            "name": "Niels' test grid",
+            "openSim": {
+                "protocol": "http",
+                "ip": "valentina.no-ip.info",
+                "port": 9000
+            }
+        },
+        "region": {
+            "name": "Region Name",
+            "uuid": "72efcc78-2b1a-4571-8704-fea352998c0c"
+        },
+        "description": "New room, Just some new room with a description",
+        "coordinates": {
+            "x": 128,
+            "y": 128,
+            "z": 25
+        }
+    },
+    "participants": [
+        {
+            "id": 4,
+            "username": "janedoe",
+            "firstName": "Jane",
+            "lastName": "Doe",
+            "email": "jane@doe.com",
+            "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/"
+        },
+        {
+            "id": 3,
+            "username": "johndoe",
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "john@doe.com",
+            "picture": false
+        },
+        (...)
+    ],
+    "agenda": "1. Opening\n2. Second Agenda Item\n  2.1. Sub agenda item\n3. Closing",
+    "documents": [
+        {
+            "id": 104,
+            "type": "presentation",
+            "user": {
+                "id": 4,
+                "username": "janedoe",
+                "firstName": "Jane",
+                "lastName": "Doe",
+                "email": "jane@doe.com",
+                "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/"
+            },
+            "title": "Jane's presentation",
+            "creationDate": "2014-04-02 09:04:59",
+            "modificationDate": "2014-04-02 09:49:59",
+            "sourceFile": "",
+            "url": "http://localhost:80/OpenSim-CMS/api/presentation/104/"
+        },
+        (...)
+    ]
+}
 ```
+
+### Create a meeting
+For scheduling a new meeting a lot of parameters are required. Only the list with documents is optional.
+Please ensure you use the correct parameters or else you will be losing a lot of time debugging.
 
 | Parameter         | Type             | Description                                                      |
 |-------------------|------------------|------------------------------------------------------------------|
@@ -396,21 +689,147 @@ PUT /api/meeting/<MEETING-ID>/ HTTP/1.1
 | participants      | array            | A array with user IDs. Can be an array `{1, 2, 3, 4, (...)}` or a json array with users that contain an id field  `[{id: 1, (...)}, {id: 2, (...)}, (...) }]`         |
 | documents         | array            | [Optional] A array with document IDs. Can be an array `{1, 2, 3, 4, (...)}` or a json array with documents that contain an id field  `[{id: 1, (...)}, {id: 2, (...)}, (...) }]` |
 
+When everything went well, the following information is returned:
+
+```json
+{
+    "success": true,
+    "meetingId": <MEETING-ID>
+}
+```
+
+### Update a meeting
+
+For updating a meeting you can use the following `PUT` request.
+
+```http
+PUT /api/meeting/<MEETING-ID>/ HTTP/1.1
+```
+The parameters are the same as for creating a meeting, see creating a meeting for more details.
+
+### Get the meeting agenda
+To return only the agenda for a specific meeting, the following API can be used. This will return the agenda as a multi dimensional array
+instead of the flat string in the meeting details response.
+
 ```http
 GET /api/meeting/<MEETING-ID>/agenda HTTP/1.1
 ```
 
+This will output something similar to:
+
+```json
+[
+    {
+        "id": 1,
+        "value": "Opening",
+        "sort": 1,
+        "parentId": null
+    },
+    {
+        "id": 2,
+        "value": "Testing",
+        "sort": 2,
+        "parentId": null,
+        "items": [
+            {
+                "id": 3,
+                "value": "Sub test",
+                "sort": 1,
+                "parentId": 2,
+                "items": [
+                    {
+                        "id": 4,
+                        "value": "small sub sub test",
+                        "sort": 1,
+                        "parentId": 3
+                    }
+                ]
+            },
+            {
+                "id": 5,
+                "value": "Additional sub test",
+                "sort": 2,
+                "parentId": 2
+            }
+        ]
+    },
+    {
+        "id": 6,
+        "value": "Finish testing",
+        "sort": 3,
+        "parentId": null
+    }
+]
+```
 ### Get meetings by participant
+This will return a list with meetings where the given user is a participant for. The output is similar to the `/api/meetings/` request.
 
 ```http
 GET /api/user/<USER-ID>/meetings/ HTTP/1.1
 ```
 
 ### Minutes
+The `meetingLogger.lsl` script has the ability to log the chat during a meeting. These minutes can be retrieved by using the following API functionality:
 
 ```http
 GET /api/meeting/<MEETING-ID>/minutes/ HTTP/1.1
 ```
+
+Just like the chat this can return a really long response. The response includes some basic information about the meeting which can be used to parse the
+minutes with more details.
+
+```json
+{
+    "id": "43",
+    "name": "Next day meeting",
+    "startDate": "2014-04-09 15:00:00",
+    "endDate": "2014-04-09 17:30:00",
+    "creator": {
+        "id": 4,
+        "username": "janedoe",
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "email": "jane@doe.com",
+        "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/"
+    },
+    "roomId": 2,
+    "url": "http://localhost:80/OpenSim-CMS/api/meeting/43/",
+    "agenda": "1. Opening\n2. Second Agenda Item\n  2.1. Sub agenda item\n3. Closing",
+    "minutes": [
+        {
+            "id": 221,
+            "timestamp": "2014-04-10 12:49:18",
+            "agenda": {
+                "id": 1,
+                "parentId": null,
+                "sort": 1,
+                "value": "Opening"
+            },
+            "uuid": "",
+            "name": "Server",
+            "message": "At 11:49 starting with agenda item: 1. Opening",
+            "user": ""
+        },
+        {
+            "id": 222,
+            "timestamp": "2014-04-10 12:49:18",
+            "agenda": {
+                "id": 1,
+                "parentId": null,
+                "sort": 1,
+                "value": "Opening"
+            },
+            "uuid": "",
+            "name": "Server",
+            "message": "Avatar entered the meeting: Jane Doe (6c7d2c8f-b9b9-43e9-9ce3-8d56232b51c9)",
+            "user": ""
+        },
+        (...)
+    ]
+}
+
+```
+
 #### Add minutes to meeting
 Can be a single element or an array of elements
 
@@ -902,31 +1321,3 @@ A small map preview can be opened by using the following API request
 GET /api/region/<REGION-UUID>/image/ HTTP/1.1
 ```
 This will return a 256x256 JPEG preview of the region map.
-
-## Error messages
-When the config value `SERVER_DEBUG` is set to `FALSE`, bad and unauthorized requests will provide,
-beside the corresponding HTTP header, an exception message in JSON. For example the following message
-is displayed when attempting to access a protected function without a valid API token.
-
-```json
-{
-    "success": false,
-    "error": "Unauthorized to access this API URL"
-}
-```
-
-When `SERVER_DEBUG` is set to `TRUE`, additional information will be displayed. Including the
-file, line and stack trace of the error. It is recommended to disable debugging for public API servers.
-
-```json
-{
-    "success": false,
-    "error": "Unauthorized to access this API URL"
-    "Code": 0,
-    "File": "/OpenSim-CMS/api/index.php",
-    "Line": 62,
-    "Trace": [
-
-    ]
-}
-```
