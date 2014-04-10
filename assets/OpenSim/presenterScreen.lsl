@@ -13,7 +13,7 @@
  *
  * @author Niels Witte
  * @date February 11th, 2014
- * @version 0.8
+ * @version 0.8a
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
@@ -154,7 +154,6 @@ load_item_comments(integer index, string type) {
 
 // Comment buffers
 string buffer   = "";
-string temp     = "";
 
 /**
  * Processes all comments and return them as a string
@@ -163,19 +162,33 @@ string temp     = "";
  */
 parse_comments(string rawComments) {
     key json        = JsonCreateStore(rawComments);
-    integer count   = JsonGetArrayLength(json, "comments");
+    integer count   = (integer) JsonGetValue(json, "commentCount");
     integer i       = 0;
     llSay(0, "Showing "+ count +" comments --------------------------------------------------------");
 
-    for(i = 0; i < count; i++) {
-        temp = "["+ JsonGetValue(json, "comments["+ i +"].timestamp") +"] "+ JsonGetValue(json, "comments["+ i +"].user.{username}") +" ("+ JsonGetValue(json, "comments["+ i +"].user.{firstName}") +" "+ JsonGetValue(json, "comments["+ i +"].user.{firstName}") + "):\n"+ JsonGetValue(json, "comments["+ i +"].message");
-        comment_buffer(temp);
+    for(i = 0; i < JsonGetArrayLength(json, "comments"); i++) {
+        buffer += "["+ JsonGetValue(json, "comments["+ i +"].timestamp") +"] "+ JsonGetValue(json, "comments["+ i +"].user.{username}") +" ("+ JsonGetValue(json, "comments["+ i +"].user.{firstName}") +" "+ JsonGetValue(json, "comments["+ i +"].user.{firstName}") + "):\n"+ JsonGetValue(json, "comments["+ i +"].message") +"\n\n";
 
         if((integer) JsonGetValue(json, "comments["+ i +"].childrenCount") > 0) {
-            parse_comment_childs(JsonGetJson(json, "comments["+ i +"].children"), 1);
+            buffer += parse_comment_childs(JsonGetJson(json, "comments["+ i +"].children"), 1);
         }
     }
-    llSay(0, buffer);
+
+    // Output the buffer
+    integer length = 0;
+    i  = 0;
+    while(llStringLength(buffer) > 1 && i < count) {
+        if(llStringLength(buffer) > 1000) {
+            length = 1000;
+        } else {
+            length = llStringLength(buffer);
+        }
+
+        string partial  = llGetSubString(buffer, 0, length-1);
+        buffer          = llGetSubString(buffer, llStringLength(partial)-1, llStringLength(buffer) -1);
+        llSay(0, "\n"+ partial);
+        i++;
+    }
     llSay(0, "-------------------------------------------------------------------------------------");
 }
 
@@ -191,28 +204,19 @@ string parse_comment_childs(string comments, integer level) {
     integer count   = JsonGetArrayLength(json, "");
     integer i       = 0;
     string tab      = "";
+    string result   = "";
     for(i = 0; i < level; i++) {
         tab = tab +"\t\t";
     }
 
     for(i = 0; i < count; i++) {
-        temp = tab + strReplace(strReplace("["+ JsonGetValue(json, "["+ i +"].timestamp") +"] "+ JsonGetValue(json, "["+ i +"].user.{username}") +" ("+ JsonGetValue(json, "["+ i +"].user.{firstName}") +" "+ JsonGetValue(json, "["+ i +"].user.{firstName}") + "):\n"+ JsonGetValue(json, "["+ i +"].message"), "\n", "\r"), "\r", "\n"+ tab);
-        comment_buffer(temp);
+        result += tab + strReplace(strReplace("["+ JsonGetValue(json, "["+ i +"].timestamp") +"] "+ JsonGetValue(json, "["+ i +"].user.{username}") +" ("+ JsonGetValue(json, "["+ i +"].user.{firstName}") +" "+ JsonGetValue(json, "["+ i +"].user.{firstName}") + "):\n"+ JsonGetValue(json, "["+ i +"].message"), "\n", "\r"), "\r", "\n"+ tab) +"\n\n";
 
         if((integer) JsonGetValue(json, "["+ i +"].childrenCount") > 0) {
-            parse_comment_childs(JsonGetJson(json, "["+ i +"].children"), (level+1));
+            result += parse_comment_childs(JsonGetJson(json, "["+ i +"].children"), (level+1));
         }
     }
-    return buffer;
-}
-
-comment_buffer(string temp) {
-    if(llStringLength(temp + buffer) < 1000) {
-        buffer = buffer +"\n\n"+ temp;
-    } else {
-        llSay(0, buffer);
-        buffer = temp;
-    }
+    return result;
 }
 
 /**
@@ -325,7 +329,7 @@ default {
         llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
         // Get new API token
         request_api_token();
-        
+
         // Listen at channel
         mListener = llListen(channel,"", userUuid,"");
         // Open main menu
