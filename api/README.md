@@ -439,7 +439,7 @@ GET /api/grid/<GRID-ID>/chats/ HTTP/1.1
 Or get all messages since a given unix timestamp in seconds
 
 ```http
-GET /api/grid/<GRID-ID>/chats/<UNIX-TIMESTAMP>
+GET /api/grid/<GRID-ID>/chats/<UNIX-TIMESTAMP>/ HTTP/1.1
 ```
 
 This will return a list with chat messages and their sender. The `fromCMS` value is used to indicate if the message
@@ -684,7 +684,7 @@ Please ensure you use the correct parameters or else you will be losing a lot of
 | name              | string           | The title of the meeting                                         |
 | startDate         | string           | The start date time of the meeting (format: YYYY-MM-DD HH:mm:ss) |
 | endDate           | string           | The end date time of the meeting (format: YYYY-MM-DD HH:mm:ss)   |
-| room              | integer or array | Room ID, can be submitted as an integer or as a json array `[{id: 1, (...)}, {id: 2, (...)}, (...) }]` |
+| room              | integer or array | Room ID, can be submitted as an integer or as a json array `[{id: 1, name: (...), (...)}]` |
 | agenda            | string           | A string with each agenda item on a new line and starting with a number and separated by a space, the topic. For example `1. Opening\n2. Minutes\n2.1 Questions\n3. (...)`   |
 | participants      | array            | A array with user IDs. Can be an array `{1, 2, 3, 4, (...)}` or a json array with users that contain an id field  `[{id: 1, (...)}, {id: 2, (...)}, (...) }]`         |
 | documents         | array            | [Optional] A array with document IDs. Can be an array `{1, 2, 3, 4, (...)}` or a json array with documents that contain an id field  `[{id: 1, (...)}, {id: 2, (...)}, (...) }]` |
