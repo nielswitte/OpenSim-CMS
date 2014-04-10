@@ -11,7 +11,7 @@
         <h2>Your meetings ({{meetings.length}})</h2>
         <div class="toolbar toolbar-top row">
             <div class="col-sm-4">
-                <button class="btn btn-default" ng-click="setOffset('meetings', false)" ng-disabled="isLastPage('meetings')"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
+                <button class="btn btn-default" ng-click="setOffset('meetings', false)" ng-disabled="isFirstPage('meetings')"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
             </div>
             <div class="col-sm-4 text-center">
                 <span ng-bind-html="getCurrentPage('meetings')"></span>
