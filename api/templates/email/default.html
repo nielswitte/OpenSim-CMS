@@ -34,7 +34,7 @@
                 table[class*=hide], td[class*=hide], img[class*=hide], p[class*=hide], span[class*=hide] { display:none !important; }
                 table[class=h0], td[class=h0] { height: 0 !important; }
                 p[class=footer-content-left] { text-align: center !important; }
-                #headline p { font-size: 30px !important; }
+                #headline h1 { font-size: 30px !important; font-weight: bold; }
                 .article-content, #left-sidebar{ -webkit-text-size-adjust: 90% !important; -ms-text-size-adjust: 90% !important; }
                 .header-content, .footer-content-left {-webkit-text-size-adjust: 80% !important; -ms-text-size-adjust: 80% !important;}
                 img { height: auto; line-height: 100%;}
@@ -75,8 +75,8 @@
             /* Prevent Webkit and Windows Mobile platforms from changing default font sizes on header and footer. */
             .header-content { font-size: 12px; color: #ededed; }
             .header-content a { font-weight: bold; color: #ffffff; text-decoration: none; }
-            #headline p { color: #444444; font-family: HelveticaNeue, sans-serif; font-size: 36px; text-align: center; margin-top:0px; margin-bottom:30px; }
-            #headline p a { color: #444444; text-decoration: none; }
+            #headline h1 { color: #444444; font-family: HelveticaNeue, sans-serif; font-size: 36px; font-weight: bold; text-align: center; margin-top:0px; margin-bottom:30px; }
+            #headline h1 a { color: #444444; text-decoration: none; }
             .article-title { font-size: 18px; line-height:24px; color: #b0b0b0; font-weight:bold; margin-top:0px; margin-bottom:18px; font-family: HelveticaNeue, sans-serif; }
             .article-title a { color: #b0b0b0; text-decoration: none; }
             .article-title.with-meta {margin-bottom: 0;}
@@ -161,9 +161,9 @@
                                                     <td class="w30" width="30"></td>
                                                     <td class="w580" width="580">
                                                         <div align="center" id="headline">
-                                                            <p>
-                                                                <strong><singleline label="Title">OpenSim-CMS</singleline></strong>
-                                                            </p>
+                                                            <h1>
+                                                                <singleline label="Title">OpenSim-CMS</singleline>
+                                                            </h1>
                                                         </div>
                                                     </td>
                                                     <td class="w30" width="30"></td>

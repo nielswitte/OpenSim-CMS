@@ -14,8 +14,8 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  * Implements the functions for users
  *
  * @author Niels Witte
- * @version 0.5
- * @date April 9th, 2014
+ * @version 0.5a
+ * @date April 10th, 2014
  * @since February 24th, 2014
  */
 class User extends Module {
@@ -56,7 +56,7 @@ class User extends Module {
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'linkAvatarToUser',         $this, 'POST',   \Auth::EXECUTE);  // Add this avatar to the user's avatar list
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'confirmAvatar',            $this, 'PUT',    \Auth::READ);     // Confirms the avatar for the authenticated user
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'unlinkAvatar',             $this, 'DELETE', \Auth::READ);     // Removes the avatar for the authenticated user's avatar list
-        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/?$/",                            'createAvatar',             $this, 'POST',   \Auth::WRITE);    // Create an avatar
+        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/?$/",                            'createAvatar',             $this, 'POST',   \Auth::EXECUTE);  // Create an avatar
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/files\/?$/",    'getUserFilesByAvatar',     $this, 'GET',    \AUTH::READ);     // Load all files for the user accociated with the avatar UUID on the given grid
     }
 

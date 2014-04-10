@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the user controller
  *
  * @author Niels Witte
- * @version 0.3
- * @date April 1st, 2014
+ * @version 0.3a
+ * @date April 10th, 2014
  * @since February 12th, 2014
  */
 class UserController {
@@ -254,7 +254,7 @@ class UserController {
 
         $temp           = \Helper::saveFile($this->user->getId() .'.'. $extension, TEMP_LOCATION, $file);
         $userfilesdir   = FILES_LOCATION . DS .'users'. DS . $this->user->getId();
-        $resize         = \Helper::imageResize($temp, $userfilesdir . DS . $this->user->getId() .'.'. IMAGE_TYPE, 250, 250);
+        $resize         = \Helper::imageResize($temp, $userfilesdir . DS . $this->user->getId() .'.'. IMAGE_TYPE, 250, 250, 95, TRUE);
         return \Helper::moveFile($temp, $userfilesdir . DS . 'source.'. $extension) && $resize;
     }
 
