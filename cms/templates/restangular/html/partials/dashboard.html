@@ -9,12 +9,21 @@
 <div class="row">
     <div class="col-sm-4">
         <h2>Your meetings ({{meetings.length}})</h2>
-        <div class="toolbar toolbar-top">
-            <button class="btn btn-default" ng-click="nextMeetingOffset()"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
-            <button class="btn btn-default"  ng-click="previousMeetingOffset()">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
+        <div class="toolbar toolbar-top row">
+            <div class="col-sm-4">
+                <button class="btn btn-default" ng-click="setOffset('meetings', false)" ng-disabled="isLastPage('meetings')"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
+            </div>
+            <div class="col-sm-4 text-center">
+                <span ng-bind-html="getCurrentPage('meetings')"></span>
+                /
+                <span ng-bind-html="getTotalPages('meetings')"></span>
+            </div>
+            <div class="col-sm-4 text-right">
+                <button class="btn btn-default"  ng-click="setOffset('meetings', true)" ng-disabled="isLastPage('meetings')">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
+            </div>
         </div>
         <ul class="list-group list-group-hover">
-            <li class="list-group-item list-group-item-{{inFuture(meeting.startDate) ? 'info' : (inFuture(meeting.endDate) ? 'success' : 'default')}}" ng-repeat="meeting in meetings | limitFromTo: getMeetingFrom():getMeetingTo()">
+            <li class="list-group-item list-group-item-{{inFuture(meeting.startDate) ? 'info' : (inFuture(meeting.endDate) ? 'success' : 'default')}}" ng-repeat="meeting in meetings | limitFromTo:  getFrom('meetings'):getTo('meetings')">
                 <a ng-href="#!/meeting/{{meeting.id}}">
                     <time datetime="{{meeting.startDate}}">{{convertTimestamp(meeting.startDate, "D")}}<br>{{convertTimestamp(meeting.startDate, "MMM")}}</time>
                     <h4 class="list-group-item-heading">{{meeting.name}}</h4>
@@ -28,12 +37,21 @@
     </div>
     <div class="col-sm-4" id="comments">
         <h2>New comments ({{comments.commentCount}})</h2>
-        <div class="toolbar toolbar-top">
-            <button class="btn btn-default" ng-click="nextCommentOffset()"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
-            <button class="btn btn-default"  ng-click="previousCommentOffset()">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
+        <div class="toolbar toolbar-top row">
+            <div class="col-sm-4">
+                <button class="btn btn-default" ng-click="setOffset('comments', false)" ng-disabled="isFirstPage('comments')"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
+            </div>
+            <div class="col-sm-4 text-center">
+                <span ng-bind-html="getCurrentPage('comments')"></span>
+                /
+                <span ng-bind-html="getTotalPages('comments')"></span>
+            </div>
+            <div class="col-sm-4 text-right">
+                <button class="btn btn-default"  ng-click="setOffset('comments', true)" ng-disabled="isLastPage('comments')">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
+            </div>
         </div>
         <ul class="list-group list-group-hover comments">
-            <li class="list-group-item" ng-repeat="comment in comments.comments | limitFromTo: getCommentFrom():getCommentTo()">
+            <li class="list-group-item" ng-repeat="comment in comments.comments | limitFromTo: getFrom('comments'):getTo('comments')">
                 <article class="comment">
                     <header class="dashboard">
                         <img src="templates/restangular/img/profile_picture.jpg" ng-src="{{comment.user.picture !== false ? comment.user.picture +'?token='+ token : ''}}" class="img-thumbnail img-picture">
@@ -51,12 +69,21 @@
     </div>
     <div class="col-sm-4">
         <h2>Latest files ({{files.length}})</h2>
-        <div class="toolbar toolbar-top">
-            <button class="btn btn-default" ng-click="nextFileOffset()"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
-            <button class="btn btn-default"  ng-click="previousFileOffset()">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
+        <div class="toolbar toolbar-top row">
+            <div class="col-sm-4">
+                <button class="btn btn-default" ng-click="setOffset('files', false)" ng-disabled="isFirstPage('files')"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
+            </div>
+            <div class="col-sm-4 text-center">
+                <span ng-bind-html="getCurrentPage('files')"></span>
+                /
+                <span ng-bind-html="getTotalPages('files')"></span>
+            </div>
+            <div class="col-sm-4 text-right">
+                <button class="btn btn-default"  ng-click="setOffset('files', true)" ng-disabled="isLastPage('files')">Next <i class="glyphicon glyphicon-chevron-right"></i></button>
+            </div>
         </div>
         <ul class="list-group list-group-hover">
-            <li class="list-group-item" ng-repeat="file in files | limitFromTo: getFileFrom():getFileTo()">
+            <li class="list-group-item" ng-repeat="file in files | limitFromTo: getFrom('files'):getTo('files')">
                 <a ng-href="#!/document/{{file.id}}">
                     <div class="type type-{{file.type}}" title="{{file.type}}" bs-tooltip>
                         <i class="glyphicon glyphicon-th" ng-show="file.type == 'presentation'"></i>

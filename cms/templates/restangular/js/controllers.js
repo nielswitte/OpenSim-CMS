@@ -571,44 +571,165 @@ angularRest.controller('toolbarController', ['$scope', 'Cache', '$location', '$a
 angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Page', '$sce', '$location', function(RestangularCache, $scope, Page, $sce, $location) {
         $scope.files     = [];
         $scope.meetings  = [];
-        $scope.comments  = [];
+        $scope.comments  = { comments: [] };
         $scope.token     = sessionStorage.token;
         Page.setTitle('Dashboard');
+
+        // Get last login time or use yesterday as time
+        var lastLogin = function() {
+            if(sessionStorage.lastLogin > 0) {
+                return moment(sessionStorage.lastLogin, 'YYYY-MM-DD HH:mm:ss').unix();
+            } else {
+                return new moment().subtract('days', 1).unix();
+            }
+        };
+
+        // Load all comments since the user last visited
+        RestangularCache.one('comments', lastLogin()).get().then(function(commentsResponse) {
+            $scope.comments = commentsResponse;
+        });
+
+        // Load all files
+        RestangularCache.all('files').getList().then(function(filesResponse) {
+            $scope.files = filesResponse;
+        });
 
         // Load all meetings the user is a participant for
         RestangularCache.one('user', sessionStorage.id).getList('meetings').then(function(meetingsResponse) {
             $scope.meetings = meetingsResponse;
         });
 
+        // Calculate the total number of pages
+        $scope.getTotalPages = function(type) {
+            var pages = 0;
+            if(type == 'comments') {
+                pages = Math.ceil(parseInt($scope.comments.comments.length) / parseInt(stepSizeComments));
+            } else if(type == 'files') {
+                pages = Math.ceil(parseInt($scope.files.length) / parseInt(stepSizeFiles));
+            } else {
+                pages = Math.ceil(parseInt($scope.meetings.length) / parseInt(stepSizeMeetings));
+            }
+            // Always show at least one page
+            if(pages == 0) {
+                pages = 1;
+            }
+
+            return $sce.trustAsHtml(''+ pages);
+        };
+
+        // Get the current page number
+        $scope.getCurrentPage = function(type) {
+            var page = 0;
+            if(type == 'comments') {
+                page = Math.ceil(parseInt($scope.commentOffset) / parseInt(stepSizeComments)) + 1;
+            } else if(type == 'files') {
+                page = Math.ceil(parseInt($scope.fileOffset) / parseInt(stepSizeFiles)) + 1;
+            } else {
+                page = Math.ceil(parseInt($scope.meetingOffset) / parseInt(stepSizeMeetings)) + 1;
+            }
+
+            return $sce.trustAsHtml(''+ page);
+        };
+
+
+        // Comment offsets
+        $scope.commentOffset = 0;
+        var stepSizeComments = 4;
+        // File offsets
+        $scope.fileOffset = 0;
+        var stepSizeFiles = 6;
         // Meeting offsets
         $scope.meetingOffset = 0;
         var stepSizeMeetings = 8;
-        // Get previous set of meetings in the list
-        $scope.previousMeetingOffset = function() {
-            var newOffset = parseInt($scope.meetingOffset) - parseInt(stepSizeMeetings);
-            if(newOffset < 0) {
-                newOffset = 0;
-            }
-            $scope.meetingOffset = newOffset;
-        };
-        // Get next set off meetings in the list
-        $scope.nextMeetingOffset = function() {
-            var newOffset = parseInt($scope.meetingOffset) + parseInt(stepSizeMeetings);
-            if(newOffset >= $scope.meetings.length) {
-                newOffset = $scope.meetings.length - parseInt(stepSizeMeetings);
-                if(newOffset < 0) {
-                    newOffset = 0;
+
+        // Set offset
+        $scope.setOffset = function(type, next) {
+            if(type == 'comments') {
+                if(next) {
+                    var newOffset = parseInt($scope.commentOffset) + parseInt(stepSizeComments);
+                    if(newOffset >= $scope.comments.comments.length) {
+                        newOffset = $scope.comments.comments.length - parseInt(stepSizeComments);
+                        if(newOffset < 0) {
+                            newOffset = 0;
+                        }
+                    }
+
+                    $scope.commentOffset = newOffset;
+                } else {
+                    var newOffset = parseInt($scope.commentOffset) - parseInt(stepSizeComments);
+                    if(newOffset < 0) {
+                        newOffset = 0;
+                    }
+                    $scope.commentOffset = newOffset;
+                }
+            } else if(type == 'files') {
+                if(next) {
+                    var newOffset = parseInt($scope.fileOffset) + parseInt(stepSizeFiles);
+                    if(newOffset >= $scope.files.length) {
+                        newOffset = $scope.files.length - parseInt(stepSizeFiles);
+                        if(newOffset < 0) {
+                            newOffset = 0;
+                        }
+                    }
+
+                    $scope.fileOffset = newOffset;
+                } else {
+                    var newOffset = parseInt($scope.fileOffset) - parseInt(stepSizeFiles);
+                    if(newOffset < 0) {
+                        newOffset = 0;
+                    }
+                    $scope.fileOffset = newOffset;
+                }
+            } else {
+                if(next) {
+                    var newOffset = parseInt($scope.meetingOffset) + parseInt(stepSizeMeetings);
+                    if(newOffset >= $scope.meetings.length) {
+                        newOffset = $scope.meetings.length - parseInt(stepSizeMeetings);
+                        if(newOffset < 0) {
+                            newOffset = 0;
+                        }
+                    }
+                    $scope.meetingOffset = newOffset;
+                } else {
+                    var newOffset = parseInt($scope.meetingOffset) - parseInt(stepSizeMeetings);
+                    if(newOffset < 0) {
+                        newOffset = 0;
+                    }
+                    $scope.meetingOffset = newOffset;
                 }
             }
-            $scope.meetingOffset = newOffset;
         };
-        // Get starting point for meeting offset
-        $scope.getMeetingFrom = function() {
-            return $scope.meetingOffset;
+
+        // Get starting point
+        $scope.getFrom = function(type) {
+            if(type == 'comments') {
+                return $scope.commentOffset;
+            } else if(type == 'files') {
+                return $scope.fileOffset;
+            } else {
+                return $scope.meetingOffset;
+            }
         };
-        // Get ending point for meeting offset
-        $scope.getMeetingTo = function() {
-            return parseInt($scope.meetingOffset) + parseInt(stepSizeMeetings);
+
+        // Get ending point
+        $scope.getTo = function(type) {
+            if(type == 'comments') {
+                return parseInt($scope.commentOffset) + parseInt(stepSizeComments);
+            } else if(type == 'files') {
+                return parseInt($scope.fileOffset) + parseInt(stepSizeFiles);
+            } else {
+                return parseInt($scope.meetingOffset) + parseInt(stepSizeMeetings);
+            }
+        };
+
+        // Check to see if the current page is the last page
+        $scope.isLastPage = function(type) {
+            return parseInt($scope.getTotalPages(type)) == parseInt($scope.getCurrentPage(type));
+        };
+
+        // Check to see if the current page is the first page
+        $scope.isFirstPage = function(type) {
+            return parseInt($scope.getCurrentPage(type)) == 1;
         };
 
         // Option to convert the timestamp to the given moment.js format
@@ -620,80 +741,6 @@ angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Pa
         $scope.inFuture = function(timestamp) {
             return new moment(timestamp, 'YYYY-MM-DD HH:mm:ss').unix() > new moment().unix();
         };
-
-        // File offsets
-        $scope.fileOffset = 0;
-        var stepSizeFiles = 6;
-        // Get previous set of files in the list
-        $scope.previousFileOffset = function() {
-            var newOffset = parseInt($scope.fileOffset) - parseInt(stepSizeFiles);
-            if(newOffset < 0) {
-                newOffset = 0;
-            }
-            $scope.fileOffset = newOffset;
-        };
-        // Get next set off files in the list
-        $scope.nextFileOffset = function() {
-            var newOffset = parseInt($scope.fileOffset) + parseInt(stepSizeFiles);
-            if(newOffset >= $scope.files.length) {
-                newOffset = $scope.files.length - parseInt(stepSizeFiles);
-                if(newOffset < 0) {
-                    newOffset = 0;
-                }
-            }
-
-            $scope.fileOffset = newOffset;
-        };
-        // Get starting point for file offset
-        $scope.getFileFrom = function() {
-            return $scope.fileOffset;
-        };
-        // Get ending point for file offset
-        $scope.getFileTo = function() {
-            return parseInt($scope.fileOffset) + parseInt(stepSizeFiles);
-        };
-
-        // Load all files
-        RestangularCache.all('files').getList().then(function(filesResponse) {
-            $scope.files = filesResponse;
-        });
-
-        // Comment offsets
-        $scope.commentOffset = 0;
-        var stepSizeComments = 6;
-        // Get previous set of comments in the list
-        $scope.previousCommentOffset = function() {
-            var newOffset = parseInt($scope.commentOffset) - parseInt(stepSizeComments);
-            if(newOffset < 0) {
-                newOffset = 0;
-            }
-            $scope.commentOffset = newOffset;
-        };
-        // Get next set off comments in the list
-        $scope.nextCommentOffset = function() {
-            var newOffset = parseInt($scope.commentOffset) + parseInt(stepSizeComments);
-            if(newOffset >= $scope.comments.length) {
-                newOffset = $scope.comments.length - parseInt(stepSizeComments);
-                if(newOffset < 0) {
-                    newOffset = 0;
-                }
-            }
-
-            $scope.commentOffset = newOffset;
-        };
-        // Get starting point for comment offset
-        $scope.getCommentFrom = function() {
-            return $scope.commentOffset;
-        };
-        // Get ending point for comment offset
-        $scope.getCommentTo = function() {
-            return parseInt($scope.commentOffset) + parseInt(stepSizeComments);
-        };
-
-        // Load all comments since the user last visited
-        RestangularCache.one('comments', moment(sessionStorage.lastLogin, 'YYYY-MM-DD HH:mm:ss').unix()).get().then(function(commentsResponse) {
-            $scope.comments = commentsResponse;
-        });
 
         // Trust the message as safe markdown html
         $scope.markdown = function(message) {
@@ -2129,7 +2176,13 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
 
         // User is allowed to add new avatars
         $scope.allowCreate = function() {
-            return sessionStorage.userPermission >= WRITE;
+            if(sessionStorage.userPermission >= WRITE) {
+                return true;
+            } else if(sessionStorage.userPermission >= EXECUTE && $routeParams.userId == sessionStorage.id) {
+                return true;
+            } else {
+                return false;
+            }
         };
 
         // Allow changing general user information
@@ -2228,6 +2281,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                 } else {
                     $alert({title: 'Profile picture changed!', content: 'The user\'s profile picture has been updated.', type: 'success'});
                     Cache.clearCachedUrl(userRequestUrl);
+                    $route.reload();
                     modal.hide();
                 }
                 // Remove loading screen
