@@ -1207,7 +1207,7 @@ when a lot of Grids are in the database. Use the get Grid by ID function instead
 specific grid when possible.
 
 ```json
-{
+[
     {
         "isOnline": 1,
         "id": 1,

@@ -66,7 +66,7 @@ defined('EXEC') or die('Config not loaded');
             </div>
 
             <!-- Main content -->
-            <div id="main" ng-view></div>
+            <div id="main" ng-view>Loading...</div>
             <div id="chat" ng-controller="chatController" ng-include src="getChat()"></div>
             <hr>
             <footer class="footer">

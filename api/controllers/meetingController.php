@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the Meeting controller
  *
  * @author Niels Witte
- * @version 0.3a
- * @date April 7th, 2014
+ * @version 0.3b
+ * @date April 11th, 2014
  * @since March 13th, 2014
  */
 class MeetingController {
@@ -324,6 +324,8 @@ class MeetingController {
                     $meeting->getRoom()->getX() .'/'.
                     $meeting->getRoom()->getY() .'/'.
                     $meeting->getRoom()->getZ();
+
+        $hopUrl = str_replace('opensim://', 'hop://', $osUrl);
         $data   = array(
             '{{title}}'     => $meeting->getName(),
             '{{body}}'      => \Helper::linkIt(
@@ -333,8 +335,9 @@ class MeetingController {
                 .'<h2>Participants</h2>'
                 .'<p>'. nl2br($meeting->getParticipants()->toString(), FALSE) .'</p>'
                 .'<div style="text-align: center;">'
-                .'  <a href="'. $osUrl .'" class="btn btn-lg">Go to Meeting</a><br>'
-                .'  <small>'. $osUrl .'</small>'
+                //.'  <a href="'. $osUrl .'" class="btn btn-lg">Go to Meeting</a><br>'
+                //.'  <small>'. $osUrl .'</small><br><br>'
+                .'  <small>Copy and paste this URL in the address bar of your OpenSim viewer: <br>'. $hopUrl .'</small>'
                 .'</div>'
             )
         );
