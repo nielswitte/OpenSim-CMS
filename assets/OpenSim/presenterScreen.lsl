@@ -148,7 +148,7 @@ load_users_documents() {
  * @param string type
  */
 load_item_comments(integer index, string type) {
-    if(!debug) llInstantMessage(userUuid, "Loading comments for "+ type +" with ID: "+ llList2String(itemIds, index));
+    if(debug) llInstantMessage(userUuid, "Loading comments for "+ type +" with ID: "+ llList2String(itemIds, index));
     http_request_comments = llHTTPRequest(serverUrl +"/comments/"+ type +"/"+ llList2String(itemIds, index) +"/?token="+ APIToken, [], "");
 }
 
@@ -161,6 +161,7 @@ string buffer   = "";
  * @param string rawComments
  */
 parse_comments(string rawComments) {
+    if(debug) llInstantMessage(userUuid, "Parsing comments: JSON");
     key json        = JsonCreateStore(rawComments);
     integer count   = (integer) JsonGetValue(json, "commentCount");
     integer i       = 0;
