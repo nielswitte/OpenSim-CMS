@@ -1080,22 +1080,48 @@ angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page',
 );
 
 // gridController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('gridController', ['RestangularCache', '$scope', '$routeParams', 'Page', function(RestangularCache, $scope, $routeParams, Page) {
+angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', '$route', '$alert', 'Page', 'Cache', function(Restangular, RestangularCache, $scope, $routeParams, $route, $alert, Page, Cache) {
+        var gridRequestUrl;
+
         // Show loading screen
         jQuery('#loading').show();
 
+        // Load grid information
         RestangularCache.one('grid', $routeParams.gridId).get().then(function(gridResponse) {
             Page.setTitle(gridResponse.name);
             $scope.grid = gridResponse;
             // Token required to request grid images
             $scope.api_token = sessionStorage.token;
 
+            // Save request URL
+            gridRequestUrl = gridResponse.getRequestedUrl();
+            console.log(gridRequestUrl);
+
             // Remove loading screen
             jQuery('#loading').hide();
         });
 
+        // Encode URLs
         $scope.urlEncode = function(target){
             return encodeURIComponent(target);
+        };
+
+        // Check if the user is allowed to update the Grid
+        $scope.allowUpdate = function() {
+            return sessionStorage.gridPermission >= EXECUTE;
+        };
+
+        // Update grid data from API
+        $scope.updateGridRegions = function() {
+            Cache.clearCachedUrl(gridRequestUrl);
+            Restangular.one('grid', $routeParams.gridId).one('regions').post().then(function(regionsResponse) {
+                 if(!regionsResponse.success) {
+                    $alert({title: 'Error!', content: regionsResponse.error, type: 'danger'});
+                } else {
+                    $alert({title: 'Regions updated!', content: 'Changes are made to '+ regionsResponse.regionsUpdated +' regions. The others were already up-to-date. (You may need to refresh the page to see the changes)', type: 'success'});
+                    $route.reload();
+                }
+            });
         };
     }]
 );

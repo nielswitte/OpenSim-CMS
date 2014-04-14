@@ -147,11 +147,13 @@ angularRest.service('Cache', ['$cacheFactory', function($cacheFactory) {
         // Option to clear the cache
         this.clearCache = function() {
             cache.removeAll();
+            return true;
         };
 
         // Option to clear specific cache
         this.clearCachedUrl = function(url) {
             cache.remove(url);
+            return true;
         };
     }]
 );

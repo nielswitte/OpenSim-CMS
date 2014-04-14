@@ -1285,6 +1285,21 @@ This will return a summary of the grid and regions, excluding the passwords.
 
 ```
 
+### Automatically retrieve region information
+When the grid is online, uses MySQL and configured correctly, you can retrieve the regions automatically by using the following URL:
+```http
+POST /api/grid/<GRID-ID>/regions/ HTTP/1.1
+```
+
+This will return the number of updated regions and a boolean indicating if the update succeeded.
+
+```json
+{
+    "success": true,
+    "regionsUpdated": 3
+}
+```
+
 ### Regions
 To retrieve information about a region the following API can be used.
 

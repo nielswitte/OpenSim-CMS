@@ -6,6 +6,9 @@
 <div class="page-header">
     <h1>Grid <small>{{grid.name}}</small></h1>
 </div>
+<div class="toolbar toolbar-top" ng-show="allowUpdate()">
+    <button ng-click="updateGridRegions()" type="button" class="btn btn-primary"><i class="glyphicon glyphicon-edit"></i> Update regions</button>
+</div>
 <form class="form-horizontal" role="form" id="gridForm">
     <div class="form-group">
         <label for="inputId" class="col-sm-2 control-label">ID</label>
