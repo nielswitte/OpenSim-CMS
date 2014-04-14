@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the presentation controller
  *
  * @author Niels Witte
- * @version 0.3
- * @date April 4th, 2014
+ * @version 0.3a
+ * @date April 14th, 2014
  * @since March 10th, 2014
  */
 class PresentationController {
@@ -50,7 +50,7 @@ class PresentationController {
             'title'         => $db->escape($parameters['title']),
             'type'          => $db->escape($parameters['type']),
             'ownerId'       => $db->escape(\Auth::getUser()->getId()),
-            'creationDate'  => $db->escape($db->now()),
+            'creationDate'  => $db->now(),
             'file'          => $db->escape('source.'. $extension)
         );
         $fileId = $db->insert('documents', $data);

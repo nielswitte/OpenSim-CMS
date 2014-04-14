@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the Comment controller
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 2nd, 2014
+ * @version 0.2a
+ * @date April 14nd, 2014
  * @since March 28th, 2014
  */
 class CommentController {
@@ -124,7 +124,7 @@ class CommentController {
             // Correct line breaks
             'message'       => str_replace('\n', "\n", $db->escape($parameters['message'])),
             // Insert update timestamp
-            'editTimestamp' => $db->escape(date('Y-m-d H:i:s'))
+            'editTimestamp' => $db->now()
         );
         $db->where('id', $db->escape($this->comment->getId()));
         $result = $db->update('comments', $data);
