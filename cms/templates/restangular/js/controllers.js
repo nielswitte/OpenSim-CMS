@@ -1619,7 +1619,7 @@ angularRest.controller('meetingMinutesController', ['RestangularCache', '$scope'
                 for(var i = 0; i < votes.length; i++) {
                     totalVotes = (totalVotes + parseInt(votes[i]));
                 }
-                var html        = '<strong>Votes: '+ totalVotes +'</strong><br>';
+                var html = '<strong>Votes: '+ totalVotes +'</strong><br>';
                 html += '<div class="progress" title="Approved"><div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[0]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[0]) / totalVotes) * 100) +'%;">'+ parseInt(votes[0]) +'</div></div>';
                 html += '<div class="progress" title="Rejected"><div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[1]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[1]) / totalVotes) * 100) +'%;">'+ parseInt(votes[1]) +'</div></div>';
                 html += '<div class="progress" title="Blank"><div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[2]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[2]) / totalVotes) * 100) +'%;">'+ parseInt(votes[2]) +'</div></div>';
