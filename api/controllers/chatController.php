@@ -7,7 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the Meeting controller
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.1a
+ * @date April 14th, 2014
  * @since March 21st, 2014
  */
 class ChatController {
@@ -41,8 +42,8 @@ class ChatController {
             if($parameter['userId'] == -1) {
                 $parameter['userId'] = null;
             }
-
-            $parameter['gridId'] = $this->chat->getGrid()->getId();
+            $parameter['message'] = strip_tags($parameter['message']);
+            $parameter['gridId']  = $this->chat->getGrid()->getId();
             $result = $db->insert('chats', $parameter);
         }
 
