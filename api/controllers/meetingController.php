@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the Meeting controller
  *
  * @author Niels Witte
- * @version 0.3b
- * @date April 11th, 2014
+ * @version 0.3c
+ * @date April 14th, 2014
  * @since March 13th, 2014
  */
 class MeetingController {
@@ -513,7 +513,8 @@ class MeetingController {
 
         // Store all results separate
         foreach($parameters as $item) {
-            $item['meetingId'] = $this->getMeeting()->getId();
+            $item['meetingId']  = $this->getMeeting()->getId();
+            $item['message']    = strip_tags($item['message'], '<p><i><b><u><br>');
             $result = $db->insert('meeting_minutes', $item);
         }
 
