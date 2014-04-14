@@ -5,8 +5,8 @@ defined('EXEC') or die('Config not loaded');
  * Helper class to support the CMS and API
  *
  * @author Niels Witte
- * @version 0.3b
- * @date April 10th, 2014
+ * @version 0.3c
+ * @date April 14th, 2014
  * @since February 12th, 2014
  */
 class Helper {
@@ -215,7 +215,7 @@ class Helper {
      * Attempts to match a file content type to an extension
      *
      * @param string $type
-     * @return string - Will return .txt if no other match is found
+     * @return string - Will return .data if no other match is found
      */
     public static function getExtentionFromContentType($type) {
         switch ($type) {
@@ -228,7 +228,7 @@ class Helper {
             case "image/gif":
                 return 'gif';
             default:
-                return 'txt';
+                return 'data';
         }
     }
 
