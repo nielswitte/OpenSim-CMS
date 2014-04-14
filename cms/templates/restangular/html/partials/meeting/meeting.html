@@ -9,7 +9,7 @@
 <div class="toolbar toolbar-top">
     <a ng-href="#!/meeting/{{meeting.id}}/edit" type="button" class="btn btn-default" ng-show="allowUpdate()"><i class="glyphicon glyphicon-edit"></i> Edit meeting</a>
     <a ng-href="#!/meeting/{{meeting.id}}/minutes" type="button" class="btn btn-default"><i class="glyphicon glyphicon-comment"></i> Minutes</a>
-    <!--<a ng-href="opensim://{{meeting.room.grid.openSim.ip}}:{{meeting.room.grid.openSim.port}}/{{meeting.room.region.name}}/{{meeting.room.coordinates.x}}/{{meeting.room.coordinates.y}}/{{meeting.room.coordinates.z}}" class="btn btn-primary" title="Use the opensim:// protocol to instruct your viewer to teleport your avatar to the meeting location." bs-tooltip><i class="glyphicon glyphicon-send"></i> Go to meeting</a>-->
+    <a ng-href="hop://{{meeting.room.grid.openSim.ip}}:{{meeting.room.grid.openSim.port}}/{{meeting.room.region.name}}/{{meeting.room.coordinates.x}}/{{meeting.room.coordinates.y}}/{{meeting.room.coordinates.z}}" class="btn btn-primary" title="Use the hop:// protocol to instruct your viewer to teleport your avatar to the meeting location. Or copy/paste this URL into your viewer's address bar." bs-tooltip><i class="glyphicon glyphicon-send"></i> Go to meeting</a>
     <button ng-click="teleportUser()" class="btn btn-primary" title="Teleport your avatar to the meeting location. Your avatar needs to be online on this grid." bs-tooltip><i class="glyphicon glyphicon-move"></i> Teleport avatar to meeting</button>
 </div>
 <table class="table table-striped table-responsive table-hover">

@@ -89,7 +89,8 @@
                         </ul>
                     </div>
                     <div class="panel-footer text-center">
-                        <a href="opensim://{{grid.openSim.ip}}:{{grid.openSim.port}}/{{urlEncode(region.name)}}/128/128/0/" class="btn btn-primary btn-sm"><i class="glyphicon glyphicon-send"></i> Visit {{region.name}}</a>
+                        <a ng-href="hop://{{grid.openSim.ip}}:{{grid.openSim.port}}/{{urlEncode(region.name)}}/128/128/0/" class="btn btn-primary btn-sm" bs-tooltip  title="Use the hop:// protocol to change location. Optionally copy and paste this URL in the address bar of your viewer."><i class="glyphicon glyphicon-send"></i> Visit {{region.name}}</a>
+                        <button ng-click="teleportUser(region.name)" class="btn btn-primary btn-sm" title="Teleport your avatar to the meeting location. Your avatar needs to be online on this grid." bs-tooltip><i class="glyphicon glyphicon-move"></i> Teleport</button>
                     </div>
                 </div>
             </div>

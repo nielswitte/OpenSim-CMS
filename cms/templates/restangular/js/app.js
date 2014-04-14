@@ -246,7 +246,7 @@ angularRest.config(function($alertProvider, $tooltipProvider, $timepickerProvide
 
 // Add opensim protocol to safe list
 angularRest.config(["$compileProvider", function($compileProvider) {
-        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|opensim):/);
+        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|opensim|hop):/);
         // Angular before v1.2 uses $compileProvider.urlSanitizationWhitelist(...)
     }]
 );
