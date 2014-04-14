@@ -608,13 +608,14 @@ angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Pa
         // Calculate the total number of pages
         $scope.getTotalPages = function(type) {
             var pages = 0;
-            if(type == 'comments') {
+            if(type == 'comments' && $scope.comments.comments !== undefined) {
                 pages = Math.ceil(parseInt($scope.comments.comments.length) / parseInt(stepSizeComments));
             } else if(type == 'files') {
                 pages = Math.ceil(parseInt($scope.files.length) / parseInt(stepSizeFiles));
-            } else {
+            } else if(type == 'meetings') {
                 pages = Math.ceil(parseInt($scope.meetings.length) / parseInt(stepSizeMeetings));
             }
+
             // Always show at least one page
             if(pages == 0) {
                 pages = 1;
@@ -625,12 +626,12 @@ angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Pa
 
         // Get the current page number
         $scope.getCurrentPage = function(type) {
-            var page = 0;
+            var page = 1;
             if(type == 'comments') {
                 page = Math.ceil(parseInt($scope.commentOffset) / parseInt(stepSizeComments)) + 1;
             } else if(type == 'files') {
                 page = Math.ceil(parseInt($scope.fileOffset) / parseInt(stepSizeFiles)) + 1;
-            } else {
+            } else if(type == 'meetings') {
                 page = Math.ceil(parseInt($scope.meetingOffset) / parseInt(stepSizeMeetings)) + 1;
             }
 
