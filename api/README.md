@@ -47,7 +47,6 @@ file, line and stack trace of the error. It is recommended to disable debugging 
 }
 ```
 
-
 ## Authorization
 Before the API can be used, an user needs to authorize himself. This can be done by using the following API:
 
@@ -390,7 +389,7 @@ can not be used in a password: ` ?{}<>;" '[]/\ `. This will result in not being 
 }
 ```
 
-### Teleport a user to a location
+### Teleport an avatar to a location
 To teleport a user you need at least the UUID of the user.
 All other parameters are optional and listed in the table below.
 
@@ -554,13 +553,14 @@ All above API functions return a similar result, as displayed below:
     },
     (...)
 ]
-
 ```
 
 ### Calendar format
+
 ```http
 GET /api/meetings/<YYYY-MM-DD>/calendar/ HTTP/1.1
 ```
+This will
 
 ```json
 [
@@ -584,7 +584,6 @@ GET /api/meetings/<YYYY-MM-DD>/calendar/ HTTP/1.1
     },
     (...)
 ]
-
 ```
 
 ### Get a specific meeting
@@ -790,7 +789,8 @@ minutes with more details.
         "firstName": "Jane",
         "lastName": "Doe",
         "email": "jane@doe.com",
-        "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/"
+        "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
+        "lastLogin": "2014-04-12 13:33:37"
     },
     "roomId": 2,
     "url": "http://localhost:80/OpenSim-CMS/api/meeting/43/",
@@ -1023,7 +1023,15 @@ Cache information is left out in the list view.
         "type": "presentation",
         "title": "Test presentation title",
         "presentationId": "1",
-        "ownerId": 1,
+        "user": {
+            "id": 4,
+            "username": "janedoe",
+            "firstName": "Jane",
+            "lastName": "Doe",
+            "email": "jane@doe.com",
+            "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
+            "lastLogin": "2014-04-12 13:33:37"
+        },
         "slides": [
             {
                 "id": 1,
@@ -1072,14 +1080,22 @@ Example of output when request is successful:
     "type": "presentation",
     "title": "Test presentation title",
     "presentationId": "1",
-    "ownerId": 1,
+    "user": {
+        "id": 4,
+        "username": "janedoe",
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "email": "jane@doe.com",
+        "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
+        "lastLogin": "2014-04-12 13:33:37"
+    },
     "slides": [
         {
             "id": 1,
             "number": 1,
             "hasComments": false,
             "image": "http:\/\/localhost:80\/OpenSim-CMS\/api\/presentation\/1\/slide\/1\/image\/",
-            "cache": {
+            "cache": [
                 "1": {
                     "uuid": "90591103-6982-4eed-9b31-291f7077194a",
                     "expires": "2014-02-23 14:29:25",
@@ -1087,6 +1103,7 @@ Example of output when request is successful:
                 },
                 "2": { (...) },
                 (...)
+            ]
         },
         {
             (...)
@@ -1272,7 +1289,7 @@ This will return a summary of the grid and regions, excluding the passwords.
     "cacheTime": "48 hours",
     "defaultRegionUuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
     "regionCount": 3,
-    "regions": {
+    "regions": [
         {
             "uuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
             "name": "The Grid",
@@ -1280,9 +1297,8 @@ This will return a summary of the grid and regions, excluding the passwords.
         },
         { (...) },
         { (...) }
-    }
+    ]
 }
-
 ```
 
 ### Automatically retrieve region information

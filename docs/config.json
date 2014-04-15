@@ -1,0 +1,10 @@
+{
+    "title": "OpenSim-CMS",
+    "docs_path": "../docs",
+    "theme": "navy",
+    "float": false,
+    "toggle_code": true,
+    "repo": "nielswitte/OpenSim-CMS",
+    "file_editor": true,
+    "timezone": "Europe/Amsterdam"
+}
