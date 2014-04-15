@@ -1,0 +1,28 @@
+{
+    "title": "OpenSim-CMS",
+    "tagline": "Documentation v0.7.2",
+    "image": "img/preview.png",
+    "docs_path": "../../assets/docs.md",
+    "theme": "custom",
+    "colors": {
+        "sidebar-background": "#f8f8f8",
+        "sidebar-hover": "#e7e7e7",
+        "lines": "#e1e1e8",
+        "dark": "#333333",
+        "light": "#e1e1e8",
+        "text": "#000000",
+        "syntax-string": "#022e99",
+        "syntax-comment": "#84989b",
+        "syntax-number": "#428bca",
+        "syntax-label": "#840d7a"
+    },
+    "float": false,
+    "toggle_code": true,
+    "repo": "nielswitte/OpenSim-CMS",
+    "file_editor": true,
+    "timezone": "Europe/Amsterdam",
+    "ignore": {
+        "files": [],
+        "folders": ["img"]
+    }
+}
