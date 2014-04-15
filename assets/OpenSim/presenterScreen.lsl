@@ -159,6 +159,8 @@ load_item_comments(integer index, string type) {
  * @param string rawComments
  */
 parse_comments(string rawComments) {
+    // Without this message no comments will be shown (weird)
+    llInstantMessage(userUuid, "Showing Comments");
     if(debug) llInstantMessage(userUuid, "Parsing comments: JSON");
     key json        = JsonCreateStore(rawComments);
     integer count   = (integer) JsonGetValue(json, "commentCount");
