@@ -47,7 +47,7 @@ This authentication request will return, on success the following JSON:
 
 ```json
 {
-    "token": "53048c5375b1d2.66536292",
+    "token": "otwk9ERPQS9ietocskWTS5qTG4ow1qrqTXK2CBStt1LHv9UY",
     "ip": "192.168.1.102",
     "expires": "2014-02-19 12:19:55",
     "userId": 1,
@@ -56,6 +56,6 @@ This authentication request will return, on success the following JSON:
 ```
 
 The validity of the token depends on the config settings and is extended everytime the token is used.
-The user OpenSim with user ID -1 can only accessed from the IP/Hostname which is used by OpenSim according
+The user OpenSim with user ID `-1` can only accessed from the IP/Hostname which is used by OpenSim according
 to the grid list. In addition the `X-SecondLife-Shard` header needs to be set to access this user, this is
 done by default for OpenSim.

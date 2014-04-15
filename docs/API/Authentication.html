@@ -67,7 +67,7 @@
                                         <span style="float: left; font-size: 10px; color: gray;">
                                             Tuesday, April 15, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            3:03 PM                                        </span>
+                                            3:22 PM                                        </span>
                                 </div>
                                                         <p>Before the API can be used, an user needs to authorize himself. This can be done by using the following API:</p>
 
@@ -177,7 +177,7 @@ by itself, for example if the CMS is running on localhost, the token is for the 
 <p>This authentication request will return, on success the following JSON:</p>
 
 <pre><code class="language-json">{
-    "token": "53048c5375b1d2.66536292",
+    "token": "otwk9ERPQS9ietocskWTS5qTG4ow1qrqTXK2CBStt1LHv9UY",
     "ip": "192.168.1.102",
     "expires": "2014-02-19 12:19:55",
     "userId": 1,
@@ -186,7 +186,7 @@ by itself, for example if the CMS is running on localhost, the token is for the 
 </code></pre>
 
 <p>The validity of the token depends on the config settings and is extended everytime the token is used.<br />
-The user OpenSim with user ID -1 can only accessed from the IP/Hostname which is used by OpenSim according<br />
+The user OpenSim with user ID <code>-1</code> can only accessed from the IP/Hostname which is used by OpenSim according<br />
 to the grid list. In addition the <code>X-SecondLife-Shard</code> header needs to be set to access this user, this is<br />
 done by default for OpenSim.</p>
                                                     </article>
