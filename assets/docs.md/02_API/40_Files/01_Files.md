@@ -126,3 +126,17 @@ Or a document
 ```http
 GET /api/document/<DOCUMENT-ID>/source/ HTTP/1.1
 ```
+
+## Cache
+When an image has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with
+the slide to speed up future use. The cache period (`FileCacheTimeout`) is set in the `FlotsamCache.ini`  configuration and needs to be
+matched by the configuration value for the grid in the CMS.
+
+```http
+PUT /api/file/<ID>/image/ HTTP/1.1
+```
+
+| Parameter         | Type      | Description                                     |
+|-------------------|-----------|-------------------------------------------------|
+| uuid              | string    | UUID of the slide to be saved                   |
+| gridId            | integer   | The ID of the grid, as used in the CMS database |

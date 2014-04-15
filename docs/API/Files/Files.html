@@ -67,7 +67,7 @@
                                         <span style="float: left; font-size: 10px; color: gray;">
                                             Tuesday, April 15, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            1:16 PM                                        </span>
+                                            4:44 PM                                        </span>
                                 </div>
                                                         <pre><code class="language-http">GET /api/files/ HTTP/1.1
 </code></pre>
@@ -212,6 +212,37 @@ using the user's ID:</p>
 
 <pre><code class="language-http">GET /api/document/&lt;DOCUMENT-ID&gt;/source/ HTTP/1.1
 </code></pre>
+
+<h2>Cache</h2>
+
+<p>When an image has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with<br />
+the slide to speed up future use. The cache period (<code>FileCacheTimeout</code>) is set in the <code>FlotsamCache.ini</code>  configuration and needs to be<br />
+matched by the configuration value for the grid in the CMS.</p>
+
+<pre><code class="language-http">PUT /api/file/&lt;ID&gt;/image/ HTTP/1.1
+</code></pre>
+
+<table>
+<thead>
+<tr>
+  <th>Parameter</th>
+  <th>Type</th>
+  <th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>uuid</td>
+  <td>string</td>
+  <td>UUID of the slide to be saved</td>
+</tr>
+<tr>
+  <td>gridId</td>
+  <td>integer</td>
+  <td>The ID of the grid, as used in the CMS database</td>
+</tr>
+</tbody>
+</table>
                                                     </article>
                     </div>
                 </div>
