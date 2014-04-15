@@ -1,3 +1,5 @@
+# Permissions
+
 For each API there are permissions for the user account. The user requires a specific level for accessing certain
 functions. The levels are represented by integers that represent a binary permission.
 

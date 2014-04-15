@@ -1,3 +1,5 @@
+# Users
+
 To get a list of 50 users, use:
 
 ```http

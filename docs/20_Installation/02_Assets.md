@@ -1,3 +1,4 @@
+# Assets
 The `assets` folder contains multiple examples of how to use the API. Some of them are explained below. The `xml` files are implementations of the script, and can be imported
 in your OpenSim environment as examples.
 

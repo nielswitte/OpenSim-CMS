@@ -1,19 +1,4 @@
-### Automatically retrieve region information
-When the grid is online, uses MySQL and configured correctly, you can retrieve the regions automatically by using the following URL:
-```http
-POST /api/grid/<GRID-ID>/regions/ HTTP/1.1
-```
-
-This will return the number of updated regions and a boolean indicating if the update succeeded.
-
-```json
-{
-    "success": true,
-    "regionsUpdated": 3
-}
-```
-
-### Regions
+# Regions
 To retrieve information about a region the following API can be used.
 
 ```http
@@ -42,7 +27,23 @@ When `OS_DB_ENABLED` is `TRUE`, the following additional information is shown:
 }
 ```
 
-### Region image
+## Automatically retrieve region information
+When the grid is online, uses MySQL and configured correctly, you can retrieve the regions automatically by using the following URL:
+
+```http
+POST /api/grid/<GRID-ID>/regions/ HTTP/1.1
+```
+
+This will return the number of updated regions and a boolean indicating if the update succeeded.
+
+```json
+{
+    "success": true,
+    "regionsUpdated": 3
+}
+```
+
+## Region image
 A small map preview can be opened by using the following API request
 
 ```http

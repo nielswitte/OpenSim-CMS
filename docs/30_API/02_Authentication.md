@@ -1,3 +1,5 @@
+# Authentication
+
 Before the API can be used, an user needs to authorize himself. This can be done by using the following API:
 
 ```http
@@ -13,7 +15,7 @@ POST /api/auth/username/ HTTP/1.1
 The optional parameter ip, can be used to assign a token to a machine that can not perform the auth request
 by itself, for example if the CMS is running on localhost, the token is for the user of the CMS, not the CMS.
 
-This request will return, on succes the following JSON:
+This request will return, on success the following JSON:
 
 ```json
 {

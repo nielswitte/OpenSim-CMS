@@ -1,3 +1,5 @@
+# Chats
+
 Through the CMS it is possible to chat with users on the Grid. The following line will return the latest
 50 chat messages on the given grid.
 

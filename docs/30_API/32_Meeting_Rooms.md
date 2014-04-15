@@ -1,3 +1,5 @@
+# Meeting Rooms
+
 To retrieve a list with rooms available on a specific grid use the following API function:
 
 ```http
@@ -68,7 +70,7 @@ For retrieving the full information about a specific room the following function
 GET /api/grid/<GRID-ID>/room/<ROOM-ID/ HTTP/1.1
 ```
 
-This will also return the grid information. 
+This will also return the grid information.
 
 ```json
 {

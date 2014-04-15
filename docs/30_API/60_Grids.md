@@ -1,4 +1,4 @@
-## Grids
+# Grids
 For an overview of all grids and their information, the following request can be used:
 
 ```http
@@ -47,7 +47,7 @@ specific grid when possible.
 ]
 ```
 
-### Get Grid by ID
+## Get Grid by ID
 
 Information about a Grid can be retrieved by using:
 ```http

@@ -1,3 +1,5 @@
+# OpenSim
+
 OpenSim needs to be configured with the following settings:
 
 For loading dynamic textures:

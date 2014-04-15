@@ -1,3 +1,5 @@
+# OpenSim-CMS API
+
 The OpenSim-CMS communicates with OpenSim objects through an JSON-API, based on REST.
 For valid requests the `HTTP/1.1 200 OK` is used, for failures an exception is thrown by
 the system and displayed as output with a `HTTP/1.1 400 Bad Request` header. For most functions

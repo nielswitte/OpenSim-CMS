@@ -1,3 +1,5 @@
+# Avatars
+
 The CMS user can not be used in the OpenSim environment. OpenSim works with Avatars, which are independent of the CMS.
 However, Avatars can be linked to an OpenSim-CMS user, to access data from a specific user.
 

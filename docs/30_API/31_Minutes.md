@@ -1,3 +1,5 @@
+# Minutes
+
 The `meetingLogger.lsl` script has the ability to log the chat during a meeting. These minutes can be retrieved by using the following API functionality:
 
 ```http
