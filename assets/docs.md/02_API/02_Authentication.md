@@ -6,14 +6,44 @@ POST /api/auth/user/ HTTP/1.1
 
 | Parameter         | Type      | Description                                                   |
 |-------------------|-----------|---------------------------------------------------------------|
-| username          | String    | The username or email address of the user in the CMS          |
+| user              | String    | The username or email address of the user in the CMS          |
+| password          | String    | The corresponding password of the user in the CMS             |
+| ip                | String    | [Optional] The IP address to assign this token to             |
+
+## Only e-mail
+
+If you only want to auth with email address use:
+
+```http
+POST /api/auth/email/ HTTP/1.1
+```
+
+| Parameter         | Type      | Description                                                   |
+|-------------------|-----------|---------------------------------------------------------------|
+| email             | String    | The email address of the user in the CMS                      |
+| password          | String    | The corresponding password of the user in the CMS             |
+| ip                | String    | [Optional] The IP address to assign this token to             |
+
+## Only username
+
+Only allow usernames by using:
+
+```http
+POST /api/auth/username/ HTTP/1.1
+```
+
+| Parameter         | Type      | Description                                                   |
+|-------------------|-----------|---------------------------------------------------------------|
+| username          | String    | The username of the user in the CMS                           |
 | password          | String    | The corresponding password of the user in the CMS             |
 | ip                | String    | [Optional] The IP address to assign this token to             |
 
 The optional parameter ip, can be used to assign a token to a machine that can not perform the auth request
 by itself, for example if the CMS is running on localhost, the token is for the user of the CMS, not the CMS.
 
-This request will return, on success the following JSON:
+## Token
+
+This authentication request will return, on success the following JSON:
 
 ```json
 {
