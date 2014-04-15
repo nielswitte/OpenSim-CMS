@@ -446,7 +446,7 @@ angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$
                 user = { username: jQuery('#LoginUsername').val(), password: jQuery('#LoginPassword').val() };
             }
 
-            var auth = Restangular.one('auth').post('username', user).then(function(authResponse) {
+            var auth = Restangular.one('auth').post('user', user).then(function(authResponse) {
                 // Successful auth?
                 if(authResponse.token) {
                     var user = Restangular.one('user', authResponse.userId).get({ token: authResponse.token }).then(function(userResponse) {

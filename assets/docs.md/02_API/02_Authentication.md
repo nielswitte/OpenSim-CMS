@@ -1,12 +1,12 @@
 Before the API can be used, an user needs to authorize himself. This can be done by using the following API:
 
 ```http
-POST /api/auth/username/ HTTP/1.1
+POST /api/auth/user/ HTTP/1.1
 ```
 
 | Parameter         | Type      | Description                                                   |
 |-------------------|-----------|---------------------------------------------------------------|
-| username          | String    | The username of the user in the CMS                           |
+| username          | String    | The username or email address of the user in the CMS          |
 | password          | String    | The corresponding password of the user in the CMS             |
 | ip                | String    | [Optional] The IP address to assign this token to             |
 
