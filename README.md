@@ -29,5 +29,5 @@ Kudos to those who created the packages and classes which are used by this progr
  * Jashkenas for Underscore ([https://github.com/jashkenas/underscore](https://github.com/jashkenas/underscore))
  * Evilstreak for Markdown-js ([https://github.com/evilstreak/markdown-js](https://github.com/evilstreak/markdown-js))
 
-### To generate this documentation
+### To generate the documentation
  * Justinwalsh for Daux.io ([https://github.com/justinwalsh/daux.io/](https://github.com/justinwalsh/daux.io/))
