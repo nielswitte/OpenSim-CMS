@@ -10,10 +10,10 @@ GET /api/comments/<TYPE>/<ID>/ HTTP/1.1
 ```
 | Types         | Description                                                      |
 |---------------|------------------------------------------------------------------|
-| document      | Get comments for the document with id = <ID>.                    |
-| meeting       | Get comments on the meeting with the given id.                   |
-| page          | Get comments for the page with id = <ID>.                        |
-| slide         | Get comments for the slide with id = <ID>.                       |
+| document      | Get comments for the document with id = `<ID>`.                  |
+| meeting       | Get comments on the meeting with the id = `<ID>`.                |
+| page          | Get comments for the page with id = `<ID>`.                      |
+| slide         | Get comments for the slide with id = `<ID>`.                     |
 
 ## Get comments after given timestamp
 
