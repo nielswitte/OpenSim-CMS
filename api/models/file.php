@@ -197,4 +197,18 @@ class File implements SimpleModel {
         header("Content-Type: ". $mimetype);
         readfile($file);
     }
+
+    /**
+     * Gets the cached textures from the database (if any available) for this file
+     *
+     * @return array
+     */
+    public function getCache() {
+        $db         = \Helper::getDB();
+        $db->join('cached_assets c', 'dc.cacheId = c.id', 'LEFT');
+        $db->where('dc.fileId', $db->escape($this->getId()));
+        $results    = $db->get('document_files_cache dc');
+
+        return $results;
+    }
 }

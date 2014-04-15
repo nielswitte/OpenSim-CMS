@@ -5,8 +5,8 @@ defined('EXEC') or die('Config not loaded');
  * Helper class to support the CMS and API
  *
  * @author Niels Witte
- * @version 0.3c
- * @date April 14th, 2014
+ * @version 0.3d
+ * @date April 15th, 2014
  * @since February 12th, 2014
  */
 class Helper {
@@ -467,8 +467,8 @@ END:VCALENDAR";
      * @return \Models\Documents or other \Models\* instance or boolean FALSE when type not found
      */
     public static function getCommentType($type, $id) {
-        if($type == 'document') {
-            $parent = new \Models\Document($id);
+        if($type == 'file') {
+            $parent = new \Models\File($id);
         } elseif($type == 'slide') {
             $parent = new \Models\Slide($id, 1, '');
         } elseif($type == 'meeting') {

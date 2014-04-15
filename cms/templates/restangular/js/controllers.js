@@ -953,13 +953,13 @@ angularRest.controller('documentController', ['RestangularCache', '$scope', '$ro
         };
 
         // Load comments
-        RestangularCache.all('comments').one('document', $routeParams.documentId).get().then(function(commentResponse) {
+        RestangularCache.all('comments').one('file', $routeParams.documentId).get().then(function(commentResponse) {
             $scope.comments = commentResponse;
         });
 
         // Show comments and set the comment Type to: meeting and the id of the meeting
         $scope.showComments = function() {
-            $scope.commentType      = 'document';
+            $scope.commentType      = 'file';
             $scope.commentItemId    = $routeParams.documentId;
             return partial_path +'/comment/commentContainer.html';
         };

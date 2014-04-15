@@ -13,8 +13,8 @@ require_once dirname(__FILE__) .'/../controllers/fileController.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.4b
- * @date April 10th, 2014
+ * @version 0.5
+ * @date April 15th, 2014
  * @since March 3rd, 2014
  */
 class File extends Module{
@@ -44,6 +44,7 @@ class File extends Module{
         $this->api->addRoute("/^\/file\/(\d+)\/?$/",                   'getFileById',           $this, 'GET',       \Auth::READ);      // Select specific files
         $this->api->addRoute("/^\/file\/(\d+)\/?$/",                   'deleteFileById',        $this, 'DELETE',    \Auth::EXECUTE);   // Delete specific files
         $this->api->addRoute("/^\/file\/(\d+)\/image\/?$/",            'getFileImageById',      $this, 'GET',       \AUTH::READ);      // Retrieves an image files type
+        $this->api->addRoute("/^\/file\/(\d+)\/image\/?$/",            'updateImageUuidById',   $this, 'PUT',       \AUTH::WRITE);     // Updates the image's UUID
         $this->api->addRoute("/^\/file\/(\d+)\/source\/?$/",           'getFileSourceById',     $this, 'GET',       \AUTH::READ);      // Retrieves the original file
     }
 
@@ -206,6 +207,18 @@ class File extends Module{
             'url'               => $file->getApiUrl()
         );
 
+        if($full && $file->getType() == 'image') {
+           $cachedTextures = array();
+            foreach($file->getCache() as $cache) {
+                $cachedTextures[$cache['gridId']] = array(
+                    'uuid'      => $cache['uuid'],
+                    'expires'   => $cache['uuidExpires'],
+                    'isExpired' => strtotime($cache['uuidExpires']) > time() ? 0 : 1
+                );
+            }
+            $data['cache']      = $cachedTextures;
+        }
+
         return $data;
     }
 
@@ -254,5 +267,33 @@ class File extends Module{
         $file = new \Models\File($args[1]);
         $file->getInfoFromDatabase();
         $file->getOriginalFile();
+    }
+
+    public function updateImageUuidById($args) {
+        $parsedPutData  = \Helper::getInput(TRUE);
+        $gridId         = isset($parsedPutData['gridId']) ? $parsedPutData['gridId'] : '';
+        $postUuid       = isset($parsedPutData['uuid']) ? $parsedPutData['uuid'] : '';
+
+        // Get document and page details
+        $file       = new \Models\File($args[1]);
+        $file->getInfoFromDatabase();
+        if($file->getType() == "image") {
+            // Get grid details
+            $grid       = new \Models\Grid($gridId);
+            $grid->getInfoFromDatabase();
+
+            // Update
+            $fileCtrl   = new \Controllers\FileController($file);
+            $data       = $fileCtrl->setUuid($postUuid, $grid);
+        } else {
+            throw new \Exception('Image does not exist', 6);
+        }
+
+        // Format the result
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE),
+        );
+
+        return $result;
     }
 }
