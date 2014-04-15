@@ -13,8 +13,8 @@ require_once dirname(__FILE__) .'/../controllers/pageController.php';
  * Implements the functions for documents
  *
  * @author Niels Witte
- * @version 0.4d
- * @date April 10th, 2014
+ * @version 0.4e
+ * @date April 11th, 2014
  * @since March 3rd, 2014
  */
 class Document extends Module {
@@ -307,10 +307,10 @@ class Document extends Module {
                 );
             }
             // Retrieve title if not available
-            if($presentation->getTitle() == '') {
-                $presentation->getInfoFromDatabase();
+            if($document->getTitle() == '') {
+                $document->getInfoFromDatabase();
             }
-            $data['documentTitle']  = $presentation->getTitle();
+            $data['documentTitle']  = $document->getTitle();
             $data['cache']          = $cachedTextures;
         }
         return $data;

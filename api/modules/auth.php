@@ -9,8 +9,8 @@ require_once dirname(__FILE__) .'/module.php';
  * Implements the functions for authentication
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 1st, 2014
+ * @version 0.3
+ * @date April 15th, 2014
  * @since February 24th, 2014
  */
 class Auth extends Module {
@@ -33,26 +33,77 @@ class Auth extends Module {
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/^\/auth\/username\/?$/", 'authUser', $this, 'POST', \Auth::NONE); // Authenticate the given user
+        $this->api->addRoute("/^\/auth\/email\/?$/",        'authEmail',    $this, 'POST', \Auth::NONE); // Authenticate the given user
+        $this->api->addRoute("/^\/auth\/user\/?$/",         'authUser',     $this, 'POST', \Auth::NONE); // Authenticate the given user
+        $this->api->addRoute("/^\/auth\/username\/?$/",     'authUsername', $this, 'POST', \Auth::NONE); // Authenticate the given user
+    }
+
+    /**
+     * Authenticate the user by username
+     *
+     * @param array $args
+     * @return array
+     */
+    public function authUsername($args) {
+        // Input parameters
+        $input                  = \Helper::getInput(TRUE);
+        $data['user']           = isset($input['username']) ? $input['username'] : '';
+        $data['password']       = isset($input['password']) ? $input['password'] : '';
+        $data['ip']             = isset($input['ip']) ? $input['ip'] : FALSE;
+        return $this->auth($data);
+    }
+
+    /**
+     * Authenticate the user by email
+     *
+     * @param array $args
+     * @return array
+     */
+    public function authEmail($args) {
+        // Input parameters
+        $input                  = \Helper::getInput(TRUE);
+        $data['user']           = isset($input['email']) ? $input['email'] : '';
+        $data['password']       = isset($input['password']) ? $input['password'] : '';
+        $data['password']       = $input['password'];
+        $data['ip']             = isset($input['ip']) ? $input['ip'] : FALSE;
+        return $this->auth($data);
     }
 
     /**
      * Authenticates the user based on the given post data
      *
-     * @throws Exception
+     * @param array
      * @returns array
      */
     public function authUser($args) {
-        $db                     = \Helper::getDB();
         // Input parameters
         $input                  = \Helper::getInput(TRUE);
-        $username               = isset($input['username']) ? $input['username'] : '';
+        $data['user']           = isset($input['user']) ? $input['user'] : '';
+        $data['password']       = isset($input['password']) ? $input['password'] : '';
+        $data['ip']             = isset($input['ip']) ? $input['ip'] : FALSE;
+        return $this->auth($data);
+    }
+
+    /**
+     * Authenticates the user on email or username
+     *
+     * @param array $input
+     * @return array
+     * @throws \Exception
+     */
+    public function auth($input) {
+        // Login with username (no valid email address used)
+        $username               = (isset($input['user']) && !filter_var($input['user'], FILTER_VALIDATE_EMAIL) ? $input['user'] : '');
+        // Login with emailaddress
+        $email                  = (isset($input['user']) && filter_var($input['user'], FILTER_VALIDATE_EMAIL) ? $input['user'] : '');
+        // Get password and IP
         $password               = isset($input['password']) ? $input['password'] : '';
         $ip                     = isset($input['ip']) ? $input['ip'] : FALSE;
 
         // Default settings
         $userId = ($username == 'OpenSim' ? 0 : -1);
 
+        $db                     = \Helper::getDB();
         // Basic output data
         $data['token']          = $db->escape(\Helper::generateToken(48));
         $data['ip']             = ($ip !== FALSE && $ip !== NULL) ? $ip : $_SERVER['REMOTE_ADDR'];
@@ -66,7 +117,7 @@ class Auth extends Module {
             throw new \Exception('Not allowed to login as OpenSim outside the Grid', 2);
         }
 
-        $user                   = new \Models\UserLoggedIn($userId, $username);
+        $user                   = new \Models\UserLoggedIn($userId, $username, $email);
         $user->getInfoFromDatabase();
         $userCtrl               = new \Controllers\UserController($user);
         $validRequest           = $userCtrl->checkPassword($password);

@@ -5,7 +5,7 @@
 <!-- Show when signed in -->
 <form class="form-signin" role="form" ng-show="{{isLoggedIn}}">
     <h2 class="form-signin-heading">Please sign in</h2>
-    <input type="text" class="form-control" placeholder="Username" disabled required autofocus>
+    <input type="text" class="form-control" placeholder="Username or E-mail address" disabled required autofocus>
     <input type="password" class="form-control" placeholder="Password" disabled required>
     <button class="btn btn-lg btn-primary btn-block btn-disabled" type="submit" disabled>Sign in</button>
 </form>
@@ -13,7 +13,7 @@
 <!-- Show when NOT signed in -->
 <form class="form-signin" role="form" autocomplete="on" ng-hide="{{isLoggedIn}}" ng-submit="login(user)">
     <h2 class="form-signin-heading">Please sign in</h2>
-    <input type="text" name="username" class="form-control" placeholder="Username" required autofocus ng-model="user.username">
+    <input type="text" name="user" class="form-control" placeholder="Username or E-mail address" required autofocus ng-model="user.user">
     <input type="password" name="password" class="form-control" placeholder="Password" required ng-model="user.password">
     <input type="submit" name="submitlogin" class="btn btn-lg btn-primary btn-block" value="Sign in">
 </form>

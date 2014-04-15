@@ -8,7 +8,7 @@
 
 <div class="row">
     <div class="col-sm-4">
-        <h2>Your meetings ({{meetings.length}})</h2>
+        <h2>Your meetings</h2>
         <div class="toolbar toolbar-top row">
             <div class="col-sm-4">
                 <button class="btn btn-default" ng-click="setOffset('meetings', false)" ng-disabled="isFirstPage('meetings')"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
@@ -33,10 +33,11 @@
                 </p>
                 <a class="btn btn-default btn-xs" ng-href="#!/meeting/{{meeting.id}}/minutes" ng-hide="inFuture(meeting.startDate)"><i class="glyphicon glyphicon-comment"></i> Minutes</a>
             </li>
+            <li class="list-group-item" ng-hide="meetings.length > 0">No meetings</li>
         </ul>
     </div>
     <div class="col-sm-4" id="comments">
-        <h2>New comments ({{comments.commentCount}})</h2>
+        <h2>New comments</h2>
         <div class="toolbar toolbar-top row">
             <div class="col-sm-4">
                 <button class="btn btn-default" ng-click="setOffset('comments', false)" ng-disabled="isFirstPage('comments')"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
@@ -65,10 +66,11 @@
                     <button ng-click="showComment(comment.id)" class="btn btn-default btn-xs"><i class="glyphicon glyphicon-eye-open"></i> Show comment</button>
                 </article>
             </li>
+            <li class="list-group-item" ng-hide="comments.comments.length > 0">No new comments</li>
         </ul>
     </div>
     <div class="col-sm-4">
-        <h2>Latest files ({{files.length}})</h2>
+        <h2>Latest files</h2>
         <div class="toolbar toolbar-top row">
             <div class="col-sm-4">
                 <button class="btn btn-default" ng-click="setOffset('files', false)" ng-disabled="isFirstPage('files')"><i class="glyphicon glyphicon-chevron-left"></i> Previous</button>
@@ -92,8 +94,9 @@
                     </div>
                     <h4 class="list-group-item-heading">{{file.title}}</h4>
                 </a>
-                <span class="posted">{{file.creationDate}} - <a ng-href="#!/user/{{user.id}}">{{file.user.username}} ({{file.user.firstName}} {{file.user.lastName}})</a></span>
+                <span class="posted">{{file.creationDate}} - <a ng-href="#!/user/{{file.user.id}}">{{file.user.username}} ({{file.user.firstName}} {{file.user.lastName}})</a></span>
             </li>
+            <li class="list-group-item" ng-hide="files.length > 0">No files</li>
         </ul>
     </div>
 </div>

@@ -446,7 +446,7 @@ angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$
                 user = { username: jQuery('#LoginUsername').val(), password: jQuery('#LoginPassword').val() };
             }
 
-            var auth = Restangular.one('auth').post('username', user).then(function(authResponse) {
+            var auth = Restangular.one('auth').post('user', user).then(function(authResponse) {
                 // Successful auth?
                 if(authResponse.token) {
                     var user = Restangular.one('user', authResponse.userId).get({ token: authResponse.token }).then(function(userResponse) {
@@ -608,13 +608,14 @@ angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Pa
         // Calculate the total number of pages
         $scope.getTotalPages = function(type) {
             var pages = 0;
-            if(type == 'comments') {
+            if(type == 'comments' && $scope.comments.comments !== undefined) {
                 pages = Math.ceil(parseInt($scope.comments.comments.length) / parseInt(stepSizeComments));
             } else if(type == 'files') {
                 pages = Math.ceil(parseInt($scope.files.length) / parseInt(stepSizeFiles));
-            } else {
+            } else if(type == 'meetings') {
                 pages = Math.ceil(parseInt($scope.meetings.length) / parseInt(stepSizeMeetings));
             }
+
             // Always show at least one page
             if(pages == 0) {
                 pages = 1;
@@ -625,12 +626,12 @@ angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Pa
 
         // Get the current page number
         $scope.getCurrentPage = function(type) {
-            var page = 0;
+            var page = 1;
             if(type == 'comments') {
                 page = Math.ceil(parseInt($scope.commentOffset) / parseInt(stepSizeComments)) + 1;
             } else if(type == 'files') {
                 page = Math.ceil(parseInt($scope.fileOffset) / parseInt(stepSizeFiles)) + 1;
-            } else {
+            } else if(type == 'meetings') {
                 page = Math.ceil(parseInt($scope.meetingOffset) / parseInt(stepSizeMeetings)) + 1;
             }
 
@@ -952,13 +953,13 @@ angularRest.controller('documentController', ['RestangularCache', '$scope', '$ro
         };
 
         // Load comments
-        RestangularCache.all('comments').one('document', $routeParams.documentId).get().then(function(commentResponse) {
+        RestangularCache.all('comments').one('file', $routeParams.documentId).get().then(function(commentResponse) {
             $scope.comments = commentResponse;
         });
 
         // Show comments and set the comment Type to: meeting and the id of the meeting
         $scope.showComments = function() {
-            $scope.commentType      = 'document';
+            $scope.commentType      = 'file';
             $scope.commentItemId    = $routeParams.documentId;
             return partial_path +'/comment/commentContainer.html';
         };
@@ -1080,22 +1081,81 @@ angularRest.controller('gridsController', ['RestangularCache', '$scope', 'Page',
 );
 
 // gridController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('gridController', ['RestangularCache', '$scope', '$routeParams', 'Page', function(RestangularCache, $scope, $routeParams, Page) {
+angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', '$route', '$alert', 'Page', 'Cache', function(Restangular, RestangularCache, $scope, $routeParams, $route, $alert, Page, Cache) {
+        var gridRequestUrl;
+
         // Show loading screen
         jQuery('#loading').show();
 
+        // Load grid information
         RestangularCache.one('grid', $routeParams.gridId).get().then(function(gridResponse) {
             Page.setTitle(gridResponse.name);
             $scope.grid = gridResponse;
             // Token required to request grid images
             $scope.api_token = sessionStorage.token;
 
+            // Save request URL
+            gridRequestUrl = gridResponse.getRequestedUrl();
+
             // Remove loading screen
             jQuery('#loading').hide();
         });
 
+        // Encode URLs
         $scope.urlEncode = function(target){
             return encodeURIComponent(target);
+        };
+
+        // Check if the user is allowed to update the Grid
+        $scope.allowUpdate = function() {
+            return sessionStorage.gridPermission >= EXECUTE;
+        };
+
+        // Update grid data from API
+        $scope.updateGridRegions = function() {
+            Cache.clearCachedUrl(gridRequestUrl);
+            Restangular.one('grid', $routeParams.gridId).one('regions').post().then(function(regionsResponse) {
+                 if(!regionsResponse.success) {
+                    $alert({title: 'Error!', content: regionsResponse.error, type: 'danger'});
+                } else {
+                    $alert({title: 'Regions updated!', content: 'Changes are made to '+ regionsResponse.regionsUpdated +' regions. The others were already up-to-date. (You may need to refresh the page to see the changes)', type: 'success'});
+                    $route.reload();
+                }
+            });
+        };
+
+        // Teleports the avatar of the user to the meeting location
+        $scope.teleportUser = function(name) {
+            var avatarFound = false;
+            // Search for avatars from the currently logged in user
+            Restangular.one('user', sessionStorage.id).get().then(function(userResponse) {
+                for(var i = 0; i < userResponse.avatars.length; i++) {
+                    // Avatar on grid and online?
+                    if(userResponse.avatars[i].gridId == $scope.grid.id && userResponse.avatars[i].online == 1) {
+                        avatarFound = true;
+                        // Teleport the found avatar
+                        Restangular.one('grid', $scope.grid.id).one('avatar', userResponse.avatars[i].uuid).customPUT({
+                            posX: 128,
+                            posY: 128,
+                            posZ: 25,
+                            regionName: name
+                        }, 'teleport').then(function(teleportResponse) {
+                            if(!teleportResponse.success) {
+                                $alert({title: 'Error!', content: teleportResponse.error, type: 'danger'});
+                                return false;
+                            } else {
+                                $alert({title: 'Teleported!', content: 'Avatar teleported to region: '+ name +' on grid '+ $scope.grid.name, type: 'success'});
+                                return true;
+                            }
+                        });
+                    }
+                }
+                // No match found?
+                if(!avatarFound) {
+                    $alert({title: 'No avatar found!', content: 'Currently there is no avatar online, linked to your user account, on this grid to teleport.', type: 'danger'});
+                }
+            });
+            return false;
         };
     }]
 );
@@ -1559,7 +1619,7 @@ angularRest.controller('meetingMinutesController', ['RestangularCache', '$scope'
                 for(var i = 0; i < votes.length; i++) {
                     totalVotes = (totalVotes + parseInt(votes[i]));
                 }
-                var html        = '<strong>Votes: '+ totalVotes +'</strong><br>';
+                var html = '<strong>Votes: '+ totalVotes +'</strong><br>';
                 html += '<div class="progress" title="Approved"><div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[0]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[0]) / totalVotes) * 100) +'%;">'+ parseInt(votes[0]) +'</div></div>';
                 html += '<div class="progress" title="Rejected"><div class="progress-bar progress-bar-danger" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[1]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[1]) / totalVotes) * 100) +'%;">'+ parseInt(votes[1]) +'</div></div>';
                 html += '<div class="progress" title="Blank"><div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="'+ Math.round((parseInt(votes[2]) / totalVotes) * 100) +'" aria-valuemin="0" aria-valuemax="100" style="width: '+ Math.round((parseInt(votes[2]) / totalVotes) * 100) +'%;">'+ parseInt(votes[2]) +'</div></div>';

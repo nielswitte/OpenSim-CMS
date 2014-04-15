@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the File controller
  *
  * @author Niels Witte
- * @version 0.2c
- * @date April 9th, 2014
+ * @version 0.3
+ * @date April 15th, 2014
  * @since March 10th, 2014
  */
 class FileController {
@@ -116,7 +116,7 @@ class FileController {
             'title'         => $db->escape($parameters['title']),
             'type'          => $db->escape($parameters['type']),
             'ownerId'       => $db->escape(\Auth::getUser()->getId()),
-            'creationDate'  => $db->escape($db->now()),
+            'creationDate'  => $db->now(),
             'file'          => $db->escape('source.'. $extension)
         );
         $fileId = $db->insert('documents', $data);
@@ -183,10 +183,47 @@ class FileController {
             throw new \Exception('Missing parameter (file) "file" with a valid file type', 4);
         } elseif(in_array($parameters['type'], array('document', 'presentation')) && !in_array(\Helper::getBase64Header($parameters['file']), array('application/pdf'))) {
             throw new \Exception('Type set to "'. $parameters['type'] .'" but file isn\'t a PDF', 5);
+        } elseif($parameters['type'] == 'image' && !in_array(\Helper::getBase64Header($parameters['file']), array('image/jpeg', 'image/png', 'image/gif'))) {
+            throw new \Exception('Type set to "'. $parameters['type'] .'" but file isn\'t a JPG, PNG or GIF', 6);
         } else {
             $result = TRUE;
         }
 
         return $result;
+    }
+
+    /**
+     * Updates the UUID of the file (image) to the given value
+     *
+     * @param string $uuid - The UUID of the image
+     * @param \Models\Grid $grid - The grid the texture is used on
+     * @return boolean
+     * @throws \Exception
+     */
+    public function setUuid($uuid, \Models\Grid $grid) {
+        $results = FALSE;
+        if(\Helper::isValidUuid($uuid)) {
+            $db = \Helper::getDB();
+            $cacheData = array(
+                'gridId'        => $db->escape($grid->getId()),
+                'uuid'          => $db->escape($uuid),
+                'uuidExpires'   => $db->escape(date('Y-m-d H:i:s', strtotime('+'. $grid->getCacheTime())))
+            );
+
+            $cacheId = $db->insert('cached_assets', $cacheData);
+            $cacheFileData = array(
+                'fileId'        => $db->escape($this->file->getId()),
+                'cacheId'       => $db->escape($cacheId)
+            );
+
+            $results = $db->insert('document_files_cache', $cacheFileData);
+        } else {
+            throw new \Exception('Invalid UUID provided', 2);
+        }
+
+        if($results === FALSE) {
+            throw new \Exception('Updating UUID failed', 1);
+        }
+        return $results !== FALSE;
     }
 }

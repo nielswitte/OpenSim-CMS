@@ -13,7 +13,7 @@
  *
  * @author Niels Witte
  * @date February 11th, 2014
- * @version 0.8a
+ * @version 0.9
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
@@ -43,7 +43,7 @@ string itemId;                  // The ID of the document/presentation
 // HTTP stuff
 key http_request_api_token;     // HTTP Request for fetching API token
 key http_request_id;            // HTTP Request for loading file
-key http_request_documents;     // HTTP Request for loading user's files
+key http_request_files;         // HTTP Request for loading user's files
 key http_request_set;           // HTTP Request to set UUID of object for future use
 key http_request_comments;      // HTTP Request for loading comments
 
@@ -54,7 +54,8 @@ string presentationNavigationText   = "Slide show navigation";
 list presentationNavigationButtons  = ["First", "Back", "Next", "Quit", "New", "Comments"];
 string documentNavigationText       = "Document navigation";
 list documentNavigationButtons      = ["First", "Back", "Next", "Quit", "New", "Comments"];
-
+string imageNavigationText          = "Image navigation";
+list imageNavigationButtons         = ["Quit", "New", "Comments"];
 
 /**
  * Opens a dialog in OpenSim for the given user with a text message and a list of buttons
@@ -107,7 +108,7 @@ integer IsInteger(string var) {
 /**
  * Sets the UUID of the given element
  *
- * @param string type - [slide, page]
+ * @param string type - [slide, page, image]
  * @param integer id - number of the element, for example slide number
  * @param key uuid - the element's UUID
  */
@@ -118,8 +119,8 @@ set_uuid_of_object(string type, integer id, key uuid) {
         http_request_set = llHTTPRequest(serverUrl +"/presentation/"+ itemId +"/slide/number/"+ id +"/?token="+ APIToken, [HTTP_METHOD, "PUT", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
     } else if(type == "page") {
         http_request_set = llHTTPRequest(serverUrl +"/document/"+ itemId +"/page/number/"+ id +"/?token="+ APIToken, [HTTP_METHOD, "PUT", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
-    } else {
-
+    } else if(type == "image") {
+        http_request_set = llHTTPRequest(serverUrl +"/file/"+ itemId +"/image/?token="+ APIToken, [HTTP_METHOD, "PUT", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
     }
 }
 
@@ -133,11 +134,11 @@ request_api_token() {
 }
 
 /**
- * Load the user's documents
+ * Load the user's files
  */
-load_users_documents() {
+load_users_files() {
     llInstantMessage(userUuid, "Searching for your documents... Please be patient");
-    http_request_documents = llHTTPRequest(serverUrl +"/grid/"+ serverId +"/avatar/"+ userUuid +"/files/?token="+ APIToken, [], "");
+    http_request_files = llHTTPRequest(serverUrl +"/grid/"+ serverId +"/avatar/"+ userUuid +"/files/?token="+ APIToken, [], "");
 }
 
 
@@ -148,12 +149,9 @@ load_users_documents() {
  * @param string type
  */
 load_item_comments(integer index, string type) {
-    if(!debug) llInstantMessage(userUuid, "Loading comments for "+ type +" with ID: "+ llList2String(itemIds, index));
+    if(debug) llInstantMessage(userUuid, "Loading comments for "+ type +" with ID: "+ llList2String(itemIds, index));
     http_request_comments = llHTTPRequest(serverUrl +"/comments/"+ type +"/"+ llList2String(itemIds, index) +"/?token="+ APIToken, [], "");
 }
-
-// Comment buffers
-string buffer   = "";
 
 /**
  * Processes all comments and return them as a string
@@ -161,12 +159,16 @@ string buffer   = "";
  * @param string rawComments
  */
 parse_comments(string rawComments) {
+    if(debug) llInstantMessage(userUuid, "Parsing comments: JSON");
     key json        = JsonCreateStore(rawComments);
     integer count   = (integer) JsonGetValue(json, "commentCount");
+    string buffer   = "";
     integer i       = 0;
     llSay(0, "Showing "+ count +" comments --------------------------------------------------------");
 
     for(i = 0; i < JsonGetArrayLength(json, "comments"); i++) {
+        if(debug) llInstantMessage(userUuid, "Processing comment "+ (i + 1) + " of "+ count);
+
         buffer += "["+ JsonGetValue(json, "comments["+ i +"].timestamp") +"] "+ JsonGetValue(json, "comments["+ i +"].user.{username}") +" ("+ JsonGetValue(json, "comments["+ i +"].user.{firstName}") +" "+ JsonGetValue(json, "comments["+ i +"].user.{firstName}") + "):\n"+ JsonGetValue(json, "comments["+ i +"].message") +"\n\n";
 
         if((integer) JsonGetValue(json, "comments["+ i +"].childrenCount") > 0) {
@@ -255,14 +257,14 @@ nav(integer next, string type) {
         llSetText("Presentation Ended", <0,0,1>, 1.0);
         llSetColor(ZERO_VECTOR, ALL_SIDES);
     // Allow totalItems+1 for black
-    } if(type == "page" && next > totalItems) {
+    } else if(type == "page" && next > totalItems) {
         item = totalItems + 1;
         llSetText("Document Ended", <0,0,1>, 1.0);
         llSetColor(ZERO_VECTOR, ALL_SIDES);
     // All fine, show item
     } else {
         // Remove black screen when returning to presentation or document
-        if(((type== "page" && item == (totalItems+1)) || (type == "slide" && item == (totalItems+1))) && next < item) {
+        if(((type == "page" && item == (totalItems+1)) || (type == "slide" && item == (totalItems+1))) && next < item) {
             // Remove black screen
             llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
         }
@@ -391,6 +393,9 @@ default {
         } else if(llList2String(commands, 0) == "Document") {
             llInstantMessage(userUuid, "Entering Document mode");
             state document;
+        } else if(llList2String(commands, 0) == "Image") {
+            llInstantMessage(userUuid, "Entering Image mode");
+            state image;
         } else if(llList2String(commands, 0) == "UUID") {
             llInstantMessage(userUuid, "Object's UUID is: "+ objectUuid);
         // Shutdown
@@ -451,7 +456,7 @@ state presentation {
             state default;
         // New document
         } else if(llList2String(commands, 0) == "New") {
-            load_users_documents();
+            load_users_files();
         }
 
         // Only execute when a media object has been loaded
@@ -491,7 +496,7 @@ state presentation {
                 open_menu(userUuid, mainNavigationText, mainNavigationButtons);
             } else {
                 // Send a more specific and meaningful response to the user
-                if(request_id == http_request_documents) {
+                if(request_id == http_request_files) {
                     llInstantMessage(userUuid, "User not found");
                 } else if(request_id == http_request_id) {
                     llInstantMessage(userUuid, "Presentation not found");
@@ -555,7 +560,7 @@ state presentation {
             // Open navigation dialog
             open_menu(userUuid, presentationNavigationText, presentationNavigationButtons);
         // Loaded user's documents
-        } else if(request_id == http_request_documents) {
+        } else if(request_id == http_request_files) {
             key json_body               = JsonCreateStore(body);
             integer presentationCount   = 0;
             string json_presentations   = JsonGetJson(json_body, "");
@@ -615,8 +620,8 @@ state presentation {
         // Listen at channel
         mListener = llListen(channel,"", userUuid,"");
 
-        // Load presentations
-        load_users_documents();
+        // Load files
+        load_users_files();
     }
 
     /**
@@ -637,9 +642,9 @@ state presentation {
         // Open menu when continuing usage
         if(media == 1) {
             open_menu(userUuid, presentationNavigationText, presentationNavigationButtons);
-        // Oopen presentations menu
+        // Open presentations menu
         } else {
-            load_users_documents();
+            load_users_files();
         }
     }
 
@@ -690,7 +695,7 @@ state document {
             state default;
         // New document
         } else if(llList2String(commands, 0) == "New") {
-            load_users_documents();
+            load_users_files();
         }
 
         // Only execute when a media object has been loaded
@@ -730,7 +735,7 @@ state document {
                 open_menu(userUuid, mainNavigationText, mainNavigationButtons);
             } else {
                 // Send a more specific and meaningful response to the user
-                if(request_id == http_request_documents) {
+                if(request_id == http_request_files) {
                     llInstantMessage(userUuid, "User not found");
                 } else if(request_id == http_request_id) {
                     llInstantMessage(userUuid, "Document not found");
@@ -744,7 +749,7 @@ state document {
             // Parse the returned body to JSON
             key json_body       = JsonCreateStore(body);
 
-            // Error occured during loading of presentation?
+            // Error occured during loading of document?
             if(JsonGetValue(json_body, "error") != "") {
                 llInstantMessage(userUuid, "Document not found");
                 return;
@@ -786,7 +791,7 @@ state document {
 
             // Count the pages
             totalItems = (integer)JsonGetValue(json_body, "pagesCount");
-            // Get presentation title
+            // Get documents title
             itemTitle  = JsonGetValue(json_body, "title");
             // Show loaded message
             llInstantMessage(userUuid, "Loaded document: "+ itemTitle);
@@ -795,16 +800,16 @@ state document {
             // Open navigation dialog
             open_menu(userUuid, documentNavigationText, documentNavigationButtons);
         // Loaded user's documents
-        } else if(request_id == http_request_documents) {
+        } else if(request_id == http_request_files) {
             key json_body               = JsonCreateStore(body);
             string json_documents       = JsonGetJson(json_body, "");
             integer documentCount       = 0;
             integer filesCount          = JsonGetArrayLength(json_body, "");
             list documents              = [];
-            // Create buttons for max 12 presentations
+            // Create buttons for max 12 documents
             list documentButtons;
             if(debug) llInstantMessage(userUuid, "[Debug] Found "+ filesCount + " files.");
-            // List with presentations is not empty?
+            // List with documents is not empty?
             if(filesCount > 0) {
                 integer x;
                 // List all presentations
@@ -842,7 +847,7 @@ state document {
     }
 
     /**
-     * Initial actions when entering the presentation state
+     * Initial actions when entering the document state
      */
     state_entry() {
         // Close any open menu's
@@ -853,8 +858,8 @@ state document {
         // Listen at channel
         mListener = llListen(channel,"", userUuid,"");
 
-        // Load presentations
-        load_users_documents();
+        // Load documents
+        load_users_files();
     }
 
     /**
@@ -874,10 +879,10 @@ state document {
 
         // Open menu when continuing usage
         if(media == 1) {
-            open_menu(userUuid, presentationNavigationText, presentationNavigationButtons);
-        // Oopen presentations menu
+            open_menu(userUuid, documentNavigationText, documentNavigationButtons);
+        // Open documents menu
         } else {
-            load_users_documents();
+            load_users_files();
         }
     }
 
@@ -889,6 +894,221 @@ state document {
     }
 }
 
+/**
+ * State of object when viewing an image
+ */
+state image {
+    /**
+     * Listen and fetch certain commands
+     */
+    listen(integer channel, string name, key id, string message) {
+        list commands = llParseString2List(message, " ", []);
+
+        // When only a number has been given
+        if(IsInteger(llList2String(commands, 0))) {
+            string loadId   = llList2String(commands, 0);
+            commands        = ["Load", loadId];
+        }
+
+        // Load presentation by ID
+        if(llList2String(commands, 0) == "Load" && llList2String(commands, 1) != "#") {
+            media = 1;
+            // Output
+            if(debug) llInstantMessage(userUuid, "[Debug] Loading image: "+ llList2String(commands, 1));
+            // Sets document Id
+            itemId = llList2String(commands, 1);
+            // Loads JSON from server
+            http_request_id = llHTTPRequest(serverUrl +"/file/"+ itemId +"/?token="+ APIToken, [], "");
+        // Show dialog to load a specific document
+        } else if(llList2String(commands, 0) == "Load" && llList2String(commands, 1) == "#") {
+            llTextBox(userUuid, "Enter the ID of the image you want to load.\nFor example if you want to load an image with ID 32 enter the number 32 and press Send", channel);
+        // Shutdown
+        } else if(llList2String(commands, 0) == "Quit") {
+            media = 0;
+            // Close any open menu's
+            close_menu();
+            state off;
+        // Back to main menu
+        } else if(llList2String(commands, 0) == "Main") {
+            state default;
+        // New document
+        } else if(llList2String(commands, 0) == "New") {
+            load_users_files();
+        }
+
+        // Only execute when a media object has been loaded
+        if(media == 1) {
+            if(llList2String(commands, 0) == "Comments") {
+                load_item_comments((item - 1), "file");
+            // Invalid command
+            } else {
+                // Other
+            }
+        }
+    }
+
+    /**
+     * Actions to be taken when a HTTP request gets a response
+     */
+    http_response(key request_id, integer status, list metadata, string body) {
+        // Catch errors
+        if(status != 200) {
+            if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
+
+            // API key expired
+            if(status == 401) {
+                llInstantMessage(userUuid, "The API key expired, turn the presenter off and on again: ");
+                open_menu(userUuid, mainNavigationText, mainNavigationButtons);
+            } else {
+                // Send a more specific and meaningful response to the user
+                if(request_id == http_request_files) {
+                    llInstantMessage(userUuid, "User not found");
+                } else if(request_id == http_request_id) {
+                    llInstantMessage(userUuid, "Image not found");
+                }
+            }
+            return;
+        }
+
+        // Loaded image
+        if(request_id == http_request_id) {
+            // Parse the returned body to JSON
+            key json_body       = JsonCreateStore(body);
+
+            // Error occured during loading of presentation?
+            if(JsonGetValue(json_body, "error") != "") {
+                llInstantMessage(userUuid, "Image not found");
+                return;
+            }
+
+            // Empty pages and cache list
+            list empty          = [];
+            textureCache        = empty;
+            itemsList           = empty;
+            itemIds             = empty;
+
+            string imageUuid     = "";
+            string imageExpired  = "";
+            // Only process if there is a cache (to prevent console warnings)
+            if(JsonGetJson(json_body, "cache") != "[]") {
+                imageUuid        = JsonGetValue(json_body, "cache.{"+ serverId +"}.uuid");
+                imageExpired     = JsonGetValue(json_body, "cache.{"+ serverId +"}.isExpired");
+            }
+            string imageUrl      = JsonGetValue(json_body, "url") +"image/";
+            itemIds             += [JsonGetValue(json_body, "id")];
+            // UUID set and not expired?
+            if(imageUuid != "" && imageExpired == "0") {
+                itemsList += [(key) imageUuid];
+                if(debug) llInstantMessage(userUuid, "[Debug] use UUID ("+ imageUuid +") for image");
+            // Use URL
+            } else {
+                itemsList += [imageUrl];
+                if(debug) llInstantMessage(userUuid, "[Debug] use URL ("+ imageUrl +") for image");
+            }
+
+            // Count the pages
+            totalItems = 1;
+            // Get presentation title
+            itemTitle  = JsonGetValue(json_body, "title");
+            // Show loaded message
+            llInstantMessage(userUuid, "Loaded image: "+ itemTitle);
+            // loads image
+            nav(1, "image");
+            // Open navigation dialog
+            open_menu(userUuid, imageNavigationText, imageNavigationButtons);
+        // Loaded user's images
+        } else if(request_id == http_request_files) {
+            key json_body               = JsonCreateStore(body);
+            string json_images          = JsonGetJson(json_body, "");
+            integer imagesCount         = 0;
+            integer filesCount          = JsonGetArrayLength(json_body, "");
+            list images                 = [];
+            // Create buttons for max 12 images
+            list imagesButtons;
+            if(debug) llInstantMessage(userUuid, "[Debug] Found "+ filesCount + " files.");
+            // List with files is not empty?
+            if(filesCount > 0) {
+                integer x;
+                // List all presentations
+                for(x = 0; x < filesCount; x++) {
+                    if(JsonGetValue(json_body, "["+ x +"].type") == "image") {
+                        images += [JsonGetValue(json_body, "["+ x +"].id")];
+                    }
+                }
+
+                // Newest presentations first
+                images = llListSort(images, 1, FALSE);
+
+                // Count presentations
+                imagesCount = llGetListLength(images);
+                if(debug) llInstantMessage(userUuid, "[Debug] Containing "+ imagesCount + " images.");
+
+                // Create buttons for presentations
+                for (x = 0; x < imagesCount && x < 11; x++) {
+                    imagesButtons += ["Load "+ llList2String(images, x)];
+                }
+            }
+            imagesButtons += ["Main","Quit","Load #"];
+            // Open presentation selection menu
+            open_menu(userUuid, "Found "+ imagesCount +" document(s).\nShowing only the latest 9 images below.\nCommand: '/"+ channel +" Load <#>' can be used to load an image that is not listed.\nIf your avatar is not linked to your CMS user account, the list will be empty." , imagesButtons);
+        // Update image uuid
+        } else if(request_id = http_request_set) {
+            if(debug) llInstantMessage(userUuid, "[Debug] UUID set for image "+ itemId +": "+ (string) body);
+        } else if(request_id = http_request_comments) {
+            parse_comments(body);
+        // HTTP response which isn't requested?
+        } else {
+            return;
+        }
+    }
+
+    /**
+     * Initial actions when entering the presentation state
+     */
+    state_entry() {
+        // Close any open menu's
+        close_menu();
+        // Remove old main listener
+        llListenRemove(mListener);
+
+        // Listen at channel
+        mListener = llListen(channel,"", userUuid,"");
+
+        // Load presentations
+        load_users_files();
+    }
+
+    /**
+     * Actions performed when a user touches the object
+     */
+    touch_start(integer totalNumber) {
+        // Close any open menu's
+        close_menu();
+
+        // Get the toucher's UUID
+        userUuid = llDetectedKey(0);
+        // Get the object's UUID
+        objectUuid = llGetKey();
+
+        // Listen at channel
+        mListener = llListen(channel,"", userUuid,"");
+
+        // Open menu when continuing usage
+        if(media == 1) {
+            open_menu(userUuid, imageNavigationText, imageNavigationButtons);
+        // Open images menu
+        } else {
+            load_users_files();
+        }
+    }
+
+    /**
+     * Actions performed when timer is finished
+     */
+    timer() {
+        close_menu();
+    }
+}
 /**
  * State when object is turned off
  */

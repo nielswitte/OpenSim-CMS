@@ -133,7 +133,7 @@ default {
      * Actions performed when entering the default state
      */
     state_entry() {
-        if(debug) llInstantMessage(userUuid, "[Debug] Chatter disabled.");
+        llSay(0, "[Debug] Chatter disabled.");
         llSetText("", <0,0,1>, 1.0);
 
         // SET COLOR RED
@@ -156,7 +156,7 @@ default {
  */
 state startup {
     state_entry() {
-        if(debug) llInstantMessage(userUuid, "[Debug] Chatter starting up!");
+        llSay(0, "Chatter starting up!");
         // SET COLOR ORANGE
         llSetColor(<255, 200, 0>, ALL_SIDES);
 
@@ -208,7 +208,7 @@ state chatting {
      * Actions performed when entering the default state
      */
     state_entry() {
-        if(debug) llInstantMessage(userUuid, "[Debug] Chatting enabled!");
+        llSay(0, "Chatting enabled!");
         // SET COLOR GREEN
         llSetColor(<0, 255, 0>, ALL_SIDES);
 

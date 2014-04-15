@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the Document controller
  *
  * @author Niels Witte
- * @version 0.1
- * @date April 4th, 2014
+ * @version 0.1a
+ * @date April 14th, 2014
  * @since April 4th, 2014
  */
 class DocumentController {
@@ -46,7 +46,7 @@ class DocumentController {
             'title'         => $db->escape($parameters['title']),
             'type'          => $db->escape($parameters['type']),
             'ownerId'       => $db->escape(\Auth::getUser()->getId()),
-            'creationDate'  => $db->escape(date('Y-m-d H:m:s')),
+            'creationDate'  => $db->now(),
             'file'          => $db->escape('source.'. $extension)
         );
         $fileId = $db->insert('documents', $data);

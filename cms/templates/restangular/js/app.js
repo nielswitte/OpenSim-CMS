@@ -147,11 +147,13 @@ angularRest.service('Cache', ['$cacheFactory', function($cacheFactory) {
         // Option to clear the cache
         this.clearCache = function() {
             cache.removeAll();
+            return true;
         };
 
         // Option to clear specific cache
         this.clearCachedUrl = function(url) {
             cache.remove(url);
+            return true;
         };
     }]
 );
@@ -173,7 +175,7 @@ angularRest.factory('Page', function() {
 angularRest.config(['RestangularProvider', function(RestangularProvider) {
         var timeout;
         RestangularProvider.setBaseUrl('' + server_address + base_url + '/api');
-        RestangularProvider.setDefaultHttpFields({cache: false, timeout: 30000});
+        RestangularProvider.setDefaultHttpFields({cache: false, timeout: (parseInt(time_out) * 1000)});
 
         // Add token to request when available (this line is required for page refreshes to keep the token)
         if(sessionStorage.token && sessionStorage.tokenTimeOut >= moment().unix()) {
@@ -182,7 +184,7 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
 
         RestangularProvider.addRequestInterceptor(function() {
             // Hide loading screen after 30 seconds
-            timeout = setTimeout(function() { jQuery('#loading').hide(); }, 30000);
+            timeout = setTimeout(function() { jQuery('#loading').hide(); }, (parseInt(time_out) * 1000));
         });
 
         RestangularProvider.setErrorInterceptor(function(resp) {
@@ -204,7 +206,7 @@ angularRest.config(['RestangularProvider', function(RestangularProvider) {
 // Restangular service with cache
 angularRest.factory('RestangularCache', function(Restangular) {
     return Restangular.withConfig(function(RestangularProvider) {
-        RestangularProvider.setDefaultHttpFields({cache: true, timeout: 30000});
+        RestangularProvider.setDefaultHttpFields({cache: true, timeout: (parseInt(time_out) * 1000)});
     });
 });
 
@@ -244,7 +246,7 @@ angularRest.config(function($alertProvider, $tooltipProvider, $timepickerProvide
 
 // Add opensim protocol to safe list
 angularRest.config(["$compileProvider", function($compileProvider) {
-        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|opensim):/);
+        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|opensim|hop):/);
         // Angular before v1.2 uses $compileProvider.urlSanitizationWhitelist(...)
     }]
 );

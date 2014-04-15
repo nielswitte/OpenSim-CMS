@@ -10,7 +10,8 @@ require_once dirname(__FILE__) .'/user.php';
  * It adds additional functions for the user to support logging in and out
  *
  * @author Niels Witte
- * @version 0.1
+ * @version 0.2
+ * @date April 15th, 2014
  * @since February 19th, 2014
  */
 class UserLoggedIn extends User implements SimpleModel {
@@ -18,10 +19,11 @@ class UserLoggedIn extends User implements SimpleModel {
      * Creates a new user with the given ID and UUID
      *
      * @param integer $id - [Optional]
-     * @param string $userUUID - [Optional]
+     * @param string $username - [Optional]
+     * @param string $email - [Optional]
      */
-    public function __construct($id = -1, $userUUID = '') {
-        parent::__construct($id, $userUUID);
+    public function __construct($id = -1, $username = '', $email = '') {
+        parent::__construct($id, $username, $email);
     }
 
     /**

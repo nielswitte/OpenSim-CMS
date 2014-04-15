@@ -5,6 +5,7 @@ defined('EXEC') or die('Config not loaded');
 
 require_once dirname(__FILE__) .'/module.php';
 require_once dirname(__FILE__) .'/../models/grid.php';
+require_once dirname(__FILE__) .'/../controllers/gridController.php';
 require_once dirname(__FILE__) .'/../models/region.php';
 require_once dirname(__FILE__) .'/../controllers/regionController.php';
 
@@ -13,8 +14,8 @@ require_once dirname(__FILE__) .'/../controllers/regionController.php';
  * Implements the functions called on the Grid
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 1st, 2014
+ * @version 0.3s
+ * @date April 14th, 2014
  * @since February 24th, 2014
  */
 class Grid extends Module{
@@ -39,6 +40,7 @@ class Grid extends Module{
     public function setRoutes() {
         $this->api->addRoute("/^\/grids\/?$/",                                       'getGrids',             $this, 'GET',  \Auth::READ);  // Get a list with grids
         $this->api->addRoute("/^\/grid\/(\d+)\/?$/",                                 'getGridById',          $this, 'GET',  \Auth::READ);  // Get grid information by ID
+        $this->api->addRoute("/^\/grid\/(\d+)\/regions\/?$/",                        'loadRegionsFromGrid',  $this, 'POST', \Auth::EXECUTE);  // Attempts to automatically get regions from the given grid
         $this->api->addRoute("/^\/grid\/(\d+)\/region\/([a-z0-9-]{36})\/?$/",        'getRegionByUuid',      $this, 'GET',  \Auth::READ);  // Get information about the given region
         $this->api->addRoute("/^\/grid\/(\d+)\/region\/([a-z0-9-]{36})\/image\/?$/", 'getRegionImageByUuid', $this, 'GET',  \Auth::READ);  // Get the map of the region
     }
@@ -175,5 +177,21 @@ class Grid extends Module{
                 throw new \Exception('UUID isn\'t a region on this server', 2);
             }
         }
+    }
+
+    public function loadRegionsFromGrid($args) {
+        $gridId     = $args[1];
+        $grid       = new \Models\Grid($gridId);
+        $grid->getInfoFromDatabase(FALSE);
+        $gridCtrl   = new \Controllers\GridController($grid);
+        $data       = $gridCtrl->loadRegionDataFromOpenSim();
+
+        // Format the result
+        $result = array(
+            'success'           => ($data !== FALSE ? TRUE : FALSE),
+            'regionsUpdated'    => ($data !== FALSE ? $data : 0)
+        );
+
+        return $result;
     }
 }
