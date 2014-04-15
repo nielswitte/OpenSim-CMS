@@ -93,6 +93,20 @@ CREATE TABLE IF NOT EXISTS `documents` (
 -- Data exporteren was gedeselecteerd
 
 
+-- Structuur van  tabel OpenSim-CMS.document_files_cache wordt geschreven
+CREATE TABLE IF NOT EXISTS `document_files_cache` (
+  `fileId` int(11) NOT NULL AUTO_INCREMENT,
+  `cacheId` int(11) NOT NULL,
+  PRIMARY KEY (`fileId`,`cacheId`),
+  KEY `FK_document_files_cache_cached_assets` (`cacheId`),
+  KEY `fileId` (`fileId`),
+  CONSTRAINT `FK_document_files_cache_cached_assets` FOREIGN KEY (`cacheId`) REFERENCES `cached_assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_document_files_cache_documents` FOREIGN KEY (`fileId`) REFERENCES `documents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Data exporteren was gedeselecteerd
+
+
 -- Structuur van  tabel OpenSim-CMS.document_pages wordt geschreven
 CREATE TABLE IF NOT EXISTS `document_pages` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -111,8 +125,9 @@ CREATE TABLE IF NOT EXISTS `document_pages_cache` (
   `cacheId` int(11) NOT NULL,
   PRIMARY KEY (`pageId`,`cacheId`),
   KEY `FK_document_pages_cache_cached_assets` (`cacheId`),
-  CONSTRAINT `FK_document_pages_cache_document_pages` FOREIGN KEY (`pageId`) REFERENCES `document_pages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_document_pages_cache_cached_assets` FOREIGN KEY (`cacheId`) REFERENCES `cached_assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `pageId` (`pageId`),
+  CONSTRAINT `FK_document_pages_cache_cached_assets` FOREIGN KEY (`cacheId`) REFERENCES `cached_assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_document_pages_cache_document_pages` FOREIGN KEY (`pageId`) REFERENCES `document_pages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- Data exporteren was gedeselecteerd
@@ -176,7 +191,7 @@ CREATE TABLE IF NOT EXISTS `grid_regions` (
   `name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (`uuid`,`gridId`),
   KEY `FK_grid_regions_grids` (`gridId`),
-  CONSTRAINT `FK_grid_regions_grids` FOREIGN KEY (`gridId`) REFERENCES `grids` (`id`) ON DELETE CASCADE
+  CONSTRAINT `FK_grid_regions_grids` FOREIGN KEY (`gridId`) REFERENCES `grids` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
@@ -193,8 +208,8 @@ CREATE TABLE IF NOT EXISTS `meetings` (
   PRIMARY KEY (`id`),
   KEY `FK_meetings_users` (`userId`),
   KEY `FK_meetings_meeting_rooms` (`roomId`),
-  CONSTRAINT `FK_meetings_meeting_rooms` FOREIGN KEY (`roomId`) REFERENCES `meeting_rooms` (`id`),
-  CONSTRAINT `FK_meetings_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`)
+  CONSTRAINT `FK_meetings_meeting_rooms` FOREIGN KEY (`roomId`) REFERENCES `meeting_rooms` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `FK_meetings_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
@@ -210,8 +225,8 @@ CREATE TABLE IF NOT EXISTS `meeting_agenda_items` (
   PRIMARY KEY (`id`,`meetingId`),
   KEY `FK_meeting_agenda_items_meetings` (`meetingId`),
   KEY `FK_meeting_agenda_items_meeting_agenda_items` (`parentId`),
-  CONSTRAINT `FK_meeting_agenda_items_meeting_agenda_items` FOREIGN KEY (`parentId`) REFERENCES `meeting_agenda_items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK_meeting_agenda_items_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `FK_meeting_agenda_items_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_meeting_agenda_items_meeting_agenda_items` FOREIGN KEY (`parentId`) REFERENCES `meeting_agenda_items` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
@@ -224,8 +239,8 @@ CREATE TABLE IF NOT EXISTS `meeting_documents` (
   `agendaId` int(11) NOT NULL,
   PRIMARY KEY (`meetingId`,`documentId`),
   KEY `FK__documents` (`documentId`),
-  CONSTRAINT `FK__documents` FOREIGN KEY (`documentId`) REFERENCES `documents` (`id`),
-  CONSTRAINT `FK__meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`)
+  CONSTRAINT `FK__meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK__documents` FOREIGN KEY (`documentId`) REFERENCES `documents` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
@@ -274,8 +289,8 @@ CREATE TABLE IF NOT EXISTS `meeting_rooms` (
   PRIMARY KEY (`id`),
   KEY `FK_meeting_rooms_grid_regions` (`regionUuid`),
   KEY `FK_meeting_rooms_grids` (`gridId`),
-  CONSTRAINT `FK_meeting_rooms_grids` FOREIGN KEY (`gridId`) REFERENCES `grid_regions` (`gridId`),
-  CONSTRAINT `FK_meeting_rooms_grid_regions` FOREIGN KEY (`regionUuid`) REFERENCES `grid_regions` (`uuid`)
+  CONSTRAINT `FK_meeting_rooms_grids` FOREIGN KEY (`gridId`) REFERENCES `grids` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_meeting_rooms_grid_regions` FOREIGN KEY (`regionUuid`) REFERENCES `grid_regions` (`uuid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
