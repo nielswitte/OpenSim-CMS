@@ -1,15 +1,14 @@
 # OpenSim-CMS
-
-A Content Management System (CMS) for OpenSim. Uses the 0.8 development versions of OpenSim to ensure JSON support. Uses JSON to serve data from and to OpenSim.
+A Content Management System (CMS) for [OpenSim](http://opensimulator.org). Uses the 0.8 development versions of OpenSim to ensure JSON support. Uses JSON to serve data from and to OpenSim.
 Also includes a couple of example scripts to be used in OpenSim in the assets folder. Such as the `presenterScreen.lsl` which enables you to access
 presentations created in the CMS.
 
-This project is based on the MVC pattern and uses Apache web server with PHP5.4+ and a MySQL database. The API is RESTful and provides the basic GET, POST, PUT and DELETE functionalities.
+This project is based on the MVC pattern and uses [Apache web server](https://httpd.apache.org/) with [PHP5.4+](http://www.php.net) and a [MySQL](http://www.mysql.com) database. The API is RESTful and provides the basic `GET`, `POST`, `PUT` and `DELETE` functionalities.
 
-The CMS itself is build with AngularJS and RestAngular allowing it to remain separated from the Model and Controller and access only the API.
+The CMS itself is build with [AngularJS](http://www.angularjs.org) and [RestAngular](https://github.com/mgonto/restangular) allowing it to remain separated from the Model and Controller and access only the API.
 
 ## Documentation
-The [docs](docs) folder contains the documentation of the [installation](docs/Installation/Installation.html) and usage of the [API](docs/API/API.html).
+The [docs](docs) folder contains the documentation of the [installation](Installation/Installation.html) and usage of the [API](API/API.html).
 
 ## Credits
 Kudos to those who created the packages and classes which are used by this program. If I forgot someone, please create a new issue and I will update the list.
