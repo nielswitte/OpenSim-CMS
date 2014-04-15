@@ -30,6 +30,7 @@ defined('EXEC') or die('Config not loaded');
         <script type="text/javascript">
             var server_address  = "<?php echo SERVER_PROTOCOL; ?>://<?php echo SERVER_ADDRESS; ?>";
             var base_url        = "<?php echo SERVER_ROOT; ?>";
+            var time_out        = "<?php echo SERVER_TIMEOUT; ?>";
         </script>
     </head>
     <body>
