@@ -9,8 +9,8 @@ require_once dirname(__FILE__) .'/module.php';
  * Implements the functions for authentication
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 1st, 2014
+ * @version 0.3
+ * @date April 15th, 2014
  * @since February 24th, 2014
  */
 class Auth extends Module {
@@ -46,7 +46,11 @@ class Auth extends Module {
         $db                     = \Helper::getDB();
         // Input parameters
         $input                  = \Helper::getInput(TRUE);
-        $username               = isset($input['username']) ? $input['username'] : '';
+        // Login with username (no valid email address used)
+        $username               = (isset($input['username']) && !filter_var($input['username'], FILTER_VALIDATE_EMAIL) ? $input['username'] : '');
+        // Login with emailaddress
+        $email                  = (isset($input['username']) && filter_var($input['username'], FILTER_VALIDATE_EMAIL) ? $input['username'] : '');
+        // Get password and IP
         $password               = isset($input['password']) ? $input['password'] : '';
         $ip                     = isset($input['ip']) ? $input['ip'] : FALSE;
 
@@ -66,7 +70,7 @@ class Auth extends Module {
             throw new \Exception('Not allowed to login as OpenSim outside the Grid', 2);
         }
 
-        $user                   = new \Models\UserLoggedIn($userId, $username);
+        $user                   = new \Models\UserLoggedIn($userId, $username, $email);
         $user->getInfoFromDatabase();
         $userCtrl               = new \Controllers\UserController($user);
         $validRequest           = $userCtrl->checkPassword($password);

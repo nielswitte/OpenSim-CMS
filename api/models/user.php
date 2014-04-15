@@ -9,8 +9,8 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class is the user model
  *
  * @author Niels Witte
- * @version 0.4
- * @date April 9th, 2014
+ * @version 0.5
+ * @date April 15th, 2014
  * @since February 10th, 2014
  */
 class User implements SimpleModel {
@@ -56,7 +56,12 @@ class User implements SimpleModel {
         if($this->getUsername() != '') {
             $db->where('username', $db->escape($this->getUsername()));
         }
-        if($this->getUsername() != '' || $this->getId() > -1) {
+        // Based on Email
+        if($this->getEmail() != '') {
+            $db->where('email', $db->escape($this->getEmail()));
+        }
+        // Check if at least one parameter (Username, ID or Email) is available to login with
+        if($this->getUsername() != '' || $this->getId() > -1 || $this->getEmail() != '') {
             $user = $db->getOne('users');
 
             // Results!
@@ -68,10 +73,10 @@ class User implements SimpleModel {
                 $this->email            = $user['email'];
                 $this->lastLogin        = $user['lastLogin'];
             } else {
-                throw new \Exception("User not found", 3);
+                throw new \Exception('User not found', 3);
             }
         } else {
-            throw new \Exception("No username or ID provided", 4);
+            throw new \Exception('No username, E-mail or ID provided', 4);
         }
     }
 
