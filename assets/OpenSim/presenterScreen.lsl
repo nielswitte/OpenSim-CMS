@@ -108,7 +108,7 @@ integer IsInteger(string var) {
 /**
  * Sets the UUID of the given element
  *
- * @param string type - [slide, page]
+ * @param string type - [slide, page, image]
  * @param integer id - number of the element, for example slide number
  * @param key uuid - the element's UUID
  */
@@ -119,8 +119,8 @@ set_uuid_of_object(string type, integer id, key uuid) {
         http_request_set = llHTTPRequest(serverUrl +"/presentation/"+ itemId +"/slide/number/"+ id +"/?token="+ APIToken, [HTTP_METHOD, "PUT", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
     } else if(type == "page") {
         http_request_set = llHTTPRequest(serverUrl +"/document/"+ itemId +"/page/number/"+ id +"/?token="+ APIToken, [HTTP_METHOD, "PUT", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
-    } else {
-
+    } else if(type == "image") {
+        http_request_set = llHTTPRequest(serverUrl +"/file/"+ itemId +"/image/?token="+ APIToken, [HTTP_METHOD, "PUT", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
     }
 }
 
@@ -939,7 +939,7 @@ state image {
         // Only execute when a media object has been loaded
         if(media == 1) {
             if(llList2String(commands, 0) == "Comments") {
-                load_item_comments((item - 1), "image");
+                load_item_comments((item - 1), "file");
             // Invalid command
             } else {
                 // Other
@@ -987,11 +987,24 @@ state image {
             itemsList           = empty;
             itemIds             = empty;
 
+            string imageUuid     = "";
+            string imageExpired  = "";
+            // Only process if there is a cache (to prevent console warnings)
+            if(JsonGetJson(json_body, "cache") != "[]") {
+                imageUuid        = JsonGetValue(json_body, "cache.{"+ serverId +"}.uuid");
+                imageExpired     = JsonGetValue(json_body, "cache.{"+ serverId +"}.isExpired");
+            }
             string imageUrl      = JsonGetValue(json_body, "url") +"image/";
             itemIds             += [JsonGetValue(json_body, "id")];
-
-            itemsList += [imageUrl];
-            if(debug) llInstantMessage(userUuid, "[Debug] use URL ("+ imageUrl +") for image");
+            // UUID set and not expired?
+            if(imageUuid != "" && imageExpired == "0") {
+                itemsList += [(key) imageUuid];
+                if(debug) llInstantMessage(userUuid, "[Debug] use UUID ("+ imageUuid +") for image");
+            // Use URL
+            } else {
+                itemsList += [imageUrl];
+                if(debug) llInstantMessage(userUuid, "[Debug] use URL ("+ imageUrl +") for image");
+            }
 
             // Count the pages
             totalItems = 1;
@@ -1038,6 +1051,9 @@ state image {
             imagesButtons += ["Main","Quit","Load #"];
             // Open presentation selection menu
             open_menu(userUuid, "Found "+ imagesCount +" document(s).\nShowing only the latest 9 images below.\nCommand: '/"+ channel +" Load <#>' can be used to load an image that is not listed.\nIf your avatar is not linked to your CMS user account, the list will be empty." , imagesButtons);
+        // Update image uuid
+        } else if(request_id = http_request_set) {
+            if(debug) llInstantMessage(userUuid, "[Debug] UUID set for image "+ itemId +": "+ (string) body);
         } else if(request_id = http_request_comments) {
             parse_comments(body);
         // HTTP response which isn't requested?
