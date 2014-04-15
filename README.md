@@ -9,7 +9,7 @@ This project is based on the MVC pattern and uses Apache web server with PHP5.4+
 The CMS itself is build with AngularJS and RestAngular allowing it to remain separated from the Model and Controller and access only the API.
 
 ## Documentation
-The [docs](docs) folder contains the documentation of the installation and usage of the API.
+The [docs](docs) folder contains the documentation of the [installation](docs/01_Installation) and usage of the [API](docs/02_API).
 
 ## Credits
 Kudos to those who created the packages and classes which are used by this program.
