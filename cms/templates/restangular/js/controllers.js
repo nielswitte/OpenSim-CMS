@@ -757,7 +757,7 @@ angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Pa
         // Returns the list with the full path to the comment in context
         $scope.showComment = function(id) {
             RestangularCache.one('comment', id).one('parents').get().then(function(parentsResponse) {
-                if(parentsResponse[0] == 'presentation' || parentsResponse[0] == 'document') {
+                if(parentsResponse[0] == 'presentation' || parentsResponse[0] == 'document' || parentsResponse[0] == 'file') {
                     if(parentsResponse[2] == 'slide') {
                         $location.path('document/'+ parentsResponse[1] +'/slide/'+ parentsResponse[3]);
                     } else if(parentsResponse[2] == 'page') {
