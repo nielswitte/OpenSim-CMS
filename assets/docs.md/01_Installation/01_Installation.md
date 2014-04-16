@@ -17,7 +17,7 @@ MySQL database and importing the structure from the `database.sql` file in the `
 Some of the functions for the processing of documents and presentations rely on `pdftoppm`. This program, located in `poppler-utils`, needs to be installed on your Linux server
 for conversion of PDF to images to work.
 
-On Ubuntu this can be done by using: `apt-get isntall poppler-utils`.
+On Ubuntu this can be done by using: `apt-get install poppler-utils`.
 
 # Apache
 Apache requires `mod_rewrite` and optionally `mod_expires`. In addition PHP 5.4 or higher is required with XML and GD support.

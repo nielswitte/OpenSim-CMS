@@ -19,6 +19,10 @@ var angularRest = angular.module('OpenSim-CMS', [
         templateUrl: partial_path +'/document/documents.html',
         controller: 'documentsController',
         requireLogin: true
+    }).when('/documents/:paginationPage', {
+        templateUrl: partial_path +'/document/documents.html',
+        controller: 'documentsController',
+        requireLogin: true
     }).when('/document/:documentId', {
         templateUrl: partial_path +'/document/document.html',
         controller: 'documentController',
@@ -75,6 +79,10 @@ var angularRest = angular.module('OpenSim-CMS', [
         controller: 'userController',
         requireLogin: true
     }).when('/users', {
+        templateUrl: partial_path +'/user/users.html',
+        controller: 'usersController',
+        requireLogin: true
+    }).when('/users/:paginationPage', {
         templateUrl: partial_path +'/user/users.html',
         controller: 'usersController',
         requireLogin: true

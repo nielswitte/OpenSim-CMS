@@ -38,8 +38,8 @@ class User extends Module {
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/^\/users\/?$/",                                          'getUsers',                 $this, 'GET',    \Auth::READ);     // Gets a list of all users
-        $this->api->addRoute("/^\/users\/(\d+)\/?$/",                                   'getUsers',                 $this, 'GET',    \Auth::READ);     // Gets a list of all users starting at the given offset
+        $this->api->addRoute("/^\/users\/?$/",                                          'getUsers',                 $this, 'GET',    \Auth::READ);     // Gets a list of 50 users
+        $this->api->addRoute("/^\/users\/(\d+)\/?$/",                                   'getUsers',                 $this, 'GET',    \Auth::READ);     // Gets a list of 50 users starting at the given offset
         $this->api->addRoute("/^\/users\/([a-zA-Z0-9-_\.]{3,}+)\/?$/",                  'getUsersByUsername',       $this, 'GET',    \Auth::READ);     // Gets a list of all users with usernames matching the search of atleast 3 characters
         $this->api->addRoute("/^\/user\/?$/",                                           'createUser',               $this, 'POST',   \Auth::WRITE);    // Create a new CMS user
         $this->api->addRoute("/^\/user\/(\d+)\/?$/",                                    'getUserById',              $this, 'GET',    \Auth::READ);     // Get a user by ID
@@ -213,7 +213,7 @@ class User extends Module {
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 users from the given offset
         $db->orderBy('LOWER(username)', 'ASC');
-        $resutls        = $db->get('users', array($args[1], 50));
+        $resutls        = $db->get('users', array($args[1], 1));
         // Process results
         $data           = array();
         foreach($resutls as $result) {

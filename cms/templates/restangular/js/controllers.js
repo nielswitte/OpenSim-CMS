@@ -392,6 +392,41 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
         };
     }]
 );
+/****************************************************************************************************************************************************
+ *  _____            _             _   _
+ * |  __ \          (_)           | | (_)
+ * | |__) |_ _  __ _ _ _ __   __ _| |_ _  ___  _ __
+ * |  ___/ _` |/ _` | | '_ \ / _` | __| |/ _ \| '_ \
+ * | |  | (_| | (_| | | | | | (_| | |_| | (_) | | | |
+ * |_|   \__,_|\__, |_|_| |_|\__,_|\__|_|\___/|_| |_|
+ *              __/ |
+ *             |___/
+ */
+// paginationController -----------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('paginationController', ['RestangularCache', '$scope', '$sce', '$route', '$alert', 'Cache', function(RestangularCache, $scope, $sce, $route, $alert, Cache) {
+        $scope.pagination = $scope.$parent.pagination;
+
+        // Add previous and current page to pagination
+        for(var i = 1; i <= $scope.pagination.start; i++) {
+            $scope.pagination.pages.push({page: i});
+        }
+
+        var getNextPaginationList = function(offset) {
+            RestangularCache.one($scope.pagination.type, offset).get().then(function(resp) {
+                if(resp.length > 0) {
+                    var pageNr = $scope.pagination.pages.length + 1;
+                    $scope.pagination.pages.push({page: pageNr});
+                }
+                if(resp.length >= $scope.pagination.perPage) {
+                    getNextPaginationList(offset + $scope.pagination.perPage);
+                }
+            });
+        };
+
+        // Load the next page
+        getNextPaginationList($scope.pagination.start * $scope.pagination.perPage);
+    }]
+);
 
 /****************************************************************************************************************************************************
  *   _    _
@@ -782,19 +817,42 @@ angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Pa
  *
  */
 // documentsController ------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$modal', 'Cache', '$route',
-    function(Restangular, RestangularCache, $scope, Page, $alert, $modal, Cache, $route) {
+angularRest.controller('documentsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$modal', 'Cache', '$route', '$routeParams',
+    function(Restangular, RestangularCache, $scope, Page, $alert, $modal, Cache, $route, $routeParams) {
         $scope.orderByField         = 'title';
         $scope.reverseSort          = false;
         var requestDocumentsUrl     = '';
         $scope.documentsList        = [];
         $scope.types                = ['document', 'image', 'presentation'];
 
+        // For loading more than the first page
+        var paginationOffset = 1;
+        var perPage          = 50;
+        if($routeParams.paginationPage !== undefined) {
+            paginationOffset = $routeParams.paginationPage;
+        }
+
+        // Show pagination and set the type
+        $scope.showPagination = function() {
+            if($scope.documentsList.length >= perPage || paginationOffset > 1) {
+                $scope.pagination = {
+                    type: 'files',
+                    url: 'documents',
+                    perPage: perPage,
+                    start: paginationOffset,
+                    pages: []
+                };
+                return 'templates/restangular/html/bootstrap/pagination.html';
+            } else {
+                return false;
+            }
+        };
+
         // Show loading screen
         jQuery('#loading').show();
 
         // Get a list with documents
-        RestangularCache.all('files').getList().then(function(documentsResponse) {
+        RestangularCache.one('files', (paginationOffset - 1) * perPage).getList().then(function(documentsResponse) {
             $scope.documentsList = documentsResponse;
             Page.setTitle('Files');
             requestDocumentsUrl = documentsResponse.getRequestedUrl();
@@ -2076,16 +2134,39 @@ angularRest.controller('slideController', ['RestangularCache', '$scope', 'Page',
  *
  */
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', 'Cache', '$route', function(RestangularCache, Restangular, $scope, Page, $modal, $alert, Cache, $route) {
+angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', 'Cache', '$route', '$routeParams', function(RestangularCache, Restangular, $scope, Page, $modal, $alert, Cache, $route, $routeParams) {
         $scope.orderByField     = 'username';
         $scope.reverseSort      = false;
         var requestUsersUrl     = '';
         $scope.usersList        = [];
 
+        // For loading more than the first page
+        var paginationOffset = 1;
+        var perPage          = 50;
+        if($routeParams.paginationPage !== undefined) {
+            paginationOffset = $routeParams.paginationPage;
+        }
+
+        // Show pagination and set the type
+        $scope.showPagination = function() {
+            if($scope.usersList.length >= perPage || paginationOffset > 1) {
+                $scope.pagination = {
+                    type: 'users',
+                    url: 'users',
+                    perPage: perPage,
+                    start: paginationOffset,
+                    pages: []
+                };
+                return 'templates/restangular/html/bootstrap/pagination.html';
+            } else {
+                return false;
+            }
+        };
+
         // Remove loading screen
         jQuery('#loading').show();
 
-        RestangularCache.all('users').getList().then(function(usersResponse) {
+        RestangularCache.one('users', (paginationOffset - 1) * perPage).getList().then(function(usersResponse) {
             $scope.usersList = usersResponse;
             Page.setTitle('Users');
             requestUsersUrl = usersResponse.getRequestedUrl();

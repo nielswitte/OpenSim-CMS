@@ -11,8 +11,8 @@ require_once dirname(__FILE__) .'/../controllers/commentController.php';
  * Implements the functions for comments
  *
  * @author Niels Witte
- * @version 0.3a
- * @date April 8th, 2014
+ * @version 0.3b
+ * @date April 16th, 2014
  * @since March 28th, 2014
  */
 class Comment extends Module {
@@ -39,7 +39,7 @@ class Comment extends Module {
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/^\/comments\/([a-z]+)\/(\d+)\/?$/",                      'getComments',           $this, 'GET',       \Auth::READ);    // Get list with comments
+        $this->api->addRoute("/^\/comments\/([a-z]+)\/(\d+)\/?$/",                      'getComments',           $this, 'GET',       \Auth::READ);    // Get list with all comments
         $this->api->addRoute("/^\/comments\/(\d+)\/?$/",                                'getCommentsByTime',     $this, 'GET',       \Auth::READ);    // Get 50 comments after a given timestamp
         $this->api->addRoute("/^\/comments\/(\d+)\/(\d+)\/?$/",                         'getCommentsByTime',     $this, 'GET',       \Auth::READ);    // Get 50 comments after a given timestamp with offset
         $this->api->addRoute("/^\/comment\/([a-z]+)\/(\d+)\/?$/",                       'createComment',         $this, 'POST',      \Auth::EXECUTE); // Create a new comment
