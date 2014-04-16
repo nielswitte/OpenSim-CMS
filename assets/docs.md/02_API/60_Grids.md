@@ -85,3 +85,12 @@ This will return a summary of the grid and regions, excluding the passwords.
     ]
 }
 ```
+
+
+## Automatically retrieve grid information
+When the grid is online, some XML requests can be performed to update the grid information,
+such as the grid's name.
+
+```http
+POST /api/grid/<GRID-ID>/opensim/ HTTP/1.1
+```

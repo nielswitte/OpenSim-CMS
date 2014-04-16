@@ -1194,6 +1194,19 @@ angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$s
             return sessionStorage.gridPermission >= EXECUTE;
         };
 
+        // Update grid from API
+        $scope.updateGrid = function() {
+            Cache.clearCachedUrl(gridRequestUrl);
+            Restangular.one('grid', $routeParams.gridId).one('opensim').post().then(function(gridResponse) {
+                 if(!gridResponse.success) {
+                    $alert({title: 'Error!', content: gridResponse.error, type: 'danger'});
+                } else {
+                    $alert({title: 'Grid updated!', content: 'The grid data has been updated with the information available from OpenSim. (You may need to refresh the page to see the changes)', type: 'success'});
+                    $route.reload();
+                }
+            });
+        };
+
         // Update grid data from API
         $scope.updateGridRegions = function() {
             Cache.clearCachedUrl(gridRequestUrl);

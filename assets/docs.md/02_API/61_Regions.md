@@ -34,6 +34,7 @@ POST /api/grid/<GRID-ID>/regions/ HTTP/1.1
 ```
 
 This will return the number of updated regions and a boolean indicating if the update succeeded.
+However, this only adds and updates regions, it does not remove regions that are listed in the CMS but do not exist anymore.
 
 ```json
 {
