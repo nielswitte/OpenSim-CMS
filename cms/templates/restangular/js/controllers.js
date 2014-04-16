@@ -608,7 +608,7 @@ angularRest.controller('toolbarController', ['$scope', 'Cache', '$location', '$a
  * |_____/ \__,_|___/_| |_|_.__/ \___/ \__,_|_|  \__,_|
  *
  */
-// documentsController ------------------------------------------------------------------------------------------------------------------------------
+// dashboardController ------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Page', '$sce', '$location', function(RestangularCache, $scope, Page, $sce, $location) {
         $scope.files     = [];
         $scope.meetings  = [];
@@ -817,8 +817,8 @@ angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Pa
  *
  */
 // documentsController ------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$modal', 'Cache', '$route', '$routeParams',
-    function(Restangular, RestangularCache, $scope, Page, $alert, $modal, Cache, $route, $routeParams) {
+angularRest.controller('documentsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$modal', 'Cache', '$route', '$routeParams', '$location',
+    function(Restangular, RestangularCache, $scope, Page, $alert, $modal, Cache, $route, $routeParams, $location) {
         $scope.orderByField         = 'title';
         $scope.reverseSort          = false;
         var requestDocumentsUrl     = '';
@@ -860,6 +860,31 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
             // Remove loading screen
             jQuery('#loading').hide();
         });
+
+
+        // Search for the given document title
+        var documentSearchResults = [];
+        $scope.documentBySearch   = "";
+        $scope.getDocumentByTitle = function($viewValue) {
+            var results = '';
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('files', $viewValue).get().then(function(documentsResponse) {
+                    documentSearchResults = documentsResponse;
+                    return documentsResponse;
+                });
+            }
+            return results;
+        };
+
+        // When selecting a document
+        $scope.selectDocument = function() {
+            for(var i = 0; i < documentSearchResults.length; i++) {
+                // Only add user when match found and not already listed
+                if(documentSearchResults[i].title == $scope.documentBySearch) {
+                    $location.path('document/'+ documentSearchResults[i].id);
+                }
+            }
+        };
 
         // Show/hide filters
         $scope.collapseFilter = true;
@@ -1461,13 +1486,12 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
 
         // Search for the given documents
         $scope.getDocumentByTitle = function($viewValue) {
-            if($viewValue != null && $viewValue.length >= 3) {
-                var results = RestangularCache.one('files', $viewValue).get().then(function(documentsResponse) {
+            var results = '';
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('files', $viewValue).get().then(function(documentsResponse) {
                     documentSearchResults = documentsResponse;
                     return documentsResponse;
                 });
-            } else {
-                var results = '';
             }
             return results;
         };
@@ -1509,13 +1533,12 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
 
         // Search for the given username
         $scope.getUserByUsername = function($viewValue) {
-            if($viewValue != null && $viewValue.length >= 3) {
-                var results = RestangularCache.one('users', $viewValue).get().then(function(usersResponse) {
+            var results = '';
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('users', $viewValue).get().then(function(usersResponse) {
                     usernameSearchResults = usersResponse;
                     return usersResponse;
                 });
-            } else {
-                var results = '';
             }
             return results;
         };
@@ -2134,7 +2157,8 @@ angularRest.controller('slideController', ['RestangularCache', '$scope', 'Page',
  *
  */
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', 'Cache', '$route', '$routeParams', function(RestangularCache, Restangular, $scope, Page, $modal, $alert, Cache, $route, $routeParams) {
+angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', 'Cache', '$route', '$routeParams', '$location',
+    function(RestangularCache, Restangular, $scope, Page, $modal, $alert, Cache, $route, $routeParams, $location) {
         $scope.orderByField     = 'username';
         $scope.reverseSort      = false;
         var requestUsersUrl     = '';
@@ -2166,6 +2190,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
         // Remove loading screen
         jQuery('#loading').show();
 
+        // Get list with users
         RestangularCache.one('users', (paginationOffset - 1) * perPage).getList().then(function(usersResponse) {
             $scope.usersList = usersResponse;
             Page.setTitle('Users');
@@ -2175,12 +2200,38 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
             jQuery('#loading').hide();
         });
 
+        // Toggle filters
         $scope.collapseFilter = true;
         $scope.toggleFilter = function() {
             $scope.collapseFilter = !$scope.collapseFilter;
             return $scope.collapseFilter;
         };
 
+        // Search for the given username
+        var usernameSearchResults = [];
+        $scope.userBySearch       = "";
+        $scope.getUserByUsername = function($viewValue) {
+            var results = '';
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('users', $viewValue).get().then(function(usersResponse) {
+                    usernameSearchResults = usersResponse;
+                    return usersResponse;
+                });
+            }
+            return results;
+        };
+
+        // When selecting an user
+        $scope.selectUser = function() {
+            for(var i = 0; i < usernameSearchResults.length; i++) {
+                // Only add user when match found and not already listed
+                if(usernameSearchResults[i].username == $scope.userBySearch) {
+                    $location.path('user/'+ usernameSearchResults[i].id);
+                }
+            }
+        };
+
+        // Save a new user
         $scope.saveUser = function() {
             // Show loading screen
             jQuery('#loading').show();

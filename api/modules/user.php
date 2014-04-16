@@ -213,7 +213,7 @@ class User extends Module {
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 users from the given offset
         $db->orderBy('LOWER(username)', 'ASC');
-        $resutls        = $db->get('users', array($args[1], 1));
+        $resutls        = $db->get('users', array($args[1], 50));
         // Process results
         $data           = array();
         foreach($resutls as $result) {
