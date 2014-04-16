@@ -6,7 +6,7 @@
 <head>
     <title>OpenSim-CMS</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="description" content="Documentation v0.7.2" />
+    <meta name="description" content="Documentation v0.8" />
     <meta name="author" content="OpenSim-CMS">
         <link rel="icon" href="../../img/favicon.png" type="image/x-icon">
         <!-- Mobile -->
@@ -65,13 +65,11 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>Documents                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Tuesday, April 15, 2014                                        </span>
+                                            Wednesday, April 16, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            1:16 PM                                        </span>
+                                            11:23 AM                                        </span>
                                 </div>
-                                                        <p>The documents API is quite similar to the Files API since it is a subset. The<br />
-main difference is that it will only return files with the type <code>document</code> and that documents have children<br />
-in the form of <code>pages</code>.</p>
+                                                        <p>The documents API is quite similar to the Files API since it is a subset. The main difference is that it will only return files with the type <code>document</code> and that documents have children in the form of <code>pages</code>.</p>
 
 <pre><code class="language-http">GET /api/documents/ HTTP/1.1
 </code></pre>
@@ -96,7 +94,8 @@ in the form of <code>pages</code>.</p>
             "firstName": "John",
             "lastName": "Doe",
             "email": "john@doe.com",
-            "picture": false
+            "picture": false,
+            "lastLogin": "2014-04-16 11:17:04"
         },
         "title": "OpenSim-CMS Documentation",
         "creationDate": "2014-04-14 15:55:31",
@@ -112,8 +111,7 @@ in the form of <code>pages</code>.</p>
 
 <h2>Get a single document</h2>
 
-<p>When retrieving a sinlg document you will get a lot of information, including a list with all pages<br />
-and their cache information.</p>
+<p>When retrieving a sinlg document you will get a lot of information, including a list with all pages and their cache information.</p>
 
 <pre><code class="language-http">GET /api/document/&lt;DOCUMENT-ID&gt;/ HTTP/1.1
 </code></pre>
@@ -129,7 +127,8 @@ and their cache information.</p>
         "firstName": "John",
         "lastName": "Doe",
         "email": "john@doe.com",
-        "picture": false
+        "picture": false,
+        "lastLogin": "2014-04-16 11:17:04"
     },
     "title": "OpenSim-CMS Documentation",
     "creationDate": "2014-04-14 15:55:31",
@@ -223,9 +222,7 @@ and their cache information.</p>
 
 <h2>Cache</h2>
 
-<p>When an page has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with<br />
-the page to speed up future use. The cache period (<code>FileCacheTimeout</code>) is set in the <code>FlotsamCache.ini</code> configuration and needs to be<br />
-matched by the configuration value for the grid in the CMS.</p>
+<p>When an page has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with the page to speed up future use. The cache period (<code>FileCacheTimeout</code>) is set in the <code>FlotsamCache.ini</code> configuration and needs to be matched by the configuration value for the grid in the CMS.</p>
 
 <pre><code class="language-http">PUT /api/document/&lt;ID&gt;/page/number/&lt;PAGE#&gt;/ HTTP/1.1
 </code></pre>

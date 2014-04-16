@@ -6,7 +6,7 @@
 <head>
     <title>OpenSim-CMS</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="description" content="Documentation v0.7.2" />
+    <meta name="description" content="Documentation v0.8" />
     <meta name="author" content="OpenSim-CMS">
         <link rel="icon" href="../img/favicon.png" type="image/x-icon">
         <!-- Mobile -->
@@ -65,15 +65,11 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>API                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Tuesday, April 15, 2014                                        </span>
+                                            Wednesday, April 16, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            1:16 PM                                        </span>
+                                            11:07 AM                                        </span>
                                 </div>
-                                                        <p>The OpenSim-CMS communicates with OpenSim objects through an JSON-API, based on REST.<br />
-For valid requests the <code>HTTP/1.1 200 OK</code> is used, for failures an exception is thrown by<br />
-the system and displayed as output with a <code>HTTP/1.1 400 Bad Request</code> header. For most functions<br />
-the user needs to be authorized, if the user is not authorized but should be, a <code>HTTP/1.1 401 Unauthorized</code><br />
-header is used.</p>
+                                                        <p>The OpenSim-CMS communicates with OpenSim objects through an JSON-API, based on REST. For valid requests the <code>HTTP/1.1 200 OK</code> is used, for failures an exception is thrown by the system and displayed as output with a <code>HTTP/1.1 400 Bad Request</code> header. For most functions the user needs to be authorized, if the user is not authorized but should be, a <code>HTTP/1.1 401 Unauthorized</code> header is used.</p>
 
 <h2>POST, PUT and DELETE</h2>
 
@@ -86,9 +82,7 @@ header is used.</p>
 
 <h2>Error messages</h2>
 
-<p>When the configuration value <code>SERVER_DEBUG</code> is set to <code>FALSE</code>, bad and unauthorized requests will provide,<br />
-beside the corresponding HTTP header, an exception message in JSON. For example the following message<br />
-is displayed when attempting to access a protected function without a valid API token.</p>
+<p>When the configuration value <code>SERVER_DEBUG</code> is set to <code>FALSE</code>, bad and unauthorized requests will provide, beside the corresponding HTTP header, an exception message in JSON. For example the following message is displayed when attempting to access a protected function without a valid API token.</p>
 
 <pre><code class="language-json">{
     "success": false,
@@ -96,8 +90,7 @@ is displayed when attempting to access a protected function without a valid API 
 }
 </code></pre>
 
-<p>When <code>SERVER_DEBUG</code> is set to <code>TRUE</code>, additional information will be displayed. Including the<br />
-file, line and stack trace of the error. It is recommended to disable debugging for public API servers.</p>
+<p>When <code>SERVER_DEBUG</code> is set to <code>TRUE</code>, additional information will be displayed. Including the file, line and stack trace of the error. It is recommended to disable debugging for public API servers.</p>
 
 <pre><code class="language-json">{
     "success": false,

@@ -6,7 +6,7 @@
 <head>
     <title>OpenSim-CMS</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="description" content="Documentation v0.7.2" />
+    <meta name="description" content="Documentation v0.8" />
     <meta name="author" content="OpenSim-CMS">
         <link rel="icon" href="../img/favicon.png" type="image/x-icon">
         <!-- Mobile -->
@@ -65,18 +65,15 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>Avatars                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Tuesday, April 15, 2014                                        </span>
+                                            Wednesday, April 16, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            1:16 PM                                        </span>
+                                            11:14 AM                                        </span>
                                 </div>
-                                                        <p>The CMS user can not be used in the OpenSim environment. OpenSim works with Avatars, which are independent of the CMS.<br />
-However, Avatars can be linked to an OpenSim-CMS user, to access data from a specific user.</p>
+                                                        <p>The CMS user can not be used in the OpenSim environment. OpenSim works with Avatars, which are independent of the CMS. However, Avatars can be linked to an OpenSim-CMS user, to access data from a specific user.</p>
 
 <h2>Link avatar to user</h2>
 
-<p>To match an UUID of a user to the user in the CMS the following command can be used.<br />
-Some form of authentication will be added later on. By sending a PUT request to the server with the CMS<br />
-username as parameter and use the UUID of the user in OpenSim as URL parameter.</p>
+<p>To match an UUID of a user to the user in the CMS the following command can be used. Some form of authentication will be added later on. By sending a PUT request to the server with the CMS username as parameter and use the UUID of the user in OpenSim as URL parameter.</p>
 
 <pre><code class="language-http">POST /api/grid/&lt;GRID-ID&gt;/avatar/&lt;UUID&gt;/ HTTP/1.1
 </code></pre>
@@ -100,21 +97,18 @@ username as parameter and use the UUID of the user in OpenSim as URL parameter.<
 
 <h2>Confirm avatar</h2>
 
-<p>Once an avatar is linked to a user account, it needs to be confirmed by the user. This can only be done<br />
-by the user himself.</p>
+<p>Once an avatar is linked to a user account, it needs to be confirmed by the user. This can only be done by the user himself.</p>
 
 <pre><code class="language-http">PUT /api/grid/&lt;GRID-ID&gt;/avatar/&lt;UUID&gt;/ HTTP/1.1
 </code></pre>
 
-<p>Because the token which is used for this request is matched to the userId, this will provide the additional<br />
-required information. Therefore no parameters are needed for this request.</p>
+<p>Because the token which is used for this request is matched to the userId, this will provide the additional required information. Therefore no parameters are needed for this request.</p>
 
 <p>This request will also return <code>"success": false</code> when the avatar is already confirmed.</p>
 
 <h2>Unlink an avatar</h2>
 
-<p>This unlinks an avatar from the user. Just like confirming, this can only be performed by the user account associated with<br />
-the link or when you have <code>WRITE</code> permissions for the <code>user</code> section. Please not that this will not remove the Avatar from OpenSim.</p>
+<p>This unlinks an avatar from the user. Just like confirming, this can only be performed by the user account associated with the link or when you have <code>WRITE</code> permissions for the <code>user</code> section. Please not that this will not remove the Avatar from OpenSim.</p>
 
 <pre><code class="language-http">DELETE /api/grid/&lt;GRID-ID&gt;/avatar/&lt;UUID&gt;/confirm/ HTTP/1.1
 </code></pre>
@@ -171,13 +165,14 @@ the link or when you have <code>WRITE</code> permissions for the <code>user</cod
 </table>
 
 <p>This request will return a JSON message with the result. It contains two or three elements.<br />
-1) success, a boolean wheter or not the request was processed successful. 2) Optional, only used when<br />
-the request is not successful. 3) the UUID of the newly created user, which is filled with zeros on<br />
-failure. Two examples of output are listed below, first a successful request,<br />
-second a failure because the user's first and lastname were already used.</p>
+* 1) success, a boolean wheter or not the request was processed successful.<br />
+* 2) Optional, only used when the request is not successful.<br />
+* 3) the UUID of the newly created user, which is filled with zeros on failure.</p>
+
+<p>Two examples of output are listed below, first a successful request, second a failure because the user's first and lastname were already used.</p>
 
 <p><em>WARNING</em> This way of avatar creation does not support special chars in the password. The following characters<br />
-can not be used in a password: <code>?{}&lt;&gt;;" '[]/\</code>. This will result in not being able to login in OpenSim.</p>
+can not be used in a password: <code>?{}&lt;&gt;;" '[]/\</code>. Somehow the characters are escaped by the XML parser but not unescaped when generating a password hash. This will result in not being able to login in OpenSim.</p>
 
 <pre><code class="language-json">{
     "success": true,
@@ -194,8 +189,7 @@ can not be used in a password: <code>?{}&lt;&gt;;" '[]/\</code>. This will resul
 
 <h2>Teleport an avatar to a location</h2>
 
-<p>To teleport a user you need at least the UUID of the user.<br />
-All other parameters are optional and listed in the table below.</p>
+<p>To teleport a user you need at least the UUID of the user. All other parameters are optional and listed in the table below.</p>
 
 <pre><code class="language-http">PUT /api/grid/&lt;GRID-ID&gt;/avatar/&lt;UUID&gt;/teleport/ HTTP/1.1
 </code></pre>

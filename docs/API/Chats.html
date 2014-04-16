@@ -6,7 +6,7 @@
 <head>
     <title>OpenSim-CMS</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="description" content="Documentation v0.7.2" />
+    <meta name="description" content="Documentation v0.8" />
     <meta name="author" content="OpenSim-CMS">
         <link rel="icon" href="../img/favicon.png" type="image/x-icon">
         <!-- Mobile -->
@@ -65,12 +65,11 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>Chats                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Tuesday, April 15, 2014                                        </span>
+                                            Wednesday, April 16, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            1:16 PM                                        </span>
+                                            11:25 AM                                        </span>
                                 </div>
-                                                        <p>Through the CMS it is possible to chat with users on the Grid. The following line will return the latest<br />
-50 chat messages on the given grid.</p>
+                                                        <p>Through the CMS it is possible to chat with users on the Grid. The following line will return the latest 50 chat messages on the given grid.</p>
 
 <pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/chats/ HTTP/1.1
 </code></pre>
@@ -80,8 +79,7 @@
 <pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/chats/&lt;UNIX-TIMESTAMP&gt;/ HTTP/1.1
 </code></pre>
 
-<p>This will return a list with chat messages and their sender. The <code>fromCMS</code> value is used to indicate if the message<br />
-was sent from the chat in the CMS (1) or was captured in the OpenSim environment (0).</p>
+<p>This will return a list with chat messages and their sender. The <code>fromCMS</code> value is used to indicate if the message was sent from the chat in the CMS (1) or was captured in the OpenSim environment (0).</p>
 
 <pre><code class="language-json">[
     {
@@ -92,7 +90,8 @@ was sent from the chat in the CMS (1) or was captured in the OpenSim environment
             "firstName": "John",
             "lastName": "Doe",
             "email": "john@doe.com",
-            "picture": false
+            "picture": false,
+            "lastLogin": "2014-04-16 11:17:04"
         },
         "message": "Hi Jane",
         "timestamp": "2014-04-08 13:15:03",
@@ -107,6 +106,7 @@ was sent from the chat in the CMS (1) or was captured in the OpenSim environment
             "lastName": "Doe",
             "email": "jane@doe.com",
             "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
+            "lastLogin": "2014-04-15 16:00:01"
         },
         "message": "Hello John",
         "timestamp": "2014-04-08 13:15:04",
@@ -118,9 +118,7 @@ was sent from the chat in the CMS (1) or was captured in the OpenSim environment
 
 <h2>Add chat</h2>
 
-<p>To add a line to the chat you require <code>WRITE</code> permissions for the chat section. For OpenSim to add a line to<br />
-the chat, the server first needs to match the Avatar to a user. Or when no match can be found, the server could use<br />
-0 as ID, and append the message with the Avatar's name.</p>
+<p>To add a line to the chat you require <code>WRITE</code> permissions for the chat section. For OpenSim to add a line to the chat, the server first needs to match the Avatar to a user. Or when no match can be found, the server could use 0 as ID, and append the message with the Avatar's name.</p>
 
 <p>The chats can be in an array or a just sent as a single element.</p>
 

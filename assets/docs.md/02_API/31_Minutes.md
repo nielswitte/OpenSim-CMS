@@ -4,8 +4,7 @@ The `meetingLogger.lsl` script has the ability to log the chat during a meeting.
 GET /api/meeting/<MEETING-ID>/minutes/ HTTP/1.1
 ```
 
-Just like the chat this can return a really long response. The response includes some basic information about the meeting which can be used to parse the
-minutes with more details.
+Just like the chat this can return a really long response. The response includes some basic information about the meeting which can be used to parse the minutes with more details.
 
 ```json
 {
@@ -20,7 +19,7 @@ minutes with more details.
         "lastName": "Doe",
         "email": "jane@doe.com",
         "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
-        "lastLogin": "2014-04-12 13:33:37"
+        "lastLogin": "2014-04-15 16:00:01"
     },
     "roomId": 2,
     "url": "http://localhost:80/OpenSim-CMS/api/meeting/43/",
@@ -57,7 +56,6 @@ minutes with more details.
         (...)
     ]
 }
-
 ```
 
 ## Add minutes to meeting
