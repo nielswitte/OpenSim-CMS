@@ -13,8 +13,8 @@ require_once dirname(__FILE__) .'/../controllers/fileController.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.5
- * @date April 15th, 2014
+ * @version 0.5a
+ * @date April 16th, 2014
  * @since March 3rd, 2014
  */
 class File extends Module{
@@ -280,7 +280,7 @@ class File extends Module{
         if($file->getType() == "image") {
             // Get grid details
             $grid       = new \Models\Grid($gridId);
-            $grid->getInfoFromDatabase();
+            $grid->getInfoFromDatabase(FALSE);
 
             // Update
             $fileCtrl   = new \Controllers\FileController($file);

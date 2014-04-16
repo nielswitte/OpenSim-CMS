@@ -13,8 +13,8 @@ require_once dirname(__FILE__) .'/../controllers/presentationController.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.4c
- * @date April 10th, 2014
+ * @version 0.4d
+ * @date April 16th, 2014
  * @since February 24th, 2014
  */
 class Presentation extends Module {
@@ -258,7 +258,7 @@ class Presentation extends Module {
         if($slide !== FALSE) {
             // Get grid details
             $grid           = new \Models\Grid($gridId);
-            $grid->getInfoFromDatabase();
+            $grid->getInfoFromDatabase(FALSE);
 
             // Update
             $slideCtrl      = new \Controllers\SlideController($slide);

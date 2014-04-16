@@ -14,7 +14,7 @@ require_once dirname(__FILE__) .'/../controllers/regionController.php';
  * Implements the functions called on the Grid
  *
  * @author Niels Witte
- * @version 0.4
+ * @version 0.4a
  * @date April 16th, 2014
  * @since February 24th, 2014
  */
@@ -60,7 +60,7 @@ class Grid extends Module{
         $data   = array();
         foreach($grids as $gridId) {
             $grid = new \Models\Grid($gridId['id']);
-            $grid->getInfoFromDatabase();
+            $grid->getInfoFromDatabase(TRUE);
             $data[] = $this->getGridData($grid);
         }
         return $data;
@@ -74,7 +74,7 @@ class Grid extends Module{
      */
     public function getGridById($args) {
         $grid       = new \Models\Grid($args[1]);
-        $grid->getInfoFromDatabase();
+        $grid->getInfoFromDatabase(TRUE);
 
         return $this->getGridData($grid);
     }
@@ -170,7 +170,7 @@ class Grid extends Module{
             throw new \Exception('Invalid UUID used', 1);
         } else {
             $grid       = new \Models\Grid($args[1]);
-            $grid->getInfoFromDatabase();
+            $grid->getInfoFromDatabase(FALSE);
             if($grid->getRegionByUuid($args[2]) !== FALSE) {
                 header('Content-Type: image/jpeg');
                 echo file_get_contents($grid->getOsProtocol() .'://'. $grid->getOsIp() .':'. $grid->getOsPort() .'/index.php?method=regionImage'. str_replace('-', '', $args[2]));
