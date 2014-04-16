@@ -17,8 +17,7 @@ GET /api/files/<SEARCH>/ HTTP/1.1
 ```
 
 ### User
-It is possible to retrieve a list with documents owned by a specific user. This can be done by
-using the user's ID:
+It is possible to retrieve a list with documents owned by a specific user. This can be done by using the user's ID:
 
 ```http
 GET /api/user/<USER-ID>/files/ HTTP/1.1
@@ -44,7 +43,8 @@ All the above functions will return a similar output, such as the example given 
             "firstName": "Jane",
             "lastName": "Doe",
             "email": "jane@doe.com",
-            "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/"
+            "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
+            "lastLogin": "2014-04-15 16:00:01"
         },
         "title": "OpenSim-CMS in a nutshell",
         "creationDate": "2014-04-15 09:13:30",
@@ -61,7 +61,8 @@ All the above functions will return a similar output, such as the example given 
             "firstName": "John",
             "lastName": "Doe",
             "email": "john@doe.com",
-            "picture": false
+            "picture": false,
+            "lastLogin": "2014-04-16 11:17:04"
         },
         "title": "OpenSim-CMS Documentation",
         "creationDate": "2014-04-14 15:55:31",
@@ -128,9 +129,7 @@ GET /api/document/<DOCUMENT-ID>/source/ HTTP/1.1
 ```
 
 ## Cache
-When an image has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with
-the slide to speed up future use. The cache period (`FileCacheTimeout`) is set in the `FlotsamCache.ini`  configuration and needs to be
-matched by the configuration value for the grid in the CMS.
+When an image has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with the slide to speed up future use. The cache period (`FileCacheTimeout`) is set in the `FlotsamCache.ini`  configuration and needs to be matched by the configuration value for the grid in the CMS.
 
 ```http
 PUT /api/file/<ID>/image/ HTTP/1.1

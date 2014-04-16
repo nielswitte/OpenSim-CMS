@@ -5,6 +5,7 @@ GET /api/grid/<GRID-ID>/rooms/ HTTP/1.1
 ```
 
 This will return an array with rooms.
+
 ```json
 [
     {
@@ -64,6 +65,7 @@ GET /api/grid/<GRID-ID>/region/<REGION-UUID>/rooms/ HTTP/1.1
 
 ## Get a specific room
 For retrieving the full information about a specific room the following function can be used:
+
 ```http
 GET /api/grid/<GRID-ID>/room/<ROOM-ID/ HTTP/1.1
 ```

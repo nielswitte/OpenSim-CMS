@@ -13,7 +13,7 @@
  *
  * @author Niels Witte
  * @date February 11th, 2014
- * @version 0.9
+ * @version 0.9a
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
@@ -160,22 +160,26 @@ load_item_comments(integer index, string type) {
  */
 parse_comments(string rawComments) {
     if(debug) llInstantMessage(userUuid, "Parsing comments: JSON");
-    key json        = JsonCreateStore(rawComments);
-    integer count   = (integer) JsonGetValue(json, "commentCount");
+
+    key json_comments   = JsonCreateStore(rawComments);
+    integer count       = (integer) JsonGetValue(json_comments, "commentCount");
     string buffer   = "";
     integer i       = 0;
     llSay(0, "Showing "+ count +" comments --------------------------------------------------------");
 
-    for(i = 0; i < JsonGetArrayLength(json, "comments"); i++) {
+    for(i = 0; i < JsonGetArrayLength(json_comments, "comments"); i++) {
         if(debug) llInstantMessage(userUuid, "Processing comment "+ (i + 1) + " of "+ count);
 
-        buffer += "["+ JsonGetValue(json, "comments["+ i +"].timestamp") +"] "+ JsonGetValue(json, "comments["+ i +"].user.{username}") +" ("+ JsonGetValue(json, "comments["+ i +"].user.{firstName}") +" "+ JsonGetValue(json, "comments["+ i +"].user.{firstName}") + "):\n"+ JsonGetValue(json, "comments["+ i +"].message") +"\n\n";
+        buffer += "["+ JsonGetValue(json_comments, "comments["+ i +"].timestamp") +"] "+
+                JsonGetValue(json_comments, "comments["+ i +"].user.{username}") +
+                " ("+ JsonGetValue(json_comments, "comments["+ i +"].user.{firstName}") +
+                " "+ JsonGetValue(json_comments, "comments["+ i +"].user.{lastName}") +
+                "):\n"+ JsonGetValue(json_comments, "comments["+ i +"].message") +"\n\n";
 
-        if((integer) JsonGetValue(json, "comments["+ i +"].childrenCount") > 0) {
-            buffer += parse_comment_childs(JsonGetJson(json, "comments["+ i +"].children"), 1);
+        if((integer) JsonGetValue(json_comments, "comments["+ i +"].childrenCount") > 0) {
+            buffer += parse_comment_childs(JsonGetJson(json_comments, "comments["+ i +"].children"), 1);
         }
     }
-
     // Output the buffer
     integer length = 0;
     i  = 0;
@@ -192,6 +196,7 @@ parse_comments(string rawComments) {
         i++;
     }
     llSay(0, "-------------------------------------------------------------------------------------");
+    JsonDestroyStore(json_comments);
 }
 
 /**
@@ -218,6 +223,8 @@ string parse_comment_childs(string comments, integer level) {
             result += parse_comment_childs(JsonGetJson(json, "["+ i +"].children"), (level+1));
         }
     }
+    // Destroy the JSON stores
+    JsonDestroyStore(json);
     return result;
 }
 
@@ -379,6 +386,8 @@ default {
             key json_body   = JsonCreateStore(body);
             APIToken        = JsonGetValue(json_body, "token");
             if(debug) llInstantMessage(userUuid, "[Debug] Storing API token: "+ APIToken);
+            // Destroy the JSON stores
+            JsonDestroyStore(json_body);
         }
     }
 
@@ -559,6 +568,9 @@ state presentation {
             nav(1, "slide");
             // Open navigation dialog
             open_menu(userUuid, presentationNavigationText, presentationNavigationButtons);
+            // Destroy the JSON stores
+            JsonDestroyStore(json_body);
+            JsonDestroyStore(json_slides);
         // Loaded user's documents
         } else if(request_id == http_request_files) {
             key json_body               = JsonCreateStore(body);
@@ -596,6 +608,9 @@ state presentation {
             presentationButtons += ["Main","Quit","Load #"];
             // Open presentation selection menu
             open_menu(userUuid, "Found "+ presentationCount +" presentation(s).\nShowing only the latest 9 presentations below.\nCommand: '/"+ channel +" Load <#>' can be used to load a presentation that is not listed.\nIf your avatar is not linked to your CMS user account, the list will be empty." , presentationButtons);
+
+            // Destroy the JSON stores
+            JsonDestroyStore(json_body);
         // Update slide uuid
         } else if(request_id = http_request_set) {
             if(debug) llInstantMessage(userUuid, "[Debug] UUID set for slide "+ item +": "+ (string) body);
@@ -799,6 +814,10 @@ state document {
             nav(1, "page");
             // Open navigation dialog
             open_menu(userUuid, documentNavigationText, documentNavigationButtons);
+
+            // Destroy the JSON stores
+            JsonDestroyStore(json_body);
+            JsonDestroyStore(json_pages);
         // Loaded user's documents
         } else if(request_id == http_request_files) {
             key json_body               = JsonCreateStore(body);
@@ -834,6 +853,8 @@ state document {
             documentButtons += ["Main","Quit","Load #"];
             // Open presentation selection menu
             open_menu(userUuid, "Found "+ documentCount +" document(s).\nShowing only the latest 9 documents below.\nCommand: '/"+ channel +" Load <#>' can be used to load a document that is not listed.\nIf your avatar is not linked to your CMS user account, the list will be empty." , documentButtons);
+            // Destroy the JSON stores
+            JsonDestroyStore(json_body);
         // Update page uuid
         } else if(request_id = http_request_set) {
             if(debug) llInstantMessage(userUuid, "[Debug] UUID set for page "+ item +": "+ (string) body);
@@ -1016,6 +1037,9 @@ state image {
             nav(1, "image");
             // Open navigation dialog
             open_menu(userUuid, imageNavigationText, imageNavigationButtons);
+
+            // Destroy the JSON stores
+            JsonDestroyStore(json_body);
         // Loaded user's images
         } else if(request_id == http_request_files) {
             key json_body               = JsonCreateStore(body);
@@ -1051,6 +1075,8 @@ state image {
             imagesButtons += ["Main","Quit","Load #"];
             // Open presentation selection menu
             open_menu(userUuid, "Found "+ imagesCount +" document(s).\nShowing only the latest 9 images below.\nCommand: '/"+ channel +" Load <#>' can be used to load an image that is not listed.\nIf your avatar is not linked to your CMS user account, the list will be empty." , imagesButtons);
+            // Destroy the JSON stores
+            JsonDestroyStore(json_body);
         // Update image uuid
         } else if(request_id = http_request_set) {
             if(debug) llInstantMessage(userUuid, "[Debug] UUID set for image "+ itemId +": "+ (string) body);

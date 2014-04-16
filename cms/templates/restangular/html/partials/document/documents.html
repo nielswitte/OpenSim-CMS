@@ -8,6 +8,11 @@
 <div class="toolbar toolbar-top" ng-show="allowCreate()">
     <button ng-click="newDocument()" type="button" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> New document</button>
     <button ng-click="clearExpiredCache()" type="button" class="btn btn-primary"><i class="glyphicon glyphicon-floppy-remove"></i> Clear expired cache</button>
+
+    <div class="input-group col-sm-3 pull-right">
+        <input type="text" class="form-control" value="" placeholder="Search for title" ng-model="documentBySearch" ng-options="document.title as document.title for document in getDocumentByTitle($viewValue)" bs-typeahead>
+        <span class="input-group-btn" ng-click="selectDocument()"><button type="button" class="btn btn-success"><i class="glyphicon glyphicon-search"></i> View</button></span>
+    </div>
 </div>
 <div class="panel panel-primary filter">
     <div class="panel-heading">
@@ -82,3 +87,4 @@
         </tbody>
     </table>
 </div>
+<div ng-include src="showPagination()"></div>

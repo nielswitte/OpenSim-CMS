@@ -75,7 +75,7 @@
                     <span class="label label-danger" ng-hide="{{grid.isOnline}}">Offline</span>
                 </td>
                 <td>
-                    <span ng-show="{{grid.isOnline}}">{{grid.activeUsers}} / {{grid.totalUsers}}</span>
+                    <span ng-show="{{grid.isOnline}}">{{grid.activeUsers}} / {{grid.totalUsers >= grid.activeUsers ? grid.totalUsers : '?'}}</span>
                     <span ng-hide="{{grid.isOnline}}">unknown</span>
                 </td>
             </tr>

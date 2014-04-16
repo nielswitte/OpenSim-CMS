@@ -6,7 +6,7 @@
 <head>
     <title>OpenSim-CMS</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="description" content="Documentation v0.7.2" />
+    <meta name="description" content="Documentation v0.8" />
     <meta name="author" content="OpenSim-CMS">
         <link rel="icon" href="../img/favicon.png" type="image/x-icon">
         <!-- Mobile -->
@@ -65,34 +65,285 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>Installation                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Tuesday, April 15, 2014                                        </span>
+                                            Wednesday, April 16, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            1:15 PM                                        </span>
+                                            12:38 PM                                        </span>
                                 </div>
-                                                        <p>Clone this repository in your <code>www</code> directory. For example: <code>/var/www/</code>.</p>
+                                                        <p>Before you start, you require a web server with <a href="https://httpd.apache.org/">Apache</a>, <a href="http://www.php.net">PHP 5.4+</a> and <a href="http://www.mysql.com">MySQL 5.6+</a>. On windows you can use for example <a href="https://www.apachefriends.org/index.html">XAMPP</a>. On Linux the software can be installed by your package manager.</p>
+
+<p>PHP requires the following extensions to be enabled:<br />
+<ul>
+<li>php5-curl</li>
+<li>php5-gd</li>
+<li>php5-json</li>
+<li>php5-mysqli</li>
+<li>php5-xmlrpc</li>
+<li>php5-xsl</li>
+</ul></p>
+
+<p>Apache requires the following modules:<br />
+<ul>
+<li>mod_rewrite</li>
+<li>mod_expires</li>
+</ul></p>
+
+<h2>Source code</h2>
+
+<p>Clone this repository in your <code>www</code> directory. For example: <code>/var/www/</code>.</p>
 
 <pre><code class="language-cmd">git clone https://github.com/nielswitte/OpenSim-CMS.git
 </code></pre>
 
 <p>Go to the <code>OpenSim-CMS</code> directory.</p>
 
-<p>Copy <code>config.php.example</code> and rename it to <code>config.php</code> in <code>api</code> and <code>cms</code> directories . Change the values in <code>config.php</code> to the values for your installation and create a new<br />
-MySQL database and importing the structure from the <code>database.sql</code> file in the <code>assets</code> directory.</p>
+<p>Copy <code>config.php.example</code> and rename it to <code>config.php</code> in <code>OpenSim-CMS/api</code> and <code>OpenSim-CMS/cms</code> directories . Change the values in <code>config.php</code> to the values for your installation and create a new MySQL database and importing the structure from the <code>database.sql</code> file in the <code>assets</code> directory. And add default users to enable access to the API by importing <code>users.sql</code> into the newly created database.</p>
+
+<h3>Configuration</h3>
+
+<p>The API configuration contains the following settings:</p>
+
+<h4>General settings</h4>
+
+<table>
+<thead>
+<tr>
+  <th>Setting</th>
+  <th>Possible values</th>
+  <th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>EXEC</td>
+  <td><code>1</code></td>
+  <td>This value is used to check if the configuration file is loaded correctly before executing any script</td>
+</tr>
+<tr>
+  <td>CMS_ADMIN_EMAIL</td>
+  <td>e-mail address</td>
+  <td>The sender's address of the e-mail messages the API sends</td>
+</tr>
+<tr>
+  <td>CMS_ADMIN_NAME</td>
+  <td>name</td>
+  <td>The sender's name corresponding to the e-mail messages the API sends</td>
+</tr>
+</tbody>
+</table>
+
+<h4>Server settings</h4>
+
+<table>
+<thead>
+<tr>
+  <th>Setting</th>
+  <th>Possible values</th>
+  <th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>SERVER_DEBUG</td>
+  <td><code>TRUE</code> or <code>FALSE</code></td>
+  <td>Show debugging output when an API request gone wrong</td>
+</tr>
+<tr>
+  <td>SERVER_PHP_ERRORS</td>
+  <td><code>TRUE</code> or <code>FALSE</code></td>
+  <td>Lets the API show PHP errors, on production servers this should be <code>FALSE</code></td>
+</tr>
+<tr>
+  <td>SERVER_TIMEOUT</td>
+  <td>seconds</td>
+  <td>Time in seconds before a script times out</td>
+</tr>
+<tr>
+  <td>SERVER_PROTOCOL</td>
+  <td><code>http</code> or <code>https</code></td>
+  <td>The protocol used to access the API. Please note that <code>https</code> has not been tested yet</td>
+</tr>
+<tr>
+  <td>SERVER_ADDRESS</td>
+  <td>URL</td>
+  <td>The URL to the API. Can be an IP address but also web address</td>
+</tr>
+<tr>
+  <td>SERVER_PORT</td>
+  <td>Port number</td>
+  <td>The port used by the webserver. Default for <code>http</code> is <code>80</code> and <code>https</code> uses <code>443</code></td>
+</tr>
+<tr>
+  <td>SERVER_ROOT</td>
+  <td>location</td>
+  <td>The path from the root of the webserver to the API. Default is <code>/OpenSim-CMS</code></td>
+</tr>
+<tr>
+  <td>SERVER_API_TOKEN_EXPIRES</td>
+  <td>time description</td>
+  <td>In English the time a normal API token is valid since its last use. The string needs to be valid for <a href="http://www.php.net/strtotime">strtotime</a></td>
+</tr>
+<tr>
+  <td>SERVER_API_TOKEN_EXPIRES2</td>
+  <td>time description</td>
+  <td>In English the time an API token is valid since its last use for an OpenSim Grid. The string needs to be valid for <a href="http://www.php.net/strtotime">strtotime</a></td>
+</tr>
+<tr>
+  <td>SERVER_MIN_USERNAME_LENGTH</td>
+  <td>number</td>
+  <td>The minimal length of an username</td>
+</tr>
+<tr>
+  <td>SERVER_MIN_PASSWORD_LENGTH</td>
+  <td>number</td>
+  <td>The minimal length of a password</td>
+</tr>
+</tbody>
+</table>
+
+<h4>Database settings</h4>
+
+<table>
+<thead>
+<tr>
+  <th>Setting</th>
+  <th>Possible values</th>
+  <th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>$DB_USERNAME</td>
+  <td>MySQL username</td>
+  <td>The username to access the MySQL database used by the API.</td>
+</tr>
+<tr>
+  <td>$DB_PASSWORD</td>
+  <td>MySQL password</td>
+  <td>The password corresponding to the user to access the API MySQL database</td>
+</tr>
+<tr>
+  <td>$DB_NAME</td>
+  <td>MySQL database name</td>
+  <td>The name of the database where the API data is stored</td>
+</tr>
+<tr>
+  <td>$DB_ADDRESS</td>
+  <td>MySQL address</td>
+  <td>The address to access the MySQL database on. If the MySQL database is on the same machine as the API, the address is most likely <code>localhost</code></td>
+</tr>
+<tr>
+  <td>$DB_PORT</td>
+  <td>MySQL port</td>
+  <td>The port used by MySQL to access the database. Default is <code>3306</code></td>
+</tr>
+</tbody>
+</table>
+
+<h4>File settings</h4>
+
+<p><strong>WARNING:</strong> Changing these values while the API is already in use can corrupt existing files.</p>
+
+<table>
+<thead>
+<tr>
+  <th>Setting</th>
+  <th>Possible values</th>
+  <th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>post_max_size</td>
+  <td>File size in bytes</td>
+  <td>Maximum amount of data that can be sent to the server in a POST request</td>
+</tr>
+<tr>
+  <td>upload_max_filesize</td>
+  <td>File size in bytes</td>
+  <td>Maximum file size that can be uploaded to the server</td>
+</tr>
+<tr>
+  <td>IMAGE_THUMBNAIL_WIDTH</td>
+  <td>Pixels</td>
+  <td>The width in pixels of thumbnails generated by the server</td>
+</tr>
+<tr>
+  <td>IMAGE_THUMBNAIL_HEIGHT</td>
+  <td>Pixels</td>
+  <td>The height in pixels of thumbnails generated by the server</td>
+</tr>
+<tr>
+  <td>IMAGE_WIDTH</td>
+  <td>Pixels</td>
+  <td>The width in pixels of images (including documents and presentations) which will be used by the API to output to OpenSim</td>
+</tr>
+<tr>
+  <td>IMAGE_HEIGHT</td>
+  <td>Pixels</td>
+  <td>The height in pixels of images (including documents and presentations) which will be used by the API to output to OpenSim</td>
+</tr>
+<tr>
+  <td>IMAGE_TYPE</td>
+  <td><code>jpg</code>, <code>png</code>, <code>gif</code></td>
+  <td>The file type to save images in. Use one of the three options. OpenSim works best with <code>jpg</code>, which is the system's default and recommend option</td>
+</tr>
+</tbody>
+</table>
+
+<h4>Additional settings</h4>
+
+<table>
+<thead>
+<tr>
+  <th>Setting</th>
+  <th>Possible values</th>
+  <th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>date_default_timezone_set</td>
+  <td>time zone</td>
+  <td>The time zone used to display dates in. See <a href="http://www.php.net/manual/en/timezones.php">http://www.php.net/manual/en/timezones.php</a> for a list with available time zones.</td>
+</tr>
+</tbody>
+</table>
 
 <h2>Users</h2>
 
-<p>@todo add sql file with default users and data to access CMS.</p>
+<p>The default users which are added by importing <code>assets/users.sql</code> are listed in the table below.<br />
+You can login into the CMS with the <code>admin</code> user. The passwords are lower case.</p>
+
+<table>
+<thead>
+<tr>
+  <th>Username</th>
+  <th>Password</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>OpenSim</td>
+  <td>opensim</td>
+</tr>
+<tr>
+  <td>admin</td>
+  <td>password</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>WARNING:</strong> Both users have maximum permissions for every part of the API and therefore it is highly recommended to change the passwords as quick as possible.</p>
 
 <h1>Linux</h1>
 
-<p>Some of the functions for the processing of documents and presentations rely on <code>pdftoppm</code>. This program, located in <code>poppler-utils</code>, needs to be installed on your Linux server<br />
-for conversion of PDF to images to work.</p>
+<p>Some of the functions for the processing of documents and presentations rely on <code>pdftoppm</code>. This program, located in <code>poppler-utils</code>, needs to be installed on your Linux server for conversion of PDF to images to work.</p>
 
-<p>On Ubuntu this can be done by using: <code>apt-get isntall poppler-utils</code>.</p>
+<p>On Ubuntu this can be done by using: <code>apt-get install poppler-utils</code>.</p>
 
 <h1>Apache</h1>
 
-<p>Apache requires <code>mod_rewrite</code> and optionally <code>mod_expires</code>. In addition PHP 5.4 or higher is required with XML and GD support.</p>
+<p>Apache requires <code>mod_rewrite</code> and optionally <code>mod_expires</code>. In addition PHP 5.4 or higher is required with CURL, JSON, GD and XML support.</p>
                                                     </article>
                     </div>
                 </div>

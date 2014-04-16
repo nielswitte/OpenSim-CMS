@@ -6,7 +6,7 @@
 <head>
     <title>OpenSim-CMS</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="description" content="Documentation v0.7.2" />
+    <meta name="description" content="Documentation v0.8" />
     <meta name="author" content="OpenSim-CMS">
         <link rel="icon" href="../../img/favicon.png" type="image/x-icon">
         <!-- Mobile -->
@@ -65,9 +65,9 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>Files                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Tuesday, April 15, 2014                                        </span>
+                                            Wednesday, April 16, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            4:44 PM                                        </span>
+                                            11:23 AM                                        </span>
                                 </div>
                                                         <pre><code class="language-http">GET /api/files/ HTTP/1.1
 </code></pre>
@@ -88,8 +88,7 @@
 
 <h3>User</h3>
 
-<p>It is possible to retrieve a list with documents owned by a specific user. This can be done by<br />
-using the user's ID:</p>
+<p>It is possible to retrieve a list with documents owned by a specific user. This can be done by using the user's ID:</p>
 
 <pre><code class="language-http">GET /api/user/&lt;USER-ID&gt;/files/ HTTP/1.1
 </code></pre>
@@ -113,7 +112,8 @@ using the user's ID:</p>
             "firstName": "Jane",
             "lastName": "Doe",
             "email": "jane@doe.com",
-            "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/"
+            "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
+            "lastLogin": "2014-04-15 16:00:01"
         },
         "title": "OpenSim-CMS in a nutshell",
         "creationDate": "2014-04-15 09:13:30",
@@ -130,7 +130,8 @@ using the user's ID:</p>
             "firstName": "John",
             "lastName": "Doe",
             "email": "john@doe.com",
-            "picture": false
+            "picture": false,
+            "lastLogin": "2014-04-16 11:17:04"
         },
         "title": "OpenSim-CMS Documentation",
         "creationDate": "2014-04-14 15:55:31",
@@ -215,9 +216,7 @@ using the user's ID:</p>
 
 <h2>Cache</h2>
 
-<p>When an image has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with<br />
-the slide to speed up future use. The cache period (<code>FileCacheTimeout</code>) is set in the <code>FlotsamCache.ini</code>  configuration and needs to be<br />
-matched by the configuration value for the grid in the CMS.</p>
+<p>When an image has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with the slide to speed up future use. The cache period (<code>FileCacheTimeout</code>) is set in the <code>FlotsamCache.ini</code>  configuration and needs to be matched by the configuration value for the grid in the CMS.</p>
 
 <pre><code class="language-http">PUT /api/file/&lt;ID&gt;/image/ HTTP/1.1
 </code></pre>

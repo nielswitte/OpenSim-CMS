@@ -14,8 +14,8 @@ require_once dirname(__FILE__) .'/../controllers/regionController.php';
  * Implements the functions called on the Grid
  *
  * @author Niels Witte
- * @version 0.3s
- * @date April 14th, 2014
+ * @version 0.4a
+ * @date April 16th, 2014
  * @since February 24th, 2014
  */
 class Grid extends Module{
@@ -40,7 +40,8 @@ class Grid extends Module{
     public function setRoutes() {
         $this->api->addRoute("/^\/grids\/?$/",                                       'getGrids',             $this, 'GET',  \Auth::READ);  // Get a list with grids
         $this->api->addRoute("/^\/grid\/(\d+)\/?$/",                                 'getGridById',          $this, 'GET',  \Auth::READ);  // Get grid information by ID
-        $this->api->addRoute("/^\/grid\/(\d+)\/regions\/?$/",                        'loadRegionsFromGrid',  $this, 'POST', \Auth::EXECUTE);  // Attempts to automatically get regions from the given grid
+        $this->api->addRoute("/^\/grid\/(\d+)\/opensim\/?$/",                        'loadGridFromGrid',     $this, 'POST', \Auth::EXECUTE); // Attempts to automatically get grid info from the given grid
+        $this->api->addRoute("/^\/grid\/(\d+)\/regions\/?$/",                        'loadRegionsFromGrid',  $this, 'POST', \Auth::EXECUTE); // Attempts to automatically get regions from the given grid
         $this->api->addRoute("/^\/grid\/(\d+)\/region\/([a-z0-9-]{36})\/?$/",        'getRegionByUuid',      $this, 'GET',  \Auth::READ);  // Get information about the given region
         $this->api->addRoute("/^\/grid\/(\d+)\/region\/([a-z0-9-]{36})\/image\/?$/", 'getRegionImageByUuid', $this, 'GET',  \Auth::READ);  // Get the map of the region
     }
@@ -59,7 +60,7 @@ class Grid extends Module{
         $data   = array();
         foreach($grids as $gridId) {
             $grid = new \Models\Grid($gridId['id']);
-            $grid->getInfoFromDatabase();
+            $grid->getInfoFromDatabase(TRUE);
             $data[] = $this->getGridData($grid);
         }
         return $data;
@@ -73,7 +74,7 @@ class Grid extends Module{
      */
     public function getGridById($args) {
         $grid       = new \Models\Grid($args[1]);
-        $grid->getInfoFromDatabase();
+        $grid->getInfoFromDatabase(TRUE);
 
         return $this->getGridData($grid);
     }
@@ -169,7 +170,7 @@ class Grid extends Module{
             throw new \Exception('Invalid UUID used', 1);
         } else {
             $grid       = new \Models\Grid($args[1]);
-            $grid->getInfoFromDatabase();
+            $grid->getInfoFromDatabase(FALSE);
             if($grid->getRegionByUuid($args[2]) !== FALSE) {
                 header('Content-Type: image/jpeg');
                 echo file_get_contents($grid->getOsProtocol() .'://'. $grid->getOsIp() .':'. $grid->getOsPort() .'/index.php?method=regionImage'. str_replace('-', '', $args[2]));
@@ -179,6 +180,33 @@ class Grid extends Module{
         }
     }
 
+    /**
+     * Loads the grid's information such as its name from
+     * the XML files the OpenSim server provides
+     * @param type $args
+     */
+    public function loadGridFromGrid($args) {
+        $gridId     = $args[1];
+        $grid       = new \Models\Grid($gridId);
+        $grid->getInfoFromDatabase(FALSE);
+        $gridCtrl   = new \Controllers\GridController($grid);
+        $data       = $gridCtrl->loadGridDataFromOpenSim();
+
+        // Format the result
+        $result = array(
+            'success'           => ($data !== FALSE ? TRUE : FALSE)
+        );
+
+        return $result;
+    }
+
+    /**
+     * Loads the regions from the OpenSim Server and updates any existing region
+     * data. This does not remove regions!
+     *
+     * @param array $args
+     * @return array
+     */
     public function loadRegionsFromGrid($args) {
         $gridId     = $args[1];
         $grid       = new \Models\Grid($gridId);

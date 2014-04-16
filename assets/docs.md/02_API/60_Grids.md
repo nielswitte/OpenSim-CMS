@@ -1,12 +1,13 @@
+Grid information can be retrieved from the API database and extended with actual Grid data. The grid data such as the number of users and the online status will be retrieved by using
+Remote Admin and the MySQL database of the Grid. However, if one or both are not available the Grid's API will be used to retrieve the user count. The total number of users can only be retrieved from the MySQL database, if the database is not available a 0 is always displayed for the `totalUsers` value.
+
 For an overview of all grids and their information, the following request can be used:
 
 ```http
 GET /api/grids/ HTTP/1.1
 ```
 
-This will return quite a large list with data. I do not recommend using this query often
-when a lot of Grids are in the database. Use the get Grid by ID function instead for a
-specific grid when possible.
+This will return quite a large list with data. I do not recommend using this query often when a lot of Grids are in the database. Use the get Grid by ID function instead for a specific grid when possible.
 
 ```json
 [
@@ -48,7 +49,8 @@ specific grid when possible.
 
 ## Get Grid by ID
 
-Information about a Grid can be retrieved by using:
+Information about a specific Grid can be retrieved by using:
+
 ```http
 GET /api/grid/<GRID-ID>/ HTTP/1.1
 ```
@@ -84,4 +86,12 @@ This will return a summary of the grid and regions, excluding the passwords.
         { (...) }
     ]
 }
+```
+
+
+## Automatically retrieve grid information
+When the grid is online, some XML requests can be performed to update the grid information, such as the grid's name.
+
+```http
+POST /api/grid/<GRID-ID>/opensim/ HTTP/1.1
 ```

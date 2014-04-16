@@ -9,8 +9,8 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class represents a region
  *
  * @author Niels Witte
- * @version 0.3
- * @date April 3rd, 2014
+ * @version 0.4
+ * @date April 16th, 2014
  * @since February 17th, 2014
  */
 class Region implements SimpleModel {
@@ -60,12 +60,28 @@ class Region implements SimpleModel {
 
     /**
      * Gets information about the region
+     *
+     * Prefers Remote Admin and MySQL,
+     * but can also try XML API requests to load some simple information
      */
     public function getInfoFromDatabase() {
         // Only when no timeout occured this instance
         if(!$this->getGrid()->getTimedOut()) {
-            $raXML  = new \OpenSimRPC($this->grid->getRaUrl(), $this->grid->getRaPort(), $this->grid->getRaPassword());
-            $result = $raXML->call('admin_region_query', array('region_id' => $this->getUuid()));
+            $raXML  = FALSE;
+            $xml    = FALSE;
+
+            // Use remote admin
+            if($this->grid->getRaUrl() != '' && $this->grid->getRaPort() != '' && $this->grid->getRaPassword() != '') {
+                $raXML  = new \OpenSimRPC($this->grid->getRaUrl(), $this->grid->getRaPort(), $this->grid->getRaPassword());
+                $result = $raXML->call('admin_region_query', array('region_id' => $this->getUuid()));
+            // Use API
+            } else {
+                $xml = file_get_contents($this->grid->getOsProtocol() .'://'. $this->grid->getOsIp() .':'. $this->grid->getOsPort() .'/monitorstats/'. $this->getUuid());
+                if($xml !== FALSE) {
+                    $xml    = simplexml_load_string($xml);
+                    $result = array('success' => TRUE);
+                }
+            }
 
             // Requesting XML went wrong?
             if($result === FALSE) {
@@ -80,27 +96,43 @@ class Region implements SimpleModel {
             $this->setOnlineStatus($result['success']);
 
             // Updates the online status of the grid, when so far the status is offline
-            // This means that if one region responds it is online, the grid is online, however not all regions
+            // This means that if one region responds it is online, the grid is online, however just not all regions
+            // Without this, when the last region to be checked is offline, the grid will respond it is offline eventhough
+            // all previous regions can be online
             if(!$this->getGrid()->getOnlineStatus()) {
                 $this->getGrid()->setOnlineStatus($result['success']);
             }
 
-            // Additional actions when MySQL database is accessable
-            if($this->grid->getDbUrl() && $this->getOnlineStatus()) {
-                $osdb = new \MysqliDb($this->grid->getDbUrl(), $this->grid->getDbUsername(), $this->grid->getDbPassword(), $this->grid->getDbName(), $this->grid->getDbPort());
-                // Get user's
-                $osdb->where('LastRegionID', $osdb->escape($this->getUuid()));
-                $results = $osdb->get('GridUser');
-
+            // Additional actions when region is online
+            if($this->getOnlineStatus()) {
                 $this->activeUsers  = 0;
                 $this->totalUsers   = 0;
 
-                // Count active and total users
-                foreach($results as $result) {
-                    if($result['Online'] == 'True') {
-                        $this->activeUsers++;
+                //MySQL database is configured?
+                if($this->grid->getDbUrl() != '' && $this->grid->getDbName() != '' && $this->grid->getDbPassword() != '' && $this->grid->getDbPort() != '') {
+                    $osdb = new \MysqliDb($this->grid->getDbUrl(), $this->grid->getDbUsername(), $this->grid->getDbPassword(), $this->grid->getDbName(), $this->grid->getDbPort());
+                    // Get user's
+                    $osdb->where('LastRegionID', $osdb->escape($this->getUuid()));
+                    $results = $osdb->get('GridUser');
+
+                    // Count active and total users
+                    foreach($results as $result) {
+                        if($result['Online'] == 'True') {
+                            $this->activeUsers++;
+                        }
+                        $this->totalUsers++;
                     }
-                    $this->totalUsers++;
+                // Load active users from XML
+                } else {
+                    // Loaded with remote admin, but no MySQL available?
+                    if($raXML !== FALSE) {
+                        $xml    = file_get_contents($this->grid->getOsProtocol() .'://'. $this->grid->getOsIp() .':'. $this->grid->getOsPort() .'/monitorstats/'. $this->getUuid());
+                        $xml    = simplexml_load_string($xml);
+                    }
+
+                    if($xml !== FALSE) {
+                        $this->activeUsers = (int) $xml->AgentCountMonitor;
+                    }
                 }
             }
         }

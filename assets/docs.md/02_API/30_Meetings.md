@@ -48,7 +48,8 @@ All above API functions return a similar result, as displayed below:
             "firstName": "jane",
             "lastName": "Doe",
             "email": "jane@doe.com",
-            "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/"
+            "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
+            "lastLogin": "2014-04-15 16:00:01"
         },
         "roomId": 4,
         "url": "http://localhost:80/OpenSim-CMS/api/meeting/43/"
@@ -110,7 +111,8 @@ The output will be something like this:
         "firstName": "Jane",
         "lastName": "Doe",
         "email": "jane@doe.com",
-        "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/"
+        "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
+        "lastLogin": "2014-04-15 16:00:01"
     },
     "room": {
         "id": 2,
@@ -142,7 +144,8 @@ The output will be something like this:
             "firstName": "Jane",
             "lastName": "Doe",
             "email": "jane@doe.com",
-            "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/"
+            "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
+            "lastLogin": "2014-04-15 16:00:01"
         },
         {
             "id": 3,
@@ -150,7 +153,8 @@ The output will be something like this:
             "firstName": "John",
             "lastName": "Doe",
             "email": "john@doe.com",
-            "picture": false
+            "picture": false,
+            "lastLogin": "2014-04-16 11:17:04"
         },
         (...)
     ],
@@ -165,7 +169,8 @@ The output will be something like this:
                 "firstName": "Jane",
                 "lastName": "Doe",
                 "email": "jane@doe.com",
-                "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/"
+                "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
+                "lastLogin": "2014-04-15 16:00:01"
             },
             "title": "Jane's presentation",
             "creationDate": "2014-04-02 09:04:59",
@@ -179,8 +184,7 @@ The output will be something like this:
 ```
 
 ## Create a meeting
-For scheduling a new meeting a lot of parameters are required. Only the list with documents is optional.
-Please ensure you use the correct parameters or else you will be losing a lot of time debugging.
+For scheduling a new meeting a lot of parameters are required. Only the list with documents is optional. Please ensure you use the correct parameters or else you will be losing a lot of time debugging.
 
 | Parameter         | Type             | Description                                                      |
 |-------------------|------------------|------------------------------------------------------------------|
@@ -211,8 +215,7 @@ PUT /api/meeting/<MEETING-ID>/ HTTP/1.1
 The parameters are the same as for creating a meeting, see creating a meeting for more details.
 
 ## Get the meeting agenda
-To return only the agenda for a specific meeting, the following API can be used. This will return the agenda as a multi dimensional array
-instead of the flat string in the meeting details response.
+To return only the agenda for a specific meeting, the following API can be used. This will return the agenda as a multi dimensional array instead of the flat string in the meeting details response.
 
 ```http
 GET /api/meeting/<MEETING-ID>/agenda HTTP/1.1

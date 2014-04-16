@@ -4,8 +4,7 @@ To get a list of 50 users, use:
 GET /api/users/ HTTP/1.1
 ```
 
-Or use the following API request with a offset to get more users. For example if the total user base contains 100 users,
-use offset: 50 to get users 51 to 100;
+Or use the following API request with a offset to get more users. For example if the total user base contains 100 users, use offset: 50 to get users 51 to 100;
 
 ```http
 GET /api/users/<OFFSET>/ HTTP/1.1
@@ -21,7 +20,8 @@ Both will return a list similar to this:
         "firstName": "Jane",
         "lastName": "Doe",
         "email": "jane@doe.com",
-        "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/"
+        "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
+        "lastLogin": "2014-04-15 16:00:01"
     },
     {
         "id": 3,
@@ -29,15 +29,15 @@ Both will return a list similar to this:
         "firstName": "John",
         "lastName": "Doe",
         "email": "john@doe.com",
-        "picture": false
+        "picture": false,
+        "lastLogin": "2014-04-16 11:17:04"
     },
     (...)
 ]
 ```
 
 ## Search for users by username
-To search for a specific user by his or her username, the following API can be used.
-At least 3 characters are required.
+To search for a specific user by his or her username, the following API can be used. At least 3 characters are required.
 
 ```http
 GET /api/user/<SEARCH>/ HTTP/1.1
@@ -53,7 +53,8 @@ The output is similar to the user list request, but displayed as a list ordered 
         "firstName": "Jane",
         "lastName": "Doe",
         "email": "jane@doe.com",
-        "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/"
+        "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
+        "lastLogin": "2014-04-15 16:00:01"
     },
     { (...) },
     { (...) },
@@ -111,8 +112,7 @@ Example of output
 }
 ```
 
-When OpenSim uses a MySQL database and the CMS is configured correctly, the following additional information is available
-about the avatars of the user. For each avatar the following information is shown below `gridName`:
+When OpenSim uses a MySQL database and the CMS is configured correctly, the following additional information is available about the avatars of the user. For each avatar the following information is shown below `gridName`:
 
 ```json
 {
@@ -124,8 +124,7 @@ about the avatars of the user. For each avatar the following information is show
 ```
 
 ## Create user
-To add a new user to the CMS user the following API URL with the parameters as described in the table below.
-The emailaddress and username need to be unique.
+To add a new user to the CMS user the following API URL with the parameters as described in the table below. The emailaddress and username need to be unique.
 
 
 ```http
@@ -164,8 +163,7 @@ PUT /api/user/<USER-ID>/ HTTP/1.1
 | permissions       | Array     | The permission levels for the user (see permissions)              |
 
 ## Change profile picture
-Attach a profile picture to the given user, which will be resized to 250x250 pixels and displayed in the CMS for example next to comments and on the user's profile page.
-When you upload a new picture the previous picture will be overwritten.
+Attach a profile picture to the given user, which will be resized to 250x250 pixels and displayed in the CMS for example next to comments and on the user's profile page. When you upload a new picture the previous picture will be overwritten.
 
 ```http
 PUT /api/user/<USER-ID>/picture/ HTTP/1.1
@@ -176,8 +174,7 @@ PUT /api/user/<USER-ID>/picture/ HTTP/1.1
 | image             | file      | Base64 encoded file, needs to be jpeg, jpg, png or gif                                    |
 
 ## Change password
-Use the following function to update the user's password. You can update passwords of other users when you at least have
-`WRITE` permissions or when you know the `currentPassword`.
+Use the following function to update the user's password. You can update passwords of other users when you at least have `WRITE` permissions or when you know the `currentPassword`.
 
 ```http
 PUT /api/user/<USER-ID>/password/ HTTP/1.1
@@ -190,8 +187,7 @@ PUT /api/user/<USER-ID>/password/ HTTP/1.1
 | currentPassword   | String    | [Optional] The user's current password, only required when no WRITE permissions for users |
 
 ## Delete user
-This will remove an user from the CMS, however it is not recommended to use. All files, comments and meetings are attached to an user,
-removing the user can cause items to disappear. The recommended solution is to set all permissions to `NONE` for an user.
+This will remove an user from the CMS, however it is not recommended to use. All files, comments and meetings are attached to an user, removing the user can cause items to disappear. The recommended solution is to set all permissions to `NONE` for an user.
 
 ```http
 DELETE /api/user/<USER-ID>/ HTTP/1.1

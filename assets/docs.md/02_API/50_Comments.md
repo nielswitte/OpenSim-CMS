@@ -1,5 +1,4 @@
-On almost everything users can leave comments (when the user has sufficient permissions).
-The comments can be saved, retrieved and removed through the API by using the following functions:
+On almost everything users can leave comments (when the user has sufficient permissions). The comments can be saved, retrieved and removed through the API by using the following functions:
 
 ## Get comments
 Getting the latest comments by using this URL. The comments are returned as a threaded array.
@@ -7,6 +6,7 @@ Getting the latest comments by using this URL. The comments are returned as a th
 ```http
 GET /api/comments/<TYPE>/<ID>/ HTTP/1.1
 ```
+
 | Types         | Description                                                      |
 |---------------|------------------------------------------------------------------|
 | document      | Get comments for the document with id = `<ID>`.                  |
@@ -17,6 +17,7 @@ GET /api/comments/<TYPE>/<ID>/ HTTP/1.1
 ## Get comments after given timestamp
 
 Returns a flat list with 50 comments.
+
 ```http
 GET /api/comments/<UNIX-TIMESTAMP>/ HTTP/1.1
 ```
@@ -26,6 +27,52 @@ Or with an offset:
 ```http
 GET /api/comments/<UNIX-TIMESTAMP>/<OFFSET>/ HTTP/1.1
 ```
+All the above functions will return a JSON response similar to the following example:
+
+```json
+{
+    "comments": [
+        {
+            "id": 4,
+            "parentId": null,
+            "number": 1,
+            "user": {
+                "id": 4,
+                "username": "janedoe",
+                "firstName": "Jane",
+                "lastName": "Doe",
+                "email": "jane@doe.com",
+                "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
+                "lastLogin": "2014-04-15 16:00:01"
+            },
+            "type": "file",
+            "timestamp": "2014-04-15 16:02:24",
+            "editTimestamp": null,
+            "message": "Just some basic comment to test the functionality"
+        },
+        {
+            "id": 3,
+            "parentId": null,
+            "number": 2,
+            "user": {
+                "id": 3,
+                "username": "johndoe",
+                "firstName": "John",
+                "lastName": "Doe",
+                "email": "john@doe.com",
+                "picture": false,
+                "lastLogin": "2014-04-16 11:17:04"
+            },
+            "type": "slide",
+            "timestamp": "2014-04-15 15:29:52",
+            "editTimestamp": null,
+            "message": "This is a comment for a specific slide"
+        }
+    ],
+    "commentCount": 2
+}
+```
+
 
 ## Post a comment
 

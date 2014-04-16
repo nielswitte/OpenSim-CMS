@@ -1,6 +1,4 @@
-The documents API is quite similar to the Files API since it is a subset. The
-main difference is that it will only return files with the type `document` and that documents have children
-in the form of `pages`.
+The documents API is quite similar to the Files API since it is a subset. The main difference is that it will only return files with the type `document` and that documents have children in the form of `pages`.
 
 ```http
 GET /api/documents/ HTTP/1.1
@@ -28,7 +26,8 @@ All the above functions will output a list like this:
             "firstName": "John",
             "lastName": "Doe",
             "email": "john@doe.com",
-            "picture": false
+            "picture": false,
+            "lastLogin": "2014-04-16 11:17:04"
         },
         "title": "OpenSim-CMS Documentation",
         "creationDate": "2014-04-14 15:55:31",
@@ -44,12 +43,12 @@ All the above functions will output a list like this:
 
 ## Get a single document
 
-When retrieving a sinlg document you will get a lot of information, including a list with all pages
-and their cache information.
+When retrieving a sinlg document you will get a lot of information, including a list with all pages and their cache information.
 
 ```http
 GET /api/document/<DOCUMENT-ID>/ HTTP/1.1
 ```
+
 For example when retrieving the document with ID 133 you can expect something like this:
 
 ```json
@@ -62,7 +61,8 @@ For example when retrieving the document with ID 133 you can expect something li
         "firstName": "John",
         "lastName": "Doe",
         "email": "john@doe.com",
-        "picture": false
+        "picture": false,
+        "lastLogin": "2014-04-16 11:17:04"
     },
     "title": "OpenSim-CMS Documentation",
     "creationDate": "2014-04-14 15:55:31",
@@ -136,9 +136,7 @@ GET /api/document/<ID>/page/number/<PAGE#>/image/ HTTP/1.1
 ```
 
 ## Cache
-When an page has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with
-the page to speed up future use. The cache period (`FileCacheTimeout`) is set in the `FlotsamCache.ini` configuration and needs to be
-matched by the configuration value for the grid in the CMS.
+When an page has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with the page to speed up future use. The cache period (`FileCacheTimeout`) is set in the `FlotsamCache.ini` configuration and needs to be matched by the configuration value for the grid in the CMS.
 
 ```http
 PUT /api/document/<ID>/page/number/<PAGE#>/ HTTP/1.1

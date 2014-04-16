@@ -13,8 +13,8 @@ require_once dirname(__FILE__) .'/../controllers/pageController.php';
  * Implements the functions for documents
  *
  * @author Niels Witte
- * @version 0.4e
- * @date April 11th, 2014
+ * @version 0.4f
+ * @date April 16th, 2014
  * @since March 3rd, 2014
  */
 class Document extends Module {
@@ -208,7 +208,7 @@ class Document extends Module {
         if($page !== FALSE) {
             // Get grid details
             $grid           = new \Models\Grid($gridId);
-            $grid->getInfoFromDatabase();
+            $grid->getInfoFromDatabase(FALSE);
 
             // Update
             $pageCtrl   = new \Controllers\PageController($page);

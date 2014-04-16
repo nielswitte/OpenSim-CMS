@@ -6,7 +6,7 @@
 <head>
     <title>OpenSim-CMS</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="description" content="Documentation v0.7.2" />
+    <meta name="description" content="Documentation v0.8" />
     <meta name="author" content="OpenSim-CMS">
         <link rel="icon" href="../img/favicon.png" type="image/x-icon">
         <!-- Mobile -->
@@ -65,18 +65,19 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>Grids                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Tuesday, April 15, 2014                                        </span>
+                                            Wednesday, April 16, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            1:06 PM                                        </span>
+                                            11:15 AM                                        </span>
                                 </div>
-                                                        <p>For an overview of all grids and their information, the following request can be used:</p>
+                                                        <p>Grid information can be retrieved from the API database and extended with actual Grid data. The grid data such as the number of users and the online status will be retrieved by using<br />
+Remote Admin and the MySQL database of the Grid. However, if one or both are not available the Grid's API will be used to retrieve the user count. The total number of users can only be retrieved from the MySQL database, if the database is not available a 0 is always displayed for the <code>totalUsers</code> value.</p>
+
+<p>For an overview of all grids and their information, the following request can be used:</p>
 
 <pre><code class="language-http">GET /api/grids/ HTTP/1.1
 </code></pre>
 
-<p>This will return quite a large list with data. I do not recommend using this query often<br />
-when a lot of Grids are in the database. Use the get Grid by ID function instead for a<br />
-specific grid when possible.</p>
+<p>This will return quite a large list with data. I do not recommend using this query often when a lot of Grids are in the database. Use the get Grid by ID function instead for a specific grid when possible.</p>
 
 <pre><code class="language-json">[
     {
@@ -117,7 +118,7 @@ specific grid when possible.</p>
 
 <h2>Get Grid by ID</h2>
 
-<p>Information about a Grid can be retrieved by using:</p>
+<p>Information about a specific Grid can be retrieved by using:</p>
 
 <pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/ HTTP/1.1
 </code></pre>
@@ -152,6 +153,13 @@ specific grid when possible.</p>
         { (...) }
     ]
 }
+</code></pre>
+
+<h2>Automatically retrieve grid information</h2>
+
+<p>When the grid is online, some XML requests can be performed to update the grid information, such as the grid's name.</p>
+
+<pre><code class="language-http">POST /api/grid/&lt;GRID-ID&gt;/opensim/ HTTP/1.1
 </code></pre>
                                                     </article>
                     </div>

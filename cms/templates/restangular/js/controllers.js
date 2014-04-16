@@ -392,6 +392,41 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
         };
     }]
 );
+/****************************************************************************************************************************************************
+ *  _____            _             _   _
+ * |  __ \          (_)           | | (_)
+ * | |__) |_ _  __ _ _ _ __   __ _| |_ _  ___  _ __
+ * |  ___/ _` |/ _` | | '_ \ / _` | __| |/ _ \| '_ \
+ * | |  | (_| | (_| | | | | | (_| | |_| | (_) | | | |
+ * |_|   \__,_|\__, |_|_| |_|\__,_|\__|_|\___/|_| |_|
+ *              __/ |
+ *             |___/
+ */
+// paginationController -----------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('paginationController', ['RestangularCache', '$scope', '$sce', '$route', '$alert', 'Cache', function(RestangularCache, $scope, $sce, $route, $alert, Cache) {
+        $scope.pagination = $scope.$parent.pagination;
+
+        // Add previous and current page to pagination
+        for(var i = 1; i <= $scope.pagination.start; i++) {
+            $scope.pagination.pages.push({page: i});
+        }
+
+        var getNextPaginationList = function(offset) {
+            RestangularCache.one($scope.pagination.type, offset).get().then(function(resp) {
+                if(resp.length > 0) {
+                    var pageNr = $scope.pagination.pages.length + 1;
+                    $scope.pagination.pages.push({page: pageNr});
+                }
+                if(resp.length >= $scope.pagination.perPage) {
+                    getNextPaginationList(offset + $scope.pagination.perPage);
+                }
+            });
+        };
+
+        // Load the next page
+        getNextPaginationList($scope.pagination.start * $scope.pagination.perPage);
+    }]
+);
 
 /****************************************************************************************************************************************************
  *   _    _
@@ -573,7 +608,7 @@ angularRest.controller('toolbarController', ['$scope', 'Cache', '$location', '$a
  * |_____/ \__,_|___/_| |_|_.__/ \___/ \__,_|_|  \__,_|
  *
  */
-// documentsController ------------------------------------------------------------------------------------------------------------------------------
+// dashboardController ------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Page', '$sce', '$location', function(RestangularCache, $scope, Page, $sce, $location) {
         $scope.files     = [];
         $scope.meetings  = [];
@@ -757,7 +792,7 @@ angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Pa
         // Returns the list with the full path to the comment in context
         $scope.showComment = function(id) {
             RestangularCache.one('comment', id).one('parents').get().then(function(parentsResponse) {
-                if(parentsResponse[0] == 'presentation' || parentsResponse[0] == 'document') {
+                if(parentsResponse[0] == 'presentation' || parentsResponse[0] == 'document' || parentsResponse[0] == 'file') {
                     if(parentsResponse[2] == 'slide') {
                         $location.path('document/'+ parentsResponse[1] +'/slide/'+ parentsResponse[3]);
                     } else if(parentsResponse[2] == 'page') {
@@ -782,19 +817,42 @@ angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Pa
  *
  */
 // documentsController ------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$modal', 'Cache', '$route',
-    function(Restangular, RestangularCache, $scope, Page, $alert, $modal, Cache, $route) {
+angularRest.controller('documentsController', ['Restangular', 'RestangularCache', '$scope', 'Page', '$alert', '$modal', 'Cache', '$route', '$routeParams', '$location',
+    function(Restangular, RestangularCache, $scope, Page, $alert, $modal, Cache, $route, $routeParams, $location) {
         $scope.orderByField         = 'title';
         $scope.reverseSort          = false;
         var requestDocumentsUrl     = '';
         $scope.documentsList        = [];
         $scope.types                = ['document', 'image', 'presentation'];
 
+        // For loading more than the first page
+        var paginationOffset = 1;
+        var perPage          = 50;
+        if($routeParams.paginationPage !== undefined) {
+            paginationOffset = $routeParams.paginationPage;
+        }
+
+        // Show pagination and set the type
+        $scope.showPagination = function() {
+            if($scope.documentsList.length >= perPage || paginationOffset > 1) {
+                $scope.pagination = {
+                    type: 'files',
+                    url: 'documents',
+                    perPage: perPage,
+                    start: paginationOffset,
+                    pages: []
+                };
+                return 'templates/restangular/html/bootstrap/pagination.html';
+            } else {
+                return false;
+            }
+        };
+
         // Show loading screen
         jQuery('#loading').show();
 
         // Get a list with documents
-        RestangularCache.all('files').getList().then(function(documentsResponse) {
+        RestangularCache.one('files', (paginationOffset - 1) * perPage).getList().then(function(documentsResponse) {
             $scope.documentsList = documentsResponse;
             Page.setTitle('Files');
             requestDocumentsUrl = documentsResponse.getRequestedUrl();
@@ -802,6 +860,31 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
             // Remove loading screen
             jQuery('#loading').hide();
         });
+
+
+        // Search for the given document title
+        var documentSearchResults = [];
+        $scope.documentBySearch   = "";
+        $scope.getDocumentByTitle = function($viewValue) {
+            var results = '';
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('files', $viewValue).get().then(function(documentsResponse) {
+                    documentSearchResults = documentsResponse;
+                    return documentsResponse;
+                });
+            }
+            return results;
+        };
+
+        // When selecting a document
+        $scope.selectDocument = function() {
+            for(var i = 0; i < documentSearchResults.length; i++) {
+                // Only add user when match found and not already listed
+                if(documentSearchResults[i].title == $scope.documentBySearch) {
+                    $location.path('document/'+ documentSearchResults[i].id);
+                }
+            }
+        };
 
         // Show/hide filters
         $scope.collapseFilter = true;
@@ -1111,6 +1194,19 @@ angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$s
             return sessionStorage.gridPermission >= EXECUTE;
         };
 
+        // Update grid from API
+        $scope.updateGrid = function() {
+            Cache.clearCachedUrl(gridRequestUrl);
+            Restangular.one('grid', $routeParams.gridId).one('opensim').post().then(function(gridResponse) {
+                 if(!gridResponse.success) {
+                    $alert({title: 'Error!', content: gridResponse.error, type: 'danger'});
+                } else {
+                    $alert({title: 'Grid updated!', content: 'The grid data has been updated with the information available from OpenSim. (You may need to refresh the page to see the changes)', type: 'success'});
+                    $route.reload();
+                }
+            });
+        };
+
         // Update grid data from API
         $scope.updateGridRegions = function() {
             Cache.clearCachedUrl(gridRequestUrl);
@@ -1403,13 +1499,12 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
 
         // Search for the given documents
         $scope.getDocumentByTitle = function($viewValue) {
-            if($viewValue != null && $viewValue.length >= 3) {
-                var results = RestangularCache.one('files', $viewValue).get().then(function(documentsResponse) {
+            var results = '';
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('files', $viewValue).get().then(function(documentsResponse) {
                     documentSearchResults = documentsResponse;
                     return documentsResponse;
                 });
-            } else {
-                var results = '';
             }
             return results;
         };
@@ -1451,13 +1546,12 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
 
         // Search for the given username
         $scope.getUserByUsername = function($viewValue) {
-            if($viewValue != null && $viewValue.length >= 3) {
-                var results = RestangularCache.one('users', $viewValue).get().then(function(usersResponse) {
+            var results = '';
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('users', $viewValue).get().then(function(usersResponse) {
                     usernameSearchResults = usersResponse;
                     return usersResponse;
                 });
-            } else {
-                var results = '';
             }
             return results;
         };
@@ -2076,16 +2170,41 @@ angularRest.controller('slideController', ['RestangularCache', '$scope', 'Page',
  *
  */
 // usersController ----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', 'Cache', '$route', function(RestangularCache, Restangular, $scope, Page, $modal, $alert, Cache, $route) {
+angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', 'Cache', '$route', '$routeParams', '$location',
+    function(RestangularCache, Restangular, $scope, Page, $modal, $alert, Cache, $route, $routeParams, $location) {
         $scope.orderByField     = 'username';
         $scope.reverseSort      = false;
         var requestUsersUrl     = '';
         $scope.usersList        = [];
 
+        // For loading more than the first page
+        var paginationOffset = 1;
+        var perPage          = 50;
+        if($routeParams.paginationPage !== undefined) {
+            paginationOffset = $routeParams.paginationPage;
+        }
+
+        // Show pagination and set the type
+        $scope.showPagination = function() {
+            if($scope.usersList.length >= perPage || paginationOffset > 1) {
+                $scope.pagination = {
+                    type: 'users',
+                    url: 'users',
+                    perPage: perPage,
+                    start: paginationOffset,
+                    pages: []
+                };
+                return 'templates/restangular/html/bootstrap/pagination.html';
+            } else {
+                return false;
+            }
+        };
+
         // Remove loading screen
         jQuery('#loading').show();
 
-        RestangularCache.all('users').getList().then(function(usersResponse) {
+        // Get list with users
+        RestangularCache.one('users', (paginationOffset - 1) * perPage).getList().then(function(usersResponse) {
             $scope.usersList = usersResponse;
             Page.setTitle('Users');
             requestUsersUrl = usersResponse.getRequestedUrl();
@@ -2094,12 +2213,38 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
             jQuery('#loading').hide();
         });
 
+        // Toggle filters
         $scope.collapseFilter = true;
         $scope.toggleFilter = function() {
             $scope.collapseFilter = !$scope.collapseFilter;
             return $scope.collapseFilter;
         };
 
+        // Search for the given username
+        var usernameSearchResults = [];
+        $scope.userBySearch       = "";
+        $scope.getUserByUsername = function($viewValue) {
+            var results = '';
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('users', $viewValue).get().then(function(usersResponse) {
+                    usernameSearchResults = usersResponse;
+                    return usersResponse;
+                });
+            }
+            return results;
+        };
+
+        // When selecting an user
+        $scope.selectUser = function() {
+            for(var i = 0; i < usernameSearchResults.length; i++) {
+                // Only add user when match found and not already listed
+                if(usernameSearchResults[i].username == $scope.userBySearch) {
+                    $location.path('user/'+ usernameSearchResults[i].id);
+                }
+            }
+        };
+
+        // Save a new user
         $scope.saveUser = function() {
             // Show loading screen
             jQuery('#loading').show();

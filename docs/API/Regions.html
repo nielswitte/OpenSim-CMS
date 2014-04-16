@@ -6,7 +6,7 @@
 <head>
     <title>OpenSim-CMS</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="description" content="Documentation v0.7.2" />
+    <meta name="description" content="Documentation v0.8" />
     <meta name="author" content="OpenSim-CMS">
         <link rel="icon" href="../img/favicon.png" type="image/x-icon">
         <!-- Mobile -->
@@ -65,18 +65,16 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>Regions                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Tuesday, April 15, 2014                                        </span>
+                                            Wednesday, April 16, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            1:06 PM                                        </span>
+                                            11:16 AM                                        </span>
                                 </div>
                                                         <p>To retrieve information about a region the following API can be used.</p>
 
 <pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/region/&lt;REGION-UUID&gt;/ HTTP/1.1
 </code></pre>
 
-<p>This will return some basic information about the region, such as the name and a thumbnail.<br />
-Most of the information is only available if OpenSim and the webserver run on the same device<br />
-or if the MySQL database of OpenSim accepts remote connections.</p>
+<p>This will return some basic information about the region, such as the name and a thumbnail. Most of the information is only available if OpenSim and the webserver run on the same device or if the MySQL database of OpenSim accepts remote connections.</p>
 
 <pre><code class="language-json">{
     "uuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
@@ -101,7 +99,7 @@ or if the MySQL database of OpenSim accepts remote connections.</p>
 <pre><code class="language-http">POST /api/grid/&lt;GRID-ID&gt;/regions/ HTTP/1.1
 </code></pre>
 
-<p>This will return the number of updated regions and a boolean indicating if the update succeeded.</p>
+<p>This will return the number of updated regions and a boolean indicating if the update succeeded. However, this only adds and updates regions, it does not remove regions that are listed in the CMS but do not exist anymore.</p>
 
 <pre><code class="language-json">{
     "success": true,

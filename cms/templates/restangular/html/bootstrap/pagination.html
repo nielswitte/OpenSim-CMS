@@ -1,0 +1,10 @@
+<ul class="pagination" ng-controller="paginationController">
+    <li class="disabled" ng-hide="pagination.start > 1"><a ng-href="#!/{{pagination.url}}/{{pagination.start}}">&laquo;</a></li>
+    <li ng-show="pagination.start > 1"><a ng-href="#!/{{pagination.url}}/{{pagination.start - 1}}">&laquo;</a></li>
+    <li ng-repeat="page in pagination.pages" class="{{page.page == pagination.start ? 'active' : ''}}">
+        <a ng-href="#!/{{pagination.url}}/" ng-show="page.page == 1">{{page.page}}</a>
+        <a ng-href="#!/{{pagination.url}}/{{page.page}}" ng-show="page.page >= 2">{{page.page}}</a>
+    </li>
+    <li class="disabled" ng-hide="pagination.start < pagination.pages.length"><a ng-href="#!/{{pagination.url}}/{{pagination.start}}">&raquo;</a></li>
+    <li ng-show="pagination.start < pagination.pages.length"><a ng-href="#!/{{pagination.url}}/{{pagination.start * 1 + 1}}">&raquo;</a></li>
+</ul>
