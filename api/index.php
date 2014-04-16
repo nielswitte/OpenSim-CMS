@@ -19,8 +19,8 @@ require_once dirname(__FILE__) .'/modules/user.php';
  * This class is catches the API calls and searches for the matching function
  *
  * @author Niels Witte
- * @version 0.6
- * @date April 2nd, 2014
+ * @version 0.7
+ * @date April 16th, 2014
  * @since February 10th, 2014
  */
 
@@ -93,10 +93,3 @@ if($result != '') {
         echo json_encode($result);
     }
 }
-
-/*
-foreach($headers as $header => $value) {
-    $data .= $header .': '. $value ."\n";
-}
-file_put_contents('headers.txt', $data);
-*/

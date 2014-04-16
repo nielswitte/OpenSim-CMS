@@ -5,8 +5,8 @@ defined('EXEC') or die('Config not loaded');
  * Helper class to support the CMS and API
  *
  * @author Niels Witte
- * @version 0.3d
- * @date April 15th, 2014
+ * @version 0.4
+ * @date April 16th, 2014
  * @since February 12th, 2014
  */
 class Helper {
@@ -479,5 +479,29 @@ END:VCALENDAR";
             $parent = FALSE;
         }
         return $parent;
+    }
+
+    /**
+     * Sets the basic PHP mailer settings, such as the sender, the SMTP server and so on
+     *
+     * @return \PHPMailer
+     */
+    public static function getMailer() {
+        // Include the mail helper class
+        require_once dirname(__FILE__) .'/../includes/PHPMailer/PHPMailerAutoload.php';
+        $mail = new \PHPMailer();
+        $mail->setFrom(CMS_ADMIN_EMAIL, CMS_ADMIN_NAME);
+
+        // Use SMTP?
+        if(SERVER_SMTP) {
+            $mail->isSMTP();                                    // Set mailer to use SMTP
+            $mail->Host = SERVER_SMTP_HOST;                     // Specify main and backup server
+            $mail->SMTPAuth = SERVER_SMTP_AUTH;                 // Enable SMTP authentication
+            $mail->Username = SERVER_SMTP_AUTH_USERNAME;        // SMTP username
+            $mail->Password = SERVER_SMTP_AUTH_PASSWORD;        // SMTP password
+            $mail->SMTPSecure = SERVER_SMTP_ENCRYPTION;         // Enable encryption, 'ssl' also accepted
+        }
+
+        return $mail;
     }
 }

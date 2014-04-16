@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the Meeting controller
  *
  * @author Niels Witte
- * @version 0.3c
- * @date April 14th, 2014
+ * @version 0.3d
+ * @date April 16th, 2014
  * @since March 13th, 2014
  */
 class MeetingController {
@@ -311,9 +311,6 @@ class MeetingController {
         // Get the actual up-to-date documents list
         $meeting->getDocumentsFromDabatase();
 
-        // Include the mail helper class
-        require_once dirname(__FILE__) .'/../includes/PHPMailer/PHPMailerAutoload.php';
-
         // Prepare email-template
         $html   = file_get_contents(dirname(__FILE__) .'/../templates/email/default.html');
 
@@ -357,11 +354,9 @@ class MeetingController {
 
         // Mail all participants
         foreach($participants as $participant) {
-            $mail = new \PHPMailer();
+            $mail = \Helper::getMailer();
             $mail->addAddress($participant->getEmail(), $participant->getFirstName() .' '. $participant->getLastName());
             $mail->Subject = '[OpenSim-CMS] Meeting: '. $meeting->getName();
-            $mail->setFrom(CMS_ADMIN_EMAIL, CMS_ADMIN_NAME);
-
             // Attach ICS
             $mail->addAttachment($pathToICS, 'invite.ics', 'base64', 'application/ics');
             // Add template

@@ -67,7 +67,7 @@
                                         <span style="float: left; font-size: 10px; color: gray;">
                                             Wednesday, April 16, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            12:38 PM                                        </span>
+                                            2:58 PM                                        </span>
                                 </div>
                                                         <p>Before you start, you require a web server with <a href="https://httpd.apache.org/">Apache</a>, <a href="http://www.php.net">PHP 5.4+</a> and <a href="http://www.mysql.com">MySQL 5.6+</a>. On windows you can use for example <a href="https://www.apachefriends.org/index.html">XAMPP</a>. On Linux the software can be installed by your package manager.</p>
 
@@ -196,6 +196,50 @@
   <td>SERVER_MIN_PASSWORD_LENGTH</td>
   <td>number</td>
   <td>The minimal length of a password</td>
+</tr>
+</tbody>
+</table>
+
+<h4>Mail settings</h4>
+
+<table>
+<thead>
+<tr>
+  <th>Setting</th>
+  <th>Possible values</th>
+  <th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>SERVER_SMTP</td>
+  <td><code>TRUE</code> or <code>FALSE</code></td>
+  <td>Whether or not to use SMTP. When this is set to <code>FALSE</code> the script will use PHP mail</td>
+</tr>
+<tr>
+  <td>SERVER_SMTP_HOST</td>
+  <td>SMTP server</td>
+  <td>A list with SMTP servers, separated by a semi column <code>;</code> when the SMTP server uses a port different than <code>25</code> add the port number to the host name. For example <code>smtp.gmail.com:587</code></td>
+</tr>
+<tr>
+  <td>SERVER_SMTP_ENCRYPTION</td>
+  <td>empty or <code>tls</code> or <code>ssl</code></td>
+  <td>Type of encryption used by the server; empty for none, <code>tls</code> or <code>ssl</code></td>
+</tr>
+<tr>
+  <td>SERVER_SMTP_AUTH</td>
+  <td><code>TRUE</code> or <code>FALSE</code></td>
+  <td>Does the SMTP server require authentication?</td>
+</tr>
+<tr>
+  <td>SERVER_SMTP_AUTH_USERNAME</td>
+  <td>username</td>
+  <td>The username required to authenticate to the SMTP server</td>
+</tr>
+<tr>
+  <td>SERVER_SMTP_AUTH_PASSWORD</td>
+  <td>password</td>
+  <td>The password required to authenticate to the SMTP server</td>
 </tr>
 </tbody>
 </table>
