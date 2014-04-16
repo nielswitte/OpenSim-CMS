@@ -51,6 +51,17 @@ The API configuration contains the following settings:
 | SERVER_MIN_USERNAME_LENGTH    | number            | The minimal length of an username                                                                     |
 | SERVER_MIN_PASSWORD_LENGTH    | number            | The minimal length of a password                                                                      |
 
+#### Mail settings
+| Setting                       | Possible values   | Description                                                                                           |
+|-------------------------------|-------------------|-------------------------------------------------------------------------------------------------------|
+| SERVER_SMTP                   | `TRUE` or `FALSE` | Whether or not to use SMTP. When this is set to `FALSE` the script will use PHP mail                  |
+| SERVER_SMTP_HOST              | SMTP server       | A list with SMTP servers, separated by a semi column `;` when the SMTP server uses a port different than `25` add the port number to the host name. For example `smtp.gmail.com:587` |
+| SERVER_SMTP_ENCRYPTION        | empty or `tls` or `ssl` | Type of encryption used by the server; empty for none, `tls` or `ssl`                           |
+| SERVER_SMTP_AUTH              | `TRUE` or `FALSE` | Does the SMTP server require authentication?                                                          |
+| SERVER_SMTP_AUTH_USERNAME     | username          | The username required to authenticate to the SMTP server                                              |
+| SERVER_SMTP_AUTH_PASSWORD     | password          | The password required to authenticate to the SMTP server                                              |
+
+
 #### Database settings
 | Setting                       | Possible values   | Description                                                                                           |
 |-------------------------------|-------------------|-------------------------------------------------------------------------------------------------------|

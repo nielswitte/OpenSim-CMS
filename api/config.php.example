@@ -15,6 +15,14 @@
     define('SERVER_API_TOKEN_EXPIRES2', '1 day');                               // Time a token is valid for OpenSim (used by strtotime)
     define('SERVER_MIN_USERNAME_LENGTH', 6);                                    // Minimum length for the username
     define('SERVER_MIN_PASSWORD_LENGTH', 8);                                    // Minimum length for the password
+    // Mail settings
+    define('SERVER_SMTP',               FALSE);                                 // Use SMTP to send mails, when FALSE use php mail
+    define('SERVER_SMTP_HOST',          '');                                    // ; separated list with smtp servers
+    define('SERVER_SMTP_ENCRYPTION',    'tls');                                 // Use tls or ssl encryption
+    define('SERVER_SMTP_AUTH',          FALSE);                                 // Use username/password authentication to SMTP server
+    define('SERVER_SMTP_AUTH_USERNAME', '');                                    // Username to use for authenticating to the SMTP server
+    define('SERVER_SMTP_AUTH_PASSWORD', '');                                    // Password to use for authenticating to the SMTP server
+
     // DB connection settings
     $DB_USERNAME                        = '';                                   // Database username
     $DB_PASSWORD                        = '';                                   // Database password
