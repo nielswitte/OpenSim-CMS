@@ -1958,6 +1958,7 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
 
         // Creates the meeting by sending it to the server
         $scope.createMeeting = function() {
+            jQuery('#loading').show();
             // Reformat back to the expected format for the API
             $scope.meeting.startDate   = $scope.startDateString.replace(/\//g, '-') +' '+ $scope.startTimeString +':00';
             $scope.meeting.endDate     = $scope.endDateString.replace(/\//g, '-') +' '+ $scope.endTimeString +':00';
@@ -1970,6 +1971,7 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
                     Cache.clearCache();
                     $location.path('meeting/'+ resp.meetingId);
                 }
+                jQuery('#loading').hide();
             });
         };
 
