@@ -11,7 +11,7 @@ require_once dirname(__FILE__) .'/../controllers/meetingController.php';
  * Implements the functions for meetings
  *
  * @author Niels Witte
- * @version 0.5
+ * @version 0.5a
  * @date April 17th, 2014
  * @since February 25th, 2014
  */
@@ -140,8 +140,8 @@ class Meeting extends Module{
                 $meeting->getParticipants()->getParticipantById(\Auth::getUser()->getId()) !== FALSE) {
             $meeting->getCreator()->getInfoFromDatabase();
             $meeting->getRoom()->getInfoFromDatabase();
-            $meeting->getAgendaFromDabatase();
-            $meeting->getDocumentsFromDabatase();
+            $meeting->getAgendaFromDatabase();
+            $meeting->getDocumentsFromDatabase();
             return $this->getMeetingData($meeting, TRUE);
         } else {
             throw new \Exception('You do not have permission to view this meeting', 1);
@@ -167,7 +167,7 @@ class Meeting extends Module{
                 $meeting->getCreator()->getId() == \Auth::getUser()->getId() ||
                 $meeting->getParticipants()->getParticipantById(\Auth::getUser()->getId()) !== FALSE) {
 
-            $meeting->getAgendaFromDabatase();
+            $meeting->getAgendaFromDatabase();
             return $this->getMeetingAgendaData($meeting);
         } else {
             throw new \Exception('You do not have permission to view this agenda', 2);
@@ -307,8 +307,8 @@ class Meeting extends Module{
                 $meeting->getCreator()->getId() == \Auth::getUser()->getId() ||
                 $meeting->getParticipants()->getParticipantById(\Auth::getUser()->getId()) !== FALSE) {
 
-            $meeting->getAgendaFromDabatase();
-            $meeting->getDocumentsFromDabatase();
+            $meeting->getAgendaFromDatabase();
+            $meeting->getDocumentsFromDatabase();
             $meeting->getMinutesFromDatabase();
             $minutes = $meeting->getMinutes()->getMinutes();
 
