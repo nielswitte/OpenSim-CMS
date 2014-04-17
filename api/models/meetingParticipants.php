@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class represents a meeting
  *
  * @author Niels Witte
- * @version 0.1
- * @date March 20th, 2014
+ * @version 0.2
+ * @date April 17th, 2014
  * @since February 25th, 2014
  */
 class MeetingParticipants {
@@ -98,6 +98,21 @@ class MeetingParticipants {
         } else {
             return $this->participantUuids[$uuid];
         }
+    }
+
+    /**
+     * Searches the list of participants for an user with a specific id
+     *
+     * @param integer $id
+     * @return \Models\User or boolean when not found
+     */
+    public function getParticipantById($id) {
+        foreach($this->getParticipants() as $participant) {
+            if($participant->getId() == $id) {
+                return $participant;
+            }
+        }
+        return FALSE;
     }
 
     /**
