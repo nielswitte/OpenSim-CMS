@@ -1779,7 +1779,13 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
                 grid: { }
             },
             agenda: '1. Opening\n',
-            participants: [],
+            participants: [{
+                    id: sessionStorage.id,
+                    username: sessionStorage.username,
+                    firstName: sessionStorage.firstName,
+                    lastName: sessionStorage.lastName,
+                    email: sessionStorage.email
+            }],
             documents: []
         };
         $scope.grids                    = [];
