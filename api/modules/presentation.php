@@ -77,7 +77,7 @@ class Presentation extends Module {
             // Retrieve all documents the user can access as the member of a group
             // or as documents owned by the user self
             $resutls = $db->rawQuery('
-                        SELECT
+                        SELECT DISTINCT
                             d.*,
                             u.*,
                             d.id AS documentId,

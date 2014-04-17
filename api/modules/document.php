@@ -73,7 +73,7 @@ class Document extends Module {
             // Retrieve all documents the user can access as the member of a group
             // or as documents owned by the user self
             $resutls = $db->rawQuery('
-                        SELECT
+                        SELECT DISTINCT
                             d.*,
                             u.*,
                             d.id AS documentId,
@@ -129,7 +129,7 @@ class Document extends Module {
         $db             = \Helper::getDB();
         $params         = array("%". strtolower($db->escape($args[1])) ."%", 'document');
         $results        = $db->rawQuery('
-            SELECT
+            SELECT DISTINCT
                 *,
                 d.id AS documentId,
                 u.id AS userId

@@ -71,7 +71,7 @@ class File extends Module{
             // Retrieve all documents the user can access as the member of a group
             // or as documents owned by the user self
             $resutls = $db->rawQuery('
-                        SELECT
+                        SELECT DISTINCT
                             d.*,
                             u.*,
                             d.id AS documentId,
@@ -126,7 +126,7 @@ class File extends Module{
         $db             = \Helper::getDB();
         $params         = array("%". strtolower($db->escape($args[1])) ."%");
         $results        = $db->rawQuery('
-            SELECT
+            SELECT DISTINCT
                 *,
                 d.id AS documentId,
                 u.id AS userId
@@ -140,7 +140,7 @@ class File extends Module{
             ORDER BY
                 LOWER(d.title) ASC'
             , $params);
-        
+
         $data           = array();
         foreach($results as $result) {
             // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
