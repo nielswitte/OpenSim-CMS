@@ -1026,8 +1026,8 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 );
 
 // documentController -------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentController', ['RestangularCache', '$scope', '$routeParams', 'Page', '$modal', '$alert',
-    function(RestangularCache, $scope, $routeParams, Page, $modal, $alert) {
+angularRest.controller('documentController', ['RestangularCache', '$scope', '$routeParams', 'Page', '$modal', '$alert', '$location',
+    function(RestangularCache, $scope, $routeParams, Page, $modal, $alert, $location) {
         // Show loading screen
         jQuery('#loading').show();
         // List with comments
@@ -1053,6 +1053,8 @@ angularRest.controller('documentController', ['RestangularCache', '$scope', '$ro
             // Error occured?
             if(documentResponse.error) {
                 $alert({title: 'Error!', content: documentResponse.error, type: 'danger'});
+                // Back to documents overview page
+                $location.path('documents');
             } else {
                 $scope.document = documentResponse;
                 $scope.token    = sessionStorage.token;
@@ -1611,53 +1613,61 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
 
         // Get the selected meeting
         RestangularCache.one('meeting', $routeParams.meetingId).get().then(function(meetingResponse) {
-            $scope.meeting          = meetingResponse;
-            angular.copy($scope.meeting, meetingOld);
-            // Page and content titles
-            $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
-            Page.setTitle('Meeting '+ meetingResponse.name);
-            meetingRequestUrl       = meetingResponse.getRequestedUrl();
-
-            // Set the dates and times
-            setDateTimes();
-
-            // When not editing, reformat the agenda
-            if($location.path().indexOf('/edit') == -1) {
-                $scope.meeting.agenda   = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
-            // When editing, load additional information
+            // Error occured?
+            if(meetingResponse.error) {
+                $alert({title: 'Error!', content: meetingResponse.error, type: 'danger'});
+                // Back to meetings overview page
+                $location.path('meetings');
             } else {
-                // Get additional information about the Grids
-                RestangularCache.all('grids').getList().then(function(gridsResponse) {
-                    gridsRequestUrl = gridsResponse.getRequestedUrl();
-                    $scope.grids    = gridsResponse;
-                });
+                $scope.meeting          = meetingResponse;
+                angular.copy($scope.meeting, meetingOld);
+                // Page and content titles
+                $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
+                Page.setTitle('Meeting '+ meetingResponse.name);
+                meetingRequestUrl       = meetingResponse.getRequestedUrl();
 
-                // Get additional meeting rooms
-                $scope.getMeetingRooms();
+                // Set the dates and times
+                setDateTimes();
 
-                // Load meetings on same day
-                var date = new moment().subtract('week', 2).format('YYYY-MM-DD');
-                Restangular.one('meetings', date).getList('calendar').then(function(meetingsResponse) {
-                    calendar = jQuery('#calendar').calendar({
-                        language:       'en-US',
-                        events_source:  meetingsResponse,
-                        tmpl_cache:     true,
-                        view:           'day',
-                        day:            new moment($scope.meeting.startDate).format('YYYY-MM-DD'),
-                        time_start:     TIME_START,
-                        time_end:       TIME_END,
-                        tmpl_path:      partial_path +'/../calendar/',
-                        holidays:       HOLIDAYS,
-                        onAfterViewLoad: function(view) {
-                            jQuery('h4.calendar-date').text(this.getTitle());
-
-                            // Scroll halfway they calendar
-                            var container = jQuery('#calendar').parent('div.calendar-container');
-                            container.scrollTop(container.height() / 2);
-                        }
+                // When not editing, reformat the agenda
+                if($location.path().indexOf('/edit') == -1) {
+                    $scope.meeting.agenda   = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
+                // When editing, load additional information
+                } else {
+                    // Get additional information about the Grids
+                    RestangularCache.all('grids').getList().then(function(gridsResponse) {
+                        gridsRequestUrl = gridsResponse.getRequestedUrl();
+                        $scope.grids    = gridsResponse;
                     });
-                });
+
+                    // Get additional meeting rooms
+                    $scope.getMeetingRooms();
+
+                    // Load meetings on same day
+                    var date = new moment().subtract('week', 2).format('YYYY-MM-DD');
+                    Restangular.one('meetings', date).getList('calendar').then(function(meetingsResponse) {
+                        calendar = jQuery('#calendar').calendar({
+                            language:       'en-US',
+                            events_source:  meetingsResponse,
+                            tmpl_cache:     true,
+                            view:           'day',
+                            day:            new moment($scope.meeting.startDate).format('YYYY-MM-DD'),
+                            time_start:     TIME_START,
+                            time_end:       TIME_END,
+                            tmpl_path:      partial_path +'/../calendar/',
+                            holidays:       HOLIDAYS,
+                            onAfterViewLoad: function(view) {
+                                jQuery('h4.calendar-date').text(this.getTitle());
+
+                                // Scroll halfway they calendar
+                                var container = jQuery('#calendar').parent('div.calendar-container');
+                                container.scrollTop(container.height() / 2);
+                            }
+                        });
+                    });
+                }
             }
+
             // Remove loading screen
             jQuery('#loading').hide();
         });
