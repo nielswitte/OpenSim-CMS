@@ -15,7 +15,7 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  * Implements the functions for users
  *
  * @author Niels Witte
- * @version 0.6
+ * @version 0.7
  * @date April 17th, 2014
  * @since February 24th, 2014
  */
@@ -506,7 +506,7 @@ class User extends Module {
     }
 
     /**
-     * Returns a formatted list with documents owned by this user.
+     * Returns a formatted list with documents owned by this user or shared with the user.
      *
      * @param array $args
      * @return array
@@ -514,9 +514,39 @@ class User extends Module {
     public function getUserFilesByUserId($args) {
         $data = array();
         $db = \Helper::getDB();
-        $db->join('users u', 'u.id = d.ownerId', 'LEFT');
-        $db->where('d.ownerId', $db->escape($args[1]));
-        $documents = $db->get('documents d', NULL, '*, d.id as documentId, u.id AS userId');
+        $params = array(
+            $db->escape($args[1]),
+            $db->escape($args[1]),
+        );
+        // This query fails when written as DB object
+        // Retrieve all documents the user can access as the member of a group
+        // or as documents owned by the user self
+        $documents = $db->rawQuery('
+                    SELECT DISTINCT
+                        d.*,
+                        u.*,
+                        d.id AS documentId,
+                        u.id AS userId
+                    FROM
+                        group_documents gd,
+                        group_users gu,
+                        documents d
+                    LEFT JOIN
+                        users u
+                    ON
+                        d.ownerId = u.id
+                    WHERE (
+                        gd.documentId = d.id
+                    AND
+                        gd.groupId = gu.groupId
+                    AND
+                        gu.userId = ?
+                    ) OR
+                        d.ownerId = ?
+                    ORDER BY
+                        d.creationDate DESC'
+            , $params);
+
         foreach($documents as $document) {
             $user   = new \Models\User($document['userId'], $document['username'], $document['email'], $document['firstName'], $document['lastName'], $document['lastLogin']);
             $file   = new \Models\File($document['documentId'], $document['type'], $document['title'], $user, $document['creationDate'], $document['modificationDate'], $document['file']);
