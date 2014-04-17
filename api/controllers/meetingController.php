@@ -70,16 +70,7 @@ class MeetingController {
         // Attach a new meeting participants list
         $participants  = new \Models\MeetingParticipants($this->getMeeting());
         $this->getMeeting()->setParticipants($participants);
-
-        // Participants are a array of ids or an array of users?
-        if(isset($parameters['participants'][0]) && is_numeric($parameters['participants'][0])) {
-            $participants = $parameters['participants'];
-        } else {
-            $participants = array();
-            foreach($parameters['participants'] as $participant) {
-                $participants[] = $participant['id'];
-            }
-        }
+        $this->updateParticipants($parameters['participants']);
 
         // Sets the participants for this meeting
         $this->addParticipants($participants);
@@ -88,16 +79,9 @@ class MeetingController {
         $documents = new \Models\MeetingDocuments($this->getMeeting());
         $this->getMeeting()->setDocuments($documents);
 
-        // Documents are a array of ids or an array of documents?
-        if(isset($parameters['documents'][0]) && is_numeric($parameters['documents'][0])) {
-            $documents = $parameters['documents'];
-        } else {
-            $documents = array();
-            foreach($parameters['documents'] as $document) {
-                $documents[] = $document['id'];
-            }
+        if(isset($parameters['documents'])) {
+            $this->updateDocuments($parameters['documents']);
         }
-        $this->addDocuments($documents);
 
         // Create the agenda
         $agenda = $this->parseAgendaString($parameters['agenda']);
@@ -353,6 +337,7 @@ class MeetingController {
      * name, date, agenda, participants, documents of this meeting
      */
     public function mailParticipants() {
+        $result  = FALSE;
         $meeting = $this->getMeeting();
         // Get actual meeting data from database (so only final data is used)
         $meeting->getInfoFromDatabase();
