@@ -5,7 +5,7 @@ defined('EXEC') or die('Config not loaded');
  * This class is used to check authorization tokens
  *
  * @author Niels Witte
- * @version 0.3
+ * @version 0.3a
  * @data April 17th, 2014
  * @since February 19th, 2014
  */
@@ -15,6 +15,7 @@ class Auth {
     private static $timestamp;
     private static $userId;
     private static $user;
+    private static $groupFiles;
 
     const NONE      = 0b000; // 0 - No rights
     const READ      = 0b100; // 4 - Read access
@@ -113,22 +114,39 @@ class Auth {
     }
 
     /**
+     * Checks if the user is part of atleast one group which can access the given file
+     *
+     * @param integer $fileId
+     * @return boolean
+     */
+    public static function checkGroupFile($fileId) {
+        $user = self::getUser();
+        $db = \Helper::getDB();
+
+        if(self::$groupFiles === NULL) {
+            $db->where('u.userId', $db->escape($user->getId()));
+            $db->join('group_users u', 'u.groupId = d.groupId', 'INNER');
+            $results = $db->get('group_documents d', NULL, 'd.documentId');
+            // Convert to one dimensional array
+            foreach($results as $result) {
+                self::$groupFiles[] = $result['documentId'];
+            }
+        }
+
+        return in_array($fileId, self::$groupFiles);
+    }
+
+    /**
      * Validates the given token and updates its expiration time
      *
      * @return boolean
      */
     private static function checkToken() {
         $db = \Helper::getDB();
-        $params = array(
-            $db->escape(self::$token),
-            $db->escape(self::$ip),
-            $db->escape(self::$timestamp)
-        );
-
         $db->where('token', $db->escape(self::$token));
         $db->where('ip', $db->escape(self::$ip));
         $db->where('expires', array('>=' => $db->escape(self::$timestamp)));
-        $result = $db->getOne('tokens', 'count(*) AS count, userId');
+        $result = $db->getOne('tokens', 'COUNT(*) AS count, userId');
 
         // Extend token expiration time
         if($result && $result['count'] == 1) {
