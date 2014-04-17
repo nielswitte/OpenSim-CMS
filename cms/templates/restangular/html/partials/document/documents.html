@@ -82,7 +82,7 @@
                 <td><a ng-href="#!/user/{{document.user.id}}">{{document.user.username}} ({{document.user.firstName}} {{document.user.lastName}})</a></td>
                 <td>{{document.creationDate}}</td>
                 <td>{{document.modificationDate}}</td>
-                <td><button class="btn btn-danger btn-xs" confirmed-click="deleteDocument(document.id)" ng-confirm-click="Are you sure you want to delete {{document.title}}?" ng-show="allowDelete(document.ownerId)"><i class="glyphicon glyphicon-trash"></i> Delete</button></td>
+                <td><button class="btn btn-danger btn-xs" confirmed-click="deleteDocument(document.id)" ng-confirm-click="Are you sure you want to delete {{document.title}}?" ng-show="allowDelete(document.user.id)"><i class="glyphicon glyphicon-trash"></i> Delete</button></td>
             </tr>
         </tbody>
     </table>
