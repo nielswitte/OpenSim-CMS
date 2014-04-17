@@ -5,7 +5,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is used to check authorization tokens
  *
  * @author Niels Witte
- * @version 0.2
+ * @version 0.3
+ * @data April 17th, 2014
  * @since February 19th, 2014
  */
 class Auth {
@@ -123,14 +124,18 @@ class Auth {
             $db->escape(self::$ip),
             $db->escape(self::$timestamp)
         );
-        $result = $db->rawQuery('SELECT count(*) AS count, userId FROM tokens WHERE token = ? AND ip = ? AND expires >= ? LIMIT 1', $params);
+
+        $db->where('token', $db->escape(self::$token));
+        $db->where('ip', $db->escape(self::$ip));
+        $db->where('expires', array('>=' => $db->escape(self::$timestamp)));
+        $result = $db->getOne('tokens', 'count(*) AS count, userId');
 
         // Extend token expiration time
-        if($result[0]['count'] == 1) {
-            self::$userId       = $result[0]['userId'];
+        if($result && $result['count'] == 1) {
+            self::$userId       = $result['userId'];
             $db->where('token', $db->escape(self::$token));
             // OpenSim uses EXPIRES2
-            if($result[0]['userId'] == 0) {
+            if($result['userId'] == 0) {
                 $data['expires']    = $db->escape(date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES2)));
             } else {
                 $data['expires']    = $db->escape(date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES)));
@@ -138,7 +143,7 @@ class Auth {
             $db->update('tokens', $data);
         }
 
-        return $result[0]['count'] == 1 ? TRUE : FALSE;
+        return $result['count'] == 1 ? TRUE : FALSE;
     }
 
     /**
