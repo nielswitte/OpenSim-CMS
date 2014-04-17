@@ -38,6 +38,22 @@ class MeetingParticipants {
     }
 
     /**
+     * Removes the given user from the list with participants
+     *
+     * @param \Models\User $user
+     * @return boolean TRUE when user removed
+     */
+    public function removeParticipant(\Models\User $user) {
+        foreach($this->getParticipants() as $index => $participant) {
+            if($participant->getId() == $user->getId()) {
+                unset($this->participants[$index]);
+                return TRUE;
+            }
+        }
+        return FALSE;
+    }
+
+    /**
      * Get all participants for this meeting
      *
      * @return array

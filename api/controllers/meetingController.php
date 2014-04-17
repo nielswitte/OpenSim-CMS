@@ -139,22 +139,10 @@ class MeetingController {
         $db->where('id', $db->escape($this->getMeeting()->getId()));
         $update = $db->update('meetings', $data);
 
-        // Update the participants list
-        $participantsRemove = $this->removeParticipants();
-
-        // Participants are a array of ids or an array of users?
-        if(isset($parameters['participants'][0]) && is_numeric($parameters['participants'][0])) {
-            $participants = $parameters['participants'];
-        } else {
-            $participants = array();
-            foreach($parameters['participants'] as $participant) {
-                $participants[] = $participant['id'];
-            }
-        }
-        $participantsAdd = $this->setParticipants($participants);
+        $participants = $this->updateParticipants($parameters['participants']);
 
         // Update the documents list
-        $documentsRemove = $this->removeDocuments();
+        $documentsRemove    = $this->removeDocuments();
 
         // Documents are a array of ids or an array of documents?
         if(isset($parameters['documents'][0]) && is_numeric($parameters['documents'][0])) {
@@ -173,7 +161,7 @@ class MeetingController {
         $this->setAgenda($agenda);
 
         // Were any updates made?
-        if($update || $participantsRemove || $participantsAdd || $documentsRemove || $documentsAdd) {
+        if($update || $participants || $documentsRemove || $documentsAdd) {
             return TRUE;
         } else {
             throw new \Exception('No changes were made to this meeting', 6);
@@ -230,7 +218,7 @@ class MeetingController {
      * @param array $files - List with file IDs
      * @return boolean
      */
-    private function setDocuments($files) {
+    private function addDocuments($files) {
         $db = \Helper::getDB();
         $result = FALSE;
         foreach($files as $fileId) {
@@ -248,19 +236,60 @@ class MeetingController {
     }
 
     /**
+     * Updates the list with participants for this meeting
+     *
+     * @param array $participants
+     * @return boolean - TRUE when something changes
+     */
+    public function updateParticipants($participants) {
+        // Update the participants list
+        // Participants are a array of ids or an array of users?
+        if(isset($participants[0]) && is_numeric($participants[0])) {
+            $newParticipantIds = $participants;
+        } else {
+            $newParticipantIds = array();
+            foreach($participants as $participant) {
+                $newParticipantIds[] = $participant['id'];
+            }
+        }
+
+        $oldParticipantIds = array();
+        $this->meeting->getParticipantsFromDatabase();
+        foreach($this->meeting->getParticipants() as $participant) {
+            $oldParticipantIds[] = $participant->getId();
+        }
+
+        $removeParticipants = array_diff($oldParticipantIds, $newParticipantIds);
+        $addParticipants    = array_diff($newParticipantIds, $oldParticipantIds);
+
+        // Remove old
+        $participantsRemove = $this->removeParticipants($removeParticipants);
+        // Add new participants
+        $participantsAdd    = $this->addParticipants($addParticipants);
+
+        return $participantsAdd || $participantsRemove;
+    }
+
+    /**
      * Removes the participants for this meeting
      *
      * @return boolean
      */
-    private function removeParticipants() {
-        // Create new empty participants list
-        $participants = new \Models\MeetingParticipants($this->getMeeting());
-        $this->getMeeting()->setParticipants($participants);
+    private function removeParticipants($participants) {
+        $db     = \Helper::getDB();
+        $result = FALSE;
+        foreach($participants as $participant) {
+            // Remove user instances from meeting
+            $user = new \Models\User($participant);
+            $this->getMeeting()->getParticipants()->removeParticipant($user);
 
-        // Add participants to DB
-        $db = \Helper::getDB();
-        $db->where('meetingId', $db->escape($this->getMeeting()->getId()));
-        return $db->delete('meeting_participants');
+            // Remove from database
+            $db->where('meetingId', $db->escape($this->getMeeting()->getId()));
+            $db->where('userId', $db->escape($user->getId()));
+            $result = $db->delete('meeting_participants');
+        }
+
+        return $result;
     }
 
     /**
@@ -269,7 +298,7 @@ class MeetingController {
      * @param array $participants - Array with participant IDs
      * @return boolean
      */
-    private function setParticipants($participants) {
+    private function addParticipants($participants) {
         $result = FALSE;
         $db     = \Helper::getDB();
         foreach($participants as $participant) {
@@ -284,7 +313,7 @@ class MeetingController {
             );
             $result = $db->insert('meeting_participants', $data);
         }
-        return $result !== FALSE ? TRUE : FALSE;
+        return $result;
     }
 
     /**
