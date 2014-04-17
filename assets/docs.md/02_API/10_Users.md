@@ -108,6 +108,12 @@ Example of output
             "gridName": "OpenSim's test grid",
             "confirmed": 1
         }
+    ],
+    "groups": [
+        {
+            "id": 1,
+            "name": "The Doe's"
+        }
     ]
 }
 ```

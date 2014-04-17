@@ -94,6 +94,12 @@ The output will be as the example below. The `start` and `end` fields are an Uni
 ## Get a specific meeting
 When retrieving a specific meeting you get a lot more details. Information such as the participants, documents and the agenda are included.
 
+**NOTICE:** You can only retrieve the meeting if you meet at least one of the following requirements.
+
+ * You have `ALL` permissions
+ * You created the meeting
+ * You are a participant of the meeting
+
 ```http
 GET /api/meeting/<MEETING-ID>/ HTTP/1.1
 ```
@@ -206,8 +212,13 @@ When everything went well, the following information is returned:
 ```
 
 ## Update a meeting
-
 For updating a meeting you can use the following `PUT` request.
+
+**NOTICE:** You can only update the meeting if you meet at least one of the following requirements.
+
+ * You have `ALL` permissions
+ * You created the meeting
+ * You are a participant of the meeting and have `WRITE` permissions
 
 ```http
 PUT /api/meeting/<MEETING-ID>/ HTTP/1.1
@@ -216,6 +227,12 @@ The parameters are the same as for creating a meeting, see creating a meeting fo
 
 ## Get the meeting agenda
 To return only the agenda for a specific meeting, the following API can be used. This will return the agenda as a multi dimensional array instead of the flat string in the meeting details response.
+
+**NOTICE:** You can only retrieve the meeting agenda if you meet at least one of the following requirements.
+
+ * You have `ALL` permissions
+ * You created the meeting
+ * You are a participant of the meeting
 
 ```http
 GET /api/meeting/<MEETING-ID>/agenda HTTP/1.1

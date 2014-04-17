@@ -1,3 +1,10 @@
+**NOTICE:** You can only retrieve files if you meet at least one of the following requirements.
+
+ * You have `ALL` permissions
+ * You created the file
+ * You are a member of a group to which the file is attached
+
+
 ```http
 GET /api/files/ HTTP/1.1
 ```
