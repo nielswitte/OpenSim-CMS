@@ -140,6 +140,7 @@ class File extends Module{
             ORDER BY
                 LOWER(d.title) ASC'
             , $params);
+        
         $data           = array();
         foreach($results as $result) {
             // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
@@ -164,6 +165,7 @@ class File extends Module{
         // User has access to this file?
         $file = new \Models\File($args[1]);
         $file->getInfoFromDatabase();
+
         // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
         if($file->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($file->getId())) {
             // If the given file is a presentation, return it as a presentation
