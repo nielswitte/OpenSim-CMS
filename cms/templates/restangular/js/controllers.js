@@ -221,9 +221,9 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
                 type: $scope.commentType,
                 itemId: $scope.commentItemId,
                 parentId: 0,
-                message: ""
+                message: ''
             };
-            $scope.replyTo = "";
+            $scope.replyTo = '';
         };
 
         // Clear comment form on init
@@ -327,7 +327,7 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
 
         // Hides the form and resets the message
         $scope.updateCommentReset = function() {
-            $scope.message  = "";
+            $scope.message  = '';
             updateForm      = 0;
         };
 
@@ -377,7 +377,7 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
 
         // Trust the message as safe markdown html
         $scope.markdown = function(message) {
-            return $sce.trustAsHtml(markdown.toHTML(""+ message));
+            return $sce.trustAsHtml(markdown.toHTML(''+ message));
         };
 
         // Toggle MarkDown help
@@ -786,7 +786,7 @@ angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Pa
 
         // Trust the message as safe markdown html
         $scope.markdown = function(message) {
-            return $sce.trustAsHtml(markdown.toHTML(""+ message));
+            return $sce.trustAsHtml(markdown.toHTML(''+ message));
         };
 
         // Returns the list with the full path to the comment in context
@@ -864,7 +864,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 
         // Search for the given document title
         var documentSearchResults = [];
-        $scope.documentBySearch   = "";
+        $scope.documentBySearch   = '';
         $scope.getDocumentByTitle = function($viewValue) {
             var results = '';
             if($viewValue !== undefined && $viewValue.length >= 3) {
@@ -1757,7 +1757,7 @@ angularRest.controller('meetingMinutesController', ['RestangularCache', '$scope'
 
                 return $sce.trustAsHtml('<h'+ depth +'>'+ minute.agenda.value +'</h'+ depth +'>');
             } else {
-                return "";
+                return '';
             }
         };
     }]
@@ -2237,7 +2237,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
         // Search for the given username
         var usernameSearchResults = [];
-        $scope.userBySearch       = "";
+        $scope.userBySearch       = '';
         $scope.getUserByUsername = function($viewValue) {
             var results = '';
             if($viewValue !== undefined && $viewValue.length >= 3) {
@@ -2368,9 +2368,13 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
 // userController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('userController', ['Restangular', 'RestangularCache', '$scope', '$route', '$routeParams', 'Page', '$alert', '$modal', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $route, $routeParams, Page, $alert, $modal, Cache, $location) {
-        var userRequestUrl   = '';
-        var userOld          = {};
-        $scope.user          = [];
+        var userRequestUrl      = '';
+        var userOld             = {};
+        $scope.user             = {
+            groups: []
+        };
+        $scope.groupname        = '';
+        var groupSearchResults  = [];
 
         // Show loading screen
         jQuery('#loading').show();
@@ -2598,6 +2602,53 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             } else if(func == 'changePicture') {
                 $scope.changePicture();
             }
+        };
+
+        // Search for the given group
+        $scope.getGroupsByName = function($viewValue) {
+            var results = '';
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('groups', $viewValue).get().then(function(groupsResponse) {
+                    groupSearchResults = groupsResponse;
+                    return groupsResponse;
+                });
+            }
+            return results;
+        };
+
+        // Adds the currently selected group to the list
+        $scope.addGroup = function() {
+            for(var i = 0; i < groupSearchResults.length; i++) {
+                // Only add user when match found and not already listed
+                if(groupSearchResults[i].name == $scope.groupname) {
+                    if(!isDuplicateGroup()) {
+                        $scope.user.groups.push(groupSearchResults[i]);
+                    } else {
+                        $alert({title: 'Duplicate!', content: 'The user is already a member of the group '+ groupSearchResults[i].name, type: 'warning'});
+                    }
+                }
+            }
+        };
+
+        // Checks for duplicate groups
+        function isDuplicateGroup() {
+            for(var i = 0; i < $scope.user.groups.length; i++) {
+                if($scope.user.groups[i].name == $scope.groupname) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Removes the group with the given ID from the list
+        $scope.removeGroup = function(id) {
+            for(var i = 0; i < $scope.user.groups.length; i++) {
+                if($scope.user.groups[i].id == id) {
+                    $scope.user.groups.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
         };
 
         // Open the form for creating a new avatar

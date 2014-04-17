@@ -87,7 +87,8 @@ CREATE TABLE IF NOT EXISTS `documents` (
   `ownerId` int(11) NOT NULL,
   `file` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `FK_presentations_users` (`ownerId`)
+  KEY `FK_presentations_users` (`ownerId`),
+  CONSTRAINT `FK_documents_users` FOREIGN KEY (`ownerId`) REFERENCES `users` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
@@ -222,7 +223,7 @@ CREATE TABLE IF NOT EXISTS `group_documents` (
 
 -- Structuur van  tabel OpenSim-CMS.group_users wordt geschreven
 CREATE TABLE IF NOT EXISTS `group_users` (
-  `groupId` int(11) NOT NULL,
+  `groupId` int(11) NOT NULL AUTO_INCREMENT,
   `userId` int(11) NOT NULL,
   PRIMARY KEY (`groupId`,`userId`),
   KEY `FK_group_users_users` (`userId`),

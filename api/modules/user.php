@@ -60,7 +60,7 @@ class User extends Module {
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/?$/",                            'createAvatar',             $this, 'POST',   \Auth::EXECUTE);  // Create an avatar
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/files\/?$/",    'getUserFilesByAvatar',     $this, 'GET',    \AUTH::READ);     // Load all files for the user accociated with the avatar UUID on the given grid
         $this->api->addRoute("/^\/groups\/?$/",                                         'getGroups',                $this, 'GET',    \AUTH::READ);     // Gets a list with groups
-        $this->api->addRoute("/^\/groups\/([a-zA-Z0-9-_\.]{3,}+)\/?$/",                 'getGroupsByName',          $this, 'GET',    \AUTH::READ);     // Gets a list with groups
+        $this->api->addRoute("/^\/groups\/([a-zA-Z0-9-_ \.\(\)\[\]]{3,}+)\/?$/",        'getGroupsByName',          $this, 'GET',    \AUTH::READ);     // Gets a list with groups
     }
 
     /**
