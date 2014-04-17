@@ -933,14 +933,14 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 
         // Check if a user is allowed to create a new document
         $scope.allowCreate = function() {
-             return sessionStorage.documentPermission >= EXECUTE;
+            return sessionStorage.filePermission >= EXECUTE;
         };
 
         // Show delete button only when allowed to delete
         $scope.allowDelete = function(ownerId) {
-            if(ownerId == sessionStorage.id && sessionStorage.documentPermission >= EXECUTE) {
+            if(ownerId == sessionStorage.id && sessionStorage.filePermission >= EXECUTE) {
                 return true;
-            } else if(sessionStorage.documentPermission >= WRITE) {
+            } else if(sessionStorage.filePermission >= WRITE) {
                 return true;
             } else {
                 return false;
@@ -1026,7 +1026,8 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 );
 
 // documentController -------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentController', ['RestangularCache', '$scope', '$routeParams', 'Page', '$modal', function(RestangularCache, $scope, $routeParams, Page, $modal) {
+angularRest.controller('documentController', ['RestangularCache', '$scope', '$routeParams', 'Page', '$modal', '$alert',
+    function(RestangularCache, $scope, $routeParams, Page, $modal, $alert) {
         // Show loading screen
         jQuery('#loading').show();
         // List with comments
@@ -1049,44 +1050,48 @@ angularRest.controller('documentController', ['RestangularCache', '$scope', '$ro
 
         // Get document from API
         RestangularCache.one('file', $routeParams.documentId).get().then(function(documentResponse) {
-            $scope.document = documentResponse;
-            $scope.token    = sessionStorage.token;
-            Page.setTitle(documentResponse.title);
+            // Error occured?
+            if(documentResponse.error) {
+                $alert({title: 'Error!', content: documentResponse.error, type: 'danger'});
+            } else {
+                $scope.document = documentResponse;
+                $scope.token    = sessionStorage.token;
+                Page.setTitle(documentResponse.title);
 
-            // Init select2
-            jQuery('#inputOwner').select2({
-                placeholder: 'Search for an user',
-                minimumInputLength: 3,
-                ajax: {
-                    url: function(term, page) {
-                        return base_url +'/api/users/'+ term +'/?token='+ sessionStorage.token;
+                // Init select2
+                jQuery('#inputOwner').select2({
+                    placeholder: 'Search for an user',
+                    minimumInputLength: 3,
+                    ajax: {
+                        url: function(term, page) {
+                            return base_url +'/api/users/'+ term +'/?token='+ sessionStorage.token;
+                        },
+                        dataType: 'json',
+                        results: function(data, page) {
+                            var result = [];
+                            jQuery.each(data, function(i, item) {
+                                var items = {id: i, text: item.username};
+                                result.push(items);
+                            });
+
+                            return {results: result};
+                        }
                     },
-                    dataType: 'json',
-                    results: function(data, page) {
-                        var result = [];
-                        jQuery.each(data, function(i, item) {
-                            var items = {id: i, text: item.username};
-                            result.push(items);
-                        });
-
-                        return {results: result};
+                    initSelection: function(element, callback) {
+                        var id = jQuery(element).val();
+                        if (id != '') {
+                            jQuery.ajax(base_url +'/api/user/'+ id +'/?token='+ sessionStorage.token, {
+                                dataType: 'json'
+                            }).done(function(data) {
+                                callback({id: data.id, text: data.username});
+                            });
+                        }
                     }
-                },
-                initSelection: function(element, callback) {
-                    var id = jQuery(element).val();
-                    if (id != '') {
-                        jQuery.ajax(base_url +'/api/user/'+ id +'/?token='+ sessionStorage.token, {
-                            dataType: 'json'
-                        }).done(function(data) {
-                            callback({id: data.id, text: data.username});
-                        });
-                    }
-                }
-            });
+                });
 
-            // Trigger change and update
-            jQuery('#inputOwner').select2('val', documentResponse.ownerId, true);
-
+                // Trigger change and update
+                jQuery('#inputOwner').select2('val', documentResponse.ownerId, true);
+            }
             // Remove loading screen
             jQuery('#loading').hide();
         });
