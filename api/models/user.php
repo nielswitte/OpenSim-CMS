@@ -1,33 +1,73 @@
 <?php
 namespace Models;
-
 defined('EXEC') or die('Config not loaded');
 
 require_once dirname(__FILE__) .'/simpleModel.php';
+require_once dirname(__FILE__) .'/avatar.php';
+require_once dirname(__FILE__) .'/grid.php';
+require_once dirname(__FILE__) .'/group.php';
 
 /**
  * This class is the user model
  *
  * @author Niels Witte
- * @version 0.5
- * @date April 15th, 2014
+ * @version 0.6
+ * @date April 17th, 2014
  * @since February 10th, 2014
  */
 class User implements SimpleModel {
+    /**
+     * User ID
+     * @var integer
+     */
     private $id;
+    /**
+     * Username
+     * @var string
+     */
     private $username;
-    private $firstName, $lastName;
+    /**
+     * First name of the user
+     * @var string
+     */
+    private $firstName;
+    /**
+     * Last name of the user
+     * @var string
+     */
+    private $lastName;
+    /**
+     * User's e-mail address
+     * @var string
+     */
     private $email;
+    /**
+     * Datetime of last login (format: YYYY-MM-DD HH:mm:ss)
+     * @var string
+     */
     private $lastLogin;
+    /**
+     * List with avatars
+     * @var array
+     */
     private $avatars;
+    /**
+     * List with user's permissions
+     * @var array
+     */
     private $rights = array();
+    /**
+     * List with the user's groups
+     * @var array
+     */
+    private $groups = array();
 
     /**
      * Construct a new User with the given UUID
      *
      * @param integer $id - [Optional] The ID of the user
      * @param string $username - [Optional] The user's user name
-     * @param string $email - [Optional] The user's email address
+     * @param string $email - [Optional] The user's e-mail address
      * @param string $firstName - [Optional] The user's first name
      * @param string $lastName - [Optional] The user's last name
      * @param string $lastLogin - [Optional] The last timestamp the user logged in (format: YYYY-MM-DD HH:mm:ss)
@@ -77,6 +117,23 @@ class User implements SimpleModel {
             }
         } else {
             throw new \Exception('No username, E-mail or ID provided', 4);
+        }
+    }
+
+    /**
+     * Gets the groups where this user is in from the database
+     */
+    public function getGroupsFromDatabase() {
+        $db = \Helper::getDB();
+        $db->where('gu.userId', $db->escape($this->getId()));
+        $db->join('groups g', 'gu.groupId = g.id', 'INNER');
+        $groups = $db->get('group_users gu', NULL, 'g.*');
+
+        // Process all groups
+        foreach($groups as $group) {
+            $group = new \Models\Group($group['id'], $group['name']);
+            $group->addUser($this);
+            $this->addGroup($group);
         }
     }
 
@@ -192,6 +249,24 @@ class User implements SimpleModel {
             }
         }
         return FALSE;
+    }
+
+    /**
+     * Adds the given group to the group list
+     *
+     * @param \Models\Group $group
+     */
+    public function addGroup(\Models\Group $group) {
+        $this->groups[] = $group;
+    }
+
+    /**
+     * Returns the list with groups
+     *
+     * @return array
+     */
+    public function getGroups() {
+        return $this->groups;
     }
 
     /**

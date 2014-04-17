@@ -6,6 +6,7 @@ defined('EXEC') or die('Config not loaded');
 require_once dirname(__FILE__) .'/module.php';
 require_once dirname(__FILE__) .'/../models/avatar.php';
 require_once dirname(__FILE__) .'/../controllers/avatarController.php';
+require_once dirname(__FILE__) .'/../models/group.php';
 require_once dirname(__FILE__) .'/../models/user.php';
 require_once dirname(__FILE__) .'/../models/userLoggedIn.php';
 require_once dirname(__FILE__) .'/../controllers/userController.php';
@@ -14,8 +15,8 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  * Implements the functions for users
  *
  * @author Niels Witte
- * @version 0.5a
- * @date April 10th, 2014
+ * @version 0.6
+ * @date April 17th, 2014
  * @since February 24th, 2014
  */
 class User extends Module {
@@ -251,6 +252,7 @@ class User extends Module {
     public function getUserById($args) {
         $user = new \Models\User($args[1]);
         $user->getInfoFromDatabase();
+        $user->getGroupsFromDatabase();
         $user->getAvatarsFromDatabase();
         return $this->getUserData($user, TRUE);
     }
@@ -315,9 +317,7 @@ class User extends Module {
 
         if($full) {
             $data['permissions']        = $user->getRights();
-
             $avatars                    = array();
-
             // Only when avatars available
             if($user->getAvatars() !== NULL) {
                 foreach($user->getAvatars() as $avatar) {
@@ -337,6 +337,14 @@ class User extends Module {
                 }
             }
             $data['avatars']            = $avatars;
+            $groups                     = array();
+            foreach($user->getGroups() as $group) {
+                $groups[]               = array(
+                    'id'    => $group->getId(),
+                    'name'  => $group->getName()
+                );
+            }
+            $data['groups']             = $groups;
         }
         return $data;
     }
