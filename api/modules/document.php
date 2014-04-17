@@ -164,6 +164,7 @@ class Document extends Module {
     public function getDocumentById($args) {
         $document = new \Models\Document($args[1]);
         $document->getInfoFromDatabase();
+
         // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
         if($document->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($document->getId())) {
             return $this->getDocumentData($document, TRUE);
@@ -177,18 +178,21 @@ class Document extends Module {
      *
      * @param array $args
      * @return array
+     * @throws \Exception
      */
     public function getPageByNumber($args) {
         $document   = new \Models\Document($args[1]);
         $document->getInfoFromDatabase();
-        $page       = $document->getPageByNumber($args[2]);
-        $data       = $this->getPageData($document, $page);
+
         // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
         if($document->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($document->getId())) {
-            return $data;
+            $page = $document->getPageByNumber($args[2]);
+            $data = $this->getPageData($document, $page);
         } else {
             throw new \Exception('You do not have permissions to view this page.', 7);
         }
+
+        return $data;
     }
 
     /**
@@ -196,18 +200,21 @@ class Document extends Module {
      *
      * @param array $args
      * @return array
+     * @throws \Exception
      */
     public function getPageById($args) {
         $document   = new \Models\Document($args[1]);
         $document->getInfoFromDatabase();
-        $page       = $document->getPageById($args[2]);
-        $data       = $this->getPageData($document, $page);
+
         // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
         if($document->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($document->getId())) {
-            return $data;
+            $page = $document->getPageById($args[2]);
+            $data = $this->getPageData($document, $page);
         } else {
             throw new \Exception('You do not have permissions to view this page.', 7);
         }
+
+        return $data;
     }
 
     /**
@@ -220,11 +227,13 @@ class Document extends Module {
         // Get document and page details
         $document       = new \Models\Document($args[1], $args[2]);
         $document->getInfoFromDatabase();
-        $document->getPages();
-        $pageNr         = str_pad($document->getCurrentPage(), strlen($document->getNumberOfPages()), '0', STR_PAD_LEFT);
-        $pagePath       = $document->getPath() . DS .'page-'. $pageNr .'.'. IMAGE_TYPE;
+
         // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
         if($document->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($document->getId())) {
+            $document->getPages();
+            $pageNr     = str_pad($document->getCurrentPage(), strlen($document->getNumberOfPages()), '0', STR_PAD_LEFT);
+            $pagePath   = $document->getPath() . DS .'page-'. $pageNr .'.'. IMAGE_TYPE;
+
             if(!\Helper::imageResize($pagePath, $pagePath, IMAGE_HEIGHT, IMAGE_WIDTH)) {
                 throw new \Exception('Requested page does not exists', 5);
             } else {
@@ -246,13 +255,14 @@ class Document extends Module {
     public function getPageThumbnailByNumber($args) {
         $document       = new \Models\Document($args[1], $args[2]);
         $document->getInfoFromDatabase();
-        $document->getPages();
-        $pageNr         = str_pad($document->getCurrentPage(), strlen($document->getNumberOfPages()), '0', STR_PAD_LEFT);
-        $pagePath       = $document->getPath() . DS .'page-'. $pageNr .'.'. IMAGE_TYPE;
-        $thumbPath      = $document->getThumbnailPath() . DS .'page-'. $pageNr .'.jpg';
 
         // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
         if($document->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($document->getId())) {
+            $document->getPages();
+            $pageNr         = str_pad($document->getCurrentPage(), strlen($document->getNumberOfPages()), '0', STR_PAD_LEFT);
+            $pagePath       = $document->getPath() . DS .'page-'. $pageNr .'.'. IMAGE_TYPE;
+            $thumbPath      = $document->getThumbnailPath() . DS .'page-'. $pageNr .'.jpg';
+
             if(!\Helper::imageResize($pagePath, $thumbPath, IMAGE_THUMBNAIL_HEIGHT, IMAGE_THUMBNAIL_WIDTH)) {
                 throw new \Exception('Requested page does not exists', 5);
             } else {
