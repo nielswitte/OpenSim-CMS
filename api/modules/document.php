@@ -13,8 +13,8 @@ require_once dirname(__FILE__) .'/../controllers/pageController.php';
  * Implements the functions for documents
  *
  * @author Niels Witte
- * @version 0.4f
- * @date April 16th, 2014
+ * @version 0.5
+ * @date April 17th, 2014
  * @since March 3rd, 2014
  */
 class Document extends Module {
@@ -36,17 +36,17 @@ class Document extends Module {
      * Initiates all routes for this module
      */
     public function setRoutes() {
-        $this->api->addRoute("/^\/documents\/?$/",                                          'getDocuments',             $this, 'GET',  \Auth::READ);    // Get list with 50 documents
-        $this->api->addRoute("/^\/documents\/(\d+)\/?$/",                                   'getDocuments',             $this, 'GET',  \Auth::READ);    // Get list with 50 documents starting at the given offset
-        $this->api->addRoute("/^\/documents\/([a-zA-Z0-9-_ ]{3,}+)\/?$/",                   'getDocumentsByTitle',      $this, 'GET',  \Auth::READ);    // Search for documents by title
-        $this->api->addRoute("/^\/document\/(\d+)\/?$/",                                    'getDocumentById',          $this, 'GET',  \Auth::READ);    // Select specific document
-        $this->api->addRoute("/^\/document\/?$/",                                           'createDocument',           $this, 'POST', \Auth::EXECUTE); // Create a document
-        $this->api->addRoute("/^\/document\/(\d+)\/source\/?$/",                            'getDocumentSourceById',    $this, 'GET',  \Auth::READ);    // Download this document
-        $this->api->addRoute("/^\/document\/(\d+)\/page\/(\d+)\/?$/",                       'getPageById',              $this, 'GET',  \Auth::READ);    // Get page from document
-        $this->api->addRoute("/^\/document\/(\d+)\/page\/number\/(\d+)\/?$/",               'getPageByNumber',          $this, 'GET',  \Auth::READ);    // Get page from document
-        $this->api->addRoute("/^\/document\/(\d+)\/page\/number\/(\d+)\/?$/",               'updatePageUuidByNumber',   $this, 'PUT',  \Auth::WRITE);   // Update page UUID for given page of document
-        $this->api->addRoute("/^\/document\/(\d+)\/page\/number\/(\d+)\/image\/?$/",        'getPageImageByNumber',     $this, 'GET',  \Auth::READ);    // Get only the image of a given document page
-        $this->api->addRoute("/^\/document\/(\d+)\/page\/number\/(\d+)\/thumbnail\/?$/",    'getPageThumbnailByNumber', $this, 'GET',  \Auth::READ);    // Get only the image of a given document page
+        $this->api->addRoute("/^\/documents\/?$/",                                       'getDocuments',             $this, 'GET', \Auth::READ);    // Get list with 50 documents
+        $this->api->addRoute("/^\/documents\/(\d+)\/?$/",                                'getDocuments',             $this, 'GET', \Auth::READ);    // Get list with 50 documents starting at the given offset
+        $this->api->addRoute("/^\/documents\/([a-zA-Z0-9-_ ]{3,}+)\/?$/",                'getDocumentsByTitle',      $this, 'GET', \Auth::READ);    // Search for documents by title
+        $this->api->addRoute("/^\/document\/(\d+)\/?$/",                                 'getDocumentById',          $this, 'GET', \Auth::READ);    // Select specific document
+        $this->api->addRoute("/^\/document\/?$/",                                        'createDocument',           $this, 'POST',\Auth::EXECUTE); // Create a document
+        $this->api->addRoute("/^\/document\/(\d+)\/source\/?$/",                         'getDocumentSourceById',    $this, 'GET', \Auth::READ);    // Download this document
+        $this->api->addRoute("/^\/document\/(\d+)\/page\/(\d+)\/?$/",                    'getPageById',              $this, 'GET', \Auth::READ);    // Get page from document
+        $this->api->addRoute("/^\/document\/(\d+)\/page\/number\/(\d+)\/?$/",            'getPageByNumber',          $this, 'GET', \Auth::READ);    // Get page from document
+        $this->api->addRoute("/^\/document\/(\d+)\/page\/number\/(\d+)\/?$/",            'updatePageUuidByNumber',   $this, 'PUT', \Auth::ALL);     // Update page UUID for given page of document
+        $this->api->addRoute("/^\/document\/(\d+)\/page\/number\/(\d+)\/image\/?$/",     'getPageImageByNumber',     $this, 'GET', \Auth::READ);    // Get only the image of a given document page
+        $this->api->addRoute("/^\/document\/(\d+)\/page\/number\/(\d+)\/thumbnail\/?$/", 'getPageThumbnailByNumber', $this, 'GET', \Auth::READ);    // Get only the image of a given document page
     }
 
     /**
@@ -60,10 +60,55 @@ class Document extends Module {
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 documents from the given offset
-        $db->join('users u', 'd.ownerId = u.id', 'LEFT');
-        $db->where('type', 'document');
-        $db->orderBy('creationDate', 'DESC');
-        $resutls        = $db->get('documents d', array($args[1], 50), '*, d.id AS documentId, u.id AS userId');
+        // User does not have all permissions? -> Can only see own or group documents
+        if(!\Auth::checkRights($this->getName(), \Auth::ALL)) {
+            $params = array(
+                $db->escape('document'),
+                $db->escape(\Auth::getUser()->getId()),
+                $db->escape(\Auth::getUser()->getId()),
+                $db->escape($args[1]),
+                50
+            );
+            // This query fails when written as DB object
+            // Retrieve all documents the user can access as the member of a group
+            // or as documents owned by the user self
+            $resutls = $db->rawQuery('
+                        SELECT
+                            d.*,
+                            u.*,
+                            d.id AS documentId,
+                            u.id AS userId
+                        FROM
+                            group_documents gd,
+                            group_users gu,
+                            documents d
+                        LEFT JOIN
+                            users u
+                        ON
+                            d.ownerId = u.id
+                        WHERE
+                            d.type = ?
+                        AND (
+                            gd.documentId = d.id
+                        AND
+                            gd.groupId = gu.groupId
+                        AND
+                            gu.userId = ?
+                        ) OR
+                            d.ownerId = ?
+                        ORDER BY
+                            d.creationDate DESC
+                        LIMIT
+                            ?, ?'
+                , $params);
+
+        // No extra filtering required
+        } else {
+            $db->join('users u', 'd.ownerId = u.id', 'LEFT');
+            $db->where('type', 'document');
+            $db->orderBy('creationDate', 'DESC');
+            $resutls        = $db->get('documents d', array($args[1], 50), '*, d.id AS documentId, u.id AS userId');
+        }
         // Process results
         $data           = array();
         foreach($resutls as $result) {
@@ -102,9 +147,11 @@ class Document extends Module {
             , $params);
         $data           = array();
         foreach($results as $result) {
-            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
-            $document   = new \Models\Document($result['documentId'], 1, $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
-            $data[]     = $this->getDocumentData($document, FALSE);
+            if($result['userId'] == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($result['documentId'])) {
+                $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
+                $document   = new \Models\Document($result['documentId'], 1, $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
+                $data[]     = $this->getDocumentData($document, FALSE);
+            }
         }
         return $data;
     }
@@ -117,8 +164,12 @@ class Document extends Module {
     public function getDocumentById($args) {
         $document = new \Models\Document($args[1]);
         $document->getInfoFromDatabase();
-
-        return $this->getDocumentData($document, TRUE);
+        // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
+        if($document->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($document->getId())) {
+            return $this->getDocumentData($document, TRUE);
+        } else {
+            throw new \Exception('You do not have permissions to view this document.', 7);
+        }
     }
 
     /**
@@ -129,9 +180,15 @@ class Document extends Module {
      */
     public function getPageByNumber($args) {
         $document   = new \Models\Document($args[1]);
+        $document->getInfoFromDatabase();
         $page       = $document->getPageByNumber($args[2]);
         $data       = $this->getPageData($document, $page);
-        return $data;
+        // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
+        if($document->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($document->getId())) {
+            return $data;
+        } else {
+            throw new \Exception('You do not have permissions to view this page.', 7);
+        }
     }
 
     /**
@@ -142,9 +199,15 @@ class Document extends Module {
      */
     public function getPageById($args) {
         $document   = new \Models\Document($args[1]);
+        $document->getInfoFromDatabase();
         $page       = $document->getPageById($args[2]);
         $data       = $this->getPageData($document, $page);
-        return $data;
+        // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
+        if($document->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($document->getId())) {
+            return $data;
+        } else {
+            throw new \Exception('You do not have permissions to view this page.', 7);
+        }
     }
 
     /**
@@ -156,16 +219,21 @@ class Document extends Module {
     public function getPageImageByNumber($args) {
         // Get document and page details
         $document       = new \Models\Document($args[1], $args[2]);
+        $document->getInfoFromDatabase();
         $document->getPages();
         $pageNr         = str_pad($document->getCurrentPage(), strlen($document->getNumberOfPages()), '0', STR_PAD_LEFT);
         $pagePath       = $document->getPath() . DS .'page-'. $pageNr .'.'. IMAGE_TYPE;
-
-        if(!\Helper::imageResize($pagePath, $pagePath, IMAGE_HEIGHT, IMAGE_WIDTH)) {
-            throw new \Exception('Requested page does not exists', 5);
+        // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
+        if($document->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($document->getId())) {
+            if(!\Helper::imageResize($pagePath, $pagePath, IMAGE_HEIGHT, IMAGE_WIDTH)) {
+                throw new \Exception('Requested page does not exists', 5);
+            } else {
+                require_once dirname(__FILE__) .'/../includes/class.Images.php';
+                $image = new \Image($pagePath);
+                $image->display();
+            }
         } else {
-            require_once dirname(__FILE__) .'/../includes/class.Images.php';
-            $image = new \Image($pagePath);
-            $image->display();
+            throw new \Exception('You do not have permissions to view this page.', 7);
         }
     }
 
@@ -177,17 +245,23 @@ class Document extends Module {
      */
     public function getPageThumbnailByNumber($args) {
         $document       = new \Models\Document($args[1], $args[2]);
+        $document->getInfoFromDatabase();
         $document->getPages();
         $pageNr         = str_pad($document->getCurrentPage(), strlen($document->getNumberOfPages()), '0', STR_PAD_LEFT);
         $pagePath       = $document->getPath() . DS .'page-'. $pageNr .'.'. IMAGE_TYPE;
         $thumbPath      = $document->getThumbnailPath() . DS .'page-'. $pageNr .'.jpg';
 
-        if(!\Helper::imageResize($pagePath, $thumbPath, IMAGE_THUMBNAIL_HEIGHT, IMAGE_THUMBNAIL_WIDTH)) {
-            throw new \Exception('Requested page does not exists', 5);
+        // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
+        if($document->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($document->getId())) {
+            if(!\Helper::imageResize($pagePath, $thumbPath, IMAGE_THUMBNAIL_HEIGHT, IMAGE_THUMBNAIL_WIDTH)) {
+                throw new \Exception('Requested page does not exists', 5);
+            } else {
+                require_once dirname(__FILE__) .'/../includes/class.Images.php';
+                $image = new \Image($thumbPath);
+                $image->display();
+            }
         } else {
-            require_once dirname(__FILE__) .'/../includes/class.Images.php';
-            $image = new \Image($thumbPath);
-            $image->display();
+            throw new \Exception('You do not have permissions to view this page.', 7);
         }
     }
 
