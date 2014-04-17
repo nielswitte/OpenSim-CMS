@@ -59,6 +59,8 @@ class User extends Module {
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'unlinkAvatar',             $this, 'DELETE', \Auth::READ);     // Removes the avatar for the authenticated user's avatar list
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/?$/",                            'createAvatar',             $this, 'POST',   \Auth::EXECUTE);  // Create an avatar
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/files\/?$/",    'getUserFilesByAvatar',     $this, 'GET',    \AUTH::READ);     // Load all files for the user accociated with the avatar UUID on the given grid
+        $this->api->addRoute("/^\/groups\/?$/",                                         'getGroups',                $this, 'GET',    \AUTH::READ);     // Gets a list with groups
+        $this->api->addRoute("/^\/groups\/([a-zA-Z0-9-_\.]{3,}+)\/?$/",                 'getGroupsByName',          $this, 'GET',    \AUTH::READ);     // Gets a list with groups
     }
 
     /**
@@ -339,10 +341,7 @@ class User extends Module {
             $data['avatars']            = $avatars;
             $groups                     = array();
             foreach($user->getGroups() as $group) {
-                $groups[]               = array(
-                    'id'    => $group->getId(),
-                    'name'  => $group->getName()
-                );
+                $groups[]               = $this->getGroupData($group);
             }
             $data['groups']             = $groups;
         }
@@ -576,6 +575,58 @@ class User extends Module {
             $data[]  = $this->api->getModule('meeting')->getMeetingData($meeting, FALSE);
         }
 
+        return $data;
+    }
+
+    /**
+     * Returns a list with all groups
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getGroups($args) {
+        $db = \Helper::getDB();
+        $db->orderBy('LOWER(name)', 'ASC');
+        $groups = $db->get('groups');
+        $data = array();
+        // Process all groups
+        foreach($groups as $group) {
+            $group = new \Models\Group($group['id'], $group['name']);
+            $data[] = $this->getGroupData($group);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Will search for a group by its name
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getGroupsByName($args) {
+        $db             = \Helper::getDB();
+        $params         = array("%". strtolower($db->escape($args[1])) ."%");
+        $groups         = $db->rawQuery('SELECT * FROM groups WHERE LOWER(name) LIKE ? ORDER BY LOWER(name) ASC', $params);
+        $data           = array();
+        foreach($groups as $group) {
+            $group = new \Models\Group($group['id'], $group['name']);
+            $data[] = $this->getGroupData($group);
+        }
+        return $data;
+    }
+
+    /**
+     * Parses the group data to a nice format
+     *
+     * @param \Models\Group $group
+     * @return array
+     */
+    public function getGroupData(\Models\Group $group) {
+        $data = array(
+            'id'    => $group->getId(),
+            'name'  => $group->getName()
+        );
         return $data;
     }
 }
