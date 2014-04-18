@@ -1275,60 +1275,91 @@ angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$s
 // meetingsController -------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Page', '$tooltip', '$sce',  function(RestangularCache, $scope, Page, $tooltip, $sce) {
         var date = new Date(new Date - (1000*60*60*24*14));
+        Page.setTitle('Meetings');
 
-        // Get all meetings for the calendar
-        RestangularCache.one('meetings', date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).getList('calendar').then(function(meetingsResponse) {
+        // Create the calendar
+        var calendar = jQuery('#calendar').calendar({
+            language:       'en-US',
+            events_source:  [],
+            tmpl_cache:     true,
+            view:           'week',
+            tmpl_path:      'templates/restangular/html/calendar/',
+            first_day:      1,
+            holidays:       HOLIDAYS,
+            time_start:     TIME_START,
+            time_end:       TIME_END,
+            onAfterEventsLoad: function(events) {
+                if(!events) {
+                    return;
+                }
+            },
+            onAfterViewLoad: function(view) {
+                jQuery('h3.month').text(this.getTitle());
+                jQuery('.btn-group button').removeClass('active');
+                jQuery('button[data-calendar-view="' + view + '"]').addClass('active');
+
+                // Process all links in the calendar
+                jQuery('#calendar a.bsDialog').each(function(index){
+                    // Manually add tooltips (does not work when using template tags because jQuery loads the templates not AngularJS)
+                    $tooltip(jQuery(this), { title: $sce.trustAsHtml(jQuery(this).attr('title')) });
+                });
+            }
+        });
+
+        // Navigation and View calendar buttons
+        jQuery('.btn-group button[data-calendar-nav]').each(function() {
+            jQuery(this).click(function() {
+                calendar.navigate(jQuery(this).data('calendar-nav'));
+            });
+        });
+
+        jQuery('.btn-group button[data-calendar-view]').each(function() {
+            jQuery(this).click(function() {
+                calendar.view(jQuery(this).data('calendar-view'));
+            });
+        });
+
+
+        // Toggle all or only own meetings
+        $scope.showAllMeetings = false;
+        $scope.toggleAllMeetings = function() {
+            // toggle show all/show own
+            $scope.showAllMeetings = !$scope.showAllMeetings;
+
             // Show loading screen
             jQuery('#loading').show();
 
-            $scope.meetings = meetingsResponse;
-            Page.setTitle('Meetings');
-
-            // Create the calendar
-            var calendar = jQuery('#calendar').calendar({
-                language:       'en-US',
-                events_source:  meetingsResponse,
-                tmpl_cache:     true,
-                view:           'week',
-                tmpl_path:      'templates/restangular/html/calendar/',
-                first_day:      1,
-                holidays:       HOLIDAYS,
-                time_start:     TIME_START,
-                time_end:       TIME_END,
-                onAfterEventsLoad: function(events) {
-                    if(!events) {
-                        return;
-                    }
-                },
-                onAfterViewLoad: function(view) {
-                    jQuery('h3.month').text(this.getTitle());
-                    jQuery('.btn-group button').removeClass('active');
-                    jQuery('button[data-calendar-view="' + view + '"]').addClass('active');
-
-                    // Process all links in the calendar
-                    jQuery('#calendar a.bsDialog').each(function(index){
-                        // Manually add tooltips (does not work when using template tags because jQuery loads the templates not AngularJS)
-                        $tooltip(jQuery(this), { title: $sce.trustAsHtml(jQuery(this).attr('title')) });
+            // Get all meetings
+            if($scope.showAllMeetings) {
+                // Get all meetings for the calendar
+                RestangularCache.one('meetings', date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).getList('calendar').then(function(meetingsResponse) {
+                    // Set to all meetings
+                    calendar.setOptions({
+                        events_source: meetingsResponse
                     });
-                }
-            });
+                    calendar.view();
 
-            // Navigation and View calendar buttons
-            jQuery('.btn-group button[data-calendar-nav]').each(function() {
-                jQuery(this).click(function() {
-                    calendar.navigate(jQuery(this).data('calendar-nav'));
+                    // Remove loading screen
+                    jQuery('#loading').hide();
                 });
-            });
+            // Get own meetings
+            } else {
+                // Get all meetings for the calendar
+                RestangularCache.one('user', sessionStorage.id).one('meetings', 'calendar').get().then(function(meetingsResponse) {
+                    // Set to all meetings
+                    calendar.setOptions({
+                        events_source: meetingsResponse
+                    });
+                    calendar.view();
 
-            jQuery('.btn-group button[data-calendar-view]').each(function() {
-                jQuery(this).click(function() {
-                    calendar.view(jQuery(this).data('calendar-view'));
+                    // Remove loading screen
+                    jQuery('#loading').hide();
                 });
-            });
+            }
+        };
 
-            // Remove loading screen
-            jQuery('#loading').hide();
-        });
+        // Actually load the meetings
+        $scope.toggleAllMeetings();
 
         // Does the user have permission to create a new meeting?
         $scope.allowCreate = function() {

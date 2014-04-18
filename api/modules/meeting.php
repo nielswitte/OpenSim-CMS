@@ -11,8 +11,8 @@ require_once dirname(__FILE__) .'/../controllers/meetingController.php';
  * Implements the functions for meetings
  *
  * @author Niels Witte
- * @version 0.5a
- * @date April 17th, 2014
+ * @version 0.6
+ * @date April 18th, 2014
  * @since February 25th, 2014
  */
 class Meeting extends Module{
@@ -96,22 +96,7 @@ class Meeting extends Module{
             $room       = new \Models\MeetingRoom($result['roomId'], NULL, $result['roomName']);
             $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room, $result['name']);
             if(strpos($args[0], 'calendar') !== FALSE) {
-                $startTimestamp = strtotime($meeting->getStartDate());
-                $endTimestamp   = strtotime($meeting->getEndDate());
-
-                // use the format for JSON Event Objects (@source: https://github.com/Serhioromano/bootstrap-calendar#feed-url )
-                $data[]   = array(
-                    'id'            => $meeting->getId(),
-                    'start'         => $startTimestamp * 1000,
-                    'end'           => $endTimestamp * 1000,
-                    'url'           => $meeting->getApiUrl(),
-                    // Meeting has started but not ended (in progress) ? => event-success
-                    // Meeting has ended ? => event-default
-                    // Meeting still has to start => event-info
-                    'class'         => ($startTimestamp < time() && $endTimestamp > time() ? 'event-success' : ($startTimestamp > time() ? 'event-info' : 'event-default')),
-                    'title'         => stripslashes(str_replace('"', '\'\'', $meeting->getName()) .' (Room: '. $meeting->getRoom()->getName() .')'),
-                    'description'   => 'Reservation made by: '. $meeting->getCreator()->getUsername()
-                );
+                $data[] = $this->getMeetingData($meeting, FALSE, TRUE);
             } else {
                 $data[] = $this->getMeetingData($meeting, FALSE);
             }
@@ -351,17 +336,40 @@ class Meeting extends Module{
      * Formats the meeting data to a nice array
      *
      * @param \Models\Meeting $meeting
-     * @param boolean $full - [Optional]
+     * @param boolean $full - [Optional] Get additional data?
+     * @param boolean $calendar - [Optional] Output as calendar format?
      * @return array
      */
-    public function getMeetingData(\Models\Meeting $meeting, $full = TRUE) {
-        $data       = array(
-            'id'        => $meeting->getId(),
-            'name'      => stripslashes($meeting->getName()),
-            'startDate' => $meeting->getStartDate(),
-            'endDate'   => $meeting->getEndDate(),
-            'creator'   => $this->api->getModule('user')->getUserData($meeting->getCreator(), FALSE)
-        );
+    public function getMeetingData(\Models\Meeting $meeting, $full = TRUE, $calendar = FALSE) {
+        // Get results as calendar data
+        if($calendar) {
+            $startTimestamp = strtotime($meeting->getStartDate());
+            $endTimestamp   = strtotime($meeting->getEndDate());
+
+            // use the format for JSON Event Objects (@source: https://github.com/Serhioromano/bootstrap-calendar#feed-url )
+            $data   = array(
+                'id'            => $meeting->getId(),
+                'start'         => $startTimestamp * 1000,
+                'end'           => $endTimestamp * 1000,
+                'url'           => $meeting->getApiUrl(),
+                // Meeting has started but not ended (in progress) ? => event-success
+                // Meeting has ended ? => event-default
+                // Meeting still has to start => event-info
+                'class'         => ($startTimestamp < time() && $endTimestamp > time() ? 'event-success' : ($startTimestamp > time() ? 'event-info' : 'event-default')),
+                'title'         => stripslashes(str_replace('"', '\'\'', $meeting->getName()) .' (Room: '. $meeting->getRoom()->getName() .')'),
+                'description'   => 'Reservation made by: '. $meeting->getCreator()->getUsername()
+            );
+        // Get the results as normal array
+        } else {
+            $data       = array(
+                'id'        => $meeting->getId(),
+                'name'      => stripslashes($meeting->getName()),
+                'startDate' => $meeting->getStartDate(),
+                'endDate'   => $meeting->getEndDate(),
+                'creator'   => $this->api->getModule('user')->getUserData($meeting->getCreator(), FALSE)
+            );
+        }
+
         // Show detailed information?
         if($full) {
             $room = $meeting->getRoom();

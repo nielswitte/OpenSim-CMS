@@ -15,8 +15,8 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  * Implements the functions for users
  *
  * @author Niels Witte
- * @version 0.7
- * @date April 17th, 2014
+ * @version 0.8
+ * @date April 18th, 2014
  * @since February 24th, 2014
  */
 class User extends Module {
@@ -49,6 +49,7 @@ class User extends Module {
         $this->api->addRoute("/^\/user\/(\d+)\/files\/?$/",                             'getUserFilesByUserId',     $this, 'GET',    \Auth::READ);     // Load all files for the user
         $this->api->addRoute("/^\/user\/(\d+)\/meetings\/?$/",                          'getUserMeetingsByUserId',  $this, 'GET',    \Auth::READ);     // Load 50 meetings for the user
         $this->api->addRoute("/^\/user\/(\d+)\/meetings\/(\d+)\/?$/",                   'getUserMeetingsByUserId',  $this, 'GET',    \Auth::READ);     // Load 50 meetings for the user with offset
+        $this->api->addRoute("/^\/user\/(\d+)\/meetings\/calendar\/?$/",                'getUserMeetingsCalendarByUserId',  $this, 'GET', \Auth::READ); // Load all meetings for the user
         $this->api->addRoute("/^\/user\/(\d+)\/picture\/?$/",                           'getUserPictureById',       $this, 'GET',    \Auth::READ);     // Shows the user's profile picture
         $this->api->addRoute("/^\/user\/(\d+)\/picture\/?$/",                           'updateUserPictureByUserID',$this, 'PUT',    \Auth::READ);     // Updates the user's profile picture with the given image
         $this->api->addRoute("/^\/user\/(\d+)\/password\/?$/",                          'updateUserPasswordById',   $this, 'PUT',    \Auth::READ);     // Updates the user's password
@@ -587,14 +588,15 @@ class User extends Module {
      * @return array
      */
     public function getUserMeetingsByUserId($args) {
-        // Determine offset
-        $offset = isset($args[2]) ? $args[2] : 0;
+        $offset     = isset($args[2]) ? $args[2] : 0;
+        $limit      = array($offset, 50);
+
         // Get info from DB
-        $db     = \Helper::getDB();
+        $db         = \Helper::getDB();
         $db->where('mp.userId', $db->escape($args[1]));
         $db->join('meeting_participants mp', 'mp.meetingId = m.id', 'LEFT');
         $db->orderBy('m.startDate', 'DESC');
-        $results = $db->get('meetings m', array($offset, 50));
+        $results = $db->get('meetings m', $limit);
         // Get user info
         $user = \Auth::getUser();
         // Process results
@@ -603,6 +605,33 @@ class User extends Module {
             $room    = new \Models\MeetingRoom($result['roomId']);
             $meeting = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room, $result['name']);
             $data[]  = $this->api->getModule('meeting')->getMeetingData($meeting, FALSE);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Returns a list with 50 meetings starting at the given offset for the currently logged in user
+     * in reversed chronological order
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getUserMeetingsCalendarByUserId($args) {
+        // Get info from DB
+        $db     = \Helper::getDB();
+        $db->where('mp.userId', $db->escape($args[1]));
+        $db->join('meeting_participants mp', 'mp.meetingId = m.id', 'LEFT');
+        $db->orderBy('m.startDate', 'DESC');
+        $results = $db->get('meetings m');
+        // Get user info
+        $user = \Auth::getUser();
+        // Process results
+        $data = array();
+        foreach($results as $result) {
+            $room    = new \Models\MeetingRoom($result['roomId']);
+            $meeting = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room, $result['name']);
+            $data[]  = $this->api->getModule('meeting')->getMeetingData($meeting, FALSE, TRUE);
         }
 
         return $data;

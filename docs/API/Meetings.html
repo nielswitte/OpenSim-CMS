@@ -65,9 +65,9 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>Meetings                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Thursday, April 17, 2014                                        </span>
+                                            Friday, April 18, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            12:16 PM                                        </span>
+                                            7:44 PM                                        </span>
                                 </div>
                                                         <p>The most important part of the CMS is the scheduling of meetings.</p>
 
@@ -396,9 +396,21 @@
 
 <h2>Get meetings by participant</h2>
 
-<p>This will return a list with meetings where the given user is a participant for. The output is similar to the <code>/api/meetings/</code> request.</p>
+<p>This will return a list with 50 meetings where the given user is a participant for. The output is similar to the <code>/api/meetings/</code> request.</p>
 
 <pre><code class="language-http">GET /api/user/&lt;USER-ID&gt;/meetings/ HTTP/1.1
+</code></pre>
+
+<p>Get meetings after number 50 by using:</p>
+
+<pre><code class="language-http">GET /api/user/&lt;USER-ID&gt;/meetings/&lt;OFFSET&gt; HTTP/1.1
+</code></pre>
+
+<h3>Calendar</h3>
+
+<p>The following URL will return all the meetings in calendar format, no limit.</p>
+
+<pre><code class="language-http">GET /api/user/&lt;USER-ID&gt;/meetings/calendar/ HTTP/1.1
 </code></pre>
                                                     </article>
                     </div>

@@ -285,8 +285,20 @@ This will output something similar to:
 ]
 ```
 ## Get meetings by participant
-This will return a list with meetings where the given user is a participant for. The output is similar to the `/api/meetings/` request.
+This will return a list with 50 meetings where the given user is a participant for. The output is similar to the `/api/meetings/` request.
 
 ```http
 GET /api/user/<USER-ID>/meetings/ HTTP/1.1
+```
+Get meetings after number 50 by using:
+
+```http
+GET /api/user/<USER-ID>/meetings/<OFFSET> HTTP/1.1
+```
+### Calendar
+
+The following URL will return all the meetings in calendar format, no limit.
+
+```http
+GET /api/user/<USER-ID>/meetings/calendar/ HTTP/1.1
 ```
