@@ -1028,6 +1028,9 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 // documentController -------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('documentController', ['RestangularCache', '$scope', '$routeParams', 'Page', '$modal', '$alert', '$location',
     function(RestangularCache, $scope, $routeParams, Page, $modal, $alert, $location) {
+        var groupSearchResults;
+        $scope.groupname        = '';
+
         // Show loading screen
         jQuery('#loading').show();
         // List with comments
@@ -1117,6 +1120,44 @@ angularRest.controller('documentController', ['RestangularCache', '$scope', '$ro
                 template: 'templates/restangular/html/bootstrap/modalDialogBasic.html',
                 scope: $scope
             });
+        };
+
+        // Search for the given group
+        $scope.getGroupsByName = function($viewValue) {
+            var results = '';
+            $scope.groupname = $viewValue;
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('groups', $viewValue).get().then(function(groupsResponse) {
+                    groupSearchResults = groupsResponse;
+                    return groupsResponse;
+                });
+            }
+            return results;
+        };
+
+        // Adds the currently selected group to the list
+        $scope.addGroup = function() {
+            for(var i = 0; i < groupSearchResults.length; i++) {
+                console.log($scope.groupname);
+                // Only add user when match found and not already listed
+                if(groupSearchResults[i].name == $scope.groupname) {
+                    if(!isDuplicateGroup()) {
+                        $scope.document.groups.push(groupSearchResults[i]);
+                    } else {
+                        $alert({title: 'Duplicate!', content: 'The document is already a member of the group '+ groupSearchResults[i].name, type: 'warning'});
+                    }
+                }
+            }
+        };
+
+        // Checks for duplicate groups
+        function isDuplicateGroup() {
+            for(var i = 0; i < $scope.document.groups.length; i++) {
+                if($scope.document.groups[i].name == $scope.groupname) {
+                    return true;
+                }
+            }
+            return false;
         };
 
         // Removes the group with the given id the list
