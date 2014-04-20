@@ -4,8 +4,9 @@ namespace API\Modules;
 defined('EXEC') or die('Config not loaded');
 
 require_once dirname(__FILE__) .'/module.php';
-require_once dirname(__FILE__) .'/../models/file.php';
 require_once dirname(__FILE__) .'/../models/document.php';
+require_once dirname(__FILE__) .'/../models/file.php';
+require_once dirname(__FILE__) .'/../models/group.php';
 require_once dirname(__FILE__) .'/../models/presentation.php';
 require_once dirname(__FILE__) .'/../controllers/fileController.php';
 
@@ -13,8 +14,8 @@ require_once dirname(__FILE__) .'/../controllers/fileController.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.6
- * @date April 17th, 2014
+ * @version 0.7
+ * @date April 20th, 2014
  * @since March 3rd, 2014
  */
 class File extends Module{
@@ -268,16 +269,37 @@ class File extends Module{
             'url'               => $file->getApiUrl()
         );
 
-        if($full && $file->getType() == 'image') {
-           $cachedTextures = array();
-            foreach($file->getCache() as $cache) {
-                $cachedTextures[$cache['gridId']] = array(
-                    'uuid'      => $cache['uuid'],
-                    'expires'   => $cache['uuidExpires'],
-                    'isExpired' => strtotime($cache['uuidExpires']) > time() ? 0 : 1
+        // Get full details
+        if($full) {
+            // Group data not retrieved yet?
+            if($file->getGroups() === NULL) {
+                // Get group data
+                $file->getGroupsFromDatabase();
+            }
+
+            // Get all groups
+            $groups = array();
+
+            foreach($file->getGroups() as $group) {
+                $groups[] = array(
+                    'id'    => $group->getId(),
+                    'name'  => $group->getName()
                 );
             }
-            $data['cache']      = $cachedTextures;
+            $data['groups'] = $groups;
+
+            // Get image details on full request
+            if($file->getType() == 'image') {
+               $cachedTextures = array();
+                foreach($file->getCache() as $cache) {
+                    $cachedTextures[$cache['gridId']] = array(
+                        'uuid'      => $cache['uuid'],
+                        'expires'   => $cache['uuidExpires'],
+                        'isExpired' => strtotime($cache['uuidExpires']) > time() ? 0 : 1
+                    );
+                }
+                $data['cache']      = $cachedTextures;
+            }
         }
 
         return $data;

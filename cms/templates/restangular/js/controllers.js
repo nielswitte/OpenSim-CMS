@@ -1118,6 +1118,52 @@ angularRest.controller('documentController', ['RestangularCache', '$scope', '$ro
                 scope: $scope
             });
         };
+
+        // Removes the group with the given id the list
+        $scope.removeGroup = function(groupId) {
+            for(var i = 0; i < $scope.document.groups.length; i++) {
+                if($scope.document.groups[i].id == groupId) {
+                    $scope.document.groups.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Actions performed when updating share information
+        $scope.shareDocument = function() {
+
+        };
+
+        // Dialog function handler
+        $scope.call = function(func) {
+            if(func == 'hide') {
+                modal.hide();
+            } else if(func == 'shareDocument') {
+                shareDocument();
+            }
+        };
+
+        // Share document options
+        $scope.showShareOptions = function() {
+            $scope.template         = partial_path +'/document/documentShareForm.html';
+            $scope.formSubmit       = 'shareDocument';
+            $scope.share            = [];
+            $scope.buttons          = [{
+                        text: 'Share',
+                        func: '',
+                        class: 'primary',
+                        type: 'submit'
+                    },
+                    {
+                        text: 'Cancel',
+                        func: 'hide',
+                        class: 'danger',
+                        type: 'button'
+                    }
+                ];
+            modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
+        };
     }]
 );
 /****************************************************************************************************************************************************
