@@ -44,6 +44,7 @@ class File extends Module{
         $this->api->addRoute("/^\/file\/?$/",                          'createFile',            $this, 'POST',      \Auth::EXECUTE);   // Create a files
         $this->api->addRoute("/^\/file\/(\d+)\/?$/",                   'getFileById',           $this, 'GET',       \Auth::READ);      // Select specific files
         $this->api->addRoute("/^\/file\/(\d+)\/?$/",                   'deleteFileById',        $this, 'DELETE',    \Auth::EXECUTE);   // Delete specific files
+        $this->api->addRoute("/^\/file\/(\d+)\/groups\/?$/",           'updateFileGroupsById',  $this, 'PUT',       \AUTH::EXECUTE);   // Set the groups for the given file
         $this->api->addRoute("/^\/file\/(\d+)\/image\/?$/",            'getFileImageById',      $this, 'GET',       \AUTH::READ);      // Retrieves an image files type
         $this->api->addRoute("/^\/file\/(\d+)\/image\/?$/",            'updateImageUuidById',   $this, 'PUT',       \AUTH::ALL);       // Updates the image's UUID
         $this->api->addRoute("/^\/file\/(\d+)\/source\/?$/",           'getFileSourceById',     $this, 'GET',       \AUTH::READ);      // Retrieves the original file
@@ -386,6 +387,35 @@ class File extends Module{
             $data       = $fileCtrl->setUuid($postUuid, $grid);
         } else {
             throw new \Exception('Image does not exist', 6);
+        }
+
+        // Format the result
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE),
+        );
+
+        return $result;
+    }
+
+    /**
+     * Set file groups
+     *
+     * @param array $args
+     * @return array
+     */
+    public function updateFileGroupsById($args) {
+        $file       = new \Models\File($args[1]);
+        $fileCtrl   = new \Controllers\FileController($file);
+        $input      = \Helper::getInput(TRUE);
+        $data       = FALSE;
+        // Validate parameters for setting groups
+        if($fileCtrl->validateParametersGroups($input)) {
+            $data   = $fileCtrl->updateFileGroups($input);
+
+            // Nothing updated?
+            if(!$data) {
+                throw new Exception('No changes made, did you actually change the groups?', 9);
+            }
         }
 
         // Format the result
