@@ -1026,8 +1026,8 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 );
 
 // documentController -------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentController', ['RestangularCache', '$scope', '$routeParams', 'Page', '$modal', '$alert', '$location',
-    function(RestangularCache, $scope, $routeParams, Page, $modal, $alert, $location) {
+angularRest.controller('documentController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$modal', '$alert', '$location',
+    function(Restangular, RestangularCache, $scope, $routeParams, Page, $modal, $alert, $location) {
         var groupSearchResults;
         $scope.groupname        = '';
 
@@ -1122,6 +1122,11 @@ angularRest.controller('documentController', ['RestangularCache', '$scope', '$ro
             });
         };
 
+        // Allow sharing of files
+        $scope.allowShare = function() {
+            return sessionStorage.filePermission >= EXECUTE;
+        };
+
         // Search for the given group
         $scope.getGroupsByName = function($viewValue) {
             var results = '';
@@ -1138,7 +1143,6 @@ angularRest.controller('documentController', ['RestangularCache', '$scope', '$ro
         // Adds the currently selected group to the list
         $scope.addGroup = function() {
             for(var i = 0; i < groupSearchResults.length; i++) {
-                console.log($scope.groupname);
                 // Only add user when match found and not already listed
                 if(groupSearchResults[i].name == $scope.groupname) {
                     if(!isDuplicateGroup()) {
@@ -1172,8 +1176,15 @@ angularRest.controller('documentController', ['RestangularCache', '$scope', '$ro
         };
 
         // Actions performed when updating share information
-        $scope.shareDocument = function() {
-
+        var shareDocument = function() {
+            Restangular.one('file', $scope.document.id).all('groups').customPUT({ groups: $scope.document.groups }).then(function(groupResponse) {
+                if(!groupResponse.success) {
+                    $alert({title: 'Error!', content: groupResponse.error, type: 'danger'});
+                } else {
+                    $alert({title: 'Groups updated', content: 'The groups that share this file have been updated', type: 'success'});
+                    modal.hide();
+                }
+            });
         };
 
         // Dialog function handler

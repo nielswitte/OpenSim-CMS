@@ -402,19 +402,22 @@ class File extends Module{
      *
      * @param array $args
      * @return array
+     * @throws \Exception
      */
     public function updateFileGroupsById($args) {
         $file       = new \Models\File($args[1]);
         $fileCtrl   = new \Controllers\FileController($file);
         $input      = \Helper::getInput(TRUE);
         $data       = FALSE;
+        // Check if user has permission to update this file's groups
+
         // Validate parameters for setting groups
         if($fileCtrl->validateParametersGroups($input)) {
             $data   = $fileCtrl->updateFileGroups($input);
 
             // Nothing updated?
             if(!$data) {
-                throw new Exception('No changes made, did you actually change the groups?', 9);
+                throw new \Exception('No changes made, did you actually change the groups?', 9);
             }
         }
 
