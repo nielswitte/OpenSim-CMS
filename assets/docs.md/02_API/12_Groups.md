@@ -88,3 +88,20 @@ This will return the following JSON result:
     ]
 }
 ```
+
+## Update group
+
+```http
+PUT /api/group/<GROUP-ID>/ HTTP/1.1
+```
+
+| Parameter         | Type      | Description                                                       |
+|-------------------|-----------|-------------------------------------------------------------------|
+| name              | string    | The group's name                                                  |
+| files             | array     | [Optional] List with file IDs or file objects                     |
+| users             | array     | [Optional] List with user IDs or User objects                     |
+
+## Delete group
+```http
+DELETE /api/group/<GROUP-ID>/ HTTP/1.1
+```
