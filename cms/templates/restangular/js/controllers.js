@@ -588,6 +588,18 @@ angularRest.controller('toolbarController', ['$scope', 'Cache', '$location', '$a
             }
         };
 
+        // User/group dropdown menu
+        $scope.userDropdown = [
+            {
+                text: 'Groups',
+                href: '#!/groups'
+            },
+            {
+                text: 'Users',
+                href: '#!/users'
+            }
+        ];
+
         // Restore session from storage
         if(sessionStorage.token && sessionStorage.id){
             $scope.user = {
