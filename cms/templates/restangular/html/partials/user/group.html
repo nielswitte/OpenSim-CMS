@@ -9,21 +9,42 @@
 <div class="toolbar toolbar-top" ng-show="allowUpdate()">
     <a ng-href="#!/group/{{group.id}}/edit" class="btn btn-default"><i class="glyphicon glyphicon-edit"></i> Edit group</a>
 </div>
-<form class="form-horizontal" role="form" id="userForm" ng-submit="updateGroup()">
-    <div class="row">
-        <div class="col-sm-8">
-            <div class="form-group">
-                <label class="col-sm-3 control-label">ID</label>
-                <div class="col-sm-9">
-                    <p class="form-control-static">{{group.id}}</p>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-3 control-label">Name</label>
-                <div class="col-sm-9">
-                    <p class="form-control-static">{{group.name}}</p>
-                </div>
-            </div>
+
+<form class="form-horizontal" role="form" id="documentsForm">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">ID</label>
+        <div class="col-sm-10">
+            <p class="form-control-static">{{group.id}}</p>
         </div>
     </div>
-</div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Name</label>
+        <div class="col-sm-10">
+            <p class="form-control-static">{{group.name}}</p>
+        </div>
+    </div>
+    <fieldset>
+        <legend>Documents ({{group.files.length}})</legend>
+        <div class="form-group">
+            <div class="col-sm-12">
+                <p ng-repeat="file in group.files">
+                    <span class="label label-default">{{file.type}}</span> <a href="#!/document/{{file.id}}">{{file.title}} <small>({{file.creationDate}})</small></a>
+                </p>
+                <p ng-show="group.files.length === 0">None</p>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Users ({{group.users.length}})</legend>
+        <div class="form-group">
+            <div class="col-sm-12">
+                <p ng-repeat="user in group.users">
+                    <a href="#!/user/{{user.id}}">{{user.username}} ({{user.firstName}} {{user.lastName}})</a>
+                </p>
+                <p ng-show="group.users.length === 0">None</p>
+            </div>
+        </div>
+    </fieldset>
+</form>
+

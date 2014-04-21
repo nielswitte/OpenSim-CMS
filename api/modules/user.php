@@ -687,20 +687,40 @@ class User extends Module {
     public function getGroupById($args){
         $group = new \Models\Group($args[1]);
         $group->getInfoFromDatabase();
-        return $this->getGroupData($group);
+        $group->getGroupFilesFromDatabase();
+        $group->getGroupUsersFromDatabase();
+        return $this->getGroupData($group, TRUE);
     }
 
     /**
      * Parses the group data to a nice format
      *
      * @param \Models\Group $group
+     * @param boolean $full - [Optional] Show all group details?
      * @return array
      */
-    public function getGroupData(\Models\Group $group) {
+    public function getGroupData(\Models\Group $group, $full = FALSE) {
         $data = array(
             'id'    => $group->getId(),
-            'name'  => $group->getName()
+            'name'  => $group->getName(),
         );
+
+        // Get additional details
+        if($full) {
+            // Add all files
+            $files = array();
+            foreach($group->getFiles() as $file) {
+                $files[] = $this->api->getModule('file')->getFileData($file, FALSE);
+            }
+            $data['files'] = $files;
+
+            // Add all useres
+            $users = array();
+            foreach($group->getUsers() as $user) {
+                $users[] = $this->api->getModule('user')->getUserData($user, FALSE);
+            }
+            $data['users'] = $users;
+        }
         return $data;
     }
 }

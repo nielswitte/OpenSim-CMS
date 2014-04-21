@@ -85,7 +85,7 @@ class Group implements SimpleModel {
         $db->where('g.groupId', $db->escape($this->getId()));
         $db->join('documents d', 'd.id = g.documentId', 'LEFT');
         $db->join('users u', 'u.id = d.ownerId', 'LEFT');
-        $results = $db->get('group_files g', NULL, 'd.*, u.*, d.id AS fileId, u.id AS userId');
+        $results = $db->get('group_documents g', NULL, 'd.*, u.*, d.id AS fileId, u.id AS userId');
         // Process all files and their owners
         foreach($results as $result) {
             $user = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
