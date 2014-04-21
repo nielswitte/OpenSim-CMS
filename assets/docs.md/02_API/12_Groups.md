@@ -1,9 +1,16 @@
 Users can be added to groups to share access to specific files.
 
 ## Get groups
-To retrieve a list of all available groups the following request can be made to the API:
+To retrieve a list of 50 available groups the following request can be made to the API:
+
 ```http
 GET /api/groups/ HTTP/1.1
+```
+
+Or starting at a given offset:
+
+```http
+GET /api/groups/<OFFSET>/ HTTP/1.1
 ```
 
 This will return an array with all groups, containing their ID and name.

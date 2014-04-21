@@ -1372,6 +1372,258 @@ angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$s
         };
     }]
 );
+
+
+/****************************************************************************************************************************************************
+ *   _____
+ *  / ____|
+ * | |  __ _ __ ___  _   _ _ __  ___
+ * | | |_ | '__/ _ \| | | | '_ \/ __|
+ * | |__| | | | (_) | |_| | |_) \__ \
+ *  \_____|_|  \___/ \__,_| .__/|___/
+ *                        | |
+ *                        |_|
+ */
+// groupssController ----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('groupsController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', 'Cache', '$route', '$routeParams', '$location',
+    function(RestangularCache, Restangular, $scope, Page, $modal, $alert, Cache, $route, $routeParams, $location) {
+        $scope.orderByField     = 'name';
+        $scope.reverseSort      = false;
+        var requestGroupsUrl    = '';
+        $scope.groupsList       = [];
+
+        // For loading more than the first page
+        var paginationOffset = 1;
+        var perPage          = 50;
+        if($routeParams.paginationPage !== undefined) {
+            paginationOffset = $routeParams.paginationPage;
+        }
+
+        // Show pagination and set the type
+        $scope.showPagination = function() {
+            if($scope.groupsList.length >= perPage || paginationOffset > 1) {
+                $scope.pagination = {
+                    type: 'groups',
+                    url: 'groups',
+                    perPage: perPage,
+                    start: paginationOffset,
+                    pages: []
+                };
+                return 'templates/restangular/html/bootstrap/pagination.html';
+            } else {
+                return false;
+            }
+        };
+
+        // Remove loading screen
+        jQuery('#loading').show();
+
+        // Get list with groups
+        RestangularCache.one('groups', (paginationOffset - 1) * perPage).getList().then(function(groupsResponse) {
+            $scope.groupsList = groupsResponse;
+            Page.setTitle('Groups');
+            requestGroupsUrl = groupsResponse.getRequestedUrl();
+
+            // Remove loading screen
+            jQuery('#loading').hide();
+        });
+
+        // Toggle filters
+        $scope.collapseFilter = true;
+        $scope.toggleFilter = function() {
+            $scope.collapseFilter = !$scope.collapseFilter;
+            return $scope.collapseFilter;
+        };
+
+        // Search for the given group name
+        var groupSearchResults = [];
+        $scope.groupBySearch       = '';
+        $scope.getGroupByName = function($viewValue) {
+            var results = '';
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('groups', $viewValue).get().then(function(groupsResponse) {
+                    groupSearchResults = groupsResponse;
+                    return groupsResponse;
+                });
+            }
+            return results;
+        };
+
+        // When selecting a group
+        $scope.selectGroup = function() {
+            for(var i = 0; i < groupSearchResults.length; i++) {
+                // Only add group when match found and not already listed
+                if(groupSearchResults[i].name == $scope.groupBySearch) {
+                    $location.path('group/'+ groupSearchResults[i].id);
+                }
+            }
+        };
+
+        // Save a new group
+        $scope.saveGroup = function() {
+            // Show loading screen
+            jQuery('#loading').show();
+
+            Restangular.all('group').post($scope.group).then(function(resp) {
+                if(!resp.success) {
+                    $alert({title: 'Error!', content: resp.error, type: 'danger'});
+                } else {
+                    $alert({title: 'Group created!', content: 'The group: '+ $scope.group.name + ' has been created with ID: '+ resp.groupId +'.', type: 'success'});
+                    $scope.group.id = resp.groupId;
+                    $scope.groupsList.push($scope.group);
+
+                    Cache.clearCachedUrl(requestGroupsUrl);
+                    modal.hide();
+                    $route.reload();
+                }
+                // Remove loading screen
+                jQuery('#loading').hide();
+            });
+        };
+
+        // Allow changing general group information
+        $scope.allowUpdate = function(groupId) {
+            if(sessionStorage.userPermission >= WRITE) {
+                return true;
+            } else if(sessionStorage.userPermission >= READ && groupId == sessionStorage.id) {
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        // Show delete button only when allowed to delete
+        $scope.allowDelete = function(groupId) {
+            if(groupId != sessionStorage.id && groupId != 0 && sessionStorage.userPermission >= WRITE) {
+                return true;
+            } else {
+                return false;
+            }
+         };
+
+         // User is allowed to add new group
+         $scope.allowCreate = function() {
+             return sessionStorage.userPermission >= WRITE;
+         };
+
+        // Remove a group
+        $scope.deleteGroup = function(index) {
+            // Show loading screen
+            jQuery('#loading').show();
+
+            Restangular.one('group', $scope.groupsList[index].id).remove().then(function(resp) {
+                if(!resp.success) {
+                    $alert({title: 'Error!', content: resp.error, type: 'danger'});
+                } else {
+                    $alert({title: 'Group removed!', content: 'The group '+ $scope.groupsList[index].name +' has been removed from the CMS.', type: 'success'});
+                    delete $scope.groupsList[index];
+                    Cache.clearCachedUrl(requestGroupsUrl);
+                    $route.reload();
+                }
+                // Remove loading screen
+                jQuery('#loading').hide();
+            });
+        };
+
+        // Dialog function handler
+        $scope.call = function(func) {
+            if(func == 'hide') {
+                modal.hide();
+            } else if(func == 'createGroup') {
+                $scope.saveGroup();
+            }
+        };
+
+        // New Group dialog creation
+        $scope.newGroup = function() {
+            $scope.template         = partial_path +'/group/groupNewForm.html';
+            $scope.group            = {};
+            $scope.formSubmit       = 'createGroup';
+            $scope.buttons          = [{
+                        text: 'Create',
+                        func: '',
+                        class: 'primary',
+                        type: 'submit'
+                    },
+                    {
+                        text: 'Cancel',
+                        func: 'hide',
+                        class: 'danger',
+                        type: 'button'
+                    }
+                ];
+            modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
+        };
+    }]
+);
+
+// groupController -----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('groupController', ['Restangular', 'RestangularCache', '$scope', '$route', '$routeParams', 'Page', '$alert', '$modal', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $route, $routeParams, Page, $alert, $modal, Cache, $location) {
+        var groupRequestUrl      = '';
+        var groupOld             = {};
+        $scope.group             = {
+            groups: []
+        };
+        $scope.groupname        = '';
+        var groupSearchResults  = [];
+
+        // Show loading screen
+        jQuery('#loading').show();
+
+        // Get all information about this group
+        RestangularCache.one('group', $routeParams.groupId).get().then(function(groupResponse) {
+            if(groupResponse.error !== undefined) {
+                $alert({title: 'Loading group failed!', content: groupResponse.error, type: 'danger'});
+            } else {
+                Page.setTitle(groupResponse.name);
+                $scope.group    = groupResponse;
+                angular.copy($scope.group, groupOld);
+                groupRequestUrl = groupResponse.getRequestedUrl();
+            }
+
+            // Remove loading screen
+            jQuery('#loading').hide();
+        });
+
+        // Allow changing group information
+        $scope.allowUpdate = function() {
+            if(sessionStorage.userPermission >= WRITE) {
+                return true;
+            } else if(sessionStorage.userPermission >= READ && $routeParams.groupId == sessionStorage.id) {
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        // Save scope changes by submitting them to the API
+        $scope.updateGroup = function() {
+            // Show loading screen
+            jQuery('#loading').show();
+
+            $scope.group.put().then(function(putResponse) {
+                angular.copy($scope.group, $scope.groupOld);
+                if(!putResponse.success) {
+                    $alert({title: 'Group updating failed!', content: putResponse.error, type: 'danger'});
+                } else {
+                    $alert({title: 'Group updated!', content: 'The group information has been updated.', type: 'success'});
+                    Cache.clearCache();
+                    $location.path('group/'+ $routeParams.groupId);
+                }
+                // Remove loading screen
+                jQuery('#loading').hide();
+            });
+        };
+
+        // Reset changes
+        $scope.resetGroup = function() {
+            angular.copy(groupOld, $scope.group);
+        };
+    }]
+);
+
+
+
 /****************************************************************************************************************************************************
  *   __  __           _   _
  *  |  \/  |         | | (_)

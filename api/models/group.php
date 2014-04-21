@@ -56,7 +56,7 @@ class Group implements SimpleModel {
         $db->where('id', $db->escape($this->getId()));
         $result = $db->getOne('groups');
         if($result) {
-            $this->name = $result->name;
+            $this->name = $result['name'];
         } else {
             throw new \Exception('Group does not exist', 1);
         }

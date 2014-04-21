@@ -15,8 +15,8 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  * Implements the functions for users
  *
  * @author Niels Witte
- * @version 0.8
- * @date April 18th, 2014
+ * @version 0.8a
+ * @date April 21st, 2014
  * @since February 24th, 2014
  */
 class User extends Module {
@@ -60,8 +60,10 @@ class User extends Module {
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'unlinkAvatar',             $this, 'DELETE', \Auth::READ);     // Removes the avatar for the authenticated user's avatar list
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/?$/",                            'createAvatar',             $this, 'POST',   \Auth::EXECUTE);  // Create an avatar
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/files\/?$/",    'getUserFilesByAvatar',     $this, 'GET',    \AUTH::READ);     // Load all files for the user accociated with the avatar UUID on the given grid
-        $this->api->addRoute("/^\/groups\/?$/",                                         'getGroups',                $this, 'GET',    \AUTH::READ);     // Gets a list with groups
+        $this->api->addRoute("/^\/groups\/?$/",                                         'getGroups',                $this, 'GET',    \AUTH::READ);     // Gets a list with groups 50 groups
+        $this->api->addRoute("/^\/groups\/(\d+)\/?$/",                                  'getGroups',                $this, 'GET',    \AUTH::READ);     // Gets a list with groups 50 groups starting at given offset
         $this->api->addRoute("/^\/groups\/([a-zA-Z0-9-_ \.\(\)\[\]]{3,}+)\/?$/",        'getGroupsByName',          $this, 'GET',    \AUTH::READ);     // Gets a list with groups
+        $this->api->addRoute("/^\/group\/(\d+)\/?$/",                                   'getGroupById',             $this, 'GET',    \AUTH::READ);     // Gets a group bu ID
     }
 
     /**
@@ -638,16 +640,17 @@ class User extends Module {
     }
 
     /**
-     * Returns a list with all groups
+     * Returns a list with 50 groups starting at optionally the given offset
      *
      * @param array $args
      * @return array
      */
     public function getGroups($args) {
-        $db = \Helper::getDB();
+        $offset = isset($args[1]) ? $args[1] : 0;
+        $db     = \Helper::getDB();
         $db->orderBy('LOWER(name)', 'ASC');
-        $groups = $db->get('groups');
-        $data = array();
+        $groups = $db->get('groups', array($offset, 50));
+        $data   = array();
         // Process all groups
         foreach($groups as $group) {
             $group = new \Models\Group($group['id'], $group['name']);
@@ -673,6 +676,18 @@ class User extends Module {
             $data[] = $this->getGroupData($group);
         }
         return $data;
+    }
+
+    /**
+     * Gets a specific group by its ID
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getGroupById($args){
+        $group = new \Models\Group($args[1]);
+        $group->getInfoFromDatabase();
+        return $this->getGroupData($group);
     }
 
     /**
