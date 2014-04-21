@@ -750,6 +750,12 @@ class User extends Module {
         return $result;
     }
 
+    /**
+     * Update the group with the given data
+     *
+     * @param array $args
+     * @return array
+     */
     public function updateGroupById($args){
         $input = \Helper::getInput(TRUE);
         $group = new \Models\Group($args[1]);
@@ -765,7 +771,21 @@ class User extends Module {
         return $result;
     }
 
-    public function deleteGroupById($args){
+    /**
+     * Removes the given group ID from the database
+     *
+     * @param array $args
+     * @return array
+     */
+    public function removeGroupById($args){
+        $group      = new \Models\Group($args[1]);
+        $groupCtrl  = new \Controllers\GroupController($group);
+        $data       = $groupCtrl->deleteGroup();
 
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE)
+        );
+
+        return $result;
     }
 }

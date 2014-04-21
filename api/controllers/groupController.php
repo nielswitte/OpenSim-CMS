@@ -232,7 +232,6 @@ class GroupController {
         return $result;
     }
 
-
     /**
      * Validates the parameters for updating a group
      *
@@ -252,5 +251,16 @@ class GroupController {
             $result = TRUE;
         }
         return $result;
+    }
+
+    /**
+     * Remove this group
+     *
+     * @return boolean
+     */
+    public function deleteGroup() {
+        $db = \Helper::getDB();
+        $db->where('id', $db->escape($this->group->getId()));
+        return $db->delete('groups');
     }
 }

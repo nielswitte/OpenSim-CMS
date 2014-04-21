@@ -1419,11 +1419,10 @@ angularRest.controller('groupsController', ['RestangularCache', 'Restangular', '
         jQuery('#loading').show();
 
         // Get list with groups
-        RestangularCache.one('groups', (paginationOffset - 1) * perPage).getList().then(function(groupsResponse) {
+        RestangularCache.one('groups').getList(''+  (paginationOffset - 1) * perPage).then(function(groupsResponse) {
             $scope.groupsList = groupsResponse;
             Page.setTitle('Groups');
             requestGroupsUrl = groupsResponse.getRequestedUrl();
-
             // Remove loading screen
             jQuery('#loading').hide();
         });
@@ -1471,7 +1470,6 @@ angularRest.controller('groupsController', ['RestangularCache', 'Restangular', '
                     $alert({title: 'Group created!', content: 'The group: '+ $scope.group.name + ' has been created with ID: '+ resp.groupId +'.', type: 'success'});
                     $scope.group.id = resp.groupId;
                     $scope.groupsList.push($scope.group);
-
                     Cache.clearCachedUrl(requestGroupsUrl);
                     modal.hide();
                     $route.reload();
@@ -1480,7 +1478,6 @@ angularRest.controller('groupsController', ['RestangularCache', 'Restangular', '
                 jQuery('#loading').hide();
             });
         };
-
         // Allow changing general group information
         $scope.allowUpdate = function(groupId) {
             if(sessionStorage.userPermission >= WRITE) {
