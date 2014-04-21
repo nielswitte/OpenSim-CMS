@@ -7,6 +7,7 @@ require_once dirname(__FILE__) .'/module.php';
 require_once dirname(__FILE__) .'/../models/avatar.php';
 require_once dirname(__FILE__) .'/../controllers/avatarController.php';
 require_once dirname(__FILE__) .'/../models/group.php';
+require_once dirname(__FILE__) .'/../controllers/groupController.php';
 require_once dirname(__FILE__) .'/../models/user.php';
 require_once dirname(__FILE__) .'/../models/userLoggedIn.php';
 require_once dirname(__FILE__) .'/../controllers/userController.php';
@@ -15,7 +16,7 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  * Implements the functions for users
  *
  * @author Niels Witte
- * @version 0.8a
+ * @version 0.9
  * @date April 21st, 2014
  * @since February 24th, 2014
  */
@@ -59,11 +60,12 @@ class User extends Module {
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'confirmAvatar',            $this, 'PUT',    \Auth::READ);     // Confirms the avatar for the authenticated user
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'unlinkAvatar',             $this, 'DELETE', \Auth::READ);     // Removes the avatar for the authenticated user's avatar list
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/?$/",                            'createAvatar',             $this, 'POST',   \Auth::EXECUTE);  // Create an avatar
-        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/files\/?$/",    'getUserFilesByAvatar',     $this, 'GET',    \AUTH::READ);     // Load all files for the user accociated with the avatar UUID on the given grid
-        $this->api->addRoute("/^\/groups\/?$/",                                         'getGroups',                $this, 'GET',    \AUTH::READ);     // Gets a list with groups 50 groups
-        $this->api->addRoute("/^\/groups\/(\d+)\/?$/",                                  'getGroups',                $this, 'GET',    \AUTH::READ);     // Gets a list with groups 50 groups starting at given offset
-        $this->api->addRoute("/^\/groups\/([a-zA-Z0-9-_ \.\(\)\[\]]{3,}+)\/?$/",        'getGroupsByName',          $this, 'GET',    \AUTH::READ);     // Gets a list with groups
-        $this->api->addRoute("/^\/group\/(\d+)\/?$/",                                   'getGroupById',             $this, 'GET',    \AUTH::READ);     // Gets a group bu ID
+        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/files\/?$/",    'getUserFilesByAvatar',     $this, 'GET',    \Auth::READ);     // Load all files for the user accociated with the avatar UUID on the given grid
+        $this->api->addRoute("/^\/groups\/?$/",                                         'getGroups',                $this, 'GET',    \Auth::READ);     // Gets a list with groups 50 groups
+        $this->api->addRoute("/^\/groups\/(\d+)\/?$/",                                  'getGroups',                $this, 'GET',    \Auth::READ);     // Gets a list with groups 50 groups starting at given offset
+        $this->api->addRoute("/^\/groups\/([a-zA-Z0-9-_ \.\(\)\[\]]{3,}+)\/?$/",        'getGroupsByName',          $this, 'GET',    \Auth::READ);     // Gets a list with groups
+        $this->api->addRoute("/^\/group\/?$/",                                          'createGroup',              $this, 'POST',   \Auth::EXECUTE);  // Create a new group
+        $this->api->addRoute("/^\/group\/(\d+)\/?$/",                                   'getGroupById',             $this, 'GET',    \Auth::READ);     // Gets a group bu ID
     }
 
     /**
@@ -722,5 +724,27 @@ class User extends Module {
             $data['users'] = $users;
         }
         return $data;
+    }
+
+    /**
+     * Creates a new group with the given POST data
+     *
+     * @param array $args
+     * @return array
+     */
+    public function createGroup($args) {
+        $input      = \Helper::getInput(TRUE);
+        $groupCtrl  = new \Controllers\GroupController();
+        $data       = FALSE;
+        if($groupCtrl->validateParametersCreate($input)) {
+            $data = $groupCtrl->createGroup($input);
+        }
+
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE),
+            'groupId' => ($data !== FALSE ? $data : 0)
+        );
+
+        return $result;
     }
 }

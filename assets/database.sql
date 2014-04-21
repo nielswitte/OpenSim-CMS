@@ -1,6 +1,6 @@
 -- --------------------------------------------------------
 -- Host:                         localhost
--- Server versie:                5.5.35-0ubuntu0.13.10.2 - (Ubuntu)
+-- Server versie:                5.5.35-1ubuntu1 - (Ubuntu)
 -- Server OS:                    debian-linux-gnu
 -- HeidiSQL Versie:              8.3.0.4756
 -- --------------------------------------------------------
@@ -202,7 +202,8 @@ CREATE TABLE IF NOT EXISTS `grid_regions` (
 CREATE TABLE IF NOT EXISTS `groups` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
@@ -271,7 +272,7 @@ CREATE TABLE IF NOT EXISTS `meeting_agenda_items` (
 
 -- Structuur van  tabel OpenSim-CMS.meeting_documents wordt geschreven
 CREATE TABLE IF NOT EXISTS `meeting_documents` (
-  `meetingId` int(11) NOT NULL,
+  `meetingId` int(11) NOT NULL AUTO_INCREMENT,
   `documentId` int(11) NOT NULL,
   `agendaId` int(11) NOT NULL,
   PRIMARY KEY (`meetingId`,`documentId`),

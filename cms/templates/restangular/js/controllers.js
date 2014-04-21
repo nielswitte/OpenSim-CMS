@@ -1460,7 +1460,7 @@ angularRest.controller('groupsController', ['RestangularCache', 'Restangular', '
         };
 
         // Save a new group
-        $scope.saveGroup = function() {
+        var saveGroup = function() {
             // Show loading screen
             jQuery('#loading').show();
 
@@ -1494,7 +1494,7 @@ angularRest.controller('groupsController', ['RestangularCache', 'Restangular', '
 
         // Show delete button only when allowed to delete
         $scope.allowDelete = function(groupId) {
-            if(groupId != sessionStorage.id && groupId != 0 && sessionStorage.userPermission >= WRITE) {
+            if(sessionStorage.userPermission >= WRITE) {
                 return true;
             } else {
                 return false;
@@ -1530,13 +1530,13 @@ angularRest.controller('groupsController', ['RestangularCache', 'Restangular', '
             if(func == 'hide') {
                 modal.hide();
             } else if(func == 'createGroup') {
-                $scope.saveGroup();
+                saveGroup();
             }
         };
 
         // New Group dialog creation
         $scope.newGroup = function() {
-            $scope.template         = partial_path +'/group/groupNewForm.html';
+            $scope.template         = partial_path +'/user/groupNewForm.html';
             $scope.group            = {};
             $scope.formSubmit       = 'createGroup';
             $scope.buttons          = [{
