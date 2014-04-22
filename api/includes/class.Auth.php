@@ -119,6 +119,46 @@ class Auth {
     }
 
     /**
+     * Check if the user has access to the comments of this type and item
+     *
+     * @param string $type - The type of comment
+     * @param integer $itemId - The id of the item to comment on
+     * @return boolean
+     */
+    public static function checkComment($type, $itemId) {
+        $result = FALSE;
+        // All permission?
+        if(\Auth::checkRights('comment', \Auth::ALL)) {
+            $result = TRUE;
+        // Extended permissions check for specific comment types
+        } elseif(in_array($type, array('file', 'document', 'presentation', 'page', 'slide'))) {
+            $db = \Helper::getDB();
+            // Get parent of page or slide
+            if($type == 'page') {
+                $db->where('id', $db->escape($itemId));
+                $document = $db->getOne('document_pages');
+                $parentId = $document['documentId'];
+            } else if($type == 'slide') {
+                $db->where('id', $db->escape($itemId));
+                $document = $db->getOne('document_slides');
+                $parentId = $document['documentId'];
+            } else {
+                $parentId = $itemId;
+            }
+
+            // User has permission to view comments?
+            if(\Auth::checkUserFiles($parentId) || \Auth::checkGroupFile($parentId)) {
+                $result = TRUE;
+            }
+        // No need to check type?
+        } else {
+            $result = TRUE;
+        }
+
+        return $result;
+    }
+
+    /**
      * Checks if the given fileId is owned by the user
      *
      * @param integer $fileId

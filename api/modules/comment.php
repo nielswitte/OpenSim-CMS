@@ -11,8 +11,8 @@ require_once dirname(__FILE__) .'/../controllers/commentController.php';
  * Implements the functions for comments
  *
  * @author Niels Witte
- * @version 0.3b
- * @date April 16th, 2014
+ * @version 0.4
+ * @date April 22nd, 2014
  * @since March 28th, 2014
  */
 class Comment extends Module {
@@ -64,6 +64,11 @@ class Comment extends Module {
             throw new \Exception('Type not implemented yet', 1);
         }
 
+        // Filter access to items the user can not see
+        if(!\Auth::checkComment($args[1], $id)) {
+            throw new \Exception('You do not have permission to view comments for the given item', 3);
+        }
+
         $comments = new \Models\Comments($parent);
         $comments->getInfoFromDatabase();
 
@@ -71,7 +76,9 @@ class Comment extends Module {
     }
 
     /**
-     * Returns all comments since the given timestamp as a flat list (not threaded)
+     * Returns a maximum of 50 comments since the given timestamp as a flat list (not threaded)
+     * The amount of comments returned depends on the access level and number of files the user can see
+     * Only comments to documents the user has access to are visible, however invisible comments also count
      *
      * @param array $args
      * @return array
@@ -86,9 +93,12 @@ class Comment extends Module {
         $comments   = new \Models\Comments(NULL);
         $number     = 1;
         foreach($results as $result) {
-            $user    = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
-            $comment = new \Models\Comment($result['commentID'], $result['parentId'], $number, $user, $result['type'], $result['timestamp'], $result['message'], $result['editTimestamp']);
-            $comments->addComment($comment);
+            // Only list comments to which the user has access
+            if(\Auth::checkComment($result['type'], $result['itemId'])) {
+                $user    = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
+                $comment = new \Models\Comment($result['commentID'], $result['parentId'], $number, $user, $result['type'], $result['timestamp'], $result['message'], $result['editTimestamp']);
+                $comments->addComment($comment);
+            }
             $number++;
         }
 
@@ -113,36 +123,41 @@ class Comment extends Module {
         $db         = \Helper::getDB();
         $db->where('id', $db->escape($args[1]));
         $query      = $db->getOne('comments');
-        // Comment found?
+        // Comment found
         if($query) {
-            // Empty path array
-            $data       = array();
+            // User has permission to view the comment?
+            if(\Auth::checkComment($query['type'], $query['itemId'])) {
+                // Empty path array
+                $data       = array();
 
-            // Create objects
-            $user       = new \Models\User($query['userId']);
-            $comment    = new \Models\Comment($query['id'], $query['parentId'], 1, $user, $query['type'], $query['timestamp'], $query['message'], $query['editTimestamp']);
-            // If page get additional document data
-            if($comment->getType() == 'page') {
-                $data[] = 'document';
-                // Get document ID
-                $db->join('document_pages p', 'p.documentId = d.id', 'LEFT');
-                $db->where('p.id', $db->escape($query['itemId']));
-                $document = $db->getOne('documents d', 'd.*');
-                $data[] = $document['id'];
-            // Get additional presentation data
-            } elseif($comment->getType() == 'slide') {
-                $data[] = 'presentation';
-                // Get presentation ID
-                $db->join('document_slides s', 's.documentId = d.id', 'LEFT');
-                $db->where('s.id', $db->escape($query['itemId']));
-                $presentation = $db->getOne('documents d', 'd.*');
-                $data[] = $presentation['id'];
+                // Create objects
+                $user       = new \Models\User($query['userId']);
+                $comment    = new \Models\Comment($query['id'], $query['parentId'], 1, $user, $query['type'], $query['timestamp'], $query['message'], $query['editTimestamp']);
+                // If page get additional document data
+                if($comment->getType() == 'page') {
+                    $data[] = 'document';
+                    // Get document ID
+                    $db->join('document_pages p', 'p.documentId = d.id', 'LEFT');
+                    $db->where('p.id', $db->escape($query['itemId']));
+                    $document = $db->getOne('documents d', 'd.*');
+                    $data[] = $document['id'];
+                // Get additional presentation data
+                } elseif($comment->getType() == 'slide') {
+                    $data[] = 'presentation';
+                    // Get presentation ID
+                    $db->join('document_slides s', 's.documentId = d.id', 'LEFT');
+                    $db->where('s.id', $db->escape($query['itemId']));
+                    $presentation = $db->getOne('documents d', 'd.*');
+                    $data[] = $presentation['id'];
+                }
+                // Get last part of the path
+                $data[] = $comment->getType();
+                $data[] = $query['itemId'];
+                $data[] = 'comment';
+                $data[] = $comment->getId();
+            } else {
+                throw new \Exception('You do not have permission to view comments for the given item', 3);
             }
-            // Get last part of the path
-            $data[] = $comment->getType();
-            $data[] = $query['itemId'];
-            $data[] = 'comment';
-            $data[] = $comment->getId();
         } else {
             throw new \Exception('Comment does not exists', 1);
         }
@@ -228,15 +243,21 @@ class Comment extends Module {
     public function createComment($args) {
         $type = \Helper::getCommentType($args[1], $args[2]);
         $data = FALSE;
+        // Type exists
         if($type !== FALSE) {
-            $parameters = \Helper::getInput(TRUE);
-            $parameters['type']     = $args[1];
-            $parameters['itemId']   = $args[2];
-            $commentCtrl = new \Controllers\CommentController();
-            // Validate parameters
-            if($commentCtrl->validateParametersCreate($parameters)) {
-                // Create comment
-                $data = $commentCtrl->createComment($parameters);
+            // User has permission to comment?
+            if(\Auth::checkComment($args[1], $args[2])) {
+                $parameters = \Helper::getInput(TRUE);
+                $parameters['type']     = $args[1];
+                $parameters['itemId']   = $args[2];
+                $commentCtrl = new \Controllers\CommentController();
+                // Validate parameters
+                if($commentCtrl->validateParametersCreate($parameters)) {
+                    // Create comment
+                    $data = $commentCtrl->createComment($parameters);
+                }
+            } else {
+                throw new \Exception('You do not have permission to comments on the given item', 4);
             }
         } else {
             throw new \Exception('Type not implemented yet', 1);
@@ -265,19 +286,24 @@ class Comment extends Module {
         $query      = $db->getOne('comments');
         // Comment exists
         if($query) {
-            $user       = new \Models\User($query['userId']);
-            $comment    = new \Models\Comment($query['id'], $query['parentId'], 1, $user, $query['type'], $query['timestamp'], $query['message']);
+            // User has permission to comment?
+            if(\Auth::checkComment($query['type'], $query['itemId'])) {
+                $user       = new \Models\User($query['userId']);
+                $comment    = new \Models\Comment($query['id'], $query['parentId'], 1, $user, $query['type'], $query['timestamp'], $query['message']);
 
-            // Only allow when the user has write access or wants to update his/her own comment
-            if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $comment->getUser()->getId() != \Auth::getUser()->getId()) {
-                throw new \Exception('You do not have permissions to update this comment.', 6);
-            }
-            $commentCtrl = new \Controllers\CommentController($comment);
-            $parameters  = \Helper::getInput(TRUE);
-            // Validate parameters
-            if($commentCtrl->validateParametersUpdate($parameters)) {
-                // Update comment
-                $data = $commentCtrl->updateComment($parameters);
+                // Only allow when the user has write access or wants to update his/her own comment
+                if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $comment->getUser()->getId() != \Auth::getUser()->getId()) {
+                    throw new \Exception('You do not have permissions to update this comment.', 6);
+                }
+                $commentCtrl = new \Controllers\CommentController($comment);
+                $parameters  = \Helper::getInput(TRUE);
+                // Validate parameters
+                if($commentCtrl->validateParametersUpdate($parameters)) {
+                    // Update comment
+                    $data = $commentCtrl->updateComment($parameters);
+                }
+            } else {
+                throw new \Exception('You do not have permission to update comments for the given item', 5);
             }
         } else {
             throw new \Exception('Cound not find comment with ID: '. $args[1], 2);
@@ -305,17 +331,22 @@ class Comment extends Module {
         $db->where('id', $db->escape($args[1]));
         $query     = $db->getOne('comments');
         if($query) {
-            $user       = new \Models\User($query['userId']);
-            $comment    = new \Models\Comment($query['id'], $query['parentId'], 1, $user, $query['type'], $query['timestamp'], $query['message']);
+            // User has permission to comment?
+            if(\Auth::checkComment($query['type'], $query['itemId'])) {
+                $user       = new \Models\User($query['userId']);
+                $comment    = new \Models\Comment($query['id'], $query['parentId'], 1, $user, $query['type'], $query['timestamp'], $query['message']);
 
-            // Only allow when the user has write access or wants to update his/her own comment
-            if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $comment->getUser()->getId() != \Auth::getUser()->getId()) {
-                throw new \Exception('You do not have permissions to remove this comment.', 6);
+                // Only allow when the user has write access or wants to update his/her own comment
+                if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $comment->getUser()->getId() != \Auth::getUser()->getId()) {
+                    throw new \Exception('You do not have permissions to remove this comment.', 6);
+                }
+
+                // Delete!
+                $commentCtrl = new \Controllers\CommentController($comment);
+                $data        = $commentCtrl->removeComment();
+            } else {
+                throw new \Exception('You do not have permission to delete comments for the given item', 5);
             }
-
-            // Delete!
-            $commentCtrl = new \Controllers\CommentController($comment);
-            $data        = $commentCtrl->removeComment();
         } else {
             throw new \Exception('Cound not find comment with ID: '. $args[1], 2);
         }
