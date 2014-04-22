@@ -101,7 +101,7 @@ class Meeting implements simpleModel {
     /**
      * Gets the agenda for this meeting from the database
      */
-    public function getAgendaFromDabatase() {
+    public function getAgendaFromDatabase() {
         $db = \Helper::getDB();
         $db->where('meetingId', $db->escape($this->getId()));
         $db->orderBy('parentId', 'ASC');
@@ -120,7 +120,7 @@ class Meeting implements simpleModel {
     /**
      * Gets the documents for this meeting from the database
      */
-    public function getDocumentsFromDabatase() {
+    public function getDocumentsFromDatabase() {
         $db = \Helper::getDB();
         $db->join('documents d', 'md.documentId = d.id', 'LEFT');
         $db->join('users u', 'd.ownerId = u.id', 'LEFT');

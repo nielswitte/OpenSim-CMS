@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the grid controller
  *
  * @author Niels Witte
- * @version 0.2
- * @data April 16th, 2014
+ * @version 0.2a
+ * @data April 17th, 2014
  * @since April 14th, 2014
  */
 class GridController {
@@ -75,7 +75,7 @@ class GridController {
      */
     public function loadGridDataFromOpenSim() {
         $result = FALSE;
-        $xml    = file_get_contents($this->grid->getOsProtocol() .'://'. $this->grid->getOsIp() .':'. $this->grid->getOsPort() .'/get_grid_info');
+        $xml    = @file_get_contents($this->grid->getOsProtocol() .'://'. $this->grid->getOsIp() .':'. $this->grid->getOsPort() .'/get_grid_info');
         if($xml !== FALSE) {
             $xml    = simplexml_load_string($xml);
             $db     = \Helper::getDB();
@@ -87,8 +87,10 @@ class GridController {
             $db->where('id', $db->escape($this->grid->getId()));
             $db->update('grids', $data);
             $result = TRUE;
-        }
 
-        return $result;
+            return $result;
+        } else {
+            throw new \Exception('Can not connect to the selected Grid.', 1);
+        }
     }
 }

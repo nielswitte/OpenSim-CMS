@@ -11,8 +11,8 @@ require_once dirname(__FILE__) .'/../controllers/meetingController.php';
  * Implements the functions for meetings
  *
  * @author Niels Witte
- * @version 0.4c
- * @date April 10th, 2014
+ * @version 0.6
+ * @date April 18th, 2014
  * @since February 25th, 2014
  */
 class Meeting extends Module{
@@ -96,22 +96,7 @@ class Meeting extends Module{
             $room       = new \Models\MeetingRoom($result['roomId'], NULL, $result['roomName']);
             $meeting    = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room, $result['name']);
             if(strpos($args[0], 'calendar') !== FALSE) {
-                $startTimestamp = strtotime($meeting->getStartDate());
-                $endTimestamp   = strtotime($meeting->getEndDate());
-
-                // use the format for JSON Event Objects (@source: https://github.com/Serhioromano/bootstrap-calendar#feed-url )
-                $data[]   = array(
-                    'id'            => $meeting->getId(),
-                    'start'         => $startTimestamp * 1000,
-                    'end'           => $endTimestamp * 1000,
-                    'url'           => $meeting->getApiUrl(),
-                    // Meeting has started but not ended (in progress) ? => event-success
-                    // Meeting has ended ? => event-default
-                    // Meeting still has to start => event-info
-                    'class'         => ($startTimestamp < time() && $endTimestamp > time() ? 'event-success' : ($startTimestamp > time() ? 'event-info' : 'event-default')),
-                    'title'         => stripslashes(str_replace('"', '\'\'', $meeting->getName()) .' (Room: '. $meeting->getRoom()->getName() .')'),
-                    'description'   => 'Reservation made by: '. $meeting->getCreator()->getUsername()
-                );
+                $data[] = $this->getMeetingData($meeting, FALSE, TRUE);
             } else {
                 $data[] = $this->getMeetingData($meeting, FALSE);
             }
@@ -125,17 +110,27 @@ class Meeting extends Module{
      *
      * @param array $args
      * @return array
+     * @throws \Exception
      */
     public function getMeetingById($args) {
         $meeting = new \Models\Meeting($args[1]);
         $meeting->getInfoFromDatabase();
-        $meeting->getAgendaFromDabatase();
-        $meeting->getCreator()->getInfoFromDatabase();
-        $meeting->getRoom()->getInfoFromDatabase();
         $meeting->getParticipantsFromDatabase();
-        $meeting->getDocumentsFromDabatase();
 
-        return $this->getMeetingData($meeting, TRUE);
+        // Only allow access to meeting details to Admins,
+        // Creator of the meeting and
+        // Participants of the meeting
+        if(\Auth::checkRights($this->getName(), \Auth::ALL) ||
+                $meeting->getCreator()->getId() == \Auth::getUser()->getId() ||
+                $meeting->getParticipants()->getParticipantById(\Auth::getUser()->getId()) !== FALSE) {
+            $meeting->getCreator()->getInfoFromDatabase();
+            $meeting->getRoom()->getInfoFromDatabase();
+            $meeting->getAgendaFromDatabase();
+            $meeting->getDocumentsFromDatabase();
+            return $this->getMeetingData($meeting, TRUE);
+        } else {
+            throw new \Exception('You do not have permission to view this meeting', 1);
+        }
     }
 
     /**
@@ -143,13 +138,25 @@ class Meeting extends Module{
      *
      * @param array $args
      * @return array
+     * @throws \Exception
      */
     public function getMeetingAgendaById($args) {
         $meeting = new \Models\Meeting($args[1]);
         $meeting->getInfoFromDatabase();
-        $meeting->getAgendaFromDabatase();
+        $meeting->getParticipantsFromDatabase();
 
-        return $this->getMeetingAgendaData($meeting);
+        // Only allow access to meeting details to Admins,
+        // Creator of the meeting and
+        // Participants of the meeting
+        if(\Auth::checkRights($this->getName(), \Auth::ALL) ||
+                $meeting->getCreator()->getId() == \Auth::getUser()->getId() ||
+                $meeting->getParticipants()->getParticipantById(\Auth::getUser()->getId()) !== FALSE) {
+
+            $meeting->getAgendaFromDatabase();
+            return $this->getMeetingAgendaData($meeting);
+        } else {
+            throw new \Exception('You do not have permission to view this agenda', 2);
+        }
     }
 
     /**
@@ -157,7 +164,6 @@ class Meeting extends Module{
      *
      * @param array $args
      * @return array
-     * @throws \Exception
      */
     public function createMeeting($args) {
         $data           = FALSE;
@@ -187,17 +193,30 @@ class Meeting extends Module{
     public function updateMeetingById($args) {
         $data           = FALSE;
         $meeting        = new \Models\Meeting($args[1]);
-        $meetingCtrl    = new \Controllers\MeetingController($meeting);
-        $input          = \Helper::getInput(TRUE);
+        $meeting->getInfoFromDatabase();
+        $meeting->getParticipantsFromDatabase();
 
-        if($meetingCtrl->validateParametersUpdate($input)) {
-            $data = $meetingCtrl->updateMeeting($input);
+        // Only allow access to meeting details to Admins,
+        // Creator of the meeting and
+        // Participants of the meeting with WRITE access
+        if(\Auth::checkRights($this->getName(), \Auth::ALL) ||
+                $meeting->getCreator()->getId() == \Auth::getUser()->getId() ||
+                (\Auth::checkRights($this->getName(), \Auth::WRITE) && $meeting->getParticipants()->getParticipantById(\Auth::getUser()->getId()) !== FALSE)) {
+
+            $meetingCtrl    = new \Controllers\MeetingController($meeting);
+            $input          = \Helper::getInput(TRUE);
+
+            if($meetingCtrl->validateParametersUpdate($input)) {
+                $data = $meetingCtrl->updateMeeting($input);
+            }
+
+            // Format the result
+            $result = array(
+                'success' => ($data !== FALSE ? TRUE : FALSE),
+            );
+        } else {
+            throw new \Exception('You do not have permission to update this meeting', 3);
         }
-
-        // Format the result
-        $result = array(
-            'success' => ($data !== FALSE ? TRUE : FALSE),
-        );
 
         return $result;
     }
@@ -207,100 +226,150 @@ class Meeting extends Module{
      *
      * @param array $args
      * @return array
+     * @throws \Exception
      */
     public function saveMinutesByMeetingId($args) {
         $data           = FALSE;
         $meeting        = new \Models\Meeting($args[1]);
-        $meetingCtrl    = new \Controllers\MeetingController($meeting);
-        $input          = \Helper::getInput(TRUE);
+        $meeting->getInfoFromDatabase();
+        $meeting->getParticipantsFromDatabase();
 
-        // Only one item? make it a sub multidemensional array
-        if(!isset($input[0])) {
-            $input = array($input);
-        }
+        // Only allow access to meeting details to Admins,
+        // Creator of the meeting and
+        // Participants of the meeting with WRITE access
+        if(\Auth::checkRights($this->getName(), \Auth::ALL) ||
+                $meeting->getCreator()->getId() == \Auth::getUser()->getId() ||
+                (\Auth::checkRights($this->getName(), \Auth::WRITE) && $meeting->getParticipants()->getParticipantById(\Auth::getUser()->getId()) !== FALSE)) {
 
-        // Convert UNIX to timestamp, which is used when the request is from the OpenSim Server
-        foreach($input as $key => $row) {
-            if(isset($row['timestamp']) && is_numeric($row['timestamp'])) {
-                $input[$key]['message']   = urldecode($row['message']);
-                $input[$key]['timestamp'] = date('Y-m-d H:i:s', $row['timestamp']);
+            $meetingCtrl    = new \Controllers\MeetingController($meeting);
+            $input          = \Helper::getInput(TRUE);
+
+            // Only one item? make it a sub multidemensional array
+            if(!isset($input[0])) {
+                $input = array($input);
             }
+
+            // Convert UNIX to timestamp, which is used when the request is from the OpenSim Server
+            foreach($input as $key => $row) {
+                if(isset($row['timestamp']) && is_numeric($row['timestamp'])) {
+                    $input[$key]['message']   = urldecode($row['message']);
+                    $input[$key]['timestamp'] = date('Y-m-d H:i:s', $row['timestamp']);
+                }
+            }
+
+            // Validate parameters and if valid save them
+            if($meetingCtrl->validateParametersChat($input)) {
+                $data = $meetingCtrl->saveChat($input);
+            }
+
+            // Format the result
+            $result = array(
+                'success' => ($data !== FALSE ? TRUE : FALSE),
+            );
+
+            return $result;
+        } else {
+            throw new \Exception('You do not have permission to add minutes to this meeting', 5);
         }
-
-        // Validate parameters and if valid save them
-        if($meetingCtrl->validateParametersChat($input)) {
-            $data = $meetingCtrl->saveChat($input);
-        }
-
-        // Format the result
-        $result = array(
-            'success' => ($data !== FALSE ? TRUE : FALSE),
-        );
-
-        return $result;
     }
 
     /**
      * Gets the minutes meetings
      *
      * @param array $args
+     * @return array
+     * @throws \Exception
      */
     public function getMinutesByMeetingId($args){
         $meeting  = new \Models\Meeting($args[1]);
         $meeting->getInfoFromDatabase();
-        $meeting->getAgendaFromDabatase();
         $meeting->getParticipantsFromDatabase();
-        $meeting->getDocumentsFromDabatase();
-        $meeting->getMinutesFromDatabase();
-        $minutes = $meeting->getMinutes()->getMinutes();
 
-        // Process and format results
-        $results            = $this->getMeetingData($meeting, FALSE);
-        $results['agenda']  = $meeting->getAgenda()->toString();
+        // Only allow access to meeting details to Admins,
+        // Creator of the meeting and
+        // Participants of the meeting with WRITE access
+        if(\Auth::checkRights($this->getName(), \Auth::ALL) ||
+                $meeting->getCreator()->getId() == \Auth::getUser()->getId() ||
+                $meeting->getParticipants()->getParticipantById(\Auth::getUser()->getId()) !== FALSE) {
 
-        // Format the Minutes
-        $agendaId = 0;
-        foreach($minutes as $minute) {
-            // Get the agenda item for this minute, but only if changed
-            if($agendaId != $minute['agendaId']) {
-                $agendaItem = $meeting->getAgenda()->getAgendaItemById($minute['agendaId']);
+            $meeting->getAgendaFromDatabase();
+            $meeting->getDocumentsFromDatabase();
+            $meeting->getMinutesFromDatabase();
+            $minutes = $meeting->getMinutes()->getMinutes();
+
+            // Process and format results
+            $results            = $this->getMeetingData($meeting, FALSE);
+            $results['agenda']  = $meeting->getAgenda()->toString();
+
+            // Format the Minutes
+            $agendaId = 0;
+            foreach($minutes as $minute) {
+                // Get the agenda item for this minute, but only if changed
+                if($agendaId != $minute['agendaId']) {
+                    $agendaItem = $meeting->getAgenda()->getAgendaItemById($minute['agendaId']);
+                }
+
+                $results['minutes'][] = array(
+                    'id'         => $minute['id'],
+                    'timestamp'  => $minute['timestamp'],
+                    'agenda'     => array(
+                        'id'            => $agendaItem['id'],
+                        'parentId'      => $agendaItem['parentId'],
+                        'sort'          => $agendaItem['sort'],
+                        'value'         => $agendaItem['value']
+                    ),
+                    'uuid'       => $minute['uuid'],
+                    'name'       => $minute['name'],
+                    'message'    => $minute['message'],
+                    // User match is found?
+                    'user'       => ($minute['user'] ? $this->api->getModule('user')->getUserData($minute['user'], FALSE) : '')
+                );
             }
 
-            $results['minutes'][] = array(
-                'id'         => $minute['id'],
-                'timestamp'  => $minute['timestamp'],
-                'agenda'     => array(
-                    'id'            => $agendaItem['id'],
-                    'parentId'      => $agendaItem['parentId'],
-                    'sort'          => $agendaItem['sort'],
-                    'value'         => $agendaItem['value']
-                ),
-                'uuid'       => $minute['uuid'],
-                'name'       => $minute['name'],
-                'message'    => $minute['message'],
-                // User match is found?
-                'user'       => ($minute['user'] ? $this->api->getModule('user')->getUserData($minute['user'], FALSE) : '')
-            );
+            return $results;
+        } else {
+            throw new \Exception('You do not have permission to view the minutes of this meeting', 4);
         }
-
-        return $results;
     }
 
     /**
      * Formats the meeting data to a nice array
      *
      * @param \Models\Meeting $meeting
-     * @param boolean $full - [Optional]
+     * @param boolean $full - [Optional] Get additional data?
+     * @param boolean $calendar - [Optional] Output as calendar format?
      * @return array
      */
-    public function getMeetingData(\Models\Meeting $meeting, $full = TRUE) {
-        $data       = array(
-            'id'        => $meeting->getId(),
-            'name'      => stripslashes($meeting->getName()),
-            'startDate' => $meeting->getStartDate(),
-            'endDate'   => $meeting->getEndDate(),
-            'creator'   => $this->api->getModule('user')->getUserData($meeting->getCreator(), FALSE)
-        );
+    public function getMeetingData(\Models\Meeting $meeting, $full = TRUE, $calendar = FALSE) {
+        // Get results as calendar data
+        if($calendar) {
+            $startTimestamp = strtotime($meeting->getStartDate());
+            $endTimestamp   = strtotime($meeting->getEndDate());
+
+            // use the format for JSON Event Objects (@source: https://github.com/Serhioromano/bootstrap-calendar#feed-url )
+            $data   = array(
+                'id'            => $meeting->getId(),
+                'start'         => $startTimestamp * 1000,
+                'end'           => $endTimestamp * 1000,
+                'url'           => $meeting->getApiUrl(),
+                // Meeting has started but not ended (in progress) ? => event-success
+                // Meeting has ended ? => event-default
+                // Meeting still has to start => event-info
+                'class'         => ($startTimestamp < time() && $endTimestamp > time() ? 'event-success' : ($startTimestamp > time() ? 'event-info' : 'event-default')),
+                'title'         => stripslashes(str_replace('"', '\'\'', $meeting->getName()) .' (Room: '. $meeting->getRoom()->getName() .')'),
+                'description'   => 'Reservation made by: '. $meeting->getCreator()->getUsername()
+            );
+        // Get the results as normal array
+        } else {
+            $data       = array(
+                'id'        => $meeting->getId(),
+                'name'      => stripslashes($meeting->getName()),
+                'startDate' => $meeting->getStartDate(),
+                'endDate'   => $meeting->getEndDate(),
+                'creator'   => $this->api->getModule('user')->getUserData($meeting->getCreator(), FALSE)
+            );
+        }
+
         // Show detailed information?
         if($full) {
             $room = $meeting->getRoom();

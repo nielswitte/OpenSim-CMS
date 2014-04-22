@@ -108,6 +108,12 @@ Example of output
             "gridName": "OpenSim's test grid",
             "confirmed": 1
         }
+    ],
+    "groups": [
+        {
+            "id": 1,
+            "name": "The Doe's"
+        }
     ]
 }
 ```
@@ -161,6 +167,9 @@ PUT /api/user/<USER-ID>/ HTTP/1.1
 | firstName         | String    | The first name of the new user                                    |
 | lastName          | String    | The last name of the new user                                     |
 | permissions       | Array     | The permission levels for the user (see permissions)              |
+| groups            | Array     | An array containing group IDs `[1,2,3]` or Group objects `[{id: 1, name: x}, {id: 2, name: y}]` |
+
+Users without at least `WRITE` permission can only remove themselves from groups, they cannot add new groups.
 
 ## Change profile picture
 Attach a profile picture to the given user, which will be resized to 250x250 pixels and displayed in the CMS for example next to comments and on the user's profile page. When you upload a new picture the previous picture will be overwritten.
@@ -171,7 +180,7 @@ PUT /api/user/<USER-ID>/picture/ HTTP/1.1
 
 | Parameter         | Type      | Description                                                                               |
 |-------------------|-----------|-------------------------------------------------------------------------------------------|
-| image             | file      | Base64 encoded file, needs to be jpeg, jpg, png or gif                                    |
+| image             | File      | Base64 encoded file, needs to be jpeg, jpg, png or gif                                    |
 
 ## Change password
 Use the following function to update the user's password. You can update passwords of other users when you at least have `WRITE` permissions or when you know the `currentPassword`.

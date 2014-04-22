@@ -20,7 +20,7 @@
     <table class="table table-bordered table-striped table-responsive table-hover" id="gridList">
         <thead>
             <tr>
-                <th>
+                <th class="col-sm-1">
                     <a ng-click="orderByField='id'; reverseSort = !reverseSort" title="Sort by ID">#</a>
                     <span ng-show="orderByField == 'id'">
                         <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
@@ -41,21 +41,21 @@
                         <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
                     </span>
                 </th>
-                <th>
+                <th class="col-sm-1">
                     <a ng-click="orderByField='regionCount'; reverseSort = !reverseSort" title="Sort by number of regions"># Regions</a>
                     <span ng-show="orderByField == 'regionCount'">
                         <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
                         <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
                     </span>
                 </th>
-                <th>
+                <th class="col-sm-1">
                     <a ng-click="orderByField='isOnline'; reverseSort = !reverseSort" title="Sort by status">Status</a>
                     <span ng-show="orderByField == 'isOnline'">
                         <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
                         <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
                     </span>
                 </th>
-                <th>
+                <th class="col-sm-1">
                     <a ng-click="orderByField='totalUsers'; reverseSort = !reverseSort" title="Sort by total number of users">Users</a>
                     <span ng-show="orderByField == 'totalUsers'">
                         <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>

@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class takes care of the documents/files attached to a meeting
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 3rd, 2014
+ * @version 0.3
+ * @date April 17th, 2014
  * @since March 18th, 2014
  */
 class MeetingDocuments {
@@ -42,5 +42,21 @@ class MeetingDocuments {
      */
     public function addDocument(\Models\File $file) {
         $this->documents[] = $file;
+    }
+
+    /**
+     * Removes the given file from the list with documents
+     * 
+     * @param \Models\File $file
+     * @return boolean
+     */
+    public function removeDocument(\Models\File $file) {
+        foreach($this->getDocuments() as $index => $document) {
+            if($document->getId() == $file->getId()) {
+                unset($this->documents[$index]);
+                return TRUE;
+            }
+        }
+        return FALSE;
     }
 }

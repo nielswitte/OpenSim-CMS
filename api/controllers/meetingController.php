@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the Meeting controller
  *
  * @author Niels Witte
- * @version 0.3d
- * @date April 16th, 2014
+ * @version 0.4a
+ * @date April 22nd, 2014
  * @since March 13th, 2014
  */
 class MeetingController {
@@ -41,6 +41,7 @@ class MeetingController {
      *              * integer or array room - Room ID or array which contains id => roomId
      *              * string name - The meeting name
      *              * array participants - An array with User IDs or with users which contain id => userId
+     *              * array documents - [Optional] An array with File IDs or with File objects which contain id => fileId
      * @return integer - meetingId or boolean FALSE on failure
      * @throws \Exception
      */
@@ -60,42 +61,27 @@ class MeetingController {
             'startDate' => $db->escape($parameters['startDate']),
             'endDate'   => $db->escape($parameters['endDate']),
             'roomId'    => $db->escape($room),
-            'name'      => $db->escape($parameters['name'])
+            'name'      => $db->escape(\Helper::filterString($parameters['name']))
         );
         $meetingId = @$db->insert('meetings', $data);
+
         // Create a new meeting object for this meeting
         $this->meeting = new \Models\Meeting($meetingId);
         // Attach a new meeting participants list
         $participants  = new \Models\MeetingParticipants($this->getMeeting());
         $this->getMeeting()->setParticipants($participants);
-
-        // Participants are a array of ids or an array of users?
-        if(isset($parameters['participants'][0]) && is_numeric($parameters['participants'][0])) {
-            $participants = $parameters['participants'];
-        } else {
-            $participants = array();
-            foreach($parameters['participants'] as $participant) {
-                $participants[] = $participant['id'];
-            }
-        }
+        $this->updateParticipants($parameters['participants']);
 
         // Sets the participants for this meeting
-        $this->setParticipants($participants);
+        $this->addParticipants($participants);
 
         // Attach a new documents list
         $documents = new \Models\MeetingDocuments($this->getMeeting());
         $this->getMeeting()->setDocuments($documents);
 
-        // Documents are a array of ids or an array of documents?
-        if(isset($parameters['documents'][0]) && is_numeric($parameters['documents'][0])) {
-            $documents = $parameters['documents'];
-        } else {
-            $documents = array();
-            foreach($parameters['documents'] as $document) {
-                $documents[] = $document['id'];
-            }
+        if(isset($parameters['documents'])) {
+            $this->updateDocuments($parameters['documents']);
         }
-        $this->setDocuments($documents);
 
         // Create the agenda
         $agenda = $this->parseAgendaString($parameters['agenda']);
@@ -116,6 +102,7 @@ class MeetingController {
      *              * integer or array room - Room ID or array which contains id => roomId
      *              * string name - The meeting name
      *              * array participants - An array with User IDs or with users which contain id => userId
+     *              * array documents - [Optional] An array with File IDs or with File objects which contain id => fileId
      * @return boolean
      * @throws \Exception
      */
@@ -134,38 +121,13 @@ class MeetingController {
             'startDate' => $db->escape($parameters['startDate']),
             'endDate'   => $db->escape($parameters['endDate']),
             'roomId'    => $db->escape($room),
-            'name'      => $db->escape($parameters['name'])
+            'name'      => $db->escape(\Helper::filterString($parameters['name']))
         );
         $db->where('id', $db->escape($this->getMeeting()->getId()));
         $update = $db->update('meetings', $data);
 
-        // Update the participants list
-        $participantsRemove = $this->removeParticipants();
-
-        // Participants are a array of ids or an array of users?
-        if(isset($parameters['participants'][0]) && is_numeric($parameters['participants'][0])) {
-            $participants = $parameters['participants'];
-        } else {
-            $participants = array();
-            foreach($parameters['participants'] as $participant) {
-                $participants[] = $participant['id'];
-            }
-        }
-        $participantsAdd = $this->setParticipants($participants);
-
-        // Update the documents list
-        $documentsRemove = $this->removeDocuments();
-
-        // Documents are a array of ids or an array of documents?
-        if(isset($parameters['documents'][0]) && is_numeric($parameters['documents'][0])) {
-            $documents = $parameters['documents'];
-        } else {
-            $documents = array();
-            foreach($parameters['documents'] as $document) {
-                $documents[] = $document['id'];
-            }
-        }
-        $documentsAdd = $this->setDocuments($documents);
+        $participants = $this->updateParticipants($parameters['participants']);
+        $documents    = $this->updateDocuments($parameters['documents']);
 
         // Update the agenda
         $agenda = $this->parseAgendaString($parameters['agenda']);
@@ -173,7 +135,7 @@ class MeetingController {
         $this->setAgenda($agenda);
 
         // Were any updates made?
-        if($update || $participantsRemove || $participantsAdd || $documentsRemove || $documentsAdd) {
+        if($update || $participants || $documents) {
             return TRUE;
         } else {
             throw new \Exception('No changes were made to this meeting', 6);
@@ -208,21 +170,63 @@ class MeetingController {
         return $result;
     }
 
+        /**
+     * Updates the list with Files for this meeting
+     *
+     * @param array $files
+     * @return boolean - TRUE when something changes
+     */
+    public function updateDocuments($files) {
+        // Update the participants list
+        // Participants are a array of ids or an array of users?
+        if(isset($files[0]) && is_numeric($files[0])) {
+            $newFileIds = $files;
+        } else {
+            $newFileIds = array();
+            foreach($files as $file) {
+                $newFileIds[] = $file['id'];
+            }
+        }
+
+        $oldFileIds = array();
+        $this->meeting->getDocumentsFromDatabase();
+        foreach($this->meeting->getDocuments()->getDocuments() as $file) {
+            $oldFileIds[] = $file->getId();
+        }
+
+        $removeFiles = array_diff($oldFileIds, $newFileIds);
+        $addFiles    = array_diff($newFileIds, $oldFileIds);
+
+        // Remove old
+        $filesRemove = $this->removeDocuments($removeFiles);
+        // Add new participants
+        $filesAdd    = $this->addDocuments($addFiles);
+
+        return $filesAdd || $filesRemove;
+    }
+
     /**
-     * Removes all documents from this meeting
+     * Removes the documents/files for this meeting
      *
      * @return boolean
      */
-    private function removeDocuments() {
-        // Create new empty documents list
-        $documents = new \Models\MeetingDocuments($this->getMeeting());
-        $this->getMeeting()->setDocuments($documents);
+    private function removeDocuments($files) {
+        $db     = \Helper::getDB();
+        $result = FALSE;
+        foreach($files as $fileId) {
+            // Remove user instances from meeting
+            $file = new \Models\File($fileId);
+            $this->getMeeting()->getDocuments()->removeDocument($file);
 
-        // Add documents to DB
-        $db = \Helper::getDB();
-        $db->where('meetingId', $db->escape($this->getMeeting()->getId()));
-        return $db->delete('meeting_documents');
+            // Remove from database
+            $db->where('meetingId', $db->escape($this->getMeeting()->getId()));
+            $db->where('documentId', $db->escape($file->getId()));
+            $result = $db->delete('meeting_documents');
+        }
+
+        return $result;
     }
+
 
     /**
      * Inserts the documents array into the database
@@ -230,7 +234,7 @@ class MeetingController {
      * @param array $files - List with file IDs
      * @return boolean
      */
-    private function setDocuments($files) {
+    private function addDocuments($files) {
         $db = \Helper::getDB();
         $result = FALSE;
         foreach($files as $fileId) {
@@ -248,19 +252,60 @@ class MeetingController {
     }
 
     /**
+     * Updates the list with participants for this meeting
+     *
+     * @param array $participants
+     * @return boolean - TRUE when something changes
+     */
+    public function updateParticipants($participants) {
+        // Update the participants list
+        // Participants are a array of ids or an array of users?
+        if(isset($participants[0]) && is_numeric($participants[0])) {
+            $newParticipantIds = $participants;
+        } else {
+            $newParticipantIds = array();
+            foreach($participants as $participant) {
+                $newParticipantIds[] = $participant['id'];
+            }
+        }
+
+        $oldParticipantIds = array();
+        $this->meeting->getParticipantsFromDatabase();
+        foreach($this->meeting->getParticipants()->getParticipants() as $participant) {
+            $oldParticipantIds[] = $participant->getId();
+        }
+
+        $removeParticipants = array_diff($oldParticipantIds, $newParticipantIds);
+        $addParticipants    = array_diff($newParticipantIds, $oldParticipantIds);
+
+        // Remove old
+        $participantsRemove = $this->removeParticipants($removeParticipants);
+        // Add new participants
+        $participantsAdd    = $this->addParticipants($addParticipants);
+
+        return $participantsAdd || $participantsRemove;
+    }
+
+    /**
      * Removes the participants for this meeting
      *
      * @return boolean
      */
-    private function removeParticipants() {
-        // Create new empty participants list
-        $participants = new \Models\MeetingParticipants($this->getMeeting());
-        $this->getMeeting()->setParticipants($participants);
+    private function removeParticipants($participants) {
+        $db     = \Helper::getDB();
+        $result = FALSE;
+        foreach($participants as $participantId) {
+            // Remove user instances from meeting
+            $user = new \Models\User($participantId);
+            $this->getMeeting()->getParticipants()->removeParticipant($user);
 
-        // Add participants to DB
-        $db = \Helper::getDB();
-        $db->where('meetingId', $db->escape($this->getMeeting()->getId()));
-        return $db->delete('meeting_participants');
+            // Remove from database
+            $db->where('meetingId', $db->escape($this->getMeeting()->getId()));
+            $db->where('userId', $db->escape($user->getId()));
+            $result = $db->delete('meeting_participants');
+        }
+
+        return $result;
     }
 
     /**
@@ -269,7 +314,7 @@ class MeetingController {
      * @param array $participants - Array with participant IDs
      * @return boolean
      */
-    private function setParticipants($participants) {
+    private function addParticipants($participants) {
         $result = FALSE;
         $db     = \Helper::getDB();
         foreach($participants as $participant) {
@@ -284,7 +329,7 @@ class MeetingController {
             );
             $result = $db->insert('meeting_participants', $data);
         }
-        return $result !== FALSE ? TRUE : FALSE;
+        return $result;
     }
 
     /**
@@ -292,6 +337,7 @@ class MeetingController {
      * name, date, agenda, participants, documents of this meeting
      */
     public function mailParticipants() {
+        $result  = FALSE;
         $meeting = $this->getMeeting();
         // Get actual meeting data from database (so only final data is used)
         $meeting->getInfoFromDatabase();
@@ -306,10 +352,10 @@ class MeetingController {
         $participants = $meeting->getParticipants()->getParticipants();
 
         // Get the actual up-to-date agenda
-        $meeting->getAgendaFromDabatase();
+        $meeting->getAgendaFromDatabase();
 
         // Get the actual up-to-date documents list
-        $meeting->getDocumentsFromDabatase();
+        $meeting->getDocumentsFromDatabase();
 
         // Prepare email-template
         $html   = file_get_contents(dirname(__FILE__) .'/../templates/email/default.html');

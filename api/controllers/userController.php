@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the user controller
  *
  * @author Niels Witte
- * @version 0.3a
- * @date April 10th, 2014
+ * @version 0.4
+ * @date April 17th, 2014
  * @since February 12th, 2014
  */
 class UserController {
@@ -117,7 +117,7 @@ class UserController {
      */
     public function checkUsername($username) {
         $db = \Helper::getDB();
-        $db->where('username', $db->escape($username));
+        $db->where('username', $db->escape(\Helper::filterString($username)));
         $result = $db->getOne('users');
 
         return !$result;
@@ -188,7 +188,7 @@ class UserController {
         $result = FALSE;
         $db     = \Helper::getDB();
         $data   = array(
-            'username'      => $db->escape($parameters['username']),
+            'username'      => $db->escape(\Helper::filterString($parameters['username'])),
             'firstName'     => $db->escape($parameters['firstName']),
             'lastName'      => $db->escape($parameters['lastName']),
             'email'         => $db->escape($parameters['email']),
@@ -225,6 +225,7 @@ class UserController {
      *              * string firstName - The user's first name
      *              * string lastName - The user's last name
      *              * string email - The user's email address
+     *              * array groups - [Optional] A list with group IDs or a list containing group objects
      * @return boolean
      */
     public function updateUser($parameters) {
@@ -237,7 +238,13 @@ class UserController {
         $db->where('id', $db->escape($this->user->getId()));
         $result = $db->update('users', $data);
 
-        return $result;
+        // Update the user's groups
+        $groups = FALSE;
+        if(isset($parameters['groups'])) {
+            $groups = $this->updateUserGroups($parameters['groups']);
+        }
+
+        return $result || $groups;
     }
 
     /**
@@ -293,6 +300,83 @@ class UserController {
     }
 
     /**
+     * Processes the array with groups and removes the user from old groups and
+     * adds the user to new groups
+     *
+     * @param array $groups
+     * @return boolean - TRUE if something updated
+     */
+    public function updateUserGroups($groups) {
+        $groupIds = array();
+        // Get new group Ids
+        foreach($groups as $group) {
+            if(is_array($group) && isset($group['id'])) {
+                $groupIds[] = $group['id'];
+            } else {
+                $groupIds[] = $group;
+            }
+        }
+        // Get the old group Ids
+        $this->user->getGroupsFromDatabase();
+        $oldGroups      = $this->user->getGroups();
+        $oldGroupIds    = array();
+        foreach($oldGroups as $group) {
+            $oldGroupIds[] = $group->getId();
+        }
+
+        // Ids to remove
+        $removeIds  = array_diff($oldGroupIds, $groupIds);
+        $remove     = $this->removeFromGroupIds($removeIds);
+        $addIds     = array_diff($groupIds, $oldGroupIds);
+        // Only allow add when user has WRITE permission to User API
+        if(\Auth::checkRights('user', \Auth::WRITE)) {
+            $add        = $this->addToGroupIds($addIds);
+        } else {
+            $add        = FALSE;
+        }
+
+        // Something updated?
+        return $remove || $add;
+    }
+
+    /**
+     * Adds the user to the groups with an ID that is in the array
+     *
+     * @param array $ids - List with group IDs
+     * @return boolean
+     */
+    public function addToGroupIds($ids) {
+        $db     = \Helper::getDB();
+        $result = FALSE;
+        foreach($ids as $id) {
+            $data = array(
+                'userId'    => $db->escape($this->user->getId()),
+                'groupId'   => $db->escape($id)
+            );
+            $result = $db->insert('group_users', $data);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Removes the user from all groups with the IDs in the array
+     *
+     * @param array $ids - List with group IDs
+     * @return boolean
+     */
+    public function removeFromGroupIds($ids) {
+        $db     = \Helper::getDB();
+        $result = FALSE;
+        foreach($ids as $id) {
+            $db->where('userId', $db->escape($this->user->getId()));
+            $db->where('groupId', $db->escape($id));
+            $result = $db->delete('group_users');
+        }
+        return $result;
+    }
+
+    /**
      * Removes this user from the CMS
      *
      * @return boolean
@@ -335,7 +419,7 @@ class UserController {
             throw new \Exception('Missing parameter (string) "firstName"', 6);
         } elseif(!isset($parameters['lastName'])) {
             throw new \Exception('Missing parameter (string) "lastName"', 7);
-        } elseif (!isset($parameters['email']) || !filter_var($parameters['email'], FILTER_VALIDATE_EMAIL)) {
+        } elseif(!isset($parameters['email']) || !filter_var($parameters['email'], FILTER_VALIDATE_EMAIL)) {
             throw new \Exception('Missing parameter (string) "email" with a valid email address', 8);
         } else {
             $result = TRUE;
@@ -358,8 +442,10 @@ class UserController {
             throw new \Exception('Missing parameter (string) "firstName"', 6);
         } elseif(!isset($parameters['lastName'])) {
             throw new \Exception('Missing parameter (string) "lastName"', 7);
-        } elseif (!isset($parameters['email']) || !filter_var($parameters['email'], FILTER_VALIDATE_EMAIL)) {
+        } elseif(!isset($parameters['email']) || !filter_var($parameters['email'], FILTER_VALIDATE_EMAIL)) {
             throw new \Exception('Missing parameter (string) "email" with a valid email address', 8);
+        } elseif(isset($parameters['groups']) && !is_array($parameters['groups']) && (!empty($parameters['groups']) || !isset($parameters['groups'][0]))) {
+            throw new \Exception('Optional parameter "groups" should be an array');
         } else {
             $result = TRUE;
         }

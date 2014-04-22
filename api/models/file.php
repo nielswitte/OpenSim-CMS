@@ -4,13 +4,14 @@ namespace Models;
 defined('EXEC') or die('Invalid request');
 
 require_once dirname(__FILE__) .'/simpleModel.php';
+require_once dirname(__FILE__) .'/group.php';
 
 /**
  * This class is the presentation model
  *
  * @author Niels Witte
- * @version 0.2a
- * @date April 10th, 2014
+ * @version 0.3
+ * @date April 20th, 2014
  * @since April 2nd, 2014
  */
 class File implements SimpleModel {
@@ -49,6 +50,12 @@ class File implements SimpleModel {
      * @var string
      */
     private $file;
+    /**
+     * List with all file groups
+     *
+     * @var array
+     */
+    private $groups;
 
     /**
      * Constructs a new document with the given id and optional the given slide
@@ -95,6 +102,23 @@ class File implements SimpleModel {
             $this->file             = $result['file'];
         } else {
             throw new \Exception('Document not found', 5);
+        }
+    }
+
+    /**
+     * Adds this document to all groups it is part of
+     */
+    public function getGroupsFromDatabase() {
+        $db             = \Helper::getDB();
+        $db->join('groups g', 'gd.groupId = g.id', 'LEFT');
+        $db->where('gd.documentId', $db->escape($this->getId()));
+        $groups         = $db->get('group_documents gd', NULL, 'g.*');
+        $this->groups   = array();
+
+        // Process all groups
+        foreach($groups as $group) {
+            $newGroup   = new \Models\Group($group['id'], $group['name']);
+            $this->addGroup($newGroup);
         }
     }
 
@@ -210,5 +234,24 @@ class File implements SimpleModel {
         $results    = $db->get('document_files_cache dc');
 
         return $results;
+    }
+
+    /**
+     * Adds the given group to the document groups
+     *
+     * @param \Models\Group $group
+     */
+    public function addGroup(\Models\Group $group) {
+        $this->groups[] = $group;
+        $group->addFile($this);
+    }
+
+    /**
+     * Returns a list with all groups this document is part of
+     *
+     * @return array
+     */
+    public function getGroups() {
+        return $this->groups;
     }
 }

@@ -63,52 +63,107 @@
                     <div class="content-page">
                         <article>
                                                             <div class="page-header sub-header clearfix">
-                                    <h1>Permissions                                                                            </h1>
+                                    <h1>Groups                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Thursday, April 17, 2014                                        </span>
+                                            Tuesday, April 22, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            2:57 PM                                        </span>
+                                            9:44 AM                                        </span>
                                 </div>
-                                                        <p>For each API there are permissions for the user account. The user requires a specific level for accessing certain functions. The levels are represented by integers that represent a binary permission.</p>
+                                                        <p>Users can be added to groups to share access to specific files.</p>
 
-<table>
-<thead>
-<tr>
-  <th>Level</th>
-  <th>Binary</th>
-  <th>Integer</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-  <td>NONE</td>
-  <td>000</td>
-  <td>0</td>
-</tr>
-<tr>
-  <td>READ</td>
-  <td>100</td>
-  <td>4</td>
-</tr>
-<tr>
-  <td>EXECUTE</td>
-  <td>101</td>
-  <td>5</td>
-</tr>
-<tr>
-  <td>WRITE</td>
-  <td>110</td>
-  <td>6</td>
-</tr>
-<tr>
-  <td>ALL</td>
-  <td>111</td>
-  <td>7</td>
-</tr>
-</tbody>
-</table>
+<h2>Get groups</h2>
 
-<p>These numbers can be used for the following parameters:</p>
+<p>To retrieve a list of 50 available groups the following request can be made to the API:</p>
+
+<pre><code class="language-http">GET /api/groups/ HTTP/1.1
+</code></pre>
+
+<p>Or starting at a given offset:</p>
+
+<pre><code class="language-http">GET /api/groups/&lt;OFFSET&gt;/ HTTP/1.1
+</code></pre>
+
+<p>This will return an array with all groups, containing their ID and name.</p>
+
+<pre><code class="language-json">[
+    {
+        "id": 1,
+        "name": "The Doe's"
+    },
+    { (...) },
+    (...)
+]
+</code></pre>
+
+<h2>Search by group name</h2>
+
+<p>To search for a specific group, it is possible to search by using a minimum of 3 characters of the group name.</p>
+
+<pre><code class="language-http">GET /api/groups/&lt;SEARCH&gt;/ HTTP/1.1
+</code></pre>
+
+<h2>Specific group</h2>
+
+<p>A specific group can be retrieved with its full details by using the following API URL:</p>
+
+<pre><code class="language-http">GET /api/group/&lt;GROUP-ID&gt;/ HTTP/1.1
+</code></pre>
+
+<p>This will return the following JSON result:</p>
+
+<pre><code class="language-json">{
+    "id": "1",
+    "name": "The Does",
+    "files": [
+        {
+            "id": 133,
+            "type": "presentation",
+            "user": {
+                "id": 3,
+                "username": "johndoe",
+                "firstName": "John",
+                "lastName": "Doe",
+                "email": "john@doe.com",
+                "picture": false,
+                "lastLogin": "2014-04-18 12:42:32"
+            },
+            "title": "Example Presentation",
+            "creationDate": "2014-04-14 15:55:31",
+            "modificationDate": "2014-04-14 15:55:31",
+            "sourceFile": "source.pdf",
+            "url": "http://localhost:80/OpenSim-CMS/api/presentation/133/"
+        }
+    ],
+    "users": [
+        {
+            "id": 3,
+            "username": "johndoe",
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "john@doe.com",
+            "picture": false,
+            "lastLogin": "2014-04-18 12:42:32"
+        },
+        {
+            "id": 4,
+            "username": "janedoe",
+            "firstName": "Jane",
+            "lastName": "Doe",
+            "email": "jane@doe.com",
+            "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
+            "lastLogin": "2014-04-17 11:21:21"
+        }
+    ]
+}
+</code></pre>
+
+<h2>Create group</h2>
+
+<p>Updating, creating and deleting groups requires at least <code>WRITE</code> permission to the User API.<br />
+Adding files to a group can be done with less permissions by going to the file you want to add and share it with the group.</p>
+
+<pre><code class="language-http">POST /api/group/ HTTP/1.1
+</code></pre>
 
 <table>
 <thead>
@@ -120,65 +175,61 @@
 </thead>
 <tbody>
 <tr>
-  <td>auth</td>
-  <td>Integer</td>
-  <td>Permission level regarding Authorization API</td>
-</tr>
-<tr>
-  <td>chat</td>
-  <td>Integer</td>
-  <td>Permission level regarding Chats API</td>
-</tr>
-<tr>
-  <td>comment</td>
-  <td>Integer</td>
-  <td>Permission level regarding Comments API</td>
-</tr>
-<tr>
-  <td>document</td>
-  <td>Integer</td>
-  <td>Permission level regarding Documents API</td>
-</tr>
-<tr>
-  <td>file</td>
-  <td>Integer</td>
-  <td>Permission level regarding Files API</td>
-</tr>
-<tr>
-  <td>grid</td>
-  <td>Integer</td>
-  <td>Permission level regarding Grids API</td>
-</tr>
-<tr>
-  <td>meeting</td>
-  <td>Integer</td>
-  <td>Permission level regarding Meetings API</td>
-</tr>
-<tr>
-  <td>meetingroom</td>
-  <td>Integer</td>
-  <td>Permission level regarding Meeting rooms API</td>
-</tr>
-<tr>
-  <td>presentation</td>
-  <td>Integer</td>
-  <td>Permission level regarding Presentations API</td>
-</tr>
-<tr>
-  <td>user</td>
-  <td>Integer</td>
-  <td>Permission level regarding Users API</td>
+  <td>name</td>
+  <td>string</td>
+  <td>The group's name</td>
 </tr>
 </tbody>
 </table>
 
-<h2>Explanation</h2>
+<p>This will return, when all went right, the following JSON:</p>
 
-<p>When you have <code>READ</code> permission you can access most basic functions but you cannot make any changes, except to Files or Users you own. With <code>EXECUTE</code> permissions you can perform actions, such as schedule a meeting, upload a file, clear the cache, etc. <code>WRITE</code> permissions give you the possibility to make changes to content owned by other users. However, you can still only see your own files and files that are shared with groups where you're in. <code>ALL</code> is gives you access to everything, you can see all files even those that are not shared with a group, you can edit everything, remove everything, basically do everything the API can facilitate.</p>
+<pre><code class="language-json">{
+    "success": true,
+    "groupId": 2
+}
+</code></pre>
 
-<p>For example your user account has <code>EXECUTE</code> permission for the File API. In this case the method <code>GET /api/files/</code> will return all files you own and all files that are shared with you through the group(s) you're in. You can only make changes to your own files. However, if your permissions get upgraded to <code>WRITE</code> you still see the same files, but now you can make changes to files shared with you through groups.</p>
+<h2>Update group</h2>
 
-<p><strong>NOTICE:</strong> Please mind that if your permissions are lower than <code>ALL</code> and someone adds a file to a meeting where you are a participant, you can see the file in the meeting details. However, if the file is not shared to a group you are a member of, you can not access the file's contents.</p>
+<p>Changing information about the group can be done by using the following API function:</p>
+
+<pre><code class="language-http">PUT /api/group/&lt;GROUP-ID&gt;/ HTTP/1.1
+</code></pre>
+
+<table>
+<thead>
+<tr>
+  <th>Parameter</th>
+  <th>Type</th>
+  <th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>name</td>
+  <td>string</td>
+  <td>The group's name</td>
+</tr>
+<tr>
+  <td>files</td>
+  <td>array</td>
+  <td>[Optional] List with file IDs or file objects</td>
+</tr>
+<tr>
+  <td>users</td>
+  <td>array</td>
+  <td>[Optional] List with user IDs or User objects</td>
+</tr>
+</tbody>
+</table>
+
+<h2>Delete group</h2>
+
+<p>Removing a group can cause users to lose access to certain files. Please be careful with this.</p>
+
+<pre><code class="language-http">DELETE /api/group/&lt;GROUP-ID&gt;/ HTTP/1.1
+</code></pre>
                                                     </article>
                     </div>
                 </div>

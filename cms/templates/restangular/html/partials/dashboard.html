@@ -88,7 +88,7 @@
             <li class="list-group-item" ng-repeat="file in files | limitFromTo: getFrom('files'):getTo('files')">
                 <a ng-href="#!/document/{{file.id}}">
                     <div class="type type-{{file.type}}" title="{{file.type}}" bs-tooltip>
-                        <i class="glyphicon glyphicon-th" ng-show="file.type == 'presentation'"></i>
+                        <i class="glyphicon glyphicon-th-large" ng-show="file.type == 'presentation'"></i>
                         <i class="glyphicon glyphicon-file" ng-show="file.type == 'document'"></i>
                         <i class="glyphicon glyphicon-picture" ng-show="file.type == 'image'"></i>
                     </div>

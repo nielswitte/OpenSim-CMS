@@ -1,6 +1,6 @@
 {
     "title": "OpenSim-CMS",
-    "tagline": "Documentation v0.8",
+    "tagline": "Documentation v0.9",
     "image": "img/preview.png",
     "docs_path": "../../assets/docs.md",
     "theme": "custom",

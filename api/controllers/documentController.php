@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the Document controller
  *
  * @author Niels Witte
- * @version 0.1a
- * @date April 14th, 2014
+ * @version 0.2
+ * @date April 22nd, 2014
  * @since April 4th, 2014
  */
 class DocumentController {
@@ -43,7 +43,7 @@ class DocumentController {
 
         // Insert main document data into database to get a autoincrement ID
         $data           = array(
-            'title'         => $db->escape($parameters['title']),
+            'title'         => $db->escape(\Helper::filterString($parameters['title'])),
             'type'          => $db->escape($parameters['type']),
             'ownerId'       => $db->escape(\Auth::getUser()->getId()),
             'creationDate'  => $db->now(),
@@ -138,8 +138,8 @@ class DocumentController {
         $result = FALSE;
         if(count($parameters) < 3) {
             throw new \Exception('Expected 3 parameters, '. count($parameters) .' given', 1);
-        } elseif(!isset($parameters['title'])) {
-            throw new \Exception('Missing parameter (string) "title"', 2);
+        } elseif(!isset($parameters['title']) || strlen($parameters['title']) < 3) {
+            throw new \Exception('Missing parameter (string) "title", with a minimum length of 3 characters', 2);
         } elseif(!isset($parameters['type']) || $parameters['type'] != 'document') {
             throw new \Exception('Missing parameter (string) "type" which should be "document"', 3);
         } elseif (!isset($parameters['file'])) {

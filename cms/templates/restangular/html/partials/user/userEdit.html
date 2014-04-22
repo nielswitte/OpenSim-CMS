@@ -53,6 +53,28 @@
             </div>
         </div>
     </fieldset>
+    <fieldset>
+        <legend>Groups (<span>{{user.groups.length}}</span>)</legend>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Groups</label>
+            <div class="col-sm-10">
+                <ul class="list-group list-group-hover" ng-show="user.groups.length >= 1">
+                    <li class="list-group-item" ng-repeat="group in user.groups">
+                        <button type="button" class="btn btn-danger btn-xs" ng-click="removeGroup(group.id)"><i class="glyphicon glyphicon-remove"></i></button>
+                        {{group.name}}
+                    </li>
+                </ul>
+                <ul class="list-group" ng-show="user.groups.length == 0">
+                    <li class="list-group-item">None</li>
+                </ul>
+                <div class="input-group" ng-show="allowAddGroup()">
+                    <input type="text" class="form-control" value="" placeholder="Group to add" ng-model="groupname" ng-options="group.name as group.name for group in getGroupsByName($viewValue)" bs-typeahead>
+                    <span class="input-group-btn" ng-click="addGroup()"><button type="button" class="btn btn-success"><i class="glyphicon glyphicon-plus"></i> Add group</button></span>
+                </div>
+            </div>
+        </div>
+    </fieldset>
+
     <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10" ng-show="allowUpdate()">
             <button class="btn btn-primary" type="submit"><i class="glyphicon glyphicon-ok"></i> Save Changes</button>

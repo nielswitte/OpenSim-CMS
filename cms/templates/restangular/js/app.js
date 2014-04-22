@@ -43,6 +43,18 @@ var angularRest = angular.module('OpenSim-CMS', [
         templateUrl: partial_path +'/grid/grid.html',
         controller: 'gridController',
         requireLogin: true
+    }).when('/groups', {
+        templateUrl: partial_path +'/user/groups.html',
+        controller: 'groupsController',
+        requireLogin: true
+    }).when('/group/:groupId', {
+        templateUrl: partial_path +'/user/group.html',
+        controller: 'groupController',
+        requireLogin: true
+    }).when('/group/:groupId/edit', {
+        templateUrl: partial_path +'/user/groupEdit.html',
+        controller: 'groupController',
+        requireLogin: true
     }).when('/login', {
         templateUrl: partial_path +'/login.html',
         controller: 'loginController',

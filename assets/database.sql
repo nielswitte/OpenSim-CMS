@@ -1,8 +1,8 @@
 -- --------------------------------------------------------
 -- Host:                         localhost
--- Server versie:                5.5.35-0ubuntu0.13.10.2 - (Ubuntu)
+-- Server versie:                5.5.35-1ubuntu1 - (Ubuntu)
 -- Server OS:                    debian-linux-gnu
--- HeidiSQL Versie:              8.3.0.4752
+-- HeidiSQL Versie:              8.3.0.4756
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `chats` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `gridId` int(11) DEFAULT NULL,
   `userId` int(11) DEFAULT NULL,
-  `message` text,
+  `message` mediumtext COLLATE utf8_bin,
   `timestamp` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `fromCMS` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`id`),
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS `chats` (
   KEY `FK_chats_grids` (`gridId`),
   CONSTRAINT `FK_chats_grids` FOREIGN KEY (`gridId`) REFERENCES `grids` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK__users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
 
@@ -61,10 +61,10 @@ CREATE TABLE IF NOT EXISTS `chats` (
 CREATE TABLE IF NOT EXISTS `comments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `parentId` int(11) DEFAULT NULL,
-  `type` varchar(50) DEFAULT NULL,
+  `type` varchar(50) COLLATE utf8_bin DEFAULT NULL,
   `itemId` int(11) DEFAULT NULL,
   `userId` int(11) DEFAULT NULL,
-  `message` text,
+  `message` mediumtext COLLATE utf8_bin,
   `timestamp` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `editTimestamp` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS `comments` (
   KEY `FK_comments_comments` (`parentId`),
   CONSTRAINT `FK_comments_comments` FOREIGN KEY (`parentId`) REFERENCES `comments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_comments_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
 
@@ -87,7 +87,8 @@ CREATE TABLE IF NOT EXISTS `documents` (
   `ownerId` int(11) NOT NULL,
   `file` varchar(255) COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `FK_presentations_users` (`ownerId`)
+  KEY `FK_presentations_users` (`ownerId`),
+  CONSTRAINT `FK_documents_users` FOREIGN KEY (`ownerId`) REFERENCES `users` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
@@ -102,7 +103,7 @@ CREATE TABLE IF NOT EXISTS `document_files_cache` (
   KEY `fileId` (`fileId`),
   CONSTRAINT `FK_document_files_cache_cached_assets` FOREIGN KEY (`cacheId`) REFERENCES `cached_assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_document_files_cache_documents` FOREIGN KEY (`fileId`) REFERENCES `documents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
 
@@ -114,7 +115,7 @@ CREATE TABLE IF NOT EXISTS `document_pages` (
   PRIMARY KEY (`id`),
   KEY `FK_document_pages_documents` (`documentId`),
   CONSTRAINT `FK_document_pages_documents` FOREIGN KEY (`documentId`) REFERENCES `documents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
 
@@ -128,7 +129,7 @@ CREATE TABLE IF NOT EXISTS `document_pages_cache` (
   KEY `pageId` (`pageId`),
   CONSTRAINT `FK_document_pages_cache_cached_assets` FOREIGN KEY (`cacheId`) REFERENCES `cached_assets` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_document_pages_cache_document_pages` FOREIGN KEY (`pageId`) REFERENCES `document_pages` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
 
@@ -197,6 +198,43 @@ CREATE TABLE IF NOT EXISTS `grid_regions` (
 -- Data exporteren was gedeselecteerd
 
 
+-- Structuur van  tabel OpenSim-CMS.groups wordt geschreven
+CREATE TABLE IF NOT EXISTS `groups` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8_bin NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.group_documents wordt geschreven
+CREATE TABLE IF NOT EXISTS `group_documents` (
+  `documentId` int(11) NOT NULL AUTO_INCREMENT,
+  `groupId` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`documentId`,`groupId`),
+  KEY `FK_group_documents_groups` (`groupId`),
+  CONSTRAINT `FK_group_documents_documents` FOREIGN KEY (`documentId`) REFERENCES `documents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_group_documents_groups` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- Data exporteren was gedeselecteerd
+
+
+-- Structuur van  tabel OpenSim-CMS.group_users wordt geschreven
+CREATE TABLE IF NOT EXISTS `group_users` (
+  `groupId` int(11) NOT NULL AUTO_INCREMENT,
+  `userId` int(11) NOT NULL,
+  PRIMARY KEY (`groupId`,`userId`),
+  KEY `FK_group_users_users` (`userId`),
+  CONSTRAINT `FK_group_users_groups` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_group_users_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+-- Data exporteren was gedeselecteerd
+
+
 -- Structuur van  tabel OpenSim-CMS.meetings wordt geschreven
 CREATE TABLE IF NOT EXISTS `meetings` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -234,13 +272,13 @@ CREATE TABLE IF NOT EXISTS `meeting_agenda_items` (
 
 -- Structuur van  tabel OpenSim-CMS.meeting_documents wordt geschreven
 CREATE TABLE IF NOT EXISTS `meeting_documents` (
-  `meetingId` int(11) NOT NULL,
+  `meetingId` int(11) NOT NULL AUTO_INCREMENT,
   `documentId` int(11) NOT NULL,
   `agendaId` int(11) NOT NULL,
   PRIMARY KEY (`meetingId`,`documentId`),
   KEY `FK__documents` (`documentId`),
-  CONSTRAINT `FK__meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `FK__documents` FOREIGN KEY (`documentId`) REFERENCES `documents` (`id`)
+  CONSTRAINT `FK__documents` FOREIGN KEY (`documentId`) REFERENCES `documents` (`id`),
+  CONSTRAINT `FK__meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
@@ -252,13 +290,13 @@ CREATE TABLE IF NOT EXISTS `meeting_minutes` (
   `meetingId` int(11) DEFAULT '0',
   `agendaId` int(11) DEFAULT '0',
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `uuid` varchar(50) DEFAULT '0',
-  `name` varchar(255) DEFAULT NULL,
-  `message` text,
+  `uuid` varchar(50) COLLATE utf8_bin DEFAULT '0',
+  `name` varchar(255) COLLATE utf8_bin DEFAULT NULL,
+  `message` mediumtext COLLATE utf8_bin,
   PRIMARY KEY (`id`),
   KEY `FK_meeting_minutes_meetings` (`meetingId`),
   CONSTRAINT `FK_meeting_minutes_meetings` FOREIGN KEY (`meetingId`) REFERENCES `meetings` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
 

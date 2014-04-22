@@ -13,7 +13,7 @@
  *
  * @author Niels Witte
  * @date February 11th, 2014
- * @version 0.9a
+ * @version 1.0
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
@@ -35,6 +35,7 @@ integer media = 0;              // Media type [0 = off, 1 = presentation]
 list textureCache;              // Cache the textures to only require loading once
 integer item = 1;               // The current page/slide
 integer totalItems = 0;         // Total number of pages/slides
+list fileIds;                   // List with all file IDs the user has access to
 list itemsList;                 // List with all pages/slides
 list itemIds;                   // List with IDs of all pages/slides
 string itemTitle;               // Title of the document/presentation
@@ -450,7 +451,12 @@ state presentation {
             // Sets presentation Id
             itemId = llList2String(commands, 1);
             // Loads JSON from server
-            http_request_id = llHTTPRequest(serverUrl +"/presentation/"+ itemId +"/?token="+ APIToken, [], "");
+            // Loads JSON from server
+            if(llListFindList(fileIds, [itemId]) > -1) {
+                http_request_id = llHTTPRequest(serverUrl +"/presentation/"+ itemId +"/?token="+ APIToken, [], "");
+            } else {
+                llInstantMessage(userUuid, "The file with ID: "+ itemId +" is not owned by, or shared with you!");
+            }
         // Show dialog to load a specific presentation
         } else if(llList2String(commands, 0) == "Load" && llList2String(commands, 1) == "#") {
             llTextBox(userUuid, "Enter the ID of the presentation you want to load.\nFor example if you want to load a presentation with ID 32 enter the number 32 and press Send", channel);
@@ -577,7 +583,7 @@ state presentation {
             integer presentationCount   = 0;
             string json_presentations   = JsonGetJson(json_body, "");
             integer filesCount          = JsonGetArrayLength(json_body, "");
-            list presentations          = [];
+            fileIds                     = [];
             // Create buttons for max 12 presentations
             list presentationButtons;
             if(debug) llInstantMessage(userUuid, "[Debug] Found "+ filesCount + " files.");
@@ -588,20 +594,20 @@ state presentation {
                 // List all presentations
                 for(x = 0; x < filesCount; x++) {
                     if(JsonGetValue(json_body, "["+ x +"].type") == "presentation") {
-                        presentations += [JsonGetValue(json_body, "["+ x +"].id")];
+                        fileIds += [JsonGetValue(json_body, "["+ x +"].id")];
                     }
                 }
 
                 // Newest presentations first
-                presentations = llListSort(presentations, 1, FALSE);
+                fileIds = llListSort(fileIds, 1, FALSE);
 
                 // Count presentations
-                presentationCount = llGetListLength(presentations);
+                presentationCount = llGetListLength(fileIds);
                 if(debug) llInstantMessage(userUuid, "[Debug] Containing "+ presentationCount + " presentations.");
 
                 // Create buttons for presentations
                 for (x = 0; x < presentationCount && x < 13; x++) {
-                    presentationButtons += ["Load "+ llList2String(presentations, x)];
+                    presentationButtons += ["Load "+ llList2String(fileIds, x)];
                 }
             }
 
@@ -695,7 +701,11 @@ state document {
             // Sets document Id
             itemId = llList2String(commands, 1);
             // Loads JSON from server
-            http_request_id = llHTTPRequest(serverUrl +"/document/"+ itemId +"/?token="+ APIToken, [], "");
+            if(llListFindList(fileIds, [itemId]) > -1) {
+                http_request_id = llHTTPRequest(serverUrl +"/document/"+ itemId +"/?token="+ APIToken, [], "");
+            } else {
+                llInstantMessage(userUuid, "The file with ID: "+ itemId +" is not owned by, or shared with you!");
+            }
         // Show dialog to load a specific document
         } else if(llList2String(commands, 0) == "Load" && llList2String(commands, 1) == "#") {
             llTextBox(userUuid, "Enter the ID of the document you want to load.\nFor example if you want to load a document with ID 32 enter the number 32 and press Send", channel);
@@ -824,7 +834,7 @@ state document {
             string json_documents       = JsonGetJson(json_body, "");
             integer documentCount       = 0;
             integer filesCount          = JsonGetArrayLength(json_body, "");
-            list documents              = [];
+            fileIds                     = [];
             // Create buttons for max 12 documents
             list documentButtons;
             if(debug) llInstantMessage(userUuid, "[Debug] Found "+ filesCount + " files.");
@@ -834,20 +844,20 @@ state document {
                 // List all presentations
                 for(x = 0; x < filesCount; x++) {
                     if(JsonGetValue(json_body, "["+ x +"].type") == "document") {
-                        documents += [JsonGetValue(json_body, "["+ x +"].id")];
+                        fileIds += [JsonGetValue(json_body, "["+ x +"].id")];
                     }
                 }
 
                 // Newest presentations first
-                documents = llListSort(documents, 1, FALSE);
+                fileIds = llListSort(fileIds, 1, FALSE);
 
                 // Count presentations
-                documentCount = llGetListLength(documents);
+                documentCount = llGetListLength(fileIds);
                 if(debug) llInstantMessage(userUuid, "[Debug] Containing "+ documentCount + " documents.");
 
                 // Create buttons for presentations
                 for (x = 0; x < documentCount && x < 11; x++) {
-                    documentButtons += ["Load "+ llList2String(documents, x)];
+                    documentButtons += ["Load "+ llList2String(fileIds, x)];
                 }
             }
             documentButtons += ["Main","Quit","Load #"];
@@ -939,7 +949,12 @@ state image {
             // Sets document Id
             itemId = llList2String(commands, 1);
             // Loads JSON from server
-            http_request_id = llHTTPRequest(serverUrl +"/file/"+ itemId +"/?token="+ APIToken, [], "");
+            // Loads JSON from server
+            if(llListFindList(fileIds, [itemId]) > -1) {
+                http_request_id = llHTTPRequest(serverUrl +"/file/"+ itemId +"/?token="+ APIToken, [], "");
+            } else {
+                llInstantMessage(userUuid, "The file with ID: "+ itemId +" is not owned by, or shared with you!");
+            }
         // Show dialog to load a specific document
         } else if(llList2String(commands, 0) == "Load" && llList2String(commands, 1) == "#") {
             llTextBox(userUuid, "Enter the ID of the image you want to load.\nFor example if you want to load an image with ID 32 enter the number 32 and press Send", channel);
@@ -1046,7 +1061,7 @@ state image {
             string json_images          = JsonGetJson(json_body, "");
             integer imagesCount         = 0;
             integer filesCount          = JsonGetArrayLength(json_body, "");
-            list images                 = [];
+            fileIds                     = [];
             // Create buttons for max 12 images
             list imagesButtons;
             if(debug) llInstantMessage(userUuid, "[Debug] Found "+ filesCount + " files.");
@@ -1056,20 +1071,20 @@ state image {
                 // List all presentations
                 for(x = 0; x < filesCount; x++) {
                     if(JsonGetValue(json_body, "["+ x +"].type") == "image") {
-                        images += [JsonGetValue(json_body, "["+ x +"].id")];
+                        fileIds += [JsonGetValue(json_body, "["+ x +"].id")];
                     }
                 }
 
                 // Newest presentations first
-                images = llListSort(images, 1, FALSE);
+                fileIds = llListSort(fileIds, 1, FALSE);
 
                 // Count presentations
-                imagesCount = llGetListLength(images);
+                imagesCount = llGetListLength(fileIds);
                 if(debug) llInstantMessage(userUuid, "[Debug] Containing "+ imagesCount + " images.");
 
                 // Create buttons for presentations
                 for (x = 0; x < imagesCount && x < 11; x++) {
-                    imagesButtons += ["Load "+ llList2String(images, x)];
+                    imagesButtons += ["Load "+ llList2String(fileIds, x)];
                 }
             }
             imagesButtons += ["Main","Quit","Load #"];

@@ -1,3 +1,9 @@
+**NOTICE:** You can only retrieve files if you meet at least one of the following requirements.
+
+ * You have `ALL` permissions
+ * You created the file
+ * You are a member of a group to which the file is attached
+
 The documents API is quite similar to the Files API since it is a subset. The main difference is that it will only return files with the type `document` and that documents have children in the form of `pages`.
 
 ```http
