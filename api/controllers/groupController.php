@@ -215,8 +215,8 @@ class GroupController {
             // Only allow adding files to which the user has access to
             if(\Auth::checkUserFiles($id) || \Auth::checkGroupFile($id)) {
                 $data = array(
-                    'fileId'    => $db->escape($id),
-                    'groupId'   => $db->escape($this->group->getId())
+                    'documentId'    => $db->escape($id),
+                    'groupId'       => $db->escape($this->group->getId())
                 );
                 $result = $db->insert('group_documents', $data);
             }
