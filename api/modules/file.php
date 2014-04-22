@@ -232,7 +232,7 @@ class File extends Module{
             // User has WRITE permissions and is in group
             (!\Auth::checkRights($this->getName(), \Auth::WRITE) && !\Auth::checkGroupFile($file->getId())) &&
             // User owns the file and has EXECUTE permissions (minimal required to access this function)
-            ($file->getUser() != \Auth::getUser()->getId())) {
+            ($file->getUser()->getId() != \Auth::getUser()->getId())) {
             throw new \Exception('You do not have permissions to delete this file.', 6);
         }
 

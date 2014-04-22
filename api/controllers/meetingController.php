@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the Meeting controller
  *
  * @author Niels Witte
- * @version 0.4
- * @date April 17th, 2014
+ * @version 0.4a
+ * @date April 22nd, 2014
  * @since March 13th, 2014
  */
 class MeetingController {
@@ -61,7 +61,7 @@ class MeetingController {
             'startDate' => $db->escape($parameters['startDate']),
             'endDate'   => $db->escape($parameters['endDate']),
             'roomId'    => $db->escape($room),
-            'name'      => $db->escape($parameters['name'])
+            'name'      => $db->escape(\Helper::filterString($parameters['name']))
         );
         $meetingId = @$db->insert('meetings', $data);
 
@@ -121,7 +121,7 @@ class MeetingController {
             'startDate' => $db->escape($parameters['startDate']),
             'endDate'   => $db->escape($parameters['endDate']),
             'roomId'    => $db->escape($room),
-            'name'      => $db->escape($parameters['name'])
+            'name'      => $db->escape(\Helper::filterString($parameters['name']))
         );
         $db->where('id', $db->escape($this->getMeeting()->getId()));
         $update = $db->update('meetings', $data);

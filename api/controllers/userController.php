@@ -117,7 +117,7 @@ class UserController {
      */
     public function checkUsername($username) {
         $db = \Helper::getDB();
-        $db->where('username', $db->escape($username));
+        $db->where('username', $db->escape(\Helper::filterString($username)));
         $result = $db->getOne('users');
 
         return !$result;
@@ -188,7 +188,7 @@ class UserController {
         $result = FALSE;
         $db     = \Helper::getDB();
         $data   = array(
-            'username'      => $db->escape($parameters['username']),
+            'username'      => $db->escape(\Helper::filterString($parameters['username'])),
             'firstName'     => $db->escape($parameters['firstName']),
             'lastName'      => $db->escape($parameters['lastName']),
             'email'         => $db->escape($parameters['email']),
@@ -334,7 +334,7 @@ class UserController {
         } else {
             $add        = FALSE;
         }
-        
+
         // Something updated?
         return $remove || $add;
     }

@@ -7,7 +7,7 @@ defined('EXEC') or die('Config not loaded');
  * This class is the group controller
  *
  * @author Niels Witte
- * @version 0.2
+ * @version 0.2a
  * @since April 22nd, 2014
  */
 class GroupController {
@@ -35,7 +35,7 @@ class GroupController {
      */
     public function createGroup($parameters) {
         $db = \Helper::getDB();
-        $data = array('name' => $parameters['name']);
+        $data = array('name' => $db->escape(\Helper::filterString($parameters['name'])));
         return $db->insert('groups', $data);
     }
 
@@ -78,7 +78,7 @@ class GroupController {
         // Group name
         $db     = \Helper::getDB();
         $data   = array(
-            'name'  => $db->escape($parameters['name'])
+            'name'  => $db->escape(\Helper::filterString($parameters['name']))
         );
         $db->where('id', $db->escape($this->group->getId()));
         $name = $db->update('groups', $data);
@@ -251,8 +251,8 @@ class GroupController {
      */
     public function validateParametersUpdate($parameters) {
         $result = FALSE;
-        if(!isset($parameters['name']) || strlen($parameters['name']) < 1) {
-            throw new \Exception('Missing parameter (string) "name" with at least one character content', 1);
+        if(!isset($parameters['name']) || strlen($parameters['name']) < 3) {
+            throw new \Exception('Missing parameter (string) "name", with a minimum length of 3 character', 1);
         } elseif(isset($parameters['users']) && !is_array($parameters['users']) && (!empty($parameters['users']) || !isset($parameters['users'][0]))) {
             throw new \Exception('Optional parameter "users" should be an array');
         } elseif(isset($parameters['groups']) && !is_array($parameters['groups']) && (!empty($parameters['groups']) || !isset($parameters['groups'][0]))) {

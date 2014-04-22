@@ -38,7 +38,7 @@ class Document extends Module {
     public function setRoutes() {
         $this->api->addRoute("/^\/documents\/?$/",                                       'getDocuments',             $this, 'GET', \Auth::READ);    // Get list with 50 documents
         $this->api->addRoute("/^\/documents\/(\d+)\/?$/",                                'getDocuments',             $this, 'GET', \Auth::READ);    // Get list with 50 documents starting at the given offset
-        $this->api->addRoute("/^\/documents\/([a-zA-Z0-9-_ ]{3,}+)\/?$/",                'getDocumentsByTitle',      $this, 'GET', \Auth::READ);    // Search for documents by title
+        $this->api->addRoute("/^\/documents\/([a-zA-Z0-9-_ \.\(\)\[\]]{3,}+)\/?$/",      'getDocumentsByTitle',      $this, 'GET', \Auth::READ);    // Search for documents by title
         $this->api->addRoute("/^\/document\/(\d+)\/?$/",                                 'getDocumentById',          $this, 'GET', \Auth::READ);    // Select specific document
         $this->api->addRoute("/^\/document\/?$/",                                        'createDocument',           $this, 'POST',\Auth::EXECUTE); // Create a document
         $this->api->addRoute("/^\/document\/(\d+)\/source\/?$/",                         'getDocumentSourceById',    $this, 'GET', \Auth::READ);    // Download this document

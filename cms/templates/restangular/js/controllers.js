@@ -1560,8 +1560,6 @@ angularRest.controller('groupController', ['RestangularCache', '$scope', '$route
         $scope.group                = {
             groups: []
         };
-        $scope.groupname            = '';
-        var groupSearchResults      = [];
         $scope.document             = '';
         var documentSearchResults   = [];
         var usernameSearchResults   = [];

@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the File controller
  *
  * @author Niels Witte
- * @version 0.4
- * @date April 20th, 2014
+ * @version 0.4a
+ * @date April 22nd, 2014
  * @since March 10th, 2014
  */
 class FileController {
@@ -113,7 +113,7 @@ class FileController {
 
         // Insert main file data into database to get a autoincrement ID
         $data           = array(
-            'title'         => $db->escape($parameters['title']),
+            'title'         => $db->escape(\Helper::filterString($parameters['title'])),
             'type'          => $db->escape($parameters['type']),
             'ownerId'       => $db->escape(\Auth::getUser()->getId()),
             'creationDate'  => $db->now(),
@@ -175,8 +175,8 @@ class FileController {
         $result = FALSE;
         if(count($parameters) < 3) {
             throw new \Exception('Expected 3 parameters, '. count($parameters) .' given', 1);
-        } elseif(!isset($parameters['title'])) {
-            throw new \Exception('Missing parameter (string) "title"', 2);
+        } elseif(!isset($parameters['title']) || strlen($parameters['title']) < 3) {
+            throw new \Exception('Missing parameter (string) "title" with a minimum length of 3 characters', 2);
         } elseif(!isset($parameters['type'])) {
             throw new \Exception('Missing parameter (string) "type"', 3);
         } elseif(!isset($parameters['file'])) {
