@@ -89,7 +89,29 @@ This will return the following JSON result:
 }
 ```
 
+## Create group
+Updating, creating and deleting groups requires at least `WRITE` permission to the User API.
+Adding files to a group can be done with less permissions by going to the file you want to add and share it with the group.
+
+```http
+POST /api/group/ HTTP/1.1
+```
+
+| Parameter         | Type      | Description                                                       |
+|-------------------|-----------|-------------------------------------------------------------------|
+| name              | string    | The group's name                                                  |
+
+This will return, when all went right, the following JSON:
+
+```json
+{
+    "success": true,
+    "groupId": 2
+}
+```
+
 ## Update group
+Changing information about the group can be done by using the following API function:
 
 ```http
 PUT /api/group/<GROUP-ID>/ HTTP/1.1
@@ -102,6 +124,8 @@ PUT /api/group/<GROUP-ID>/ HTTP/1.1
 | users             | array     | [Optional] List with user IDs or User objects                     |
 
 ## Delete group
+Removing a group can cause users to lose access to certain files. Please be careful with this.
+
 ```http
 DELETE /api/group/<GROUP-ID>/ HTTP/1.1
 ```
