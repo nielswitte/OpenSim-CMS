@@ -9,8 +9,8 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class represents a region
  *
  * @author Niels Witte
- * @version 0.4
- * @date April 16th, 2014
+ * @version 0.4a
+ * @date April 17th, 2014
  * @since February 17th, 2014
  */
 class Region implements SimpleModel {
@@ -76,7 +76,7 @@ class Region implements SimpleModel {
                 $result = $raXML->call('admin_region_query', array('region_id' => $this->getUuid()));
             // Use API
             } else {
-                $xml = file_get_contents($this->grid->getOsProtocol() .'://'. $this->grid->getOsIp() .':'. $this->grid->getOsPort() .'/monitorstats/'. $this->getUuid());
+                $xml = @file_get_contents($this->grid->getOsProtocol() .'://'. $this->grid->getOsIp() .':'. $this->grid->getOsPort() .'/monitorstats/'. $this->getUuid());
                 if($xml !== FALSE) {
                     $xml    = simplexml_load_string($xml);
                     $result = array('success' => TRUE);

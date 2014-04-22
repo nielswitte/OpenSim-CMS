@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class represents a meeting
  *
  * @author Niels Witte
- * @version 0.1
- * @date March 20th, 2014
+ * @version 0.2
+ * @date April 17th, 2014
  * @since February 25th, 2014
  */
 class MeetingParticipants {
@@ -35,6 +35,22 @@ class MeetingParticipants {
      */
     public function addParticipant(\Models\User $user) {
         $this->participants[] = $user;
+    }
+
+    /**
+     * Removes the given user from the list with participants
+     *
+     * @param \Models\User $user
+     * @return boolean TRUE when user removed
+     */
+    public function removeParticipant(\Models\User $user) {
+        foreach($this->getParticipants() as $index => $participant) {
+            if($participant->getId() == $user->getId()) {
+                unset($this->participants[$index]);
+                return TRUE;
+            }
+        }
+        return FALSE;
     }
 
     /**
@@ -98,6 +114,21 @@ class MeetingParticipants {
         } else {
             return $this->participantUuids[$uuid];
         }
+    }
+
+    /**
+     * Searches the list of participants for an user with a specific id
+     *
+     * @param integer $id
+     * @return \Models\User or boolean when not found
+     */
+    public function getParticipantById($id) {
+        foreach($this->getParticipants() as $participant) {
+            if($participant->getId() == $id) {
+                return $participant;
+            }
+        }
+        return FALSE;
     }
 
     /**

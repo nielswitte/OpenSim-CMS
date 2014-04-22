@@ -57,7 +57,7 @@
                     </div>
                     <div id="sub-nav-collapse" class="sub-nav-collapse">
                         <!-- Navigation -->
-                        <ul class="nav nav-list"><li><a href="#" class="aj-nav folder">Installation</a><ul class="nav nav-list"><li><a href="../Installation/./Installation.html">Installation</a></li><li><a href="../Installation/./Assets.html">Assets</a></li><li><a href="../Installation/./OpenSim.html">OpenSim</a></li></ul></li><li class="open"><a href="#" class="aj-nav folder">API</a><ul class="nav nav-list"><li><a href="../API/./API.html">API</a></li><li><a href="../API/./Authentication.html">Authentication</a></li><li><a href="../API/./Permissions.html">Permissions</a></li><li><a href="../API/./Users.html">Users</a></li><li><a href="../API/./Avatars.html">Avatars</a></li><li><a href="../API/./Chats.html">Chats</a></li><li><a href="../API/./Meetings.html">Meetings</a></li><li><a href="../API/./Minutes.html">Minutes</a></li><li><a href="../API/./Meeting_Rooms.html">Meeting Rooms</a></li><li><a href="#" class="aj-nav folder">Files</a><ul class="nav nav-list"><li><a href="../API/Files/./Files.html">Files</a></li><li><a href="../API/Files/./Documents.html">Documents</a></li><li><a href="../API/Files/./Presentations.html">Presentations</a></li><li><a href="../API/Files/./Cache.html">Cache</a></li></ul></li><li><a href="../API/./Comments.html">Comments</a></li><li><a href="../API/./Grids.html">Grids</a></li><li><a href="../API/./Regions.html">Regions</a></li></ul></li></ul>                                            </div>
+                        <ul class="nav nav-list"><li><a href="#" class="aj-nav folder">Installation</a><ul class="nav nav-list"><li><a href="../Installation/./Installation.html">Installation</a></li><li><a href="../Installation/./Assets.html">Assets</a></li><li><a href="../Installation/./OpenSim.html">OpenSim</a></li></ul></li><li class="open"><a href="#" class="aj-nav folder">API</a><ul class="nav nav-list"><li><a href="../API/./API.html">API</a></li><li><a href="../API/./Authentication.html">Authentication</a></li><li><a href="../API/./Permissions.html">Permissions</a></li><li><a href="../API/./Users.html">Users</a></li><li><a href="../API/./Avatars.html">Avatars</a></li><li><a href="../API/./Groups.html">Groups</a></li><li><a href="../API/./Chats.html">Chats</a></li><li><a href="../API/./Meetings.html">Meetings</a></li><li><a href="../API/./Minutes.html">Minutes</a></li><li><a href="../API/./Meeting_Rooms.html">Meeting Rooms</a></li><li><a href="#" class="aj-nav folder">Files</a><ul class="nav nav-list"><li><a href="../API/Files/./Files.html">Files</a></li><li><a href="../API/Files/./Documents.html">Documents</a></li><li><a href="../API/Files/./Presentations.html">Presentations</a></li><li><a href="../API/Files/./Cache.html">Cache</a></li></ul></li><li><a href="../API/./Comments.html">Comments</a></li><li><a href="../API/./Grids.html">Grids</a></li><li><a href="../API/./Regions.html">Regions</a></li></ul></li></ul>                                            </div>
                 </div>
                 <div class="right-column  content-area col-sm-9">
                     <div class="content-page">
@@ -65,9 +65,9 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>Meetings                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Wednesday, April 16, 2014                                        </span>
+                                            Friday, April 18, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            11:25 AM                                        </span>
+                                            7:44 PM                                        </span>
                                 </div>
                                                         <p>The most important part of the CMS is the scheduling of meetings.</p>
 
@@ -163,6 +163,13 @@
 <h2>Get a specific meeting</h2>
 
 <p>When retrieving a specific meeting you get a lot more details. Information such as the participants, documents and the agenda are included.</p>
+
+<p><strong>NOTICE:</strong> You can only retrieve the meeting if you meet at least one of the following requirements.<br />
+<ul>
+<li>You have <code>ALL</code> permissions</li>
+<li>You created the meeting</li>
+<li>You are a participant of the meeting</li>
+</ul></p>
 
 <pre><code class="language-http">GET /api/meeting/&lt;MEETING-ID&gt;/ HTTP/1.1
 </code></pre>
@@ -315,6 +322,13 @@
 
 <p>For updating a meeting you can use the following <code>PUT</code> request.</p>
 
+<p><strong>NOTICE:</strong> You can only update the meeting if you meet at least one of the following requirements.<br />
+<ul>
+<li>You have <code>ALL</code> permissions</li>
+<li>You created the meeting</li>
+<li>You are a participant of the meeting and have <code>WRITE</code> permissions</li>
+</ul></p>
+
 <pre><code class="language-http">PUT /api/meeting/&lt;MEETING-ID&gt;/ HTTP/1.1
 </code></pre>
 
@@ -323,6 +337,13 @@
 <h2>Get the meeting agenda</h2>
 
 <p>To return only the agenda for a specific meeting, the following API can be used. This will return the agenda as a multi dimensional array instead of the flat string in the meeting details response.</p>
+
+<p><strong>NOTICE:</strong> You can only retrieve the meeting agenda if you meet at least one of the following requirements.<br />
+<ul>
+<li>You have <code>ALL</code> permissions</li>
+<li>You created the meeting</li>
+<li>You are a participant of the meeting</li>
+</ul></p>
 
 <pre><code class="language-http">GET /api/meeting/&lt;MEETING-ID&gt;/agenda HTTP/1.1
 </code></pre>
@@ -375,9 +396,21 @@
 
 <h2>Get meetings by participant</h2>
 
-<p>This will return a list with meetings where the given user is a participant for. The output is similar to the <code>/api/meetings/</code> request.</p>
+<p>This will return a list with 50 meetings where the given user is a participant for. The output is similar to the <code>/api/meetings/</code> request.</p>
 
 <pre><code class="language-http">GET /api/user/&lt;USER-ID&gt;/meetings/ HTTP/1.1
+</code></pre>
+
+<p>Get meetings after number 50 by using:</p>
+
+<pre><code class="language-http">GET /api/user/&lt;USER-ID&gt;/meetings/&lt;OFFSET&gt; HTTP/1.1
+</code></pre>
+
+<h3>Calendar</h3>
+
+<p>The following URL will return all the meetings in calendar format, no limit.</p>
+
+<pre><code class="language-http">GET /api/user/&lt;USER-ID&gt;/meetings/calendar/ HTTP/1.1
 </code></pre>
                                                     </article>
                     </div>

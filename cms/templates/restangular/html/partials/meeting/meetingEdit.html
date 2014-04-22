@@ -102,7 +102,12 @@
                         <ul class="list-group list-group-hover" ng-show="meeting.documents.length >= 1">
                             <li class="list-group-item" ng-repeat="document in meeting.documents">
                                 <button type="button" class="btn btn-danger btn-xs" ng-click="removeDocument(document.id)"><i class="glyphicon glyphicon-remove"></i></button>
-                                <span class="label label-default">{{document.type}}</span> {{document.title}} <small>({{document.creationDate}})</small>
+                                <span title="{{document.type}}" bs-tooltip>
+                                    <span class="label label-primary" ng-show="document.type == 'presentation'"><i class="glyphicon glyphicon-th-large"></i></span>
+                                    <span class="label label-info" ng-show="document.type == 'document'"><i class="glyphicon glyphicon-file"></i></span>
+                                    <span class="label label-danger" ng-show="document.type == 'image'"><i class="glyphicon glyphicon-picture"></i></span>
+                                </span>
+                                {{document.title}} <small>({{document.creationDate}})</small>
                             </li>
                         </ul>
                         <ul class="list-group" ng-show="meeting.documents.length == 0">

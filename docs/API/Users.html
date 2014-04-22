@@ -57,7 +57,7 @@
                     </div>
                     <div id="sub-nav-collapse" class="sub-nav-collapse">
                         <!-- Navigation -->
-                        <ul class="nav nav-list"><li><a href="#" class="aj-nav folder">Installation</a><ul class="nav nav-list"><li><a href="../Installation/./Installation.html">Installation</a></li><li><a href="../Installation/./Assets.html">Assets</a></li><li><a href="../Installation/./OpenSim.html">OpenSim</a></li></ul></li><li class="open"><a href="#" class="aj-nav folder">API</a><ul class="nav nav-list"><li><a href="../API/./API.html">API</a></li><li><a href="../API/./Authentication.html">Authentication</a></li><li><a href="../API/./Permissions.html">Permissions</a></li><li><a href="../API/./Users.html">Users</a></li><li><a href="../API/./Avatars.html">Avatars</a></li><li><a href="../API/./Chats.html">Chats</a></li><li><a href="../API/./Meetings.html">Meetings</a></li><li><a href="../API/./Minutes.html">Minutes</a></li><li><a href="../API/./Meeting_Rooms.html">Meeting Rooms</a></li><li><a href="#" class="aj-nav folder">Files</a><ul class="nav nav-list"><li><a href="../API/Files/./Files.html">Files</a></li><li><a href="../API/Files/./Documents.html">Documents</a></li><li><a href="../API/Files/./Presentations.html">Presentations</a></li><li><a href="../API/Files/./Cache.html">Cache</a></li></ul></li><li><a href="../API/./Comments.html">Comments</a></li><li><a href="../API/./Grids.html">Grids</a></li><li><a href="../API/./Regions.html">Regions</a></li></ul></li></ul>                                            </div>
+                        <ul class="nav nav-list"><li><a href="#" class="aj-nav folder">Installation</a><ul class="nav nav-list"><li><a href="../Installation/./Installation.html">Installation</a></li><li><a href="../Installation/./Assets.html">Assets</a></li><li><a href="../Installation/./OpenSim.html">OpenSim</a></li></ul></li><li class="open"><a href="#" class="aj-nav folder">API</a><ul class="nav nav-list"><li><a href="../API/./API.html">API</a></li><li><a href="../API/./Authentication.html">Authentication</a></li><li><a href="../API/./Permissions.html">Permissions</a></li><li><a href="../API/./Users.html">Users</a></li><li><a href="../API/./Avatars.html">Avatars</a></li><li><a href="../API/./Groups.html">Groups</a></li><li><a href="../API/./Chats.html">Chats</a></li><li><a href="../API/./Meetings.html">Meetings</a></li><li><a href="../API/./Minutes.html">Minutes</a></li><li><a href="../API/./Meeting_Rooms.html">Meeting Rooms</a></li><li><a href="#" class="aj-nav folder">Files</a><ul class="nav nav-list"><li><a href="../API/Files/./Files.html">Files</a></li><li><a href="../API/Files/./Documents.html">Documents</a></li><li><a href="../API/Files/./Presentations.html">Presentations</a></li><li><a href="../API/Files/./Cache.html">Cache</a></li></ul></li><li><a href="../API/./Comments.html">Comments</a></li><li><a href="../API/./Grids.html">Grids</a></li><li><a href="../API/./Regions.html">Regions</a></li></ul></li></ul>                                            </div>
                 </div>
                 <div class="right-column  content-area col-sm-9">
                     <div class="content-page">
@@ -65,9 +65,9 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>Users                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Wednesday, April 16, 2014                                        </span>
+                                            Thursday, April 17, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            11:24 AM                                        </span>
+                                            1:25 PM                                        </span>
                                 </div>
                                                         <p>To get a list of 50 users, use:</p>
 
@@ -172,6 +172,12 @@
             "gridId": 1,
             "gridName": "OpenSim's test grid",
             "confirmed": 1
+        }
+    ],
+    "groups": [
+        {
+            "id": 1,
+            "name": "The Doe's"
         }
     ]
 }
@@ -280,6 +286,11 @@
   <td>Array</td>
   <td>The permission levels for the user (see permissions)</td>
 </tr>
+<tr>
+  <td>groups</td>
+  <td>Array</td>
+  <td>An array containing group IDs <code>[1,2,3]</code> or Group objects <code>[{id: 1, name: x}, {id: 2, name: y}]</code></td>
+</tr>
 </tbody>
 </table>
 
@@ -301,7 +312,7 @@
 <tbody>
 <tr>
   <td>image</td>
-  <td>file</td>
+  <td>File</td>
   <td>Base64 encoded file, needs to be jpeg, jpg, png or gif</td>
 </tr>
 </tbody>

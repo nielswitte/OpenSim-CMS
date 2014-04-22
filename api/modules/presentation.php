@@ -13,8 +13,8 @@ require_once dirname(__FILE__) .'/../controllers/presentationController.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.4d
- * @date April 16th, 2014
+ * @version 0.5a
+ * @date April 22nd, 2014
  * @since February 24th, 2014
  */
 class Presentation extends Module {
@@ -48,7 +48,7 @@ class Presentation extends Module {
         $this->api->addRoute("/^\/presentation\/(\d+)\/source\/?$/",                           'getPresentationSourceById',    $this, 'GET',  \Auth::READ);  // Download this presentation
         $this->api->addRoute("/^\/presentation\/(\d+)\/slide\/(\d+)\/?$/",                     'getSlideById',                 $this, 'GET',  \Auth::READ);  // Get slide from presentation
         $this->api->addRoute("/^\/presentation\/(\d+)\/slide\/number\/(\d+)\/?$/",             'getSlideByNumber',             $this, 'GET',  \Auth::READ);  // Get slide from presentation
-        $this->api->addRoute("/^\/presentation\/(\d+)\/slide\/number\/(\d+)\/?$/",             'updateSlideUuidByNumber',      $this, 'PUT',  \Auth::WRITE); // Update slide UUID for given slide of presentation
+        $this->api->addRoute("/^\/presentation\/(\d+)\/slide\/number\/(\d+)\/?$/",             'updateSlideUuidByNumber',      $this, 'PUT',  \Auth::ALL);   // Update slide UUID for given slide of presentation
         $this->api->addRoute("/^\/presentation\/(\d+)\/slide\/number\/(\d+)\/image\/?$/",      'getSlideImageByNumber',        $this, 'GET',  \Auth::READ);  // Get only the image of a given presentation slide
         $this->api->addRoute("/^\/presentation\/(\d+)\/slide\/number\/(\d+)\/thumbnail\/?$/",  'getSlideThumbnailByNumber',    $this, 'GET',  \Auth::READ);  // Get only the image of a given presentation slide
     }
@@ -64,10 +64,49 @@ class Presentation extends Module {
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 presentations from the given offset
-        $db->join('users u', 'd.ownerId = u.id', 'LEFT');
-        $db->where('type', 'presentation');
-        $db->orderBy('creationDate', 'DESC');
-        $resutls        = $db->get('documents d', array($args[1], 50), '*, d.id AS documentId, u.id AS userId');
+        // User does not have all permissions? -> Can only see own or group documents
+        if(!\Auth::checkRights($this->getName(), \Auth::ALL)) {
+            $params = array(
+                $db->escape('presentation'),
+                $db->escape(\Auth::getUser()->getId()),
+                $db->escape(\Auth::getUser()->getId()),
+                $db->escape($args[1]),
+                50
+            );
+            // This query fails when written as DB object
+            // Retrieve all documents the user can access as the member of a group
+            // or as documents owned by the user self
+            $resutls = $db->rawQuery('
+                        SELECT DISTINCT
+                            d.*,
+                            u.*,
+                            d.id AS documentId,
+                            u.id AS userId
+                        FROM
+                            documents d
+                        LEFT JOIN
+                            users u
+                        ON
+                            d.ownerId = u.id
+                        WHERE
+                            d.type = ?
+                        AND (
+                            d.ownerId = ?
+                        OR
+                            d.id IN (SELECT gd.documentId FROM group_documents gd, group_users gu WHERE gu.userId = ? AND gu.groupId = gd.groupId)
+                        ) ORDER BY
+                            d.creationDate DESC
+                        LIMIT
+                            ?, ?'
+                , $params);
+
+        // No extra filtering required
+        } else {
+            $db->join('users u', 'd.ownerId = u.id', 'LEFT');
+            $db->where('type', 'presentation');
+            $db->orderBy('creationDate', 'DESC');
+            $resutls        = $db->get('documents d', array($args[1], 50), '*, d.id AS documentId, u.id AS userId');
+        }
         // Process results
         $data           = array();
         foreach($resutls as $result) {
@@ -87,7 +126,12 @@ class Presentation extends Module {
     public function getPresentationById($args) {
         $presentation = new \Models\Presentation($args[1]);
         $presentation->getInfoFromDatabase();
-        return $this->getPresentationData($presentation);
+        // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
+        if($presentation->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($presentation->getId())) {
+            return $this->getPresentationData($presentation);
+        } else {
+            throw new \Exception('You do not have permissions to view this presentation.', 7);
+        }
     }
 
     /**
@@ -176,11 +220,20 @@ class Presentation extends Module {
      *
      * @param array $args
      * @return array
+     * @throws \Exception
      */
     public function getSlideByNumber($args) {
         $presentation   = new \Models\Presentation($args[1]);
-        $slide          = $presentation->getSlideByNumber($args[2]);
-        $data           = $this->getSlideData($presentation, $slide);
+        $presentation->getInfoFromDatabase();
+
+        // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
+        if($presentation->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($presentation->getId())) {
+            $slide = $presentation->getSlideByNumber($args[2]);
+            $data  = $this->getSlideData($presentation, $slide);
+        } else {
+            throw new \Exception('You do not have permissions to view this presentation.', 7);
+        }
+
         return $data;
     }
 
@@ -189,11 +242,20 @@ class Presentation extends Module {
      *
      * @param array $args
      * @return array
+     * @throws \Exception
      */
     public function getSlideById($args) {
         $presentation   = new \Models\Presentation($args[1]);
-        $slide          = $presentation->getSlideById($args[2]);
-        $data           = $this->getSlideData($presentation, $slide);
+        $presentation->getInfoFromDatabase();
+
+        // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
+        if($presentation->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($presentation->getId())) {
+            $slide = $presentation->getSlideById($args[2]);
+            $data  = $this->getSlideData($presentation, $slide);
+        } else {
+            throw new \Exception('You do not have permissions to view this presentation.', 7);
+        }
+
         return $data;
     }
 
@@ -206,16 +268,23 @@ class Presentation extends Module {
     public function getSlideImageByNumber($args) {
         // Get presentation and slide details
         $presentation   = new \Models\Presentation($args[1], $args[2]);
-        $presentation->getSlides();
-        $slidenr        = str_pad($presentation->getCurrentSlide(), strlen($presentation->getNumberOfSlides()), '0', STR_PAD_LEFT);
-        $slidePath      = $presentation->getPath() . DS .'slide-'. $slidenr .'.'. IMAGE_TYPE;
+        $presentation->getInfoFromDatabase();
 
-        if(!\Helper::imageResize($slidePath, $slidePath, IMAGE_HEIGHT, IMAGE_WIDTH)) {
-            throw new \Exception('Requested slide does not exists', 5);
+        // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
+        if($presentation->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($presentation->getId())) {
+            $presentation->getSlides();
+            $slidenr        = str_pad($presentation->getCurrentSlide(), strlen($presentation->getNumberOfSlides()), '0', STR_PAD_LEFT);
+            $slidePath      = $presentation->getPath() . DS .'slide-'. $slidenr .'.'. IMAGE_TYPE;
+
+            if(!\Helper::imageResize($slidePath, $slidePath, IMAGE_HEIGHT, IMAGE_WIDTH)) {
+                throw new \Exception('Requested slide does not exists', 5);
+            } else {
+                require_once dirname(__FILE__) .'/../includes/class.Images.php';
+                $image = new \Image($slidePath);
+                $image->display();
+            }
         } else {
-            require_once dirname(__FILE__) .'/../includes/class.Images.php';
-            $image = new \Image($slidePath);
-            $image->display();
+            throw new \Exception('You do not have permissions to view this presentation.', 7);
         }
     }
 
@@ -227,17 +296,24 @@ class Presentation extends Module {
      */
     public function getSlideThumbnailByNumber($args) {
         $presentation   = new \Models\Presentation($args[1], $args[2]);
-        $presentation->getSlides();
-        $slidenr        = str_pad($presentation->getCurrentSlide(), strlen($presentation->getNumberOfSlides()), '0', STR_PAD_LEFT);
-        $slidePath      = $presentation->getPath() . DS .'slide-'. $slidenr .'.'. IMAGE_TYPE;
-        $thumbPath      = $presentation->getThumbnailPath() . DS .'slide-'. $slidenr .'.jpg';
+        $presentation->getInfoFromDatabase();
 
-        if(!\Helper::imageResize($slidePath, $thumbPath, IMAGE_THUMBNAIL_HEIGHT, IMAGE_THUMBNAIL_WIDTH)) {
-            throw new \Exception('Requested slide does not exists', 5);
+        // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
+        if($presentation->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($presentation->getId())) {
+            $presentation->getSlides();
+            $slidenr        = str_pad($presentation->getCurrentSlide(), strlen($presentation->getNumberOfSlides()), '0', STR_PAD_LEFT);
+            $slidePath      = $presentation->getPath() . DS .'slide-'. $slidenr .'.'. IMAGE_TYPE;
+            $thumbPath      = $presentation->getThumbnailPath() . DS .'slide-'. $slidenr .'.jpg';
+
+            if(!\Helper::imageResize($slidePath, $thumbPath, IMAGE_THUMBNAIL_HEIGHT, IMAGE_THUMBNAIL_WIDTH)) {
+                throw new \Exception('Requested slide does not exists', 5);
+            } else {
+                require_once dirname(__FILE__) .'/../includes/class.Images.php';
+                $image = new \Image($thumbPath);
+                $image->display();
+            }
         } else {
-            require_once dirname(__FILE__) .'/../includes/class.Images.php';
-            $image = new \Image($thumbPath);
-            $image->display();
+            throw new \Exception('You do not have permissions to view this presentation.', 7);
         }
     }
 

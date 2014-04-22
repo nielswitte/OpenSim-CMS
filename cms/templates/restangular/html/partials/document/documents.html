@@ -13,6 +13,7 @@
         <input type="text" class="form-control" value="" placeholder="Search for title" ng-model="documentBySearch" ng-options="document.title as document.title for document in getDocumentByTitle($viewValue)" bs-typeahead>
         <span class="input-group-btn" ng-click="selectDocument()"><button type="button" class="btn btn-success"><i class="glyphicon glyphicon-search"></i> View</button></span>
     </div>
+    <div class="clearfix"></div>
 </div>
 <div class="panel panel-primary filter">
     <div class="panel-heading">
@@ -29,7 +30,7 @@
     <table class="table table-bordered table-striped table-responsive table-hover" id="documentsList">
         <thead>
             <tr>
-                <th>
+                <th class="col-sm-1">
                     <a ng-click="orderByField='id'; reverseSort = !reverseSort" title="Sort by ID">#</a>
                     <span ng-show="orderByField == 'id'">
                         <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
@@ -39,13 +40,6 @@
                 <th>
                     <a ng-click="orderByField='title'; reverseSort = !reverseSort" title="Sort by title">Title</a>
                     <span ng-show="orderByField == 'title'">
-                        <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
-                        <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
-                    </span>
-                </th>
-                <th>
-                    <a ng-click="orderByField='type'; reverseSort = !reverseSort" title="Sort by type">Type</a>
-                    <span ng-show="orderByField == 'type'">
                         <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
                         <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
                     </span>
@@ -71,18 +65,24 @@
                         <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
                     </span>
                 </th>
-                <th> </th>
+                <th class="col-sm-1"> </th>
             </tr>
         </thead>
         <tbody>
             <tr ng-repeat="(index, document) in documentsList | orderBy:orderByField:reverseSort | filter:searchText">
                 <td>{{document.id}}</td>
-                <td><a ng-href="#!/document/{{document.id}}">{{document.title}}</a></td>
-                <td>{{document.type}}</td>
+                <td>
+                    <span title="{{document.type}}" bs-tooltip>
+                        <span class="label label-primary" ng-show="document.type == 'presentation'"><i class="glyphicon glyphicon-th-large"></i></span>
+                        <span class="label label-info" ng-show="document.type == 'document'"><i class="glyphicon glyphicon-file"></i></span>
+                        <span class="label label-danger" ng-show="document.type == 'image'"><i class="glyphicon glyphicon-picture"></i></span>
+                    </span>
+                    <a ng-href="#!/document/{{document.id}}">{{document.title}}</a>
+                </td>
                 <td><a ng-href="#!/user/{{document.user.id}}">{{document.user.username}} ({{document.user.firstName}} {{document.user.lastName}})</a></td>
                 <td>{{document.creationDate}}</td>
                 <td>{{document.modificationDate}}</td>
-                <td><button class="btn btn-danger btn-xs" confirmed-click="deleteDocument(document.id)" ng-confirm-click="Are you sure you want to delete {{document.title}}?" ng-show="allowDelete(document.ownerId)"><i class="glyphicon glyphicon-trash"></i> Delete</button></td>
+                <td><button class="btn btn-danger btn-xs" confirmed-click="deleteDocument(document.id)" ng-confirm-click="Are you sure you want to delete {{document.title}}?" ng-show="allowDelete(document.user.id)"><i class="glyphicon glyphicon-trash"></i> Delete</button></td>
             </tr>
         </tbody>
     </table>

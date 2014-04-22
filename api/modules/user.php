@@ -6,6 +6,8 @@ defined('EXEC') or die('Config not loaded');
 require_once dirname(__FILE__) .'/module.php';
 require_once dirname(__FILE__) .'/../models/avatar.php';
 require_once dirname(__FILE__) .'/../controllers/avatarController.php';
+require_once dirname(__FILE__) .'/../models/group.php';
+require_once dirname(__FILE__) .'/../controllers/groupController.php';
 require_once dirname(__FILE__) .'/../models/user.php';
 require_once dirname(__FILE__) .'/../models/userLoggedIn.php';
 require_once dirname(__FILE__) .'/../controllers/userController.php';
@@ -14,8 +16,8 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  * Implements the functions for users
  *
  * @author Niels Witte
- * @version 0.5a
- * @date April 10th, 2014
+ * @version 0.9
+ * @date April 21st, 2014
  * @since February 24th, 2014
  */
 class User extends Module {
@@ -48,6 +50,7 @@ class User extends Module {
         $this->api->addRoute("/^\/user\/(\d+)\/files\/?$/",                             'getUserFilesByUserId',     $this, 'GET',    \Auth::READ);     // Load all files for the user
         $this->api->addRoute("/^\/user\/(\d+)\/meetings\/?$/",                          'getUserMeetingsByUserId',  $this, 'GET',    \Auth::READ);     // Load 50 meetings for the user
         $this->api->addRoute("/^\/user\/(\d+)\/meetings\/(\d+)\/?$/",                   'getUserMeetingsByUserId',  $this, 'GET',    \Auth::READ);     // Load 50 meetings for the user with offset
+        $this->api->addRoute("/^\/user\/(\d+)\/meetings\/calendar\/?$/",                'getUserMeetingsCalendarByUserId',  $this, 'GET', \Auth::READ); // Load all meetings for the user
         $this->api->addRoute("/^\/user\/(\d+)\/picture\/?$/",                           'getUserPictureById',       $this, 'GET',    \Auth::READ);     // Shows the user's profile picture
         $this->api->addRoute("/^\/user\/(\d+)\/picture\/?$/",                           'updateUserPictureByUserID',$this, 'PUT',    \Auth::READ);     // Updates the user's profile picture with the given image
         $this->api->addRoute("/^\/user\/(\d+)\/password\/?$/",                          'updateUserPasswordById',   $this, 'PUT',    \Auth::READ);     // Updates the user's password
@@ -57,7 +60,14 @@ class User extends Module {
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'confirmAvatar',            $this, 'PUT',    \Auth::READ);     // Confirms the avatar for the authenticated user
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/?$/",           'unlinkAvatar',             $this, 'DELETE', \Auth::READ);     // Removes the avatar for the authenticated user's avatar list
         $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/?$/",                            'createAvatar',             $this, 'POST',   \Auth::EXECUTE);  // Create an avatar
-        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/files\/?$/",    'getUserFilesByAvatar',     $this, 'GET',    \AUTH::READ);     // Load all files for the user accociated with the avatar UUID on the given grid
+        $this->api->addRoute("/^\/grid\/(\d+)\/avatar\/([a-z0-9-]{36})\/files\/?$/",    'getUserFilesByAvatar',     $this, 'GET',    \Auth::READ);     // Load all files for the user accociated with the avatar UUID on the given grid
+        $this->api->addRoute("/^\/groups\/?$/",                                         'getGroups',                $this, 'GET',    \Auth::READ);     // Gets a list with groups 50 groups
+        $this->api->addRoute("/^\/groups\/(\d+)\/?$/",                                  'getGroups',                $this, 'GET',    \Auth::READ);     // Gets a list with groups 50 groups starting at given offset
+        $this->api->addRoute("/^\/groups\/([a-zA-Z0-9-_ \.\(\)\[\]]{3,}+)\/?$/",        'getGroupsByName',          $this, 'GET',    \Auth::READ);     // Gets a list with groups
+        $this->api->addRoute("/^\/group\/?$/",                                          'createGroup',              $this, 'POST',   \Auth::WRITE);    // Create a new group
+        $this->api->addRoute("/^\/group\/(\d+)\/?$/",                                   'getGroupById',             $this, 'GET',    \Auth::READ);     // Gets a group bu ID
+        $this->api->addRoute("/^\/group\/(\d+)\/?$/",                                   'updateGroupById',          $this, 'PUT',    \Auth::WRITE);    // Update group by ID
+        $this->api->addRoute("/^\/group\/(\d+)\/?$/",                                   'removeGroupById',          $this, 'DELETE', \Auth::WRITE);    // Remove group by ID
     }
 
     /**
@@ -251,6 +261,7 @@ class User extends Module {
     public function getUserById($args) {
         $user = new \Models\User($args[1]);
         $user->getInfoFromDatabase();
+        $user->getGroupsFromDatabase();
         $user->getAvatarsFromDatabase();
         return $this->getUserData($user, TRUE);
     }
@@ -315,9 +326,7 @@ class User extends Module {
 
         if($full) {
             $data['permissions']        = $user->getRights();
-
             $avatars                    = array();
-
             // Only when avatars available
             if($user->getAvatars() !== NULL) {
                 foreach($user->getAvatars() as $avatar) {
@@ -337,6 +346,11 @@ class User extends Module {
                 }
             }
             $data['avatars']            = $avatars;
+            $groups                     = array();
+            foreach($user->getGroups() as $group) {
+                $groups[]               = $this->getGroupData($group);
+            }
+            $data['groups']             = $groups;
         }
         return $data;
     }
@@ -499,7 +513,7 @@ class User extends Module {
     }
 
     /**
-     * Returns a formatted list with documents owned by this user.
+     * Returns a formatted list with documents owned by this user or shared with the user.
      *
      * @param array $args
      * @return array
@@ -507,9 +521,39 @@ class User extends Module {
     public function getUserFilesByUserId($args) {
         $data = array();
         $db = \Helper::getDB();
-        $db->join('users u', 'u.id = d.ownerId', 'LEFT');
-        $db->where('d.ownerId', $db->escape($args[1]));
-        $documents = $db->get('documents d', NULL, '*, d.id as documentId, u.id AS userId');
+        $params = array(
+            $db->escape($args[1]),
+            $db->escape($args[1]),
+        );
+        // This query fails when written as DB object
+        // Retrieve all documents the user can access as the member of a group
+        // or as documents owned by the user self
+        $documents = $db->rawQuery('
+                    SELECT DISTINCT
+                        d.*,
+                        u.*,
+                        d.id AS documentId,
+                        u.id AS userId
+                    FROM
+                        group_documents gd,
+                        group_users gu,
+                        documents d
+                    LEFT JOIN
+                        users u
+                    ON
+                        d.ownerId = u.id
+                    WHERE (
+                        gd.documentId = d.id
+                    AND
+                        gd.groupId = gu.groupId
+                    AND
+                        gu.userId = ?
+                    ) OR
+                        d.ownerId = ?
+                    ORDER BY
+                        d.creationDate DESC'
+            , $params);
+
         foreach($documents as $document) {
             $user   = new \Models\User($document['userId'], $document['username'], $document['email'], $document['firstName'], $document['lastName'], $document['lastLogin']);
             $file   = new \Models\File($document['documentId'], $document['type'], $document['title'], $user, $document['creationDate'], $document['modificationDate'], $document['file']);
@@ -550,14 +594,15 @@ class User extends Module {
      * @return array
      */
     public function getUserMeetingsByUserId($args) {
-        // Determine offset
-        $offset = isset($args[2]) ? $args[2] : 0;
+        $offset     = isset($args[2]) ? $args[2] : 0;
+        $limit      = array($offset, 50);
+
         // Get info from DB
-        $db     = \Helper::getDB();
+        $db         = \Helper::getDB();
         $db->where('mp.userId', $db->escape($args[1]));
         $db->join('meeting_participants mp', 'mp.meetingId = m.id', 'LEFT');
         $db->orderBy('m.startDate', 'DESC');
-        $results = $db->get('meetings m', array($offset, 50));
+        $results = $db->get('meetings m', $limit);
         // Get user info
         $user = \Auth::getUser();
         // Process results
@@ -569,5 +614,178 @@ class User extends Module {
         }
 
         return $data;
+    }
+
+    /**
+     * Returns a list with 50 meetings starting at the given offset for the currently logged in user
+     * in reversed chronological order
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getUserMeetingsCalendarByUserId($args) {
+        // Get info from DB
+        $db     = \Helper::getDB();
+        $db->where('mp.userId', $db->escape($args[1]));
+        $db->join('meeting_participants mp', 'mp.meetingId = m.id', 'LEFT');
+        $db->orderBy('m.startDate', 'DESC');
+        $results = $db->get('meetings m');
+        // Get user info
+        $user = \Auth::getUser();
+        // Process results
+        $data = array();
+        foreach($results as $result) {
+            $room    = new \Models\MeetingRoom($result['roomId']);
+            $meeting = new \Models\Meeting($result['meetingId'], $result['startDate'], $result['endDate'], $user, $room, $result['name']);
+            $data[]  = $this->api->getModule('meeting')->getMeetingData($meeting, FALSE, TRUE);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Returns a list with 50 groups starting at optionally the given offset
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getGroups($args) {
+        $offset = isset($args[1]) ? $args[1] : 0;
+        $db     = \Helper::getDB();
+        $db->orderBy('LOWER(name)', 'ASC');
+        $groups = $db->get('groups', array($offset, 50));
+        $data   = array();
+        // Process all groups
+        foreach($groups as $group) {
+            $group = new \Models\Group($group['id'], $group['name']);
+            $data[] = $this->getGroupData($group);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Will search for a group by its name
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getGroupsByName($args) {
+        $db             = \Helper::getDB();
+        $params         = array("%". strtolower($db->escape($args[1])) ."%");
+        $groups         = $db->rawQuery('SELECT * FROM groups WHERE LOWER(name) LIKE ? ORDER BY LOWER(name) ASC', $params);
+        $data           = array();
+        foreach($groups as $group) {
+            $group = new \Models\Group($group['id'], $group['name']);
+            $data[] = $this->getGroupData($group);
+        }
+        return $data;
+    }
+
+    /**
+     * Gets a specific group by its ID
+     *
+     * @param array $args
+     * @return array
+     */
+    public function getGroupById($args){
+        $group = new \Models\Group($args[1]);
+        $group->getInfoFromDatabase();
+        $group->getGroupFilesFromDatabase();
+        $group->getGroupUsersFromDatabase();
+        return $this->getGroupData($group, TRUE);
+    }
+
+    /**
+     * Parses the group data to a nice format
+     *
+     * @param \Models\Group $group
+     * @param boolean $full - [Optional] Show all group details?
+     * @return array
+     */
+    public function getGroupData(\Models\Group $group, $full = FALSE) {
+        $data = array(
+            'id'    => $group->getId(),
+            'name'  => $group->getName(),
+        );
+
+        // Get additional details
+        if($full) {
+            // Add all files
+            $files = array();
+            foreach($group->getFiles() as $file) {
+                $files[] = $this->api->getModule('file')->getFileData($file, FALSE);
+            }
+            $data['files'] = $files;
+
+            // Add all useres
+            $users = array();
+            foreach($group->getUsers() as $user) {
+                $users[] = $this->api->getModule('user')->getUserData($user, FALSE);
+            }
+            $data['users'] = $users;
+        }
+        return $data;
+    }
+
+    /**
+     * Creates a new group with the given POST data
+     *
+     * @param array $args
+     * @return array
+     */
+    public function createGroup($args) {
+        $input      = \Helper::getInput(TRUE);
+        $groupCtrl  = new \Controllers\GroupController();
+        $data       = FALSE;
+        if($groupCtrl->validateParametersCreate($input)) {
+            $data = $groupCtrl->createGroup($input);
+        }
+
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE),
+            'groupId' => ($data !== FALSE ? $data : 0)
+        );
+
+        return $result;
+    }
+
+    /**
+     * Update the group with the given data
+     *
+     * @param array $args
+     * @return array
+     */
+    public function updateGroupById($args){
+        $input = \Helper::getInput(TRUE);
+        $group = new \Models\Group($args[1]);
+        $groupCtrl = new \Controllers\GroupController($group);
+        if($groupCtrl->validateParametersUpdate($input)) {
+            $data = $groupCtrl->updateGroup($input);
+        }
+
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE)
+        );
+
+        return $result;
+    }
+
+    /**
+     * Removes the given group ID from the database
+     *
+     * @param array $args
+     * @return array
+     */
+    public function removeGroupById($args){
+        $group      = new \Models\Group($args[1]);
+        $groupCtrl  = new \Controllers\GroupController($group);
+        $data       = $groupCtrl->deleteGroup();
+
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE)
+        );
+
+        return $result;
     }
 }

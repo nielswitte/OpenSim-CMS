@@ -4,8 +4,9 @@ namespace API\Modules;
 defined('EXEC') or die('Config not loaded');
 
 require_once dirname(__FILE__) .'/module.php';
-require_once dirname(__FILE__) .'/../models/file.php';
 require_once dirname(__FILE__) .'/../models/document.php';
+require_once dirname(__FILE__) .'/../models/file.php';
+require_once dirname(__FILE__) .'/../models/group.php';
 require_once dirname(__FILE__) .'/../models/presentation.php';
 require_once dirname(__FILE__) .'/../controllers/fileController.php';
 
@@ -13,8 +14,8 @@ require_once dirname(__FILE__) .'/../controllers/fileController.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.5a
- * @date April 16th, 2014
+ * @version 0.7
+ * @date April 22nd, 2014
  * @since March 3rd, 2014
  */
 class File extends Module{
@@ -43,8 +44,9 @@ class File extends Module{
         $this->api->addRoute("/^\/file\/?$/",                          'createFile',            $this, 'POST',      \Auth::EXECUTE);   // Create a files
         $this->api->addRoute("/^\/file\/(\d+)\/?$/",                   'getFileById',           $this, 'GET',       \Auth::READ);      // Select specific files
         $this->api->addRoute("/^\/file\/(\d+)\/?$/",                   'deleteFileById',        $this, 'DELETE',    \Auth::EXECUTE);   // Delete specific files
+        $this->api->addRoute("/^\/file\/(\d+)\/groups\/?$/",           'updateFileGroupsById',  $this, 'PUT',       \AUTH::EXECUTE);   // Set the groups for the given file
         $this->api->addRoute("/^\/file\/(\d+)\/image\/?$/",            'getFileImageById',      $this, 'GET',       \AUTH::READ);      // Retrieves an image files type
-        $this->api->addRoute("/^\/file\/(\d+)\/image\/?$/",            'updateImageUuidById',   $this, 'PUT',       \AUTH::WRITE);     // Updates the image's UUID
+        $this->api->addRoute("/^\/file\/(\d+)\/image\/?$/",            'updateImageUuidById',   $this, 'PUT',       \AUTH::ALL);       // Updates the image's UUID
         $this->api->addRoute("/^\/file\/(\d+)\/source\/?$/",           'getFileSourceById',     $this, 'GET',       \AUTH::READ);      // Retrieves the original file
     }
 
@@ -58,14 +60,51 @@ class File extends Module{
         $db             = \Helper::getDB();
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
-        // Get 50 presentations from the given offset
-        $db->join('users u', 'd.ownerId = u.id', 'LEFT');
-        $db->orderBy('creationDate', 'DESC');
-        $resutls        = $db->get('documents d', array($args[1], 50), '*, d.id AS documentId, u.id AS userId');
+
+        // User does not have all permissions? -> Can only see own or group documents
+        if(!\Auth::checkRights($this->getName(), \Auth::ALL)) {
+            $params = array(
+                $db->escape(\Auth::getUser()->getId()),
+                $db->escape(\Auth::getUser()->getId()),
+                $db->escape($args[1]),
+                50
+            );
+            // This query fails when written as DB object
+            // Retrieve all documents the user can access as the member of a group
+            // or as documents owned by the user self
+            $results = $db->rawQuery('
+                        SELECT DISTINCT
+                            d.*,
+                            u.*,
+                            d.id AS documentId,
+                            u.id AS userId
+                        FROM
+                            documents d
+                        LEFT JOIN
+                            users u
+                        ON
+                            d.ownerId = u.id
+                        WHERE
+                            d.ownerId = ?
+                        OR
+                            d.id IN (SELECT gd.documentId FROM group_documents gd, group_users gu WHERE gu.userId = ? AND gu.groupId = gd.groupId)
+                        ORDER BY
+                            d.creationDate DESC
+                        LIMIT
+                            ?, ?'
+                , $params);
+
+        // No extra filtering required
+        } else {
+            // Get 50 presentations from the given offset
+            $db->join('users u', 'd.ownerId = u.id', 'LEFT');
+            $db->orderBy('d.creationDate', 'DESC');
+            $results = $db->get('documents d', array($args[1], 50), '*, d.id AS documentId, u.id AS userId');
+        }
 
         // Process results
         $data           = array();
-        foreach($resutls as $result) {
+        foreach($results as $result) {
             $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
             $file       = new \Models\File($result['documentId'], $result['type'], $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
             $data[]     = $this->getFileData($file, FALSE);
@@ -83,7 +122,7 @@ class File extends Module{
         $db             = \Helper::getDB();
         $params         = array("%". strtolower($db->escape($args[1])) ."%");
         $results        = $db->rawQuery('
-            SELECT
+            SELECT DISTINCT
                 *,
                 d.id AS documentId,
                 u.id AS userId
@@ -97,11 +136,15 @@ class File extends Module{
             ORDER BY
                 LOWER(d.title) ASC'
             , $params);
+
         $data           = array();
         foreach($results as $result) {
-            $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
-            $file       = new \Models\File($result['documentId'], $result['type'], $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
-            $data[]     = $this->getFileData($file, FALSE);
+            // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
+            if($result['userId'] == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($result['documentId'])) {
+                $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
+                $file       = new \Models\File($result['documentId'], $result['type'], $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
+                $data[]     = $this->getFileData($file, FALSE);
+            }
         }
         return $data;
     }
@@ -111,23 +154,32 @@ class File extends Module{
      *
      * @param array $args
      * @return array
+     * @throws \Exception
      */
     public function getFileById($args) {
+        $data = array();
+        // User has access to this file?
         $file = new \Models\File($args[1]);
         $file->getInfoFromDatabase();
 
-        // If the given file is a presentation, return it as a presentation
-        if($file->getType() == 'presentation') {
-            $presentation = new \Models\Presentation($file->getId(), 0, $file->getTitle(), $file->getUser(), $file->getCreationDate(), $file->getModificationDate());
-            return $this->api->getModule('presentation')->getPresentationData($presentation, TRUE);
-        // If the given file is a document, return it as a document
-        } elseif($file->getType() == 'document') {
-            $document = new \Models\Document($file->getId(), 0, $file->getTitle(), $file->getUser(), $file->getCreationDate(), $file->getModificationDate());
-            return $this->api->getModule('document')->getDocumentData($document, TRUE);
-        // Return it as a file
+        // Only allow access to specific files, files owned by user, when user has all rights or when file is part of a group the user is in
+        if($file->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($file->getId())) {
+            // If the given file is a presentation, return it as a presentation
+            if($file->getType() == 'presentation') {
+                $presentation = new \Models\Presentation($file->getId(), 0, $file->getTitle(), $file->getUser(), $file->getCreationDate(), $file->getModificationDate());
+                $data = $this->api->getModule('presentation')->getPresentationData($presentation, TRUE);
+            // If the given file is a document, return it as a document
+            } elseif($file->getType() == 'document') {
+                $document = new \Models\Document($file->getId(), 0, $file->getTitle(), $file->getUser(), $file->getCreationDate(), $file->getModificationDate());
+                $data = $this->api->getModule('document')->getDocumentData($document, TRUE);
+            // Return it as a file
+            } else {
+                $data = $this->getFileData($file, TRUE);
+            }
         } else {
-            return $this->getFileData($file, TRUE);
+            throw new \Exception('You do not have permissions to view this file.', 7);
         }
+        return $data;
     }
 
     /**
@@ -169,14 +221,19 @@ class File extends Module{
      *
      * @param array $args
      * @return array
+     * @throws \Exception
      */
     public function deleteFileById($args) {
         $file     = new \Models\File($args[1]);
         $file->getInfoFromDatabase();
 
-        // Only allow when the user has write access or wants to update his/her own files
-        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $file->getUser() != \Auth::getUser()->getId()) {
-            throw new \Exception('You do not have permissions to update this user.', 6);
+        // User does not have ALL permissions
+        if(!\Auth::checkRights($this->getName(), \Auth::ALL) &&
+            // User has WRITE permissions and is in group
+            (!\Auth::checkRights($this->getName(), \Auth::WRITE) && !\Auth::checkGroupFile($file->getId())) &&
+            // User owns the file and has EXECUTE permissions (minimal required to access this function)
+            ($file->getUser() != \Auth::getUser()->getId())) {
+            throw new \Exception('You do not have permissions to delete this file.', 6);
         }
 
         $fileCtrl = new \Controllers\FileController($file);
@@ -207,16 +264,37 @@ class File extends Module{
             'url'               => $file->getApiUrl()
         );
 
-        if($full && $file->getType() == 'image') {
-           $cachedTextures = array();
-            foreach($file->getCache() as $cache) {
-                $cachedTextures[$cache['gridId']] = array(
-                    'uuid'      => $cache['uuid'],
-                    'expires'   => $cache['uuidExpires'],
-                    'isExpired' => strtotime($cache['uuidExpires']) > time() ? 0 : 1
+        // Get full details
+        if($full) {
+            // Group data not retrieved yet?
+            if($file->getGroups() === NULL) {
+                // Get group data
+                $file->getGroupsFromDatabase();
+            }
+
+            // Get all groups
+            $groups = array();
+
+            foreach($file->getGroups() as $group) {
+                $groups[] = array(
+                    'id'    => $group->getId(),
+                    'name'  => $group->getName()
                 );
             }
-            $data['cache']      = $cachedTextures;
+            $data['groups'] = $groups;
+
+            // Get image details on full request
+            if($file->getType() == 'image') {
+               $cachedTextures = array();
+                foreach($file->getCache() as $cache) {
+                    $cachedTextures[$cache['gridId']] = array(
+                        'uuid'      => $cache['uuid'],
+                        'expires'   => $cache['uuidExpires'],
+                        'isExpired' => strtotime($cache['uuidExpires']) > time() ? 0 : 1
+                    );
+                }
+                $data['cache']      = $cachedTextures;
+            }
         }
 
         return $data;
@@ -250,25 +328,41 @@ class File extends Module{
     public function getFileImageById($args) {
         $file = new \Models\File($args[1]);
         $file->getInfoFromDatabase();
-        if($file->getType() != 'image') {
-            throw new \Exception('File with ID '+ $args[1] +' is not an image.');
+        if($file->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($file->getId())) {
+            if($file->getType() != 'image') {
+                throw new \Exception('File with ID '+ $args[1] +' is not an image.');
+            }
+            require_once dirname(__FILE__) .'/../includes/class.Images.php';
+            $image = new \Image($file->getPath() . DS . $file->getId() .'.'. IMAGE_TYPE);
+            $image->display();
+        } else {
+            throw new \Exception('You do not have permissions to view this file.', 7);
         }
-        require_once dirname(__FILE__) .'/../includes/class.Images.php';
-        $image = new \Image($file->getPath() . DS . $file->getId() .'.'. IMAGE_TYPE);
-        $image->display();
     }
 
     /**
      * Outputs the original source file
      *
      * @param array $args
+     * @throws \Exception
      */
     public function getFileSourceById($args) {
         $file = new \Models\File($args[1]);
         $file->getInfoFromDatabase();
-        $file->getOriginalFile();
+        if($file->getUser()->getId() == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($file->getId())) {
+            $file->getOriginalFile();
+        } else {
+            throw new \Exception('You do not have permissions to view this file.', 7);
+        }
     }
 
+    /**
+     * Sets the UUID of this image
+     *
+     * @param array $args
+     * @return array
+     * @throws \Exception
+     */
     public function updateImageUuidById($args) {
         $parsedPutData  = \Helper::getInput(TRUE);
         $gridId         = isset($parsedPutData['gridId']) ? $parsedPutData['gridId'] : '';
@@ -287,6 +381,42 @@ class File extends Module{
             $data       = $fileCtrl->setUuid($postUuid, $grid);
         } else {
             throw new \Exception('Image does not exist', 6);
+        }
+
+        // Format the result
+        $result = array(
+            'success' => ($data !== FALSE ? TRUE : FALSE),
+        );
+
+        return $result;
+    }
+
+    /**
+     * Set file groups
+     *
+     * @param array $args
+     * @return array
+     * @throws \Exception
+     */
+    public function updateFileGroupsById($args) {
+        $file       = new \Models\File($args[1]);
+        $fileCtrl   = new \Controllers\FileController($file);
+        $input      = \Helper::getInput(TRUE);
+        $data       = FALSE;
+
+        // Check if user has permission to update this file's groups
+        if(!\Auth::checkRights($this->getName(), \Auth::ALL) && !\Auth::checkUserFiles($file->getId()) && !\Auth::checkGroupFile($file->getId())) {
+            throw new \Exception('You do not have permission to change the sharing settings of this file', 10);
+        }
+
+        // Validate parameters for setting groups
+        if($fileCtrl->validateParametersGroups($input)) {
+            $data   = $fileCtrl->updateFileGroups($input);
+
+            // Nothing updated?
+            if(!$data) {
+                throw new \Exception('No changes made, did you actually change the groups?', 9);
+            }
         }
 
         // Format the result

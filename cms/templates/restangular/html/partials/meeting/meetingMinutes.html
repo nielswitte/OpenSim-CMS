@@ -14,8 +14,8 @@
 <div ng-bind-html="meeting.agenda"></div>
 <h2>Minutes</h2>
 <div class="toolbar toolbar-top">
-    <button type="button" class="btn btn-default" ng-click="toggleGuests()" ng-show="showGuests"><i class="glyphicon glyphicon-filter"></i> Only show invited participants</button>
-    <button type="button" class="btn btn-default" ng-click="toggleGuests()" ng-hide="showGuests"><i class="glyphicon glyphicon-filter"></i> Show all participants</button>
+    <button type="button" class="btn btn-success" ng-click="toggleGuests()" ng-show="showGuests"><i class="glyphicon glyphicon-filter"></i> Only show invited participants</button>
+    <button type="button" class="btn btn-success" ng-click="toggleGuests()" ng-hide="showGuests"><i class="glyphicon glyphicon-filter"></i> Show all participants</button>
 </div>
 <section id="minutes" class="heading-numbers">
     <div class="row row-striped row-hover" ng-repeat="(index, minute) in meeting.minutes" ng-show="minute.user || showGuests || minute.name == 'Server'">

@@ -22,3 +22,10 @@ These numbers can be used for the following parameters:
 | meetingroom       | Integer   | Permission level regarding Meeting rooms API                  |
 | presentation      | Integer   | Permission level regarding Presentations API                  |
 | user              | Integer   | Permission level regarding Users API                          |
+
+## Explanation
+When you have `READ` permission you can access most basic functions but you cannot make any changes, except to Files or Users you own. With `EXECUTE` permissions you can perform actions, such as schedule a meeting, upload a file, clear the cache, etc. `WRITE` permissions give you the possibility to make changes to content owned by other users. However, you can still only see your own files and files that are shared with groups where you're in. `ALL` is gives you access to everything, you can see all files even those that are not shared with a group, you can edit everything, remove everything, basically do everything the API can facilitate.
+
+For example your user account has `EXECUTE` permission for the File API. In this case the method `GET /api/files/` will return all files you own and all files that are shared with you through the group(s) you're in. You can only make changes to your own files. However, if your permissions get upgraded to `WRITE` you still see the same files, but now you can make changes to files shared with you through groups.
+
+**NOTICE:** Please mind that if your permissions are lower than `ALL` and someone adds a file to a meeting where you are a participant, you can see the file in the meeting details. However, if the file is not shared to a group you are a member of, you can not access the file's contents.

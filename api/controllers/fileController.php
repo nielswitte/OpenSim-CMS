@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the File controller
  *
  * @author Niels Witte
- * @version 0.3
- * @date April 15th, 2014
+ * @version 0.4
+ * @date April 20th, 2014
  * @since March 10th, 2014
  */
 class FileController {
@@ -225,5 +225,92 @@ class FileController {
             throw new \Exception('Updating UUID failed', 1);
         }
         return $results !== FALSE;
+    }
+
+    /**
+     * Updates the groups for this file
+     *
+     * @param array $parameters
+     *              * array groups - A list with group objects or a list of groupIds
+     * @return boolean
+     */
+    public function updateFileGroups($parameters) {
+        $groups = array();
+        if(isset($parameters['groups'][0]) && is_array($parameters['groups'][0])) {
+            foreach($parameters['groups'] as $group) {
+                $groups[] = $group['id'];
+            }
+        } else {
+            $group = $parameters['groups'];
+        }
+
+        // Get difference between existing groups and new groups
+        $oldGroups = array();
+        $this->file->getGroupsFromDatabase();
+        foreach($this->file->getGroups() as $group) {
+            $oldGroups[] = $group->getId();
+        }
+
+        // Remove unset groups
+        $removeIds  = array_diff($oldGroups, $groups);
+        $remove     = $this->removeGroups($removeIds);
+        // Add new groups
+        $addIds     = array_diff($groups, $oldGroups);
+        $add        = $this->addGroups($addIds);
+
+        return $remove || $add;
+    }
+
+    /**
+     * Add file to given groups
+     *
+     * @param array $groupIds
+     * @return boolean
+     */
+    public function addGroups($groupIds) {
+        $db     = \Helper::getDB();
+        $result = FALSE;
+        foreach($groupIds as $id) {
+            $data = array(
+                'groupId'       => $db->escape($id),
+                'documentId'    => $db->escape($this->file->getId())
+            );
+            $result = $db->insert('group_documents', $data);
+        }
+        return $result;
+    }
+
+    /**
+     * Removes the file from the groups with the given groupIds
+     *
+     * @param array $groupIds
+     * @return boolean
+     */
+    public function removeGroups($groupIds) {
+        $db     = \Helper::getDB();
+        $result = FALSE;
+        foreach($groupIds as $id) {
+            $db->where('groupId', $db->escape($id));
+            $result = $db->delete('group_documents');
+        }
+        return $result;
+    }
+
+    /**
+     * Validates the parameters used to update groups
+     *
+     * @param array $parameters
+     * @return boolean
+     * @throws \Exception
+     */
+    public function validateParametersGroups($parameters) {
+        $result = FALSE;
+        if(!isset($parameters['groups']) || !is_array($parameters['groups']) || (!empty($parameters['groups']) && !is_array($parameters['groups'][0]) && !is_numeric($parameters['groups'][0]))) {
+            throw new \Exception('Parameter "groups" (array) not set.');
+        } else {
+            $result = TRUE;
+        }
+
+        return $result;
     }
 }

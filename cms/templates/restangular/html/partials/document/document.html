@@ -8,6 +8,7 @@
 </div>
 <div class="toolbar toolbar-top">
     <a ng-href="{{document.url}}source/?token={{token}}" target="_blank" class="btn btn-default" ng-click="downloadDocument()" bs-tooltip title="Download the original file"><i class="glyphicon glyphicon-download"></i> Download</a>
+    <button type="button" ng-click="showShareOptions()" class="btn btn-default" ng-show="allowShare()"><i class="glyphicon glyphicon-share"></i> Share options</button>
 </div>
 <form class="form-horizontal" role="form" id="documentsForm">
     <div class="form-group">

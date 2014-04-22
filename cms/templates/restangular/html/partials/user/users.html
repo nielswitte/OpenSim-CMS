@@ -5,12 +5,14 @@
 <div class="page-header">
     <h1>Users <small>Overview</small></h1>
 </div>
-<div class="toolbar toolbar-top" ng-show="allowCreate()">
-    <button ng-click="newUser()" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> New user</button>
+<div class="toolbar toolbar-top">
+    <button ng-click="newUser()" class="btn btn-default" ng-show="allowCreate()"><i class="glyphicon glyphicon-plus"></i> New user</button>
+
     <div class="input-group col-sm-3 pull-right">
         <input type="text" class="form-control" value="" placeholder="Search for username" ng-model="userBySearch" ng-options="user.username as user.username for user in getUserByUsername($viewValue)" bs-typeahead>
         <span class="input-group-btn" ng-click="selectUser()"><button type="button" class="btn btn-success"><i class="glyphicon glyphicon-search"></i> View</button></span>
     </div>
+    <div class="clearfix"></div>
 </div>
 <div class="panel panel-primary filter">
     <div class="panel-heading">
@@ -27,7 +29,7 @@
     <table class="table table-bordered table-striped table-responsive table-hover" id="userList">
         <thead>
             <tr>
-                <th>
+                <th class="col-sm-1">
                     <a ng-click="orderByField='id'; reverseSort = !reverseSort" title="Sort by ID">#</a>
                     <span ng-show="orderByField == 'id'">
                         <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
@@ -62,7 +64,7 @@
                         <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
                     </span>
                 </th>
-                <th> </th>
+                <th class="col-sm-2"> </th>
             </tr>
         </thead>
         <tbody>

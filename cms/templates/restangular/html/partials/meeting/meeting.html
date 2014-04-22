@@ -51,7 +51,12 @@
         <th><strong>Documents</strong></th>
         <td>
             <p ng-repeat="document in meeting.documents">
-                <span class="label label-default">{{document.type}}</span> <a href="#!/document/{{document.id}}">{{document.title}} <small>({{document.creationDate}})</small></a>
+                <span title="{{document.type}}" bs-tooltip>
+                    <span class="label label-primary" ng-show="document.type == 'presentation'"><i class="glyphicon glyphicon-th-large"></i></span>
+                    <span class="label label-info" ng-show="document.type == 'document'"><i class="glyphicon glyphicon-file"></i></span>
+                    <span class="label label-danger" ng-show="document.type == 'image'"><i class="glyphicon glyphicon-picture"></i></span>
+                </span>
+                <a href="#!/document/{{document.id}}">{{document.title}} <small>({{document.creationDate}})</small></a>
             </p>
             <p ng-show="meeting.documents.length === 0">None</p>
         </td>

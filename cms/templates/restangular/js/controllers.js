@@ -221,9 +221,9 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
                 type: $scope.commentType,
                 itemId: $scope.commentItemId,
                 parentId: 0,
-                message: ""
+                message: ''
             };
-            $scope.replyTo = "";
+            $scope.replyTo = '';
         };
 
         // Clear comment form on init
@@ -327,7 +327,7 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
 
         // Hides the form and resets the message
         $scope.updateCommentReset = function() {
-            $scope.message  = "";
+            $scope.message  = '';
             updateForm      = 0;
         };
 
@@ -377,7 +377,7 @@ angularRest.controller('commentsController', ['Restangular', '$scope', '$sce', '
 
         // Trust the message as safe markdown html
         $scope.markdown = function(message) {
-            return $sce.trustAsHtml(markdown.toHTML(""+ message));
+            return $sce.trustAsHtml(markdown.toHTML(''+ message));
         };
 
         // Toggle MarkDown help
@@ -588,6 +588,18 @@ angularRest.controller('toolbarController', ['$scope', 'Cache', '$location', '$a
             }
         };
 
+        // User/group dropdown menu
+        $scope.userDropdown = [
+            {
+                text: 'Groups',
+                href: '#!/groups'
+            },
+            {
+                text: 'Users',
+                href: '#!/users'
+            }
+        ];
+
         // Restore session from storage
         if(sessionStorage.token && sessionStorage.id){
             $scope.user = {
@@ -786,7 +798,7 @@ angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Pa
 
         // Trust the message as safe markdown html
         $scope.markdown = function(message) {
-            return $sce.trustAsHtml(markdown.toHTML(""+ message));
+            return $sce.trustAsHtml(markdown.toHTML(''+ message));
         };
 
         // Returns the list with the full path to the comment in context
@@ -864,7 +876,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 
         // Search for the given document title
         var documentSearchResults = [];
-        $scope.documentBySearch   = "";
+        $scope.documentBySearch   = '';
         $scope.getDocumentByTitle = function($viewValue) {
             var results = '';
             if($viewValue !== undefined && $viewValue.length >= 3) {
@@ -933,14 +945,14 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 
         // Check if a user is allowed to create a new document
         $scope.allowCreate = function() {
-             return sessionStorage.documentPermission >= EXECUTE;
+            return sessionStorage.filePermission >= EXECUTE;
         };
 
         // Show delete button only when allowed to delete
         $scope.allowDelete = function(ownerId) {
-            if(ownerId == sessionStorage.id && sessionStorage.documentPermission >= EXECUTE) {
+            if(ownerId == sessionStorage.id && sessionStorage.filePermission >= EXECUTE) {
                 return true;
-            } else if(sessionStorage.documentPermission >= WRITE) {
+            } else if(sessionStorage.filePermission >= WRITE) {
                 return true;
             } else {
                 return false;
@@ -1026,7 +1038,11 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 );
 
 // documentController -------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentController', ['RestangularCache', '$scope', '$routeParams', 'Page', '$modal', function(RestangularCache, $scope, $routeParams, Page, $modal) {
+angularRest.controller('documentController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$modal', '$alert', '$location',
+    function(Restangular, RestangularCache, $scope, $routeParams, Page, $modal, $alert, $location) {
+        var groupSearchResults;
+        $scope.groupname        = '';
+
         // Show loading screen
         jQuery('#loading').show();
         // List with comments
@@ -1049,44 +1065,50 @@ angularRest.controller('documentController', ['RestangularCache', '$scope', '$ro
 
         // Get document from API
         RestangularCache.one('file', $routeParams.documentId).get().then(function(documentResponse) {
-            $scope.document = documentResponse;
-            $scope.token    = sessionStorage.token;
-            Page.setTitle(documentResponse.title);
+            // Error occured?
+            if(documentResponse.error) {
+                $alert({title: 'Error!', content: documentResponse.error, type: 'danger'});
+                // Back to documents overview page
+                $location.path('documents');
+            } else {
+                $scope.document = documentResponse;
+                $scope.token    = sessionStorage.token;
+                Page.setTitle(documentResponse.title);
 
-            // Init select2
-            jQuery('#inputOwner').select2({
-                placeholder: 'Search for an user',
-                minimumInputLength: 3,
-                ajax: {
-                    url: function(term, page) {
-                        return base_url +'/api/users/'+ term +'/?token='+ sessionStorage.token;
+                // Init select2
+                jQuery('#inputOwner').select2({
+                    placeholder: 'Search for an user',
+                    minimumInputLength: 3,
+                    ajax: {
+                        url: function(term, page) {
+                            return base_url +'/api/users/'+ term +'/?token='+ sessionStorage.token;
+                        },
+                        dataType: 'json',
+                        results: function(data, page) {
+                            var result = [];
+                            jQuery.each(data, function(i, item) {
+                                var items = {id: i, text: item.username};
+                                result.push(items);
+                            });
+
+                            return {results: result};
+                        }
                     },
-                    dataType: 'json',
-                    results: function(data, page) {
-                        var result = [];
-                        jQuery.each(data, function(i, item) {
-                            var items = {id: i, text: item.username};
-                            result.push(items);
-                        });
-
-                        return {results: result};
+                    initSelection: function(element, callback) {
+                        var id = jQuery(element).val();
+                        if (id != '') {
+                            jQuery.ajax(base_url +'/api/user/'+ id +'/?token='+ sessionStorage.token, {
+                                dataType: 'json'
+                            }).done(function(data) {
+                                callback({id: data.id, text: data.username});
+                            });
+                        }
                     }
-                },
-                initSelection: function(element, callback) {
-                    var id = jQuery(element).val();
-                    if (id != '') {
-                        jQuery.ajax(base_url +'/api/user/'+ id +'/?token='+ sessionStorage.token, {
-                            dataType: 'json'
-                        }).done(function(data) {
-                            callback({id: data.id, text: data.username});
-                        });
-                    }
-                }
-            });
+                });
 
-            // Trigger change and update
-            jQuery('#inputOwner').select2('val', documentResponse.ownerId, true);
-
+                // Trigger change and update
+                jQuery('#inputOwner').select2('val', documentResponse.ownerId, true);
+            }
             // Remove loading screen
             jQuery('#loading').hide();
         });
@@ -1110,6 +1132,101 @@ angularRest.controller('documentController', ['RestangularCache', '$scope', '$ro
                 template: 'templates/restangular/html/bootstrap/modalDialogBasic.html',
                 scope: $scope
             });
+        };
+
+        // Allow sharing of files
+        $scope.allowShare = function() {
+            return sessionStorage.filePermission >= EXECUTE;
+        };
+
+        // Search for the given group
+        $scope.getGroupsByName = function($viewValue) {
+            var results = '';
+            $scope.groupname = $viewValue;
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('groups', $viewValue).get().then(function(groupsResponse) {
+                    groupSearchResults = groupsResponse;
+                    return groupsResponse;
+                });
+            }
+            return results;
+        };
+
+        // Adds the currently selected group to the list
+        $scope.addGroup = function() {
+            for(var i = 0; i < groupSearchResults.length; i++) {
+                // Only add user when match found and not already listed
+                if(groupSearchResults[i].name == $scope.groupname) {
+                    if(!isDuplicateGroup()) {
+                        $scope.document.groups.push(groupSearchResults[i]);
+                    } else {
+                        $alert({title: 'Duplicate!', content: 'The document is already a member of the group '+ groupSearchResults[i].name, type: 'warning'});
+                    }
+                }
+            }
+        };
+
+        // Checks for duplicate groups
+        function isDuplicateGroup() {
+            for(var i = 0; i < $scope.document.groups.length; i++) {
+                if($scope.document.groups[i].name == $scope.groupname) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Removes the group with the given id the list
+        $scope.removeGroup = function(groupId) {
+            for(var i = 0; i < $scope.document.groups.length; i++) {
+                if($scope.document.groups[i].id == groupId) {
+                    $scope.document.groups.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Actions performed when updating share information
+        var shareDocument = function() {
+            Restangular.one('file', $scope.document.id).all('groups').customPUT({ groups: $scope.document.groups }).then(function(groupResponse) {
+                if(!groupResponse.success) {
+                    $alert({title: 'Error!', content: groupResponse.error, type: 'danger'});
+                } else {
+                    $alert({title: 'Groups updated', content: 'The groups that share this file have been updated', type: 'success'});
+                    modal.hide();
+                }
+            });
+        };
+
+        // Dialog function handler
+        $scope.call = function(func) {
+            if(func == 'hide') {
+                modal.hide();
+            } else if(func == 'shareDocument') {
+                shareDocument();
+            }
+        };
+
+        // Share document options
+        $scope.showShareOptions = function() {
+            $scope.template         = partial_path +'/document/documentShareForm.html';
+            $scope.formSubmit       = 'shareDocument';
+            $scope.share            = [];
+            $scope.buttons          = [{
+                        text: 'Share',
+                        func: '',
+                        class: 'primary',
+                        type: 'submit'
+                    },
+                    {
+                        text: 'Cancel',
+                        func: 'hide',
+                        class: 'danger',
+                        type: 'button'
+                    }
+                ];
+            modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
         };
     }]
 );
@@ -1255,6 +1372,352 @@ angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$s
         };
     }]
 );
+
+
+/****************************************************************************************************************************************************
+ *   _____
+ *  / ____|
+ * | |  __ _ __ ___  _   _ _ __  ___
+ * | | |_ | '__/ _ \| | | | '_ \/ __|
+ * | |__| | | | (_) | |_| | |_) \__ \
+ *  \_____|_|  \___/ \__,_| .__/|___/
+ *                        | |
+ *                        |_|
+ */
+// groupssController ----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('groupsController', ['RestangularCache', 'Restangular', '$scope', 'Page', '$modal', '$alert', 'Cache', '$route', '$routeParams', '$location',
+    function(RestangularCache, Restangular, $scope, Page, $modal, $alert, Cache, $route, $routeParams, $location) {
+        $scope.orderByField     = 'name';
+        $scope.reverseSort      = false;
+        var requestGroupsUrl    = '';
+        $scope.groupsList       = [];
+
+        // For loading more than the first page
+        var paginationOffset = 1;
+        var perPage          = 50;
+        if($routeParams.paginationPage !== undefined) {
+            paginationOffset = $routeParams.paginationPage;
+        }
+
+        // Show pagination and set the type
+        $scope.showPagination = function() {
+            if($scope.groupsList.length >= perPage || paginationOffset > 1) {
+                $scope.pagination = {
+                    type: 'groups',
+                    url: 'groups',
+                    perPage: perPage,
+                    start: paginationOffset,
+                    pages: []
+                };
+                return 'templates/restangular/html/bootstrap/pagination.html';
+            } else {
+                return false;
+            }
+        };
+
+        // Remove loading screen
+        jQuery('#loading').show();
+
+        // Get list with groups
+        RestangularCache.one('groups').getList(''+  (paginationOffset - 1) * perPage).then(function(groupsResponse) {
+            $scope.groupsList = groupsResponse;
+            Page.setTitle('Groups');
+            requestGroupsUrl = groupsResponse.getRequestedUrl();
+            // Remove loading screen
+            jQuery('#loading').hide();
+        });
+
+        // Toggle filters
+        $scope.collapseFilter = true;
+        $scope.toggleFilter = function() {
+            $scope.collapseFilter = !$scope.collapseFilter;
+            return $scope.collapseFilter;
+        };
+
+        // Search for the given group name
+        var groupSearchResults = [];
+        $scope.groupBySearch       = '';
+        $scope.getGroupByName = function($viewValue) {
+            var results = '';
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('groups', $viewValue).get().then(function(groupsResponse) {
+                    groupSearchResults = groupsResponse;
+                    return groupsResponse;
+                });
+            }
+            return results;
+        };
+
+        // When selecting a group
+        $scope.selectGroup = function() {
+            for(var i = 0; i < groupSearchResults.length; i++) {
+                // Only add group when match found and not already listed
+                if(groupSearchResults[i].name == $scope.groupBySearch) {
+                    $location.path('group/'+ groupSearchResults[i].id);
+                }
+            }
+        };
+
+        // Save a new group
+        var saveGroup = function() {
+            // Show loading screen
+            jQuery('#loading').show();
+
+            Restangular.all('group').post($scope.group).then(function(resp) {
+                if(!resp.success) {
+                    $alert({title: 'Error!', content: resp.error, type: 'danger'});
+                } else {
+                    $alert({title: 'Group created!', content: 'The group: '+ $scope.group.name + ' has been created with ID: '+ resp.groupId +'.', type: 'success'});
+                    $scope.group.id = resp.groupId;
+                    $scope.groupsList.push($scope.group);
+                    Cache.clearCachedUrl(requestGroupsUrl);
+                    modal.hide();
+                    $route.reload();
+                }
+                // Remove loading screen
+                jQuery('#loading').hide();
+            });
+        };
+        // Allow changing general group information
+        $scope.allowUpdate = function(groupId) {
+            if(sessionStorage.userPermission >= WRITE) {
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        // Show delete button only when allowed to delete
+        $scope.allowDelete = function(groupId) {
+            if(sessionStorage.userPermission >= WRITE) {
+                return true;
+            } else {
+                return false;
+            }
+         };
+
+         // User is allowed to add new group
+         $scope.allowCreate = function() {
+             return sessionStorage.userPermission >= WRITE;
+         };
+
+        // Remove a group
+        $scope.deleteGroup = function(index) {
+            // Show loading screen
+            jQuery('#loading').show();
+
+            Restangular.one('group', $scope.groupsList[index].id).remove().then(function(resp) {
+                if(!resp.success) {
+                    $alert({title: 'Error!', content: resp.error, type: 'danger'});
+                } else {
+                    $alert({title: 'Group removed!', content: 'The group '+ $scope.groupsList[index].name +' has been removed from the CMS.', type: 'success'});
+                    delete $scope.groupsList[index];
+                    Cache.clearCachedUrl(requestGroupsUrl);
+                    $route.reload();
+                }
+                // Remove loading screen
+                jQuery('#loading').hide();
+            });
+        };
+
+        // Dialog function handler
+        $scope.call = function(func) {
+            if(func == 'hide') {
+                modal.hide();
+            } else if(func == 'createGroup') {
+                saveGroup();
+            }
+        };
+
+        // New Group dialog creation
+        $scope.newGroup = function() {
+            $scope.template         = partial_path +'/user/groupNewForm.html';
+            $scope.group            = {};
+            $scope.formSubmit       = 'createGroup';
+            $scope.buttons          = [{
+                        text: 'Create',
+                        func: '',
+                        class: 'primary',
+                        type: 'submit'
+                    },
+                    {
+                        text: 'Cancel',
+                        func: 'hide',
+                        class: 'danger',
+                        type: 'button'
+                    }
+                ];
+            modal                   = $modal({scope: $scope, template: 'templates/restangular/html/bootstrap/modalDialogTemplate.html'});
+        };
+    }]
+);
+
+// groupController -----------------------------------------------------------------------------------------------------------------------------------
+angularRest.controller('groupController', ['RestangularCache', '$scope', '$routeParams', 'Page', '$alert', 'Cache', '$location',
+    function(RestangularCache, $scope, $routeParams, Page, $alert, Cache, $location) {
+        var groupRequestUrl         = '';
+        var groupOld                = {};
+        $scope.group                = {
+            groups: []
+        };
+        $scope.groupname            = '';
+        var groupSearchResults      = [];
+        $scope.document             = '';
+        var documentSearchResults   = [];
+        var usernameSearchResults   = [];
+        $scope.user                 = '';
+
+        // Show loading screen
+        jQuery('#loading').show();
+
+        // Get all information about this group
+        RestangularCache.one('group', $routeParams.groupId).get().then(function(groupResponse) {
+            if(groupResponse.error !== undefined) {
+                $alert({title: 'Loading group failed!', content: groupResponse.error, type: 'danger'});
+            } else {
+                Page.setTitle(groupResponse.name);
+                $scope.group    = groupResponse;
+                angular.copy($scope.group, groupOld);
+                groupRequestUrl = groupResponse.getRequestedUrl();
+            }
+
+            // Remove loading screen
+            jQuery('#loading').hide();
+        });
+
+        // Allow changing group information
+        $scope.allowUpdate = function() {
+            if(sessionStorage.userPermission >= WRITE) {
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        // Save scope changes by submitting them to the API
+        $scope.updateGroup = function() {
+            // Show loading screen
+            jQuery('#loading').show();
+
+            $scope.group.put().then(function(putResponse) {
+                angular.copy($scope.group, $scope.groupOld);
+                if(!putResponse.success) {
+                    $alert({title: 'Group updating failed!', content: putResponse.error, type: 'danger'});
+                } else {
+                    $alert({title: 'Group updated!', content: 'The group information has been updated.', type: 'success'});
+                    Cache.clearCache();
+                    $location.path('group/'+ $routeParams.groupId);
+                }
+                // Remove loading screen
+                jQuery('#loading').hide();
+            });
+        };
+
+        // Reset changes
+        $scope.resetGroup = function() {
+            angular.copy(groupOld, $scope.group);
+        };
+
+
+        // Search for the given documents
+        $scope.getDocumentByTitle = function($viewValue) {
+            var results = '';
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('files', $viewValue).get().then(function(documentsResponse) {
+                    documentSearchResults = documentsResponse;
+                    return documentsResponse;
+                });
+            }
+            return results;
+        };
+
+        // Adds the currently selected documents to the list
+        $scope.addDocument = function() {
+            for(var i = 0; i < documentSearchResults.length; i++) {
+                // Only add user when match found and not already listed
+                if(documentSearchResults[i].title == $scope.document) {
+                    if(!isDuplicateDocument()) {
+                        $scope.group.files.push(documentSearchResults[i]);
+                    } else {
+                        $alert({title: 'Duplicate!', content: 'The document '+ documentSearchResults[i].title + ' is already added to this meeting', type: 'warning'});
+                    }
+                }
+            }
+        };
+
+        // Checks for duplicate documents
+        function isDuplicateDocument() {
+            for(var i = 0; i < $scope.group.files.length; i++) {
+                if($scope.group.files[i].title == $scope.document) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Removes the documents with the given ID from the list
+        $scope.removeDocument = function(id) {
+            for(var i = 0; i < $scope.group.files.length; i++) {
+                if($scope.group.files[i].id == id) {
+                    $scope.group.files.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Search for the given username
+        $scope.getUserByUsername = function($viewValue) {
+            var results = '';
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('users', $viewValue).get().then(function(usersResponse) {
+                    usernameSearchResults = usersResponse;
+                    return usersResponse;
+                });
+            }
+            return results;
+        };
+
+        // Adds the currently selected user to the list
+        $scope.addUser = function() {
+            for(var i = 0; i < usernameSearchResults.length; i++) {
+                // Only add user when match found and not already listed
+                if(usernameSearchResults[i].username == $scope.user) {
+                    if(!isDuplicateUser()) {
+                        $scope.group.users.push(usernameSearchResults[i]);
+                    } else {
+                        $alert({title: 'Duplicate!', content: 'The user '+ usernameSearchResults[i].username + ' is already a participant for this meeting', type: 'warning'});
+                    }
+                }
+            }
+        };
+
+        // Checks for duplicate users
+        function isDuplicateUser() {
+            for(var i = 0; i < $scope.group.users.length; i++) {
+                if($scope.group.users[i].username == $scope.user) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Removes the user with the given ID from the list
+        $scope.removeUser = function(id) {
+            for(var i = 0; i < $scope.group.users.length; i++) {
+                if($scope.group.users[i].id == id) {
+                    $scope.group.users.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
+        };
+
+    }]
+);
+
+
+
 /****************************************************************************************************************************************************
  *   __  __           _   _
  *  |  \/  |         | | (_)
@@ -1268,60 +1731,91 @@ angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$s
 // meetingsController -------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('meetingsController', ['RestangularCache', '$scope', 'Page', '$tooltip', '$sce',  function(RestangularCache, $scope, Page, $tooltip, $sce) {
         var date = new Date(new Date - (1000*60*60*24*14));
+        Page.setTitle('Meetings');
 
-        // Get all meetings for the calendar
-        RestangularCache.one('meetings', date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).getList('calendar').then(function(meetingsResponse) {
+        // Create the calendar
+        var calendar = jQuery('#calendar').calendar({
+            language:       'en-US',
+            events_source:  [],
+            tmpl_cache:     true,
+            view:           'week',
+            tmpl_path:      'templates/restangular/html/calendar/',
+            first_day:      1,
+            holidays:       HOLIDAYS,
+            time_start:     TIME_START,
+            time_end:       TIME_END,
+            onAfterEventsLoad: function(events) {
+                if(!events) {
+                    return;
+                }
+            },
+            onAfterViewLoad: function(view) {
+                jQuery('h3.month').text(this.getTitle());
+                jQuery('.btn-group button').removeClass('active');
+                jQuery('button[data-calendar-view="' + view + '"]').addClass('active');
+
+                // Process all links in the calendar
+                jQuery('#calendar a.bsDialog').each(function(index){
+                    // Manually add tooltips (does not work when using template tags because jQuery loads the templates not AngularJS)
+                    $tooltip(jQuery(this), { title: $sce.trustAsHtml(jQuery(this).attr('title')) });
+                });
+            }
+        });
+
+        // Navigation and View calendar buttons
+        jQuery('.btn-group button[data-calendar-nav]').each(function() {
+            jQuery(this).click(function() {
+                calendar.navigate(jQuery(this).data('calendar-nav'));
+            });
+        });
+
+        jQuery('.btn-group button[data-calendar-view]').each(function() {
+            jQuery(this).click(function() {
+                calendar.view(jQuery(this).data('calendar-view'));
+            });
+        });
+
+
+        // Toggle all or only own meetings
+        $scope.showAllMeetings = false;
+        $scope.toggleAllMeetings = function() {
+            // toggle show all/show own
+            $scope.showAllMeetings = !$scope.showAllMeetings;
+
             // Show loading screen
             jQuery('#loading').show();
 
-            $scope.meetings = meetingsResponse;
-            Page.setTitle('Meetings');
-
-            // Create the calendar
-            var calendar = jQuery('#calendar').calendar({
-                language:       'en-US',
-                events_source:  meetingsResponse,
-                tmpl_cache:     true,
-                view:           'week',
-                tmpl_path:      'templates/restangular/html/calendar/',
-                first_day:      1,
-                holidays:       HOLIDAYS,
-                time_start:     TIME_START,
-                time_end:       TIME_END,
-                onAfterEventsLoad: function(events) {
-                    if(!events) {
-                        return;
-                    }
-                },
-                onAfterViewLoad: function(view) {
-                    jQuery('h3.month').text(this.getTitle());
-                    jQuery('.btn-group button').removeClass('active');
-                    jQuery('button[data-calendar-view="' + view + '"]').addClass('active');
-
-                    // Process all links in the calendar
-                    jQuery('#calendar a.bsDialog').each(function(index){
-                        // Manually add tooltips (does not work when using template tags because jQuery loads the templates not AngularJS)
-                        $tooltip(jQuery(this), { title: $sce.trustAsHtml(jQuery(this).attr('title')) });
+            // Get all meetings
+            if($scope.showAllMeetings) {
+                // Get all meetings for the calendar
+                RestangularCache.one('meetings', date.getFullYear() +'-'+ (date.getMonth()+1) +'-'+ date.getDate()).getList('calendar').then(function(meetingsResponse) {
+                    // Set to all meetings
+                    calendar.setOptions({
+                        events_source: meetingsResponse
                     });
-                }
-            });
+                    calendar.view();
 
-            // Navigation and View calendar buttons
-            jQuery('.btn-group button[data-calendar-nav]').each(function() {
-                jQuery(this).click(function() {
-                    calendar.navigate(jQuery(this).data('calendar-nav'));
+                    // Remove loading screen
+                    jQuery('#loading').hide();
                 });
-            });
+            // Get own meetings
+            } else {
+                // Get all meetings for the calendar
+                RestangularCache.one('user', sessionStorage.id).one('meetings', 'calendar').get().then(function(meetingsResponse) {
+                    // Set to all meetings
+                    calendar.setOptions({
+                        events_source: meetingsResponse
+                    });
+                    calendar.view();
 
-            jQuery('.btn-group button[data-calendar-view]').each(function() {
-                jQuery(this).click(function() {
-                    calendar.view(jQuery(this).data('calendar-view'));
+                    // Remove loading screen
+                    jQuery('#loading').hide();
                 });
-            });
+            }
+        };
 
-            // Remove loading screen
-            jQuery('#loading').hide();
-        });
+        // Actually load the meetings
+        $scope.toggleAllMeetings();
 
         // Does the user have permission to create a new meeting?
         $scope.allowCreate = function() {
@@ -1606,53 +2100,61 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
 
         // Get the selected meeting
         RestangularCache.one('meeting', $routeParams.meetingId).get().then(function(meetingResponse) {
-            $scope.meeting          = meetingResponse;
-            angular.copy($scope.meeting, meetingOld);
-            // Page and content titles
-            $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
-            Page.setTitle('Meeting '+ meetingResponse.name);
-            meetingRequestUrl       = meetingResponse.getRequestedUrl();
-
-            // Set the dates and times
-            setDateTimes();
-
-            // When not editing, reformat the agenda
-            if($location.path().indexOf('/edit') == -1) {
-                $scope.meeting.agenda   = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
-            // When editing, load additional information
+            // Error occured?
+            if(meetingResponse.error) {
+                $alert({title: 'Error!', content: meetingResponse.error, type: 'danger'});
+                // Back to meetings overview page
+                $location.path('meetings');
             } else {
-                // Get additional information about the Grids
-                RestangularCache.all('grids').getList().then(function(gridsResponse) {
-                    gridsRequestUrl = gridsResponse.getRequestedUrl();
-                    $scope.grids    = gridsResponse;
-                });
+                $scope.meeting          = meetingResponse;
+                angular.copy($scope.meeting, meetingOld);
+                // Page and content titles
+                $scope.title            = $sce.trustAsHtml(moment(meetingResponse.startDate).format('dddd H:mm') +' - Room '+ meetingResponse.room.id);
+                Page.setTitle('Meeting '+ meetingResponse.name);
+                meetingRequestUrl       = meetingResponse.getRequestedUrl();
 
-                // Get additional meeting rooms
-                $scope.getMeetingRooms();
+                // Set the dates and times
+                setDateTimes();
 
-                // Load meetings on same day
-                var date = new moment().subtract('week', 2).format('YYYY-MM-DD');
-                Restangular.one('meetings', date).getList('calendar').then(function(meetingsResponse) {
-                    calendar = jQuery('#calendar').calendar({
-                        language:       'en-US',
-                        events_source:  meetingsResponse,
-                        tmpl_cache:     true,
-                        view:           'day',
-                        day:            new moment($scope.meeting.startDate).format('YYYY-MM-DD'),
-                        time_start:     TIME_START,
-                        time_end:       TIME_END,
-                        tmpl_path:      partial_path +'/../calendar/',
-                        holidays:       HOLIDAYS,
-                        onAfterViewLoad: function(view) {
-                            jQuery('h4.calendar-date').text(this.getTitle());
-
-                            // Scroll halfway they calendar
-                            var container = jQuery('#calendar').parent('div.calendar-container');
-                            container.scrollTop(container.height() / 2);
-                        }
+                // When not editing, reformat the agenda
+                if($location.path().indexOf('/edit') == -1) {
+                    $scope.meeting.agenda   = $sce.trustAsHtml(meetingResponse.agenda.replace(/\n/g, '<br>').replace(/\ /g, '&nbsp;'));
+                // When editing, load additional information
+                } else {
+                    // Get additional information about the Grids
+                    RestangularCache.all('grids').getList().then(function(gridsResponse) {
+                        gridsRequestUrl = gridsResponse.getRequestedUrl();
+                        $scope.grids    = gridsResponse;
                     });
-                });
+
+                    // Get additional meeting rooms
+                    $scope.getMeetingRooms();
+
+                    // Load meetings on same day
+                    var date = new moment().subtract('week', 2).format('YYYY-MM-DD');
+                    Restangular.one('meetings', date).getList('calendar').then(function(meetingsResponse) {
+                        calendar = jQuery('#calendar').calendar({
+                            language:       'en-US',
+                            events_source:  meetingsResponse,
+                            tmpl_cache:     true,
+                            view:           'day',
+                            day:            new moment($scope.meeting.startDate).format('YYYY-MM-DD'),
+                            time_start:     TIME_START,
+                            time_end:       TIME_END,
+                            tmpl_path:      partial_path +'/../calendar/',
+                            holidays:       HOLIDAYS,
+                            onAfterViewLoad: function(view) {
+                                jQuery('h4.calendar-date').text(this.getTitle());
+
+                                // Scroll halfway they calendar
+                                var container = jQuery('#calendar').parent('div.calendar-container');
+                                container.scrollTop(container.height() / 2);
+                            }
+                        });
+                    });
+                }
             }
+
             // Remove loading screen
             jQuery('#loading').hide();
         });
@@ -1742,7 +2244,7 @@ angularRest.controller('meetingMinutesController', ['RestangularCache', '$scope'
 
                 return $sce.trustAsHtml('<h'+ depth +'>'+ minute.agenda.value +'</h'+ depth +'>');
             } else {
-                return "";
+                return '';
             }
         };
     }]
@@ -1764,7 +2266,13 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
                 grid: { }
             },
             agenda: '1. Opening\n',
-            participants: [],
+            participants: [{
+                    id: sessionStorage.id,
+                    username: sessionStorage.username,
+                    firstName: sessionStorage.firstName,
+                    lastName: sessionStorage.lastName,
+                    email: sessionStorage.email
+            }],
             documents: []
         };
         $scope.grids                    = [];
@@ -1943,6 +2451,7 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
 
         // Creates the meeting by sending it to the server
         $scope.createMeeting = function() {
+            jQuery('#loading').show();
             // Reformat back to the expected format for the API
             $scope.meeting.startDate   = $scope.startDateString.replace(/\//g, '-') +' '+ $scope.startTimeString +':00';
             $scope.meeting.endDate     = $scope.endDateString.replace(/\//g, '-') +' '+ $scope.endTimeString +':00';
@@ -1955,6 +2464,7 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
                     Cache.clearCache();
                     $location.path('meeting/'+ resp.meetingId);
                 }
+                jQuery('#loading').hide();
             });
         };
 
@@ -2222,7 +2732,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
         // Search for the given username
         var usernameSearchResults = [];
-        $scope.userBySearch       = "";
+        $scope.userBySearch       = '';
         $scope.getUserByUsername = function($viewValue) {
             var results = '';
             if($viewValue !== undefined && $viewValue.length >= 3) {
@@ -2353,9 +2863,13 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
 // userController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('userController', ['Restangular', 'RestangularCache', '$scope', '$route', '$routeParams', 'Page', '$alert', '$modal', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $route, $routeParams, Page, $alert, $modal, Cache, $location) {
-        var userRequestUrl   = '';
-        var userOld          = {};
-        $scope.user          = [];
+        var userRequestUrl      = '';
+        var userOld             = {};
+        $scope.user             = {
+            groups: []
+        };
+        $scope.groupname        = '';
+        var groupSearchResults  = [];
 
         // Show loading screen
         jQuery('#loading').show();
@@ -2583,6 +3097,53 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             } else if(func == 'changePicture') {
                 $scope.changePicture();
             }
+        };
+
+        // Search for the given group
+        $scope.getGroupsByName = function($viewValue) {
+            var results = '';
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('groups', $viewValue).get().then(function(groupsResponse) {
+                    groupSearchResults = groupsResponse;
+                    return groupsResponse;
+                });
+            }
+            return results;
+        };
+
+        // Adds the currently selected group to the list
+        $scope.addGroup = function() {
+            for(var i = 0; i < groupSearchResults.length; i++) {
+                // Only add user when match found and not already listed
+                if(groupSearchResults[i].name == $scope.groupname) {
+                    if(!isDuplicateGroup()) {
+                        $scope.user.groups.push(groupSearchResults[i]);
+                    } else {
+                        $alert({title: 'Duplicate!', content: 'The user is already a member of the group '+ groupSearchResults[i].name, type: 'warning'});
+                    }
+                }
+            }
+        };
+
+        // Checks for duplicate groups
+        function isDuplicateGroup() {
+            for(var i = 0; i < $scope.user.groups.length; i++) {
+                if($scope.user.groups[i].name == $scope.groupname) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Removes the group with the given ID from the list
+        $scope.removeGroup = function(id) {
+            for(var i = 0; i < $scope.user.groups.length; i++) {
+                if($scope.user.groups[i].id == id) {
+                    $scope.user.groups.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
         };
 
         // Open the form for creating a new avatar

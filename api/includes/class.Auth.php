@@ -5,7 +5,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is used to check authorization tokens
  *
  * @author Niels Witte
- * @version 0.2
+ * @version 0.4
+ * @data April 22nd, 2014
  * @since February 19th, 2014
  */
 class Auth {
@@ -14,6 +15,12 @@ class Auth {
     private static $timestamp;
     private static $userId;
     private static $user;
+    private static $groupFiles;
+    /**
+     * Array containing all files of the currently loggedIn user
+     * @var array
+     */
+    private static $userFiles;
 
     const NONE      = 0b000; // 0 - No rights
     const READ      = 0b100; // 4 - Read access
@@ -112,25 +119,108 @@ class Auth {
     }
 
     /**
+     * Check if the user has access to the comments of this type and item
+     *
+     * @param string $type - The type of comment
+     * @param integer $itemId - The id of the item to comment on
+     * @return boolean
+     */
+    public static function checkComment($type, $itemId) {
+        $result = FALSE;
+        // All permission?
+        if(\Auth::checkRights('comment', \Auth::ALL)) {
+            $result = TRUE;
+        // Extended permissions check for specific comment types
+        } elseif(in_array($type, array('file', 'document', 'presentation', 'page', 'slide'))) {
+            $db = \Helper::getDB();
+            // Get parent of page or slide
+            if($type == 'page') {
+                $db->where('id', $db->escape($itemId));
+                $document = $db->getOne('document_pages');
+                $parentId = $document['documentId'];
+            } else if($type == 'slide') {
+                $db->where('id', $db->escape($itemId));
+                $document = $db->getOne('document_slides');
+                $parentId = $document['documentId'];
+            } else {
+                $parentId = $itemId;
+            }
+
+            // User has permission to view comments?
+            if(\Auth::checkUserFiles($parentId) || \Auth::checkGroupFile($parentId)) {
+                $result = TRUE;
+            }
+        // No need to check type?
+        } else {
+            $result = TRUE;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Checks if the given fileId is owned by the user
+     *
+     * @param integer $fileId
+     * @return boolean
+     */
+    public static function checkUserFiles($fileId) {
+        if(!is_array(self::$userFiles)) {
+            $db                 = \Helper::getDB();
+            // Get all files owned by the current user
+            $db->where('ownerId', $db->escape(\Auth::getUser()->getId()));
+            $files              = $db->get('documents');
+            self::$userFiles    = array();
+            foreach($files as $file) {
+                self::$userFiles[] = $file['id'];
+            }
+        }
+
+        return in_array($fileId, self::$userFiles);
+    }
+
+    /**
+     * Checks if the user is part of atleast one group which can access the given file
+     *
+     * @param integer $fileId
+     * @return boolean
+     */
+    public static function checkGroupFile($fileId) {
+        $user = self::getUser();
+        $db = \Helper::getDB();
+
+        if(!is_array(self::$groupFiles)) {
+            $db->where('u.userId', $db->escape($user->getId()));
+            $db->join('group_users u', 'u.groupId = d.groupId', 'INNER');
+            $results = $db->get('group_documents d', NULL, 'd.documentId');
+            self::$groupFiles = array();
+            // Convert to one dimensional array
+            foreach($results as $result) {
+                self::$groupFiles[] = $result['documentId'];
+            }
+        }
+
+        return in_array($fileId, self::$groupFiles);
+    }
+
+    /**
      * Validates the given token and updates its expiration time
      *
      * @return boolean
      */
     private static function checkToken() {
         $db = \Helper::getDB();
-        $params = array(
-            $db->escape(self::$token),
-            $db->escape(self::$ip),
-            $db->escape(self::$timestamp)
-        );
-        $result = $db->rawQuery('SELECT count(*) AS count, userId FROM tokens WHERE token = ? AND ip = ? AND expires >= ? LIMIT 1', $params);
+        $db->where('token', $db->escape(self::$token));
+        $db->where('ip', $db->escape(self::$ip));
+        $db->where('expires', array('>=' => $db->escape(self::$timestamp)));
+        $result = $db->getOne('tokens', 'COUNT(*) AS count, userId');
 
         // Extend token expiration time
-        if($result[0]['count'] == 1) {
-            self::$userId       = $result[0]['userId'];
+        if($result && $result['count'] == 1) {
+            self::$userId       = $result['userId'];
             $db->where('token', $db->escape(self::$token));
             // OpenSim uses EXPIRES2
-            if($result[0]['userId'] == 0) {
+            if($result['userId'] == 0) {
                 $data['expires']    = $db->escape(date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES2)));
             } else {
                 $data['expires']    = $db->escape(date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES)));
@@ -138,7 +228,7 @@ class Auth {
             $db->update('tokens', $data);
         }
 
-        return $result[0]['count'] == 1 ? TRUE : FALSE;
+        return $result['count'] == 1 ? TRUE : FALSE;
     }
 
     /**
