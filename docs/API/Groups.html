@@ -65,17 +65,22 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>Groups                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Thursday, April 17, 2014                                        </span>
+                                            Tuesday, April 22, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            12:14 PM                                        </span>
+                                            9:44 AM                                        </span>
                                 </div>
                                                         <p>Users can be added to groups to share access to specific files.</p>
 
 <h2>Get groups</h2>
 
-<p>To retrieve a list of all available groups the following request can be made to the API:</p>
+<p>To retrieve a list of 50 available groups the following request can be made to the API:</p>
 
 <pre><code class="language-http">GET /api/groups/ HTTP/1.1
+</code></pre>
+
+<p>Or starting at a given offset:</p>
+
+<pre><code class="language-http">GET /api/groups/&lt;OFFSET&gt;/ HTTP/1.1
 </code></pre>
 
 <p>This will return an array with all groups, containing their ID and name.</p>
@@ -95,6 +100,135 @@
 <p>To search for a specific group, it is possible to search by using a minimum of 3 characters of the group name.</p>
 
 <pre><code class="language-http">GET /api/groups/&lt;SEARCH&gt;/ HTTP/1.1
+</code></pre>
+
+<h2>Specific group</h2>
+
+<p>A specific group can be retrieved with its full details by using the following API URL:</p>
+
+<pre><code class="language-http">GET /api/group/&lt;GROUP-ID&gt;/ HTTP/1.1
+</code></pre>
+
+<p>This will return the following JSON result:</p>
+
+<pre><code class="language-json">{
+    "id": "1",
+    "name": "The Does",
+    "files": [
+        {
+            "id": 133,
+            "type": "presentation",
+            "user": {
+                "id": 3,
+                "username": "johndoe",
+                "firstName": "John",
+                "lastName": "Doe",
+                "email": "john@doe.com",
+                "picture": false,
+                "lastLogin": "2014-04-18 12:42:32"
+            },
+            "title": "Example Presentation",
+            "creationDate": "2014-04-14 15:55:31",
+            "modificationDate": "2014-04-14 15:55:31",
+            "sourceFile": "source.pdf",
+            "url": "http://localhost:80/OpenSim-CMS/api/presentation/133/"
+        }
+    ],
+    "users": [
+        {
+            "id": 3,
+            "username": "johndoe",
+            "firstName": "John",
+            "lastName": "Doe",
+            "email": "john@doe.com",
+            "picture": false,
+            "lastLogin": "2014-04-18 12:42:32"
+        },
+        {
+            "id": 4,
+            "username": "janedoe",
+            "firstName": "Jane",
+            "lastName": "Doe",
+            "email": "jane@doe.com",
+            "picture": "http://localhost:80/OpenSim-CMS/api/user/4/picture/",
+            "lastLogin": "2014-04-17 11:21:21"
+        }
+    ]
+}
+</code></pre>
+
+<h2>Create group</h2>
+
+<p>Updating, creating and deleting groups requires at least <code>WRITE</code> permission to the User API.<br />
+Adding files to a group can be done with less permissions by going to the file you want to add and share it with the group.</p>
+
+<pre><code class="language-http">POST /api/group/ HTTP/1.1
+</code></pre>
+
+<table>
+<thead>
+<tr>
+  <th>Parameter</th>
+  <th>Type</th>
+  <th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>name</td>
+  <td>string</td>
+  <td>The group's name</td>
+</tr>
+</tbody>
+</table>
+
+<p>This will return, when all went right, the following JSON:</p>
+
+<pre><code class="language-json">{
+    "success": true,
+    "groupId": 2
+}
+</code></pre>
+
+<h2>Update group</h2>
+
+<p>Changing information about the group can be done by using the following API function:</p>
+
+<pre><code class="language-http">PUT /api/group/&lt;GROUP-ID&gt;/ HTTP/1.1
+</code></pre>
+
+<table>
+<thead>
+<tr>
+  <th>Parameter</th>
+  <th>Type</th>
+  <th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>name</td>
+  <td>string</td>
+  <td>The group's name</td>
+</tr>
+<tr>
+  <td>files</td>
+  <td>array</td>
+  <td>[Optional] List with file IDs or file objects</td>
+</tr>
+<tr>
+  <td>users</td>
+  <td>array</td>
+  <td>[Optional] List with user IDs or User objects</td>
+</tr>
+</tbody>
+</table>
+
+<h2>Delete group</h2>
+
+<p>Removing a group can cause users to lose access to certain files. Please be careful with this.</p>
+
+<pre><code class="language-http">DELETE /api/group/&lt;GROUP-ID&gt;/ HTTP/1.1
 </code></pre>
                                                     </article>
                     </div>
