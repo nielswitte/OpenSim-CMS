@@ -77,27 +77,27 @@ class Presentation extends Module {
             // Retrieve all documents the user can access as the member of a group
             // or as documents owned by the user self
             $resutls = $db->rawQuery('
-                        SELECT DISTINCT
-                            d.*,
-                            u.*,
-                            d.id AS documentId,
-                            u.id AS userId
-                        FROM
-                            documents d
-                        LEFT JOIN
-                            users u
-                        ON
-                            d.ownerId = u.id
-                        WHERE
-                            d.type = ?
-                        AND (
-                            d.ownerId = ?
-                        OR
-                            d.id IN (SELECT gd.documentId FROM group_documents gd, group_users gu WHERE gu.userId = ? AND gu.groupId = gd.groupId)
-                        ) ORDER BY
-                            d.creationDate DESC
-                        LIMIT
-                            ?, ?'
+                SELECT DISTINCT
+                    d.*,
+                    u.*,
+                    d.id AS documentId,
+                    u.id AS userId
+                FROM
+                    documents d
+                LEFT JOIN
+                    users u
+                ON
+                    d.ownerId = u.id
+                WHERE
+                    d.type = ?
+                AND (
+                    d.ownerId = ?
+                OR
+                    d.id IN (SELECT gd.documentId FROM group_documents gd, group_users gu WHERE gu.userId = ? AND gu.groupId = gd.groupId)
+                ) ORDER BY
+                    d.creationDate DESC
+                LIMIT
+                    ?, ?'
                 , $params);
 
         // No extra filtering required

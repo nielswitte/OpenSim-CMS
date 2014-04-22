@@ -529,29 +529,23 @@ class User extends Module {
         // Retrieve all documents the user can access as the member of a group
         // or as documents owned by the user self
         $documents = $db->rawQuery('
-                    SELECT DISTINCT
-                        d.*,
-                        u.*,
-                        d.id AS documentId,
-                        u.id AS userId
-                    FROM
-                        group_documents gd,
-                        group_users gu,
-                        documents d
-                    LEFT JOIN
-                        users u
-                    ON
-                        d.ownerId = u.id
-                    WHERE (
-                        gd.documentId = d.id
-                    AND
-                        gd.groupId = gu.groupId
-                    AND
-                        gu.userId = ?
-                    ) OR
-                        d.ownerId = ?
-                    ORDER BY
-                        d.creationDate DESC'
+            SELECT DISTINCT
+                d.*,
+                u.*,
+                d.id AS documentId,
+                u.id AS userId
+            FROM
+                documents d
+            LEFT JOIN
+                users u
+            ON
+                d.ownerId = u.id
+            WHERE
+                d.ownerId = ?
+            OR
+                d.id IN (SELECT gd.documentId FROM group_documents gd, group_users gu WHERE gu.userId = ? AND gu.groupId = gd.groupId)
+            ORDER BY
+                d.creationDate DESC'
             , $params);
 
         foreach($documents as $document) {
