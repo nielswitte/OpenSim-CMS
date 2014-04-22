@@ -29,7 +29,7 @@
     <table class="table table-bordered table-striped table-responsive table-hover" id="documentsList">
         <thead>
             <tr>
-                <th>
+                <th class="col-sm-1">
                     <a ng-click="orderByField='id'; reverseSort = !reverseSort" title="Sort by ID">#</a>
                     <span ng-show="orderByField == 'id'">
                         <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
@@ -71,7 +71,7 @@
                         <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
                     </span>
                 </th>
-                <th> </th>
+                <th class="col-sm-1"> </th>
             </tr>
         </thead>
         <tbody>
