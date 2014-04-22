@@ -28,7 +28,12 @@
         <div class="form-group">
             <div class="col-sm-12">
                 <p ng-repeat="file in group.files">
-                    <span class="label label-default">{{file.type}}</span> <a href="#!/document/{{file.id}}">{{file.title}} <small>({{file.creationDate}})</small></a>
+                    <span title="{{file.type}}" bs-tooltip>
+                        <span class="label label-primary" ng-show="file.type == 'presentation'"><i class="glyphicon glyphicon-th-large"></i></span>
+                        <span class="label label-info" ng-show="file.type == 'document'"><i class="glyphicon glyphicon-file"></i></span>
+                        <span class="label label-danger" ng-show="file.type == 'image'"><i class="glyphicon glyphicon-picture"></i></span>
+                    </span>
+                    <a href="#!/document/{{file.id}}">{{file.title}} <small>({{file.creationDate}})</small></a>
                 </p>
                 <p ng-show="group.files.length === 0">None</p>
             </div>

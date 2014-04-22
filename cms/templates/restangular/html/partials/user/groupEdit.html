@@ -29,7 +29,12 @@
                 <ul class="list-group list-group-hover" ng-show="group.files.length >= 1">
                     <li class="list-group-item" ng-repeat="file in group.files">
                         <button type="button" class="btn btn-danger btn-xs" ng-click="removeDocument(file.id)"><i class="glyphicon glyphicon-remove"></i></button>
-                        <span class="label label-default">{{file.type}}</span> {{file.title}} <small>({{file.creationDate}})</small>
+                        <span title="{{file.type}}" bs-tooltip>
+                            <span class="label label-primary" ng-show="file.type == 'presentation'"><i class="glyphicon glyphicon-th-large"></i></span>
+                            <span class="label label-info" ng-show="file.type == 'document'"><i class="glyphicon glyphicon-file"></i></span>
+                            <span class="label label-danger" ng-show="file.type == 'image'"><i class="glyphicon glyphicon-picture"></i></span>
+                        </span>
+                        {{file.title}} <small>({{file.creationDate}})</small>
                     </li>
                 </ul>
                 <ul class="list-group" ng-show="group.files.length == 0">

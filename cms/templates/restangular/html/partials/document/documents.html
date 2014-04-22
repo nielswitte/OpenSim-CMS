@@ -44,13 +44,6 @@
                     </span>
                 </th>
                 <th>
-                    <a ng-click="orderByField='type'; reverseSort = !reverseSort" title="Sort by type">Type</a>
-                    <span ng-show="orderByField == 'type'">
-                        <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
-                        <i class="glyphicon glyphicon-chevron-down" ng-show="reverseSort"></i>
-                    </span>
-                </th>
-                <th>
                     <a ng-click="orderByField='user.username'; reverseSort = !reverseSort" title="Sort by owner">Owner</a>
                     <span ng-show="orderByField == 'user.username'">
                         <i class="glyphicon glyphicon-chevron-up" ng-hide="reverseSort"></i>
@@ -77,8 +70,14 @@
         <tbody>
             <tr ng-repeat="(index, document) in documentsList | orderBy:orderByField:reverseSort | filter:searchText">
                 <td>{{document.id}}</td>
-                <td><a ng-href="#!/document/{{document.id}}">{{document.title}}</a></td>
-                <td>{{document.type}}</td>
+                <td>
+                    <span title="{{document.type}}" bs-tooltip>
+                        <span class="label label-primary" ng-show="document.type == 'presentation'"><i class="glyphicon glyphicon-th-large"></i></span>
+                        <span class="label label-info" ng-show="document.type == 'document'"><i class="glyphicon glyphicon-file"></i></span>
+                        <span class="label label-danger" ng-show="document.type == 'image'"><i class="glyphicon glyphicon-picture"></i></span>
+                    </span>
+                    <a ng-href="#!/document/{{document.id}}">{{document.title}}</a>
+                </td>
                 <td><a ng-href="#!/user/{{document.user.id}}">{{document.user.username}} ({{document.user.firstName}} {{document.user.lastName}})</a></td>
                 <td>{{document.creationDate}}</td>
                 <td>{{document.modificationDate}}</td>
