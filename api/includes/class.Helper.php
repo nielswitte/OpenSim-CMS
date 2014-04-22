@@ -106,7 +106,7 @@ class Helper {
      * @return strin
      */
     public static function filterString($string) {
-        return preg_replace("#[^a-zA-Z0-9-_ \.\(\)\[\]]*#", '', $string);
+        return preg_replace("#[^a-zA-Z0-9-_ \.\(\)]*#", '', $string);
     }
 
     /**
