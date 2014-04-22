@@ -38,7 +38,7 @@ class FileController {
 
         // Remove comments for this file
         $commentCtrl = new \Controllers\CommentController();
-        $commentCtrl->removeCommentsByItem($this->file->getType(), $this->file->getId());
+        $commentCtrl->removeCommentsByItem('file', $this->file->getId());
 
         // If it's a presentation, remove all comments for slides as well
         if($this->file->getType() == 'presentation') {
