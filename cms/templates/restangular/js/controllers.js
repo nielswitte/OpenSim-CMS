@@ -1556,13 +1556,17 @@ angularRest.controller('groupsController', ['RestangularCache', 'Restangular', '
 
 // groupController -----------------------------------------------------------------------------------------------------------------------------------
 angularRest.controller('groupController', ['Restangular', 'RestangularCache', '$scope', '$route', '$routeParams', 'Page', '$alert', '$modal', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $route, $routeParams, Page, $alert, $modal, Cache, $location) {
-        var groupRequestUrl      = '';
-        var groupOld             = {};
-        $scope.group             = {
+        var groupRequestUrl         = '';
+        var groupOld                = {};
+        $scope.group                = {
             groups: []
         };
-        $scope.groupname        = '';
-        var groupSearchResults  = [];
+        $scope.groupname            = '';
+        var groupSearchResults      = [];
+        $scope.document             = '';
+        var documentSearchResults   = [];
+        var usernameSearchResults   = [];
+        $scope.user                 = '';
 
         // Show loading screen
         jQuery('#loading').show();
@@ -1616,6 +1620,102 @@ angularRest.controller('groupController', ['Restangular', 'RestangularCache', '$
         $scope.resetGroup = function() {
             angular.copy(groupOld, $scope.group);
         };
+
+
+        // Search for the given documents
+        $scope.getDocumentByTitle = function($viewValue) {
+            var results = '';
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('files', $viewValue).get().then(function(documentsResponse) {
+                    documentSearchResults = documentsResponse;
+                    return documentsResponse;
+                });
+            }
+            return results;
+        };
+
+        // Adds the currently selected documents to the list
+        $scope.addDocument = function() {
+            for(var i = 0; i < documentSearchResults.length; i++) {
+                // Only add user when match found and not already listed
+                if(documentSearchResults[i].title == $scope.document) {
+                    if(!isDuplicateDocument()) {
+                        $scope.group.files.push(documentSearchResults[i]);
+                    } else {
+                        $alert({title: 'Duplicate!', content: 'The document '+ documentSearchResults[i].title + ' is already added to this meeting', type: 'warning'});
+                    }
+                }
+            }
+        };
+
+        // Checks for duplicate documents
+        function isDuplicateDocument() {
+            for(var i = 0; i < $scope.group.files.length; i++) {
+                if($scope.group.files[i].title == $scope.document) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Removes the documents with the given ID from the list
+        $scope.removeDocument = function(id) {
+            for(var i = 0; i < $scope.group.files.length; i++) {
+                if($scope.group.files[i].id == id) {
+                    $scope.group.files.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Search for the given username
+        $scope.getUserByUsername = function($viewValue) {
+            var results = '';
+            if($viewValue !== undefined && $viewValue.length >= 3) {
+                results = RestangularCache.one('users', $viewValue).get().then(function(usersResponse) {
+                    usernameSearchResults = usersResponse;
+                    return usersResponse;
+                });
+            }
+            return results;
+        };
+
+        // Adds the currently selected user to the list
+        $scope.addUser = function() {
+            for(var i = 0; i < usernameSearchResults.length; i++) {
+                // Only add user when match found and not already listed
+                if(usernameSearchResults[i].username == $scope.user) {
+                    if(!isDuplicateUser()) {
+                        $scope.group.users.push(usernameSearchResults[i]);
+                    } else {
+                        $alert({title: 'Duplicate!', content: 'The user '+ usernameSearchResults[i].username + ' is already a participant for this meeting', type: 'warning'});
+                    }
+                }
+            }
+        };
+
+        // Checks for duplicate users
+        function isDuplicateUser() {
+            for(var i = 0; i < $scope.group.users.length; i++) {
+                if($scope.group.users[i].username == $scope.user) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        // Removes the user with the given ID from the list
+        $scope.removeUser = function(id) {
+            for(var i = 0; i < $scope.group.users.length; i++) {
+                if($scope.group.users[i].id == id) {
+                    $scope.group.users.splice(i, 1);
+                    return true;
+                }
+            }
+            return false;
+        };
+
     }]
 );
 
