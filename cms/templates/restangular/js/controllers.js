@@ -864,7 +864,7 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
         jQuery('#loading').show();
 
         // Get a list with documents
-        RestangularCache.one('files', (paginationOffset - 1) * perPage).getList().then(function(documentsResponse) {
+        RestangularCache.one('files').getList(''+ (paginationOffset - 1) * perPage).then(function(documentsResponse) {
             $scope.documentsList = documentsResponse;
             Page.setTitle('Files');
             requestDocumentsUrl = documentsResponse.getRequestedUrl();
@@ -2714,7 +2714,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
         jQuery('#loading').show();
 
         // Get list with users
-        RestangularCache.one('users', (paginationOffset - 1) * perPage).getList().then(function(usersResponse) {
+        RestangularCache.one('users').getList(''+ (paginationOffset - 1) * perPage).then(function(usersResponse) {
             $scope.usersList = usersResponse;
             Page.setTitle('Users');
             requestUsersUrl = usersResponse.getRequestedUrl();
