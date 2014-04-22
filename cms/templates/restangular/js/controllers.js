@@ -1482,8 +1482,6 @@ angularRest.controller('groupsController', ['RestangularCache', 'Restangular', '
         $scope.allowUpdate = function(groupId) {
             if(sessionStorage.userPermission >= WRITE) {
                 return true;
-            } else if(sessionStorage.userPermission >= READ && groupId == sessionStorage.id) {
-                return true;
             } else {
                 return false;
             }
@@ -1555,7 +1553,8 @@ angularRest.controller('groupsController', ['RestangularCache', 'Restangular', '
 );
 
 // groupController -----------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('groupController', ['Restangular', 'RestangularCache', '$scope', '$route', '$routeParams', 'Page', '$alert', '$modal', 'Cache', '$location', function(Restangular, RestangularCache, $scope, $route, $routeParams, Page, $alert, $modal, Cache, $location) {
+angularRest.controller('groupController', ['RestangularCache', '$scope', '$routeParams', 'Page', '$alert', 'Cache', '$location',
+    function(RestangularCache, $scope, $routeParams, Page, $alert, Cache, $location) {
         var groupRequestUrl         = '';
         var groupOld                = {};
         $scope.group                = {
@@ -1589,8 +1588,6 @@ angularRest.controller('groupController', ['Restangular', 'RestangularCache', '$
         // Allow changing group information
         $scope.allowUpdate = function() {
             if(sessionStorage.userPermission >= WRITE) {
-                return true;
-            } else if(sessionStorage.userPermission >= READ && $routeParams.groupId == sessionStorage.id) {
                 return true;
             } else {
                 return false;

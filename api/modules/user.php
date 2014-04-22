@@ -64,10 +64,10 @@ class User extends Module {
         $this->api->addRoute("/^\/groups\/?$/",                                         'getGroups',                $this, 'GET',    \Auth::READ);     // Gets a list with groups 50 groups
         $this->api->addRoute("/^\/groups\/(\d+)\/?$/",                                  'getGroups',                $this, 'GET',    \Auth::READ);     // Gets a list with groups 50 groups starting at given offset
         $this->api->addRoute("/^\/groups\/([a-zA-Z0-9-_ \.\(\)\[\]]{3,}+)\/?$/",        'getGroupsByName',          $this, 'GET',    \Auth::READ);     // Gets a list with groups
-        $this->api->addRoute("/^\/group\/?$/",                                          'createGroup',              $this, 'POST',   \Auth::EXECUTE);  // Create a new group
+        $this->api->addRoute("/^\/group\/?$/",                                          'createGroup',              $this, 'POST',   \Auth::WRITE);    // Create a new group
         $this->api->addRoute("/^\/group\/(\d+)\/?$/",                                   'getGroupById',             $this, 'GET',    \Auth::READ);     // Gets a group bu ID
-        $this->api->addRoute("/^\/group\/(\d+)\/?$/",                                   'updateGroupById',          $this, 'PUT',    \Auth::EXECUTE);  // Update group by ID
-        $this->api->addRoute("/^\/group\/(\d+)\/?$/",                                   'removeGroupById',          $this, 'DELETE', \Auth::EXECUTE);  // Remove group by ID
+        $this->api->addRoute("/^\/group\/(\d+)\/?$/",                                   'updateGroupById',          $this, 'PUT',    \Auth::WRITE);    // Update group by ID
+        $this->api->addRoute("/^\/group\/(\d+)\/?$/",                                   'removeGroupById',          $this, 'DELETE', \Auth::WRITE);    // Remove group by ID
     }
 
     /**
