@@ -67,7 +67,7 @@
                 <ul class="list-group" ng-show="user.groups.length == 0">
                     <li class="list-group-item">None</li>
                 </ul>
-                <div class="input-group">
+                <div class="input-group" ng-show="allowAddGroup()">
                     <input type="text" class="form-control" value="" placeholder="Group to add" ng-model="groupname" ng-options="group.name as group.name for group in getGroupsByName($viewValue)" bs-typeahead>
                     <span class="input-group-btn" ng-click="addGroup()"><button type="button" class="btn btn-success"><i class="glyphicon glyphicon-plus"></i> Add group</button></span>
                 </div>

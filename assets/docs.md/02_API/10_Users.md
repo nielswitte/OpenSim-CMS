@@ -169,6 +169,8 @@ PUT /api/user/<USER-ID>/ HTTP/1.1
 | permissions       | Array     | The permission levels for the user (see permissions)              |
 | groups            | Array     | An array containing group IDs `[1,2,3]` or Group objects `[{id: 1, name: x}, {id: 2, name: y}]` |
 
+Users without at least `WRITE` permission can only remove themselves from groups, they cannot add new groups.
+
 ## Change profile picture
 Attach a profile picture to the given user, which will be resized to 250x250 pixels and displayed in the CMS for example next to comments and on the user's profile page. When you upload a new picture the previous picture will be overwritten.
 

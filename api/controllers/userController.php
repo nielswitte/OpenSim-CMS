@@ -328,8 +328,13 @@ class UserController {
         $removeIds  = array_diff($oldGroupIds, $groupIds);
         $remove     = $this->removeFromGroupIds($removeIds);
         $addIds     = array_diff($groupIds, $oldGroupIds);
-        $add        = $this->addToGroupIds($addIds);
-
+        // Only allow add when user has WRITE permission to User API
+        if(\Auth::checkRights('user', \Auth::WRITE)) {
+            $add        = $this->addToGroupIds($addIds);
+        } else {
+            $add        = FALSE;
+        }
+        
         // Something updated?
         return $remove || $add;
     }

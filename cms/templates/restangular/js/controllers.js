@@ -2921,6 +2921,11 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
             }
         };
 
+        // User has permission to addGroups
+        $scope.allowAddGroup = function() {
+            return sessionStorage.userPermission >= WRITE;
+        };
+
         // Open modal dialog to change the user's password
         $scope.changePasswordForm = function() {
             $scope.template         = partial_path +'/user/userPasswordForm.html';
