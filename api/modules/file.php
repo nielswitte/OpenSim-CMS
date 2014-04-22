@@ -15,7 +15,7 @@ require_once dirname(__FILE__) .'/../controllers/fileController.php';
  *
  * @author Niels Witte
  * @version 0.7
- * @date April 20th, 2014
+ * @date April 22nd, 2014
  * @since March 3rd, 2014
  */
 class File extends Module{
@@ -72,28 +72,22 @@ class File extends Module{
             // This query fails when written as DB object
             // Retrieve all documents the user can access as the member of a group
             // or as documents owned by the user self
-            $resutls = $db->rawQuery('
+            $results = $db->rawQuery('
                         SELECT DISTINCT
                             d.*,
                             u.*,
                             d.id AS documentId,
                             u.id AS userId
                         FROM
-                            group_documents gd,
-                            group_users gu,
                             documents d
                         LEFT JOIN
                             users u
                         ON
                             d.ownerId = u.id
-                        WHERE (
-                            gd.documentId = d.id
-                        AND
-                            gd.groupId = gu.groupId
-                        AND
-                            gu.userId = ?
-                        ) OR
+                        WHERE
                             d.ownerId = ?
+                        OR
+                            d.id IN (SELECT gd.documentId FROM group_documents gd, group_users gu WHERE gu.userId = ? AND gu.groupId = gd.groupId)
                         ORDER BY
                             d.creationDate DESC
                         LIMIT
@@ -105,12 +99,12 @@ class File extends Module{
             // Get 50 presentations from the given offset
             $db->join('users u', 'd.ownerId = u.id', 'LEFT');
             $db->orderBy('d.creationDate', 'DESC');
-            $resutls = $db->get('documents d', array($args[1], 50), '*, d.id AS documentId, u.id AS userId');
+            $results = $db->get('documents d', array($args[1], 50), '*, d.id AS documentId, u.id AS userId');
         }
 
         // Process results
         $data           = array();
-        foreach($resutls as $result) {
+        foreach($results as $result) {
             $user       = new \Models\User($result['userId'], $result['username'], $result['email'], $result['firstName'], $result['lastName'], $result['lastLogin']);
             $file       = new \Models\File($result['documentId'], $result['type'], $result['title'], $user, $result['creationDate'], $result['modificationDate'], $result['file']);
             $data[]     = $this->getFileData($file, FALSE);
@@ -409,7 +403,11 @@ class File extends Module{
         $fileCtrl   = new \Controllers\FileController($file);
         $input      = \Helper::getInput(TRUE);
         $data       = FALSE;
+
         // Check if user has permission to update this file's groups
+        if(!\Auth::checkRights($this->getName(), \Auth::ALL) && !\Auth::checkUserFiles($file->getId()) && !\Auth::checkGroupFile($file->getId())) {
+            throw new \Exception('You do not have permission to change the sharing settings of this file', 10);
+        }
 
         // Validate parameters for setting groups
         if($fileCtrl->validateParametersGroups($input)) {

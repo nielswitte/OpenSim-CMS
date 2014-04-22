@@ -5,8 +5,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is used to check authorization tokens
  *
  * @author Niels Witte
- * @version 0.3a
- * @data April 17th, 2014
+ * @version 0.4
+ * @data April 22nd, 2014
  * @since February 19th, 2014
  */
 class Auth {
@@ -16,6 +16,11 @@ class Auth {
     private static $userId;
     private static $user;
     private static $groupFiles;
+    /**
+     * Array containing all files of the currently loggedIn user
+     * @var array
+     */
+    private static $userFiles;
 
     const NONE      = 0b000; // 0 - No rights
     const READ      = 0b100; // 4 - Read access
@@ -114,6 +119,27 @@ class Auth {
     }
 
     /**
+     * Checks if the given fileId is owned by the user
+     *
+     * @param integer $fileId
+     * @return boolean
+     */
+    public static function checkUserFiles($fileId) {
+        if(!is_array(self::$userFiles)) {
+            $db                 = \Helper::getDB();
+            // Get all files owned by the current user
+            $db->where('ownerId', $db->escape(\Auth::getUser()->getId()));
+            $files              = $db->get('documents');
+            self::$userFiles    = array();
+            foreach($files as $file) {
+                self::$userFiles[] = $file['id'];
+            }
+        }
+
+        return in_array($fileId, self::$userFiles);
+    }
+
+    /**
      * Checks if the user is part of atleast one group which can access the given file
      *
      * @param integer $fileId
@@ -123,10 +149,11 @@ class Auth {
         $user = self::getUser();
         $db = \Helper::getDB();
 
-        if(self::$groupFiles === NULL) {
+        if(!is_array(self::$groupFiles)) {
             $db->where('u.userId', $db->escape($user->getId()));
             $db->join('group_users u', 'u.groupId = d.groupId', 'INNER');
             $results = $db->get('group_documents d', NULL, 'd.documentId');
+            self::$groupFiles = array();
             // Convert to one dimensional array
             foreach($results as $result) {
                 self::$groupFiles[] = $result['documentId'];

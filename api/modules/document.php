@@ -13,8 +13,8 @@ require_once dirname(__FILE__) .'/../controllers/pageController.php';
  * Implements the functions for documents
  *
  * @author Niels Witte
- * @version 0.5
- * @date April 17th, 2014
+ * @version 0.5a
+ * @date April 22nd, 2014
  * @since March 3rd, 2014
  */
 class Document extends Module {
@@ -79,8 +79,6 @@ class Document extends Module {
                             d.id AS documentId,
                             u.id AS userId
                         FROM
-                            group_documents gd,
-                            group_users gu,
                             documents d
                         LEFT JOIN
                             users u
@@ -89,14 +87,10 @@ class Document extends Module {
                         WHERE
                             d.type = ?
                         AND (
-                            gd.documentId = d.id
-                        AND
-                            gd.groupId = gu.groupId
-                        AND
-                            gu.userId = ?
-                        ) OR
                             d.ownerId = ?
-                        ORDER BY
+                        OR
+                            d.id IN (SELECT gd.documentId FROM group_documents gd, group_users gu WHERE gu.userId = ? AND gu.groupId = gd.groupId)
+                        ) ORDER BY
                             d.creationDate DESC
                         LIMIT
                             ?, ?'

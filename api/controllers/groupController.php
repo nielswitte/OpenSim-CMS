@@ -7,10 +7,14 @@ defined('EXEC') or die('Config not loaded');
  * This class is the group controller
  *
  * @author Niels Witte
- * @version 0.1
- * @since April 21st, 2014
+ * @version 0.2
+ * @since April 22nd, 2014
  */
 class GroupController {
+    /**
+     * The group to control
+     * @var \Models\Group
+     */
     private $group;
 
     /**
@@ -197,6 +201,7 @@ class GroupController {
 
     /**
      * Adds the file with an ID that is in the array to the group
+     * You can only add files to which you have access!
      *
      * @param array $ids - List with file IDs
      * @return boolean
@@ -204,12 +209,17 @@ class GroupController {
     public function addFileIds($ids) {
         $db     = \Helper::getDB();
         $result = FALSE;
+
+        // Process all files the user wants to add
         foreach($ids as $id) {
-            $data = array(
-                'fileId'    => $db->escape($id),
-                'groupId'   => $db->escape($this->group->getId())
-            );
-            $result = $db->insert('group_documents', $data);
+            // Only allow adding files to which the user has access to
+            if(\Auth::checkUserFiles($id) || \Auth::checkGroupFile($id)) {
+                $data = array(
+                    'fileId'    => $db->escape($id),
+                    'groupId'   => $db->escape($this->group->getId())
+                );
+                $result = $db->insert('group_documents', $data);
+            }
         }
 
         return $result;
