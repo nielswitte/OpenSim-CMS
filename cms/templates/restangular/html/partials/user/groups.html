@@ -5,12 +5,14 @@
 <div class="page-header">
     <h1>Groups <small>Overview</small></h1>
 </div>
-<div class="toolbar toolbar-top" ng-show="allowCreate()">
-    <button ng-click="newGroup()" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> New group</button>
+<div class="toolbar toolbar-top">
+    <button ng-click="newGroup()" class="btn btn-default" ng-show="allowCreate()"><i class="glyphicon glyphicon-plus"></i> New group</button>
+    
     <div class="input-group col-sm-3 pull-right">
         <input type="text" class="form-control" value="" placeholder="Search for group" ng-model="groupBySearch" ng-options="group.name as group.name for group in getGroupByName($viewValue)" bs-typeahead>
         <span class="input-group-btn" ng-click="selectGroup()"><button type="button" class="btn btn-success"><i class="glyphicon glyphicon-search"></i> View</button></span>
     </div>
+    <div class="clearfix"></div>
 </div>
 <div class="panel panel-primary filter">
     <div class="panel-heading">
