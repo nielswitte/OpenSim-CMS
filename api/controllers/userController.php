@@ -532,14 +532,22 @@ class UserController {
             'user'
         );
 
+        $userPermissions = \Auth::getUser()->getRights();
+
         if(count($parameters) < count($permissionTypes)) {
             throw new \Exception('Expected '. count($permissionTypes) .' parameters, '. count($parameters) .' given', 1);
         } elseif(count($parameters) >= count($permissionTypes)) {
             $result = TRUE;
             foreach($permissionTypes as $type) {
+                // Check if valid permission type and value
                 if(!isset($parameters[$type]) || !in_array($parameters[$type], $permissions)) {
                     $result = FALSE;
                     throw new \Exception('Missing parameter (integer) "'. $type .'", with value in ('. implode(', ', $permissions) .')', 2);
+                }
+                // Check if you are not setting permissions to ALL when you do not have ALL
+                if($parameters[$type] == \Auth::ALL && $userPermissions['user'] != \Auth::ALL) {
+                    $result = FALSE;
+                    throw new \Exception('Unable to grant someone "ALL" permission on the "'. $type .'" API when you do not have "ALL" permissions on that API', 3);
                 }
             }
         } else {
