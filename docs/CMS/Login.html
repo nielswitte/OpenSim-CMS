@@ -57,52 +57,27 @@
                     </div>
                     <div id="sub-nav-collapse" class="sub-nav-collapse">
                         <!-- Navigation -->
-                        <ul class="nav nav-list"><li class="open"><a href="#" class="aj-nav folder">Installation</a><ul class="nav nav-list"><li><a href="../Installation/./Installation.html">Installation</a></li><li><a href="../Installation/./Assets.html">Assets</a></li><li><a href="../Installation/./OpenSim.html">OpenSim</a></li></ul></li><li><a href="#" class="aj-nav folder">API</a><ul class="nav nav-list"><li><a href="../API/./API.html">API</a></li><li><a href="../API/./Authentication.html">Authentication</a></li><li><a href="../API/./Permissions.html">Permissions</a></li><li><a href="../API/./Users.html">Users</a></li><li><a href="../API/./Avatars.html">Avatars</a></li><li><a href="../API/./Groups.html">Groups</a></li><li><a href="../API/./Chats.html">Chats</a></li><li><a href="../API/./Meetings.html">Meetings</a></li><li><a href="../API/./Minutes.html">Minutes</a></li><li><a href="../API/./Meeting_Rooms.html">Meeting Rooms</a></li><li><a href="#" class="aj-nav folder">Files</a><ul class="nav nav-list"><li><a href="../API/Files/./Files.html">Files</a></li><li><a href="../API/Files/./Documents.html">Documents</a></li><li><a href="../API/Files/./Presentations.html">Presentations</a></li><li><a href="../API/Files/./Cache.html">Cache</a></li></ul></li><li><a href="../API/./Comments.html">Comments</a></li><li><a href="../API/./Grids.html">Grids</a></li><li><a href="../API/./Regions.html">Regions</a></li></ul></li><li><a href="#" class="aj-nav folder">CMS</a><ul class="nav nav-list"><li><a href="../CMS/./CMS.html">CMS</a></li><li><a href="../CMS/./Login.html">Login</a></li><li><a href="../CMS/./Dashboard.html">Dashboard</a></li><li><a href="../CMS/./Grids.html">Grids</a></li><li><a href="../CMS/./Meetings.html">Meetings</a></li><li><a href="../CMS/./Documents.html">Documents</a></li><li><a href="../CMS/./Users.html">Users</a></li></ul></li></ul>                                            </div>
+                        <ul class="nav nav-list"><li><a href="#" class="aj-nav folder">Installation</a><ul class="nav nav-list"><li><a href="../Installation/./Installation.html">Installation</a></li><li><a href="../Installation/./Assets.html">Assets</a></li><li><a href="../Installation/./OpenSim.html">OpenSim</a></li></ul></li><li><a href="#" class="aj-nav folder">API</a><ul class="nav nav-list"><li><a href="../API/./API.html">API</a></li><li><a href="../API/./Authentication.html">Authentication</a></li><li><a href="../API/./Permissions.html">Permissions</a></li><li><a href="../API/./Users.html">Users</a></li><li><a href="../API/./Avatars.html">Avatars</a></li><li><a href="../API/./Groups.html">Groups</a></li><li><a href="../API/./Chats.html">Chats</a></li><li><a href="../API/./Meetings.html">Meetings</a></li><li><a href="../API/./Minutes.html">Minutes</a></li><li><a href="../API/./Meeting_Rooms.html">Meeting Rooms</a></li><li><a href="#" class="aj-nav folder">Files</a><ul class="nav nav-list"><li><a href="../API/Files/./Files.html">Files</a></li><li><a href="../API/Files/./Documents.html">Documents</a></li><li><a href="../API/Files/./Presentations.html">Presentations</a></li><li><a href="../API/Files/./Cache.html">Cache</a></li></ul></li><li><a href="../API/./Comments.html">Comments</a></li><li><a href="../API/./Grids.html">Grids</a></li><li><a href="../API/./Regions.html">Regions</a></li></ul></li><li class="open"><a href="#" class="aj-nav folder">CMS</a><ul class="nav nav-list"><li><a href="../CMS/./CMS.html">CMS</a></li><li><a href="../CMS/./Login.html">Login</a></li><li><a href="../CMS/./Dashboard.html">Dashboard</a></li><li><a href="../CMS/./Grids.html">Grids</a></li><li><a href="../CMS/./Meetings.html">Meetings</a></li><li><a href="../CMS/./Documents.html">Documents</a></li><li><a href="../CMS/./Users.html">Users</a></li></ul></li></ul>                                            </div>
                 </div>
                 <div class="right-column  content-area col-sm-9">
                     <div class="content-page">
                         <article>
                                                             <div class="page-header sub-header clearfix">
-                                    <h1>OpenSim                                                                            </h1>
+                                    <h1>Login                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
                                             Thursday, April 24, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            3:20 PM                                        </span>
+                                            2:44 PM                                        </span>
                                 </div>
-                                                        <p>The assets use JSON stores to process JSON data returned by the server. JSON stores are supported in all versions newer than <code>0.7.6</code>. At this moment it requires you to run a development version of OpenSim.</p>
+                                                        <p>The login page can be accessed by using the <code>Login</code> button in the top right corner of the page.</p>
 
-<p>The source code of a development version can be downloaded from <a href="https://www.github.com/opensim/opensim">https://www.github.com/opensim/opensim</a>. <a href="http://opensimulator.org/wiki/Build_Instructions">Compile instructions</a> can be found in the <a href="http://opensimulator.org/wiki/Main_Page">Wiki</a> of OpenSim.</p>
+<h2>Login options</h2>
 
-<p>OpenSim needs to be configured with the following settings:</p>
+<p>You can login with your <code>username</code> or the <code>e-mail address</code> associated with the user account and the correct <code>password</code>.</p>
 
-<p>For loading dynamic textures:</p>
+<p>Logging in will update your last logged in timestamp  and provide you with an access token. This token is associated to your account and the currently used IP address. Your login token will have a limited validity time, depending on the configuration settings of the API, by default this is after last use 30 minutes.</p>
 
-<pre><code class="language-ini">[XEngine]
-    AllowOSFunctions = true
-</code></pre>
-
-<p>Enable JSON support:</p>
-
-<pre><code class="language-ini">[XEngine]
-    AllowMODFunctions = true
-[JsonStore]
-    Enabled = true
-</code></pre>
-
-<p>For RemoteAdmin functions:</p>
-
-<pre><code class="language-ini">[RemoteAdmin]
-    enabled = true
-    port = 9000
-    access_password = "&lt;ACCESS PASSWORD HERE&gt;"
-    access_ip_addresses = 127.0.0.1
-    enabled_methods = all
-</code></pre>
-
-<p>The cache functions used by <code>presenterScreen.lsl</code> require the use of the <code>FlotsamCache.ini</code>. For more information about the FlotsamCache see:<br />
-<a href="http://opensimulator.org/wiki/AssetCache">http://opensimulator.org/wiki/AssetCache</a>.</p>
-
-<p>In addition it is recommended to use MySQL as a database server for OpenSim. See <a href="http://opensimulator.org/wiki/Database_Settings#MySQL_Walkthrough">http://opensimulator.org/wiki/Database_Settings#MySQL_Walkthrough</a> for instructions on how to set things up.</p>
+<p>So if you make a new API request, for example showing the details on a document, the API will reset the expiration time of the token and the token will be valid for another 30 minutes.</p>
                                                     </article>
                     </div>
                 </div>

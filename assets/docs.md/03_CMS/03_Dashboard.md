@@ -1,0 +1,3 @@
+After logging in you gain access to your dashboard. The dashboard provides an overview of all your past and future meetings, comments posted after the last time you logged in and an overview of the latest documents. The previous meetings have a button `minutes` which allows you to jump to the minutes of a meeting without first having to browse to the meeting in the meeting calendar. The dashboard also allows you to jump right into a discussion by clicking on a comment, and to review the latest documents.
+
+You can always return to your dashboard by using the `Dashboard` button at the top of the page.

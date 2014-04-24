@@ -1,3 +1,7 @@
+**Notice:** All authentication functions require at least `READ` permissions to the Auth API.
+
+Passwords are encrypted and salted before being stored in the database.
+
 Before the API can be used, an user needs to authorize himself. This can be done by using the following API:
 
 ```http

@@ -57,7 +57,7 @@
                     </div>
                     <div id="sub-nav-collapse" class="sub-nav-collapse">
                         <!-- Navigation -->
-                        <ul class="nav nav-list"><li><a href="#" class="aj-nav folder">Installation</a><ul class="nav nav-list"><li><a href="../Installation/./Installation.html">Installation</a></li><li><a href="../Installation/./Assets.html">Assets</a></li><li><a href="../Installation/./OpenSim.html">OpenSim</a></li></ul></li><li class="open"><a href="#" class="aj-nav folder">API</a><ul class="nav nav-list"><li><a href="../API/./API.html">API</a></li><li><a href="../API/./Authentication.html">Authentication</a></li><li><a href="../API/./Permissions.html">Permissions</a></li><li><a href="../API/./Users.html">Users</a></li><li><a href="../API/./Avatars.html">Avatars</a></li><li><a href="../API/./Groups.html">Groups</a></li><li><a href="../API/./Chats.html">Chats</a></li><li><a href="../API/./Meetings.html">Meetings</a></li><li><a href="../API/./Minutes.html">Minutes</a></li><li><a href="../API/./Meeting_Rooms.html">Meeting Rooms</a></li><li><a href="#" class="aj-nav folder">Files</a><ul class="nav nav-list"><li><a href="../API/Files/./Files.html">Files</a></li><li><a href="../API/Files/./Documents.html">Documents</a></li><li><a href="../API/Files/./Presentations.html">Presentations</a></li><li><a href="../API/Files/./Cache.html">Cache</a></li></ul></li><li><a href="../API/./Comments.html">Comments</a></li><li><a href="../API/./Grids.html">Grids</a></li><li><a href="../API/./Regions.html">Regions</a></li></ul></li></ul>                                            </div>
+                        <ul class="nav nav-list"><li><a href="#" class="aj-nav folder">Installation</a><ul class="nav nav-list"><li><a href="../Installation/./Installation.html">Installation</a></li><li><a href="../Installation/./Assets.html">Assets</a></li><li><a href="../Installation/./OpenSim.html">OpenSim</a></li></ul></li><li class="open"><a href="#" class="aj-nav folder">API</a><ul class="nav nav-list"><li><a href="../API/./API.html">API</a></li><li><a href="../API/./Authentication.html">Authentication</a></li><li><a href="../API/./Permissions.html">Permissions</a></li><li><a href="../API/./Users.html">Users</a></li><li><a href="../API/./Avatars.html">Avatars</a></li><li><a href="../API/./Groups.html">Groups</a></li><li><a href="../API/./Chats.html">Chats</a></li><li><a href="../API/./Meetings.html">Meetings</a></li><li><a href="../API/./Minutes.html">Minutes</a></li><li><a href="../API/./Meeting_Rooms.html">Meeting Rooms</a></li><li><a href="#" class="aj-nav folder">Files</a><ul class="nav nav-list"><li><a href="../API/Files/./Files.html">Files</a></li><li><a href="../API/Files/./Documents.html">Documents</a></li><li><a href="../API/Files/./Presentations.html">Presentations</a></li><li><a href="../API/Files/./Cache.html">Cache</a></li></ul></li><li><a href="../API/./Comments.html">Comments</a></li><li><a href="../API/./Grids.html">Grids</a></li><li><a href="../API/./Regions.html">Regions</a></li></ul></li><li><a href="#" class="aj-nav folder">CMS</a><ul class="nav nav-list"><li><a href="../CMS/./CMS.html">CMS</a></li><li><a href="../CMS/./Login.html">Login</a></li><li><a href="../CMS/./Dashboard.html">Dashboard</a></li><li><a href="../CMS/./Grids.html">Grids</a></li><li><a href="../CMS/./Meetings.html">Meetings</a></li><li><a href="../CMS/./Documents.html">Documents</a></li><li><a href="../CMS/./Users.html">Users</a></li></ul></li></ul>                                            </div>
                 </div>
                 <div class="right-column  content-area col-sm-9">
                     <div class="content-page">
@@ -67,9 +67,11 @@
                                         <span style="float: left; font-size: 10px; color: gray;">
                                             Thursday, April 24, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            9:13 AM                                        </span>
+                                            10:10 AM                                        </span>
                                 </div>
-                                                        <p>To get a list of 50 users, use:</p>
+                                                        <p><strong>Notice:</strong> The following <code>GET</code> functions require at least <code>READ</code> permissions to the User API.</p>
+
+<p>To get a list of 50 users, use:</p>
 
 <pre><code class="language-http">GET /api/users/ HTTP/1.1
 </code></pre>
@@ -198,6 +200,8 @@
 <p>To add a new user to the CMS user the following API URL with the parameters as described in the table below. The e-mail address and username need to be unique.<br />
 The password parameters are optional and when not set, or left empty a random password will be generated.</p>
 
+<p><strong>Notice:</strong> Creating a user requires <code>WRITE</code> permission to the User API.</p>
+
 <pre><code class="language-http">POST /api/user/ HTTP/1.1
 </code></pre>
 
@@ -297,7 +301,11 @@ The password parameters are optional and when not set, or left empty a random pa
 </tbody>
 </table>
 
-<p>Users without at least <code>WRITE</code> permission can only remove themselves from groups, they cannot add new groups.</p>
+<p><strong>Notice:</strong> Users can only update their own basic information. To make changes to the permissions or to other users <code>WRITE</code> permission to the User API is required.</p>
+
+<p><strong>Notice:</strong> You can not give yourself or another user <code>ALL</code> permissions on an API when you do not have <code>ALL</code> permissions on that API.</p>
+
+<p><strong>Notice:</strong> Users without <code>WRITE</code> or <code>ALL</code> permission can only remove themselves from groups, they cannot add new groups.</p>
 
 <h2>Change profile picture</h2>
 
@@ -322,6 +330,8 @@ The password parameters are optional and when not set, or left empty a random pa
 </tr>
 </tbody>
 </table>
+
+<p><strong>Notice:</strong> Users can only their own profile picture. To make changes to other users <code>WRITE</code> permission to the User API is required.</p>
 
 <h2>Change password</h2>
 
@@ -357,12 +367,16 @@ The password parameters are optional and when not set, or left empty a random pa
 </tbody>
 </table>
 
+<p><strong>Notice:</strong> Users can only their own password. To make changes to other users <code>WRITE</code> permission to the User API is required or the current password of the user needs to be known.</p>
+
 <h2>Delete user</h2>
 
 <p>This will remove an user from the CMS, however it is not recommended to use. All files, comments and meetings are attached to an user, removing the user can cause items to disappear. The recommended solution is to set all permissions to <code>NONE</code> for an user.</p>
 
 <pre><code class="language-http">DELETE /api/user/&lt;USER-ID&gt;/ HTTP/1.1
 </code></pre>
+
+<p><strong>Notice:</strong> To remove an user <code>WRITE</code> permission to the User API is required.</p>
                                                     </article>
                     </div>
                 </div>
