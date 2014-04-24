@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the user controller
  *
  * @author Niels Witte
- * @version 0.4
- * @date April 17th, 2014
+ * @version 0.5
+ * @date April 24th, 2014
  * @since February 12th, 2014
  */
 class UserController {
@@ -180,19 +180,27 @@ class UserController {
      *              * string firstName - The user's first name
      *              * string lastName - The user's last name
      *              * string email - The user's email address
-     *              * string password - The unhashed password for the user
-     *              * string password2 - Unhashed retyped password to check if the user did not made any typo's
+     *              * string password - [Optional] The unhashed password for the user
+     *              * string password2 - [Optional] Unhashed retyped password to check if the user did not made any typo's
      * @return integer - The userId when creation succeded, or boolean FALSE when failed.
      */
     public function createUser($parameters) {
         $result = FALSE;
+        // Password is set?
+        if(isset($parameters['password']) && strlen($parameters['password']) > 0) {
+            $password = $parameters['password'];
+        // Generate random password
+        } else {
+            $password = \Helper::generateToken(8);
+        }
+
         $db     = \Helper::getDB();
         $data   = array(
             'username'      => $db->escape(\Helper::filterString($parameters['username'])),
             'firstName'     => $db->escape($parameters['firstName']),
             'lastName'      => $db->escape($parameters['lastName']),
             'email'         => $db->escape($parameters['email']),
-            'password'      => $db->escape(\Helper::Hash($parameters['password']))
+            'password'      => $db->escape(\Helper::Hash($password))
         );
         $userId = $db->insert('users', $data);
         // User creation successful?
@@ -214,7 +222,45 @@ class UserController {
                 'user'          => $db->escape(\Auth::READ)
             );
             $db->insert('user_permissions', $permissions);
+
+            // Create user object
+            $user = new \Models\User($userId, $data['username'], $data['email'], $data['firstName'], $data['lastName']);
+            // Send e-mail
+            $this->mailNewUser($user, $password);
         }
+        return $result;
+    }
+
+    /**
+     * Sends an e-mail message to the newly created user containing his/her username and password
+     *
+     * @param \Models\User $user
+     * @param string $password
+     * @return boolean
+     */
+    private function mailNewUser(\Models\User $user, $password) {
+        $mail = \Helper::getMailer();
+        // Prepare email-template
+        $html   = file_get_contents(dirname(__FILE__) .'/../templates/email/default.html');
+
+        $data   = array(
+            '{{title}}'     => 'Welcome, '. $user->getFirstName(),
+            '{{body}}'      => \Helper::linkIt(
+                '<p>An useraccount has been created for you with the following credentials.</p>'
+                .'<p>username: <b>'. $user->getUsername() .'</b><br>'
+                .'password: <b>'. $password .'</b></p>'
+                .'<p>You can login the OpenSim-CMS at the following URL: '. SERVER_PROTOCOL .'://'. SERVER_ADDRESS .':'. SERVER_PORT . SERVER_ROOT .' </p>'
+                .'<p>After logging in you can change your password and use the CMS.</p>'
+            )
+        );
+        $html = str_replace(array_keys($data), array_values($data), $html);
+        $mail->addAddress($user->getEmail(), $user->getFirstName() .' '. $user->getLastName());
+        $mail->Subject = '[OpenSim-CMS] Welcome';
+        // Add template
+        $mail->msgHTML($html, '', TRUE);
+        // Send the email
+        $result = $mail->send();
+
         return $result;
     }
 
@@ -402,29 +448,32 @@ class UserController {
      * @throws \Exception
      */
     public  function validateParametersCreate($parameters) {
-        $result = FALSE;
-        if(count($parameters) != 6) {
-            throw new \Exception('Expected 6 parameters, '. count($parameters) .' given', 1);
+        if(count($parameters) < 4) {
+            throw new \Exception('Expected at least 4 parameters, '. count($parameters) .' given', 1);
         } elseif(!isset($parameters['username']) || strlen($parameters['username']) < SERVER_MIN_USERNAME_LENGTH) {
             throw new \Exception('Missing parameter (string) "username" with a minimum length of '. SERVER_MIN_USERNAME_LENGTH, 2);
         } elseif(isset($parameters['username']) && !$this->checkUsername($parameters['username'])) {
             throw new \Exception('Username is already being used', 9);
         } elseif(isset($parameters['email']) && !$this->checkEmail($parameters['email'])) {
             throw new \Exception('This is email is already being used', 10);
-        } elseif(!isset($parameters['password']) || strlen($parameters['password']) < SERVER_MIN_PASSWORD_LENGTH) {
-            throw new \Exception('Missing parameter (string) "password" with a minimum length of '. SERVER_MIN_PASSWORD_LENGTH, 3);
-        } elseif(!isset($parameters['password2']) || $parameters['password'] != $parameters['password2']) {
-            throw new \Exception('Missing parameter (string) "password2" which should match parameter (string) "password" with a minimum length of '. SERVER_MIN_PASSWORD_LENGTH, 4);
+        } elseif(isset($parameters['password']) && strlen($parameters['password']) > 0) {
+            // Check minimum password length
+            if(strlen($parameters['password']) < SERVER_MIN_PASSWORD_LENGTH) {
+                throw new \Exception('Missing parameter (string) "password" with a minimum length of '. SERVER_MIN_PASSWORD_LENGTH, 3);
+            }
+            // Check password repeat
+            if(!isset($parameters['password2']) || $parameters['password'] != $parameters['password2']) {
+                throw new \Exception('Missing parameter (string) "password2" which should match parameter (string) "password" with a minimum length of '. SERVER_MIN_PASSWORD_LENGTH, 4);
+            }
         } elseif(!isset($parameters['firstName'])) {
             throw new \Exception('Missing parameter (string) "firstName"', 6);
         } elseif(!isset($parameters['lastName'])) {
             throw new \Exception('Missing parameter (string) "lastName"', 7);
         } elseif(!isset($parameters['email']) || !filter_var($parameters['email'], FILTER_VALIDATE_EMAIL)) {
             throw new \Exception('Missing parameter (string) "email" with a valid email address', 8);
-        } else {
-            $result = TRUE;
         }
-        return $result;
+
+        return TRUE;
     }
 
     /**
