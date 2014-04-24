@@ -568,6 +568,7 @@ class User extends Module {
         if(\Helper::isValidUuid($args[2])) {
             $db = \Helper::getDB();
             $db->where('uuid', $db->escape($args[2]));
+            $db->where('confirmed', 1);
             $db->where('gridId', $db->escape($args[1]));
             $avatarQuery = $db->getOne('avatars');
             if($avatarQuery) {
