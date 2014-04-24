@@ -3215,7 +3215,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                     $alert({title: 'Error!', content: confirmationResponse.error, type: 'danger'});
                 } else {
                     $scope.user.avatars[index].confirmed = 1;
-                    $alert({title: 'Avatar confirmed!', content: 'The avatar is confirmed user.', type: 'success'});
+                    $alert({title: 'Avatar confirmed!', content: 'The avatar is confirmed for this user.', type: 'success'});
                     Cache.clearCachedUrl(userRequestUrl);
                 }
 
