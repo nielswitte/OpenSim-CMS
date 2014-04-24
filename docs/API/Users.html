@@ -65,9 +65,9 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>Users                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Tuesday, April 22, 2014                                        </span>
+                                            Thursday, April 24, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            10:07 AM                                        </span>
+                                            9:13 AM                                        </span>
                                 </div>
                                                         <p>To get a list of 50 users, use:</p>
 
@@ -195,7 +195,8 @@
 
 <h2>Create user</h2>
 
-<p>To add a new user to the CMS user the following API URL with the parameters as described in the table below. The emailaddress and username need to be unique.</p>
+<p>To add a new user to the CMS user the following API URL with the parameters as described in the table below. The e-mail address and username need to be unique.<br />
+The password parameters are optional and when not set, or left empty a random password will be generated.</p>
 
 <pre><code class="language-http">POST /api/user/ HTTP/1.1
 </code></pre>
@@ -232,12 +233,12 @@
 <tr>
   <td>password</td>
   <td>String</td>
-  <td>The new user's password</td>
+  <td>[Optional] The new user's password</td>
 </tr>
 <tr>
   <td>password2</td>
   <td>String</td>
-  <td>The new user's password again, to check if no typo has been made</td>
+  <td>[Optional] The new user's password again, to check if no typo has been made</td>
 </tr>
 </tbody>
 </table>
@@ -249,6 +250,8 @@
     "userId": &lt;NEW-USER-ID&gt;
 }
 </code></pre>
+
+<p>Beside this response an e-mail is sent to the user containing the username and password.</p>
 
 <h2>Update user</h2>
 

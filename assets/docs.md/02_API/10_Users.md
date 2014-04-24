@@ -130,21 +130,21 @@ When OpenSim uses a MySQL database and the CMS is configured correctly, the foll
 ```
 
 ## Create user
-To add a new user to the CMS user the following API URL with the parameters as described in the table below. The emailaddress and username need to be unique.
-
+To add a new user to the CMS user the following API URL with the parameters as described in the table below. The e-mail address and username need to be unique.
+The password parameters are optional and when not set, or left empty a random password will be generated.
 
 ```http
 POST /api/user/ HTTP/1.1
 ```
 
-| Parameter         | Type      | Description                                                       |
-|-------------------|-----------|-------------------------------------------------------------------|
-| username          | String    | The username of the new user                                      |
-| email             | String    | The email address for the new user                                |
-| firstName         | String    | The first name of the new user                                    |
-| lastName          | String    | The last name of the new user                                     |
-| password          | String    | The new user's password                                           |
-| password2         | String    | The new user's password again, to check if no typo has been made  |
+| Parameter         | Type      | Description                                                                   |
+|-------------------|-----------|-------------------------------------------------------------------------------|
+| username          | String    | The username of the new user                                                  |
+| email             | String    | The email address for the new user                                            |
+| firstName         | String    | The first name of the new user                                                |
+| lastName          | String    | The last name of the new user                                                 |
+| password          | String    | [Optional] The new user's password                                            |
+| password2         | String    | [Optional] The new user's password again, to check if no typo has been made   |
 
 The result of a successful request to create an user will be as follows:
 
@@ -154,6 +154,8 @@ The result of a successful request to create an user will be as follows:
     "userId": <NEW-USER-ID>
 }
 ```
+
+Beside this response an e-mail is sent to the user containing the username and password.
 
 ## Update user
 Change some information about the user. The username and id are locked. The password is a separate function.
