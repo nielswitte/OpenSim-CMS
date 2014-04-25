@@ -46,6 +46,7 @@ Users can also place comments below the meeting, for example start a discussion 
 
 ## Editing a meeting
 When you meet one of these requirements, it is possible to make changes to the meeting.
+
  * Viewing your own meeting.
  * Are participant of the meeting and have `WRITE` permissions to the Meetings API.
  * Have `ALL` permissions to the Meeting API.
