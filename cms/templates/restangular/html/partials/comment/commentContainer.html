@@ -7,7 +7,7 @@
     <div ng-show="allowComments()" id="commentForm" class="row">
         <form method="post" ng-submit="commentSubmit()">
             <div class="col-sm-6 editor">
-                <h3>Write comment <small ng-show="replyTo">Reply to: {{replyTo}}</small><button class="btn btn-link btn-xs" ng-click="toggleMDHelp()"><i class="glyphicon glyphicon-question-sign"></i> Markdown syntax</button></h3>
+                <h3>Write comment <small ng-show="replyTo">Reply to: {{replyTo}}</small><button type="button" class="btn btn-link btn-xs" ng-click="toggleMDHelp()"><i class="glyphicon glyphicon-question-sign"></i> Markdown syntax</button></h3>
 
                 <div class="alert alert-info" ng-show="showMDHelp()">
                     <strong>Markdown!</strong> The comments are formatted using Markdown. A reference for the syntax can be found here: <a href="http://daringfireball.net/projects/markdown/syntax" target="_blank">http://daringfireball.net/projects/markdown/syntax</a>.
