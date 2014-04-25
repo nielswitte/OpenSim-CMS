@@ -10,7 +10,7 @@ Or get all messages since a given unix timestamp in seconds
 GET /api/grid/<GRID-ID>/chats/<UNIX-TIMESTAMP>/ HTTP/1.1
 ```
 
-This will return a list with chat messages and their sender. The `fromCMS` value is used to indicate if the message was sent from the chat in the CMS (1) or was captured in the OpenSim environment (0).
+This will return a list with chat messages and their sender. The `fromCMS` value is used to indicate if the message was sent from the chat in the CMS (`1`) or was captured in the OpenSim environment (`0`).
 
 ```json
 [
@@ -49,7 +49,7 @@ This will return a list with chat messages and their sender. The `fromCMS` value
 ```
 
 ## Add chat
-To add a line to the chat you require `WRITE` permissions for the chat section. For OpenSim to add a line to the chat, the server first needs to match the Avatar to a user. Or when no match can be found, the server could use 0 as ID, and append the message with the Avatar's name.
+To add a line to the chat you require `WRITE` permissions for the chat section. For OpenSim to add a line to the chat, the server first needs to match the Avatar to a user. Or when no match can be found, the server could use `0` as ID, and append the message with the Avatar's name.
 
 The chats can be in an array or a just sent as a single element.
 
@@ -61,4 +61,4 @@ POST /api/grid/<GRID-ID/chats/ HTTP/1.1
 | userId            | integer   | The CMS user ID                                                           |
 | message           | string    | The message to be saved                                                   |
 | timestamp         | string    | The timestamp of the message in the format YYYY-MM-DD HH:mm:ss            |
-| fromCMS           | integer   | 1 (True) if the message is from the CMS, 0 (false) if from OpenSim Server |
+| fromCMS           | integer   | `1` (True) if the message is from the CMS, `0` (false) if from OpenSim Server |

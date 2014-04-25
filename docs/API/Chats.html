@@ -65,9 +65,9 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>Chats                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Wednesday, April 16, 2014                                        </span>
+                                            Friday, April 25, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            11:25 AM                                        </span>
+                                            10:45 AM                                        </span>
                                 </div>
                                                         <p>Through the CMS it is possible to chat with users on the Grid. The following line will return the latest 50 chat messages on the given grid.</p>
 
@@ -79,7 +79,7 @@
 <pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/chats/&lt;UNIX-TIMESTAMP&gt;/ HTTP/1.1
 </code></pre>
 
-<p>This will return a list with chat messages and their sender. The <code>fromCMS</code> value is used to indicate if the message was sent from the chat in the CMS (1) or was captured in the OpenSim environment (0).</p>
+<p>This will return a list with chat messages and their sender. The <code>fromCMS</code> value is used to indicate if the message was sent from the chat in the CMS (<code>1</code>) or was captured in the OpenSim environment (<code>0</code>).</p>
 
 <pre><code class="language-json">[
     {
@@ -118,7 +118,7 @@
 
 <h2>Add chat</h2>
 
-<p>To add a line to the chat you require <code>WRITE</code> permissions for the chat section. For OpenSim to add a line to the chat, the server first needs to match the Avatar to a user. Or when no match can be found, the server could use 0 as ID, and append the message with the Avatar's name.</p>
+<p>To add a line to the chat you require <code>WRITE</code> permissions for the chat section. For OpenSim to add a line to the chat, the server first needs to match the Avatar to a user. Or when no match can be found, the server could use <code>0</code> as ID, and append the message with the Avatar's name.</p>
 
 <p>The chats can be in an array or a just sent as a single element.</p>
 
@@ -152,7 +152,7 @@
 <tr>
   <td>fromCMS</td>
   <td>integer</td>
-  <td>1 (True) if the message is from the CMS, 0 (false) if from OpenSim Server</td>
+  <td><code>1</code> (True) if the message is from the CMS, <code>0</code> (false) if from OpenSim Server</td>
 </tr>
 </tbody>
 </table>
