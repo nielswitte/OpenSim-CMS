@@ -5,8 +5,8 @@ defined('EXEC') or die('Config not loaded');
  * Helper class to support the CMS and API
  *
  * @author Niels Witte
- * @version 0.4a
- * @date April 22nd, 2014
+ * @version 0.4b
+ * @date April 28th, 2014
  * @since February 12th, 2014
  */
 class Helper {
@@ -145,7 +145,7 @@ class Helper {
         // Parse other form types
         } else {
             // grab multipart boundary from content type header
-            preg_match('/boundary=(.*)$/', $_SERVER['CONTENT_TYPE'], $matches);
+            preg_match('/boundary=(.*)$/', @$_SERVER['CONTENT_TYPE'], $matches);
             // Is multipart form?
             if(isset($matches[1])) {
                 $boundary = $matches[1];
