@@ -14,8 +14,8 @@ require_once dirname(__FILE__) .'/../controllers/regionController.php';
  * Implements the functions called on the Grid
  *
  * @author Niels Witte
- * @version 0.4a
- * @date April 16th, 2014
+ * @version 0.5
+ * @date April 29th, 2014
  * @since February 24th, 2014
  */
 class Grid extends Module{
@@ -172,8 +172,28 @@ class Grid extends Module{
             $grid       = new \Models\Grid($args[1]);
             $grid->getInfoFromDatabase(FALSE);
             if($grid->getRegionByUuid($args[2]) !== FALSE) {
-                header('Content-Type: image/jpeg');
-                echo file_get_contents($grid->getOsProtocol() .'://'. $grid->getOsIp() .':'. $grid->getOsPort() .'/index.php?method=regionImage'. str_replace('-', '', $args[2]));
+                // Create image URL
+                $imageUrl = $grid->getOsProtocol() .'://'. $grid->getOsIp() .':'. $grid->getOsPort() .'/index.php?method=regionImage'. str_replace('-', '', $args[2]);
+
+                // Use cURL because remote URLs can not always be accessed with file_get_contents
+                $curl = curl_init();
+                curl_setopt($curl, CURLOPT_URL, $imageUrl);
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($curl, CURLOPT_HEADER, false);
+                curl_setopt($curl, CURLOPT_TIMEOUT, 5);
+                $data   = curl_exec($curl);
+                $error  = curl_error($curl);
+                curl_close($curl);
+
+                // No error?
+                if($error == '') {
+                    header('Content-Type: image/jpeg');
+                    echo $data;
+                // Error
+                } else {
+                    throw new \Exception('Failed to retrieve image for region', 3);
+                }
+
             } else {
                 throw new \Exception('UUID isn\'t a region on this server', 2);
             }
