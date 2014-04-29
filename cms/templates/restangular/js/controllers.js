@@ -630,7 +630,7 @@ angularRest.controller('dashboardController', ['RestangularCache', '$scope', 'Pa
 
         // Get last login time or use yesterday as time
         var lastLogin = function() {
-            if(sessionStorage.lastLogin > 0) {
+            if(sessionStorage.lastLogin != 0) {
                 return moment(sessionStorage.lastLogin, 'YYYY-MM-DD HH:mm:ss').unix();
             } else {
                 return new moment().subtract('days', 1).unix();
@@ -3215,7 +3215,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                     $alert({title: 'Error!', content: confirmationResponse.error, type: 'danger'});
                 } else {
                     $scope.user.avatars[index].confirmed = 1;
-                    $alert({title: 'Avatar confirmed!', content: 'The avatar is confirmed user.', type: 'success'});
+                    $alert({title: 'Avatar confirmed!', content: 'The avatar is confirmed for this user.', type: 'success'});
                     Cache.clearCachedUrl(userRequestUrl);
                 }
 

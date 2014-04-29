@@ -6,7 +6,7 @@
 <head>
     <title>OpenSim-CMS</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="description" content="Documentation v0.8" />
+    <meta name="description" content="Documentation v0.9" />
     <meta name="author" content="OpenSim-CMS">
         <link rel="icon" href="../img/favicon.png" type="image/x-icon">
         <!-- Mobile -->
@@ -57,7 +57,7 @@
                     </div>
                     <div id="sub-nav-collapse" class="sub-nav-collapse">
                         <!-- Navigation -->
-                        <ul class="nav nav-list"><li><a href="#" class="aj-nav folder">Installation</a><ul class="nav nav-list"><li><a href="../Installation/./Installation.html">Installation</a></li><li><a href="../Installation/./Assets.html">Assets</a></li><li><a href="../Installation/./OpenSim.html">OpenSim</a></li></ul></li><li class="open"><a href="#" class="aj-nav folder">API</a><ul class="nav nav-list"><li><a href="../API/./API.html">API</a></li><li><a href="../API/./Authentication.html">Authentication</a></li><li><a href="../API/./Permissions.html">Permissions</a></li><li><a href="../API/./Users.html">Users</a></li><li><a href="../API/./Avatars.html">Avatars</a></li><li><a href="../API/./Groups.html">Groups</a></li><li><a href="../API/./Chats.html">Chats</a></li><li><a href="../API/./Meetings.html">Meetings</a></li><li><a href="../API/./Minutes.html">Minutes</a></li><li><a href="../API/./Meeting_Rooms.html">Meeting Rooms</a></li><li><a href="#" class="aj-nav folder">Files</a><ul class="nav nav-list"><li><a href="../API/Files/./Files.html">Files</a></li><li><a href="../API/Files/./Documents.html">Documents</a></li><li><a href="../API/Files/./Presentations.html">Presentations</a></li><li><a href="../API/Files/./Cache.html">Cache</a></li></ul></li><li><a href="../API/./Comments.html">Comments</a></li><li><a href="../API/./Grids.html">Grids</a></li><li><a href="../API/./Regions.html">Regions</a></li></ul></li></ul>                                            </div>
+                        <ul class="nav nav-list"><li><a href="#" class="aj-nav folder">Installation</a><ul class="nav nav-list"><li><a href="../Installation/./Installation.html">Installation</a></li><li><a href="../Installation/./Assets.html">Assets</a></li><li><a href="../Installation/./OpenSim.html">OpenSim</a></li></ul></li><li class="open"><a href="#" class="aj-nav folder">API</a><ul class="nav nav-list"><li><a href="../API/./API.html">API</a></li><li><a href="../API/./Authentication.html">Authentication</a></li><li><a href="../API/./Permissions.html">Permissions</a></li><li><a href="../API/./Users.html">Users</a></li><li><a href="../API/./Avatars.html">Avatars</a></li><li><a href="../API/./Groups.html">Groups</a></li><li><a href="../API/./Chats.html">Chats</a></li><li><a href="../API/./Meetings.html">Meetings</a></li><li><a href="../API/./Minutes.html">Minutes</a></li><li><a href="../API/./Meeting_Rooms.html">Meeting Rooms</a></li><li><a href="#" class="aj-nav folder">Files</a><ul class="nav nav-list"><li><a href="../API/Files/./Files.html">Files</a></li><li><a href="../API/Files/./Documents.html">Documents</a></li><li><a href="../API/Files/./Presentations.html">Presentations</a></li><li><a href="../API/Files/./Cache.html">Cache</a></li></ul></li><li><a href="../API/./Comments.html">Comments</a></li><li><a href="../API/./Grids.html">Grids</a></li><li><a href="../API/./Regions.html">Regions</a></li></ul></li><li><a href="#" class="aj-nav folder">CMS</a><ul class="nav nav-list"><li><a href="../CMS/./CMS.html">CMS</a></li><li><a href="../CMS/./Login.html">Login</a></li><li><a href="../CMS/./Dashboard.html">Dashboard</a></li><li><a href="../CMS/./Grids.html">Grids</a></li><li><a href="../CMS/./Meetings.html">Meetings</a></li><li><a href="../CMS/./Documents.html">Documents</a></li><li><a href="../CMS/./Users_and_Groups.html">Users and Groups</a></li></ul></li></ul>                                            </div>
                 </div>
                 <div class="right-column  content-area col-sm-9">
                     <div class="content-page">
@@ -65,9 +65,9 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>Groups                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Tuesday, April 22, 2014                                        </span>
+                                            Thursday, April 24, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            9:44 AM                                        </span>
+                                            9:57 AM                                        </span>
                                 </div>
                                                         <p>Users can be added to groups to share access to specific files.</p>
 
@@ -159,8 +159,9 @@
 
 <h2>Create group</h2>
 
-<p>Updating, creating and deleting groups requires at least <code>WRITE</code> permission to the User API.<br />
-Adding files to a group can be done with less permissions by going to the file you want to add and share it with the group.</p>
+<p><strong>Notice:</strong> Updating, creating and deleting groups requires at least <code>WRITE</code> permission to the User API.</p>
+
+<p>Adding files to an existing group can be done with less permissions by going to the file you want to add and share it with the group.</p>
 
 <pre><code class="language-http">POST /api/group/ HTTP/1.1
 </code></pre>

@@ -15,7 +15,7 @@ This will return some basic information about the region, such as the name and a
 }
 ```
 
-When `OS_DB_ENABLED` is `TRUE`, the following additional information is shown:
+When the grid is configured to use MySQL or when Remote Admin is available, the following additional information is shown:
 
 ```json
 {

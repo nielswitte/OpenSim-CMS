@@ -90,8 +90,9 @@ This will return the following JSON result:
 ```
 
 ## Create group
-Updating, creating and deleting groups requires at least `WRITE` permission to the User API.
-Adding files to a group can be done with less permissions by going to the file you want to add and share it with the group.
+**Notice:** Updating, creating and deleting groups requires at least `WRITE` permission to the User API.
+
+Adding files to an existing group can be done with less permissions by going to the file you want to add and share it with the group.
 
 ```http
 POST /api/group/ HTTP/1.1

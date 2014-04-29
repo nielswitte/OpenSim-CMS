@@ -1,3 +1,7 @@
+The assets use JSON stores to process JSON data returned by the server. JSON stores are supported in all versions newer than `0.7.6`. At this moment it requires you to run a development version of OpenSim.
+
+The source code of a development version can be downloaded from [https://www.github.com/opensim/opensim](https://www.github.com/opensim/opensim). [Compile instructions](http://opensimulator.org/wiki/Build_Instructions) can be found in the [Wiki](http://opensimulator.org/wiki/Main_Page) of OpenSim.
+
 OpenSim needs to be configured with the following settings:
 
 For loading dynamic textures:

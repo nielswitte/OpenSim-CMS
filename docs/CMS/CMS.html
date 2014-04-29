@@ -57,52 +57,27 @@
                     </div>
                     <div id="sub-nav-collapse" class="sub-nav-collapse">
                         <!-- Navigation -->
-                        <ul class="nav nav-list"><li><a href="#" class="aj-nav folder">Installation</a><ul class="nav nav-list"><li><a href="../Installation/./Installation.html">Installation</a></li><li><a href="../Installation/./Assets.html">Assets</a></li><li><a href="../Installation/./OpenSim.html">OpenSim</a></li></ul></li><li class="open"><a href="#" class="aj-nav folder">API</a><ul class="nav nav-list"><li><a href="../API/./API.html">API</a></li><li><a href="../API/./Authentication.html">Authentication</a></li><li><a href="../API/./Permissions.html">Permissions</a></li><li><a href="../API/./Users.html">Users</a></li><li><a href="../API/./Avatars.html">Avatars</a></li><li><a href="../API/./Groups.html">Groups</a></li><li><a href="../API/./Chats.html">Chats</a></li><li><a href="../API/./Meetings.html">Meetings</a></li><li><a href="../API/./Minutes.html">Minutes</a></li><li><a href="../API/./Meeting_Rooms.html">Meeting Rooms</a></li><li><a href="#" class="aj-nav folder">Files</a><ul class="nav nav-list"><li><a href="../API/Files/./Files.html">Files</a></li><li><a href="../API/Files/./Documents.html">Documents</a></li><li><a href="../API/Files/./Presentations.html">Presentations</a></li><li><a href="../API/Files/./Cache.html">Cache</a></li></ul></li><li><a href="../API/./Comments.html">Comments</a></li><li><a href="../API/./Grids.html">Grids</a></li><li><a href="../API/./Regions.html">Regions</a></li></ul></li><li><a href="#" class="aj-nav folder">CMS</a><ul class="nav nav-list"><li><a href="../CMS/./CMS.html">CMS</a></li><li><a href="../CMS/./Login.html">Login</a></li><li><a href="../CMS/./Dashboard.html">Dashboard</a></li><li><a href="../CMS/./Grids.html">Grids</a></li><li><a href="../CMS/./Meetings.html">Meetings</a></li><li><a href="../CMS/./Documents.html">Documents</a></li><li><a href="../CMS/./Users_and_Groups.html">Users and Groups</a></li></ul></li></ul>                                            </div>
+                        <ul class="nav nav-list"><li><a href="#" class="aj-nav folder">Installation</a><ul class="nav nav-list"><li><a href="../Installation/./Installation.html">Installation</a></li><li><a href="../Installation/./Assets.html">Assets</a></li><li><a href="../Installation/./OpenSim.html">OpenSim</a></li></ul></li><li><a href="#" class="aj-nav folder">API</a><ul class="nav nav-list"><li><a href="../API/./API.html">API</a></li><li><a href="../API/./Authentication.html">Authentication</a></li><li><a href="../API/./Permissions.html">Permissions</a></li><li><a href="../API/./Users.html">Users</a></li><li><a href="../API/./Avatars.html">Avatars</a></li><li><a href="../API/./Groups.html">Groups</a></li><li><a href="../API/./Chats.html">Chats</a></li><li><a href="../API/./Meetings.html">Meetings</a></li><li><a href="../API/./Minutes.html">Minutes</a></li><li><a href="../API/./Meeting_Rooms.html">Meeting Rooms</a></li><li><a href="#" class="aj-nav folder">Files</a><ul class="nav nav-list"><li><a href="../API/Files/./Files.html">Files</a></li><li><a href="../API/Files/./Documents.html">Documents</a></li><li><a href="../API/Files/./Presentations.html">Presentations</a></li><li><a href="../API/Files/./Cache.html">Cache</a></li></ul></li><li><a href="../API/./Comments.html">Comments</a></li><li><a href="../API/./Grids.html">Grids</a></li><li><a href="../API/./Regions.html">Regions</a></li></ul></li><li class="open"><a href="#" class="aj-nav folder">CMS</a><ul class="nav nav-list"><li><a href="../CMS/./CMS.html">CMS</a></li><li><a href="../CMS/./Login.html">Login</a></li><li><a href="../CMS/./Dashboard.html">Dashboard</a></li><li><a href="../CMS/./Grids.html">Grids</a></li><li><a href="../CMS/./Meetings.html">Meetings</a></li><li><a href="../CMS/./Documents.html">Documents</a></li><li><a href="../CMS/./Users_and_Groups.html">Users and Groups</a></li></ul></li></ul>                                            </div>
                 </div>
                 <div class="right-column  content-area col-sm-9">
                     <div class="content-page">
                         <article>
                                                             <div class="page-header sub-header clearfix">
-                                    <h1>API                                                                            </h1>
+                                    <h1>CMS                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Wednesday, April 16, 2014                                        </span>
+                                            Thursday, April 24, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            11:07 AM                                        </span>
+                                            12:24 PM                                        </span>
                                 </div>
-                                                        <p>The OpenSim-CMS communicates with OpenSim objects through an JSON-API, based on REST. For valid requests the <code>HTTP/1.1 200 OK</code> is used, for failures an exception is thrown by the system and displayed as output with a <code>HTTP/1.1 400 Bad Request</code> header. For most functions the user needs to be authorized, if the user is not authorized but should be, a <code>HTTP/1.1 401 Unauthorized</code> header is used.</p>
+                                                        <p>The functions of the API can be accessed by using the OpenSim-CMS. The CMS is a client of the API and only uses HTML5 and JavaScript to access functionalities offered by the server (the API). This section describes the options available in the CMS and how to use them.</p>
 
-<h2>POST, PUT and DELETE</h2>
+<h2>Buttons</h2>
 
-<p>All <code>POST</code>, <code>PUT</code> and <code>DELETE</code> request will atleast return the following result when successfully processed:</p>
+<p>The buttons in the CMS are identifiable by their color. For example all buttons to submit data to the API, for example create a new User account, are <code>blue</code>. Buttons that cancel such a request or remove something are <code>red</code>. Buttons which perform small actions such as filter the visible information or add new information, for example add a document to a meeting, are <code>green</code>. All buttons which navigate you to another page, open a dialog, or show a form are <code>white</code>.</p>
 
-<pre><code class="language-json">{
-    "success": true
-}
-</code></pre>
+<h2>Notifications</h2>
 
-<h2>Error messages</h2>
-
-<p>When the configuration value <code>SERVER_DEBUG</code> is set to <code>FALSE</code>, bad and unauthorized requests will provide, beside the corresponding HTTP header, an exception message in JSON. For example the following message is displayed when attempting to access a protected function without a valid API token.</p>
-
-<pre><code class="language-json">{
-    "success": false,
-    "error": "Unauthorized to access this API URL"
-}
-</code></pre>
-
-<p>When <code>SERVER_DEBUG</code> is set to <code>TRUE</code>, additional information will be displayed. Including the file, line and stack trace of the error. It is recommended to disable debugging for public API servers.</p>
-
-<pre><code class="language-json">{
-    "success": false,
-    "error": "Unauthorized to access this API URL"
-    "Code": 0,
-    "File": "/OpenSim-CMS/api/index.php",
-    "Line": 62,
-    "Trace": [
-
-    ]
-}
-</code></pre>
+<p>Feedback from the API will be provided in the top right corner by a notification. The color indicates the result. <code>Green</code> notifications will be shown for successful requests, when the notifications turn <code>orange</code> you receive a warning and when they are <code>red</code> an error has occurred. Some request will return a <code>blue</code> notification, this is just simple feedback to inform you that you can continue and should not expect any problems.</p>
                                                     </article>
                     </div>
                 </div>

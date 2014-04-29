@@ -11,6 +11,7 @@ POST /api/grid/<GRID-ID>/avatar/<UUID>/ HTTP/1.1
 |-------------------|-----------|---------------------------------------------------------------|
 | username          | String    | The username of the user in the CMS                           |
 
+**Notice:** Linking an avatar to an user requires `EXECUTE` permissions to the User API.
 
 ## Confirm avatar
 Once an avatar is linked to a user account, it needs to be confirmed by the user. This can only be done by the user himself.
@@ -23,12 +24,16 @@ Because the token which is used for this request is matched to the userId, this 
 
 This request will also return `"success": false` when the avatar is already confirmed.
 
+**Notice:** Users can only confirm their own avatar. To confirm avatars of other users, you require `WRITE` permissions to the User API.
+
 ## Unlink an avatar
 This unlinks an avatar from the user. Just like confirming, this can only be performed by the user account associated with the link or when you have `WRITE` permissions for the `user` section. Please not that this will not remove the Avatar from OpenSim.
 
 ```http
 DELETE /api/grid/<GRID-ID>/avatar/<UUID>/confirm/ HTTP/1.1
 ```
+
+**Notice:** Users can only unlink their own avatars. To unlink other user's avatars `WRITE` permissions are required to the User API.
 
 ## Create a new avatar
 To create a new avatar on the given Grid the following API url can be used with a POST request.
@@ -73,8 +78,10 @@ can not be used in a password: ` ?{}<>;" '[]/\ `. Somehow the characters are esc
 }
 ```
 
+**Notice:** Creating a new avatar requires `EXECUTE` permissions to the User API.
+
 ## Teleport an avatar to a location
-To teleport a user you need at least the UUID of the user. All other parameters are optional and listed in the table below.
+To teleport an user you need at least the UUID of the user. All other parameters are optional and listed in the table below.
 
 ```http
 PUT /api/grid/<GRID-ID>/avatar/<UUID>/teleport/ HTTP/1.1

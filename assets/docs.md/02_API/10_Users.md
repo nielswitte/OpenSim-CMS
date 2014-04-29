@@ -1,3 +1,5 @@
+**Notice:** The following `GET` functions require at least `READ` permissions to the User API.
+
 To get a list of 50 users, use:
 
 ```http
@@ -130,21 +132,23 @@ When OpenSim uses a MySQL database and the CMS is configured correctly, the foll
 ```
 
 ## Create user
-To add a new user to the CMS user the following API URL with the parameters as described in the table below. The emailaddress and username need to be unique.
+To add a new user to the CMS user the following API URL with the parameters as described in the table below. The e-mail address and username need to be unique.
+The password parameters are optional and when not set, or left empty a random password will be generated.
 
+**Notice:** Creating a user requires `WRITE` permission to the User API.
 
 ```http
 POST /api/user/ HTTP/1.1
 ```
 
-| Parameter         | Type      | Description                                                       |
-|-------------------|-----------|-------------------------------------------------------------------|
-| username          | String    | The username of the new user                                      |
-| email             | String    | The email address for the new user                                |
-| firstName         | String    | The first name of the new user                                    |
-| lastName          | String    | The last name of the new user                                     |
-| password          | String    | The new user's password                                           |
-| password2         | String    | The new user's password again, to check if no typo has been made  |
+| Parameter         | Type      | Description                                                                   |
+|-------------------|-----------|-------------------------------------------------------------------------------|
+| username          | String    | The username of the new user                                                  |
+| email             | String    | The email address for the new user                                            |
+| firstName         | String    | The first name of the new user                                                |
+| lastName          | String    | The last name of the new user                                                 |
+| password          | String    | [Optional] The new user's password                                            |
+| password2         | String    | [Optional] The new user's password again, to check if no typo has been made   |
 
 The result of a successful request to create an user will be as follows:
 
@@ -154,6 +158,8 @@ The result of a successful request to create an user will be as follows:
     "userId": <NEW-USER-ID>
 }
 ```
+
+Beside this response an e-mail is sent to the user containing the username and password.
 
 ## Update user
 Change some information about the user. The username and id are locked. The password is a separate function.
@@ -169,7 +175,11 @@ PUT /api/user/<USER-ID>/ HTTP/1.1
 | permissions       | Array     | The permission levels for the user (see permissions)              |
 | groups            | Array     | An array containing group IDs `[1,2,3]` or Group objects `[{id: 1, name: x}, {id: 2, name: y}]` |
 
-Users without at least `WRITE` permission can only remove themselves from groups, they cannot add new groups.
+**Notice:** Users can only update their own basic information. To make changes to the permissions or to other users `WRITE` permission to the User API is required.
+
+**Notice:** You can not give yourself or another user `ALL` permissions on an API when you do not have `ALL` permissions on that API.
+
+**Notice:** Users without `WRITE` or `ALL` permission can only remove themselves from groups, they cannot add new groups.
 
 ## Change profile picture
 Attach a profile picture to the given user, which will be resized to 250x250 pixels and displayed in the CMS for example next to comments and on the user's profile page. When you upload a new picture the previous picture will be overwritten.
@@ -181,6 +191,8 @@ PUT /api/user/<USER-ID>/picture/ HTTP/1.1
 | Parameter         | Type      | Description                                                                               |
 |-------------------|-----------|-------------------------------------------------------------------------------------------|
 | image             | File      | Base64 encoded file, needs to be jpeg, jpg, png or gif                                    |
+
+**Notice:** Users can only their own profile picture. To make changes to other users `WRITE` permission to the User API is required.
 
 ## Change password
 Use the following function to update the user's password. You can update passwords of other users when you at least have `WRITE` permissions or when you know the `currentPassword`.
@@ -195,9 +207,13 @@ PUT /api/user/<USER-ID>/password/ HTTP/1.1
 | password2         | String    | The user's new password again, to check if no typo has been made                          |
 | currentPassword   | String    | [Optional] The user's current password, only required when no WRITE permissions for users |
 
+**Notice:** Users can only their own password. To make changes to other users `WRITE` permission to the User API is required or the current password of the user needs to be known.
+
 ## Delete user
 This will remove an user from the CMS, however it is not recommended to use. All files, comments and meetings are attached to an user, removing the user can cause items to disappear. The recommended solution is to set all permissions to `NONE` for an user.
 
 ```http
 DELETE /api/user/<USER-ID>/ HTTP/1.1
 ```
+
+**Notice:** To remove an user `WRITE` permission to the User API is required.

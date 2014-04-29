@@ -6,7 +6,7 @@
 <head>
     <title>OpenSim-CMS</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="description" content="Documentation v0.8" />
+    <meta name="description" content="Documentation v0.9" />
     <meta name="author" content="OpenSim-CMS">
         <link rel="icon" href="../img/favicon.png" type="image/x-icon">
         <!-- Mobile -->
@@ -57,7 +57,7 @@
                     </div>
                     <div id="sub-nav-collapse" class="sub-nav-collapse">
                         <!-- Navigation -->
-                        <ul class="nav nav-list"><li><a href="#" class="aj-nav folder">Installation</a><ul class="nav nav-list"><li><a href="../Installation/./Installation.html">Installation</a></li><li><a href="../Installation/./Assets.html">Assets</a></li><li><a href="../Installation/./OpenSim.html">OpenSim</a></li></ul></li><li class="open"><a href="#" class="aj-nav folder">API</a><ul class="nav nav-list"><li><a href="../API/./API.html">API</a></li><li><a href="../API/./Authentication.html">Authentication</a></li><li><a href="../API/./Permissions.html">Permissions</a></li><li><a href="../API/./Users.html">Users</a></li><li><a href="../API/./Avatars.html">Avatars</a></li><li><a href="../API/./Groups.html">Groups</a></li><li><a href="../API/./Chats.html">Chats</a></li><li><a href="../API/./Meetings.html">Meetings</a></li><li><a href="../API/./Minutes.html">Minutes</a></li><li><a href="../API/./Meeting_Rooms.html">Meeting Rooms</a></li><li><a href="#" class="aj-nav folder">Files</a><ul class="nav nav-list"><li><a href="../API/Files/./Files.html">Files</a></li><li><a href="../API/Files/./Documents.html">Documents</a></li><li><a href="../API/Files/./Presentations.html">Presentations</a></li><li><a href="../API/Files/./Cache.html">Cache</a></li></ul></li><li><a href="../API/./Comments.html">Comments</a></li><li><a href="../API/./Grids.html">Grids</a></li><li><a href="../API/./Regions.html">Regions</a></li></ul></li></ul>                                            </div>
+                        <ul class="nav nav-list"><li><a href="#" class="aj-nav folder">Installation</a><ul class="nav nav-list"><li><a href="../Installation/./Installation.html">Installation</a></li><li><a href="../Installation/./Assets.html">Assets</a></li><li><a href="../Installation/./OpenSim.html">OpenSim</a></li></ul></li><li class="open"><a href="#" class="aj-nav folder">API</a><ul class="nav nav-list"><li><a href="../API/./API.html">API</a></li><li><a href="../API/./Authentication.html">Authentication</a></li><li><a href="../API/./Permissions.html">Permissions</a></li><li><a href="../API/./Users.html">Users</a></li><li><a href="../API/./Avatars.html">Avatars</a></li><li><a href="../API/./Groups.html">Groups</a></li><li><a href="../API/./Chats.html">Chats</a></li><li><a href="../API/./Meetings.html">Meetings</a></li><li><a href="../API/./Minutes.html">Minutes</a></li><li><a href="../API/./Meeting_Rooms.html">Meeting Rooms</a></li><li><a href="#" class="aj-nav folder">Files</a><ul class="nav nav-list"><li><a href="../API/Files/./Files.html">Files</a></li><li><a href="../API/Files/./Documents.html">Documents</a></li><li><a href="../API/Files/./Presentations.html">Presentations</a></li><li><a href="../API/Files/./Cache.html">Cache</a></li></ul></li><li><a href="../API/./Comments.html">Comments</a></li><li><a href="../API/./Grids.html">Grids</a></li><li><a href="../API/./Regions.html">Regions</a></li></ul></li><li><a href="#" class="aj-nav folder">CMS</a><ul class="nav nav-list"><li><a href="../CMS/./CMS.html">CMS</a></li><li><a href="../CMS/./Login.html">Login</a></li><li><a href="../CMS/./Dashboard.html">Dashboard</a></li><li><a href="../CMS/./Grids.html">Grids</a></li><li><a href="../CMS/./Meetings.html">Meetings</a></li><li><a href="../CMS/./Documents.html">Documents</a></li><li><a href="../CMS/./Users_and_Groups.html">Users and Groups</a></li></ul></li></ul>                                            </div>
                 </div>
                 <div class="right-column  content-area col-sm-9">
                     <div class="content-page">
@@ -65,9 +65,9 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>Avatars                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Wednesday, April 16, 2014                                        </span>
+                                            Thursday, April 24, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            11:14 AM                                        </span>
+                                            9:56 AM                                        </span>
                                 </div>
                                                         <p>The CMS user can not be used in the OpenSim environment. OpenSim works with Avatars, which are independent of the CMS. However, Avatars can be linked to an OpenSim-CMS user, to access data from a specific user.</p>
 
@@ -95,6 +95,8 @@
 </tbody>
 </table>
 
+<p><strong>Notice:</strong> Linking an avatar to an user requires <code>EXECUTE</code> permissions to the User API.</p>
+
 <h2>Confirm avatar</h2>
 
 <p>Once an avatar is linked to a user account, it needs to be confirmed by the user. This can only be done by the user himself.</p>
@@ -106,12 +108,16 @@
 
 <p>This request will also return <code>"success": false</code> when the avatar is already confirmed.</p>
 
+<p><strong>Notice:</strong> Users can only confirm their own avatar. To confirm avatars of other users, you require <code>WRITE</code> permissions to the User API.</p>
+
 <h2>Unlink an avatar</h2>
 
 <p>This unlinks an avatar from the user. Just like confirming, this can only be performed by the user account associated with the link or when you have <code>WRITE</code> permissions for the <code>user</code> section. Please not that this will not remove the Avatar from OpenSim.</p>
 
 <pre><code class="language-http">DELETE /api/grid/&lt;GRID-ID&gt;/avatar/&lt;UUID&gt;/confirm/ HTTP/1.1
 </code></pre>
+
+<p><strong>Notice:</strong> Users can only unlink their own avatars. To unlink other user's avatars <code>WRITE</code> permissions are required to the User API.</p>
 
 <h2>Create a new avatar</h2>
 
@@ -187,9 +193,11 @@ can not be used in a password: <code>?{}&lt;&gt;;" '[]/\</code>. Somehow the cha
 }
 </code></pre>
 
+<p><strong>Notice:</strong> Creating a new avatar requires <code>EXECUTE</code> permissions to the User API.</p>
+
 <h2>Teleport an avatar to a location</h2>
 
-<p>To teleport a user you need at least the UUID of the user. All other parameters are optional and listed in the table below.</p>
+<p>To teleport an user you need at least the UUID of the user. All other parameters are optional and listed in the table below.</p>
 
 <pre><code class="language-http">PUT /api/grid/&lt;GRID-ID&gt;/avatar/&lt;UUID&gt;/teleport/ HTTP/1.1
 </code></pre>

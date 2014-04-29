@@ -1,6 +1,6 @@
 -- --------------------------------------------------------
 -- Host:                         localhost
--- Server versie:                5.5.35-1ubuntu1 - (Ubuntu)
+-- Server versie:                5.5.37-0ubuntu0.14.04.1 - (Ubuntu)
 -- Server OS:                    debian-linux-gnu
 -- HeidiSQL Versie:              8.3.0.4756
 -- --------------------------------------------------------
@@ -217,7 +217,7 @@ CREATE TABLE IF NOT EXISTS `group_documents` (
   KEY `FK_group_documents_groups` (`groupId`),
   CONSTRAINT `FK_group_documents_documents` FOREIGN KEY (`documentId`) REFERENCES `documents` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `FK_group_documents_groups` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
 
@@ -342,7 +342,7 @@ CREATE TABLE IF NOT EXISTS `tokens` (
   `expires` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`token`),
   KEY `userId` (`userId`),
-  CONSTRAINT `FK_tokens_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`)
+  CONSTRAINT `FK_tokens_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd
