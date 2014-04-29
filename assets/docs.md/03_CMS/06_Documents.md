@@ -4,6 +4,8 @@ The documents section contains an overview of the files in the system. This over
 * Shared with a group you are in
 * You have `ALL` permissions on the Files API
 
+![Documents overview](../img/documents.png "Documents overview in the CMS")
+
 Each document is one of three types, `image`, `document` or `presentation`. Comments can be placed for the whole document or for a specific page/slide. Each document you can see can be shared, well at least if you have `EXECUTE` permissions on the Files API. Which is also required to add new documents.
 
 Each image, page or slide is resized to a square image within the height (`IMAGE_HEIGHT`) and width (`IMAGE_WIDTH`) settings from the configuration, and saved as the configured file type (`IMAGE_TYPE`). See the [Installation](../Installation/Installation.html) section for details about these settings.
