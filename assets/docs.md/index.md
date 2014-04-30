@@ -3,7 +3,7 @@ A Content Management System (CMS) for [OpenSim](http://opensimulator.org). Uses 
 Also includes a couple of example scripts to be used in OpenSim in the assets folder. Such as the `presenterScreen.lsl` which enables you to access
 presentations created in the CMS.
 
-This project is based on the MVC pattern and uses [Apache web server](https://httpd.apache.org/) with [PHP5.4+](http://www.php.net) and a [MySQL](http://www.mysql.com) database. The API is RESTful and provides the basic `GET`, `POST`, `PUT` and `DELETE` functionalities.
+This project is based on the MVC pattern and uses [Apache web server](https://httpd.apache.org/) with [PHP5.5+](http://www.php.net) and a [MySQL](http://www.mysql.com) database. The API is RESTful and provides the basic `GET`, `POST`, `PUT` and `DELETE` functionalities.
 
 The CMS itself is build with [AngularJS](http://www.angularjs.org) and [RestAngular](https://github.com/mgonto/restangular) allowing it to remain separated from the Model and Controller and access only the API.
 

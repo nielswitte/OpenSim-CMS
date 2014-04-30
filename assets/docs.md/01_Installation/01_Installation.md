@@ -101,9 +101,9 @@ You can login into the CMS with the `admin` user. The passwords are lower case.
 **WARNING:** Both users have maximum permissions for every part of the API and therefore it is highly recommended to change the passwords as quick as possible.
 
 # Linux
-Some of the functions for the processing of documents and presentations rely on `pdftoppm`. This program, located in `poppler-utils`, needs to be installed on your Linux server for conversion of PDF to images to work.
+Some of the functions for the processing of documents and presentations rely on `pdftocairo`. This program, located in `poppler-utils`, needs to be installed on your Linux server for conversion of PDF to images to work.
 
 On Ubuntu this can be done by using: `apt-get install poppler-utils`.
 
 # Apache
-Apache requires `mod_rewrite` and optionally `mod_expires`. In addition PHP 5.5 or higher is required with CURL, JSON, GD and XML support.
+Apache requires `mod_rewrite` and optionally `mod_expires`. In addition PHP 5.5 or higher is required with cURL, JSON, GD and XML support.
