@@ -1337,14 +1337,15 @@ angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$s
             });
         };
 
-        // Teleports the avatar of the user to the meeting location
+        // Teleports the avatar of the user to the center of the grid
         $scope.teleportUser = function(name) {
             var avatarFound = false;
             // Search for avatars from the currently logged in user
             Restangular.one('user', sessionStorage.id).get().then(function(userResponse) {
+                var uuid;
                 for(var i = 0; i < userResponse.avatars.length; i++) {
                     // Avatar on grid and online?
-                    if(userResponse.avatars[i].gridId == $scope.grid.id && userResponse.avatars[i].online == 1) {
+                    if(userResponse.avatars[i].gridId == $scope.grid.id) {
                         avatarFound = true;
                         // Teleport the found avatar
                         Restangular.one('grid', $scope.grid.id).one('avatar', userResponse.avatars[i].uuid).customPUT({
@@ -1365,7 +1366,7 @@ angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$s
                 }
                 // No match found?
                 if(!avatarFound) {
-                    $alert({title: 'No avatar found!', content: 'Currently there is no avatar online, linked to your user account, on this grid to teleport.', type: 'danger'});
+                    $alert({title: 'No avatar found!', content: 'Currently there is no avatar linked to your user account on this grid to teleport.', type: 'danger'});
                 }
             });
             return false;
@@ -1898,7 +1899,7 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
             Restangular.one('user', sessionStorage.id).get().then(function(userResponse) {
                 for(var i = 0; i < userResponse.avatars.length; i++) {
                     // Avatar on grid and online?
-                    if(userResponse.avatars[i].gridId == $scope.meeting.room.grid.id && userResponse.avatars[i].online == 1) {
+                    if(userResponse.avatars[i].gridId == $scope.meeting.room.grid.id) {
                         avatarFound = true;
                         // Teleport the found avatar
                         Restangular.one('grid', $scope.meeting.room.grid.id).one('avatar', userResponse.avatars[i].uuid).customPUT({
@@ -1907,14 +1908,19 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
                             posZ: $scope.meeting.room.coordinates.z,
                             regionName: $scope.meeting.room.region.name
                         }, 'teleport').then(function(teleportResponse) {
-                            $alert({title: 'Teleported!', content: 'Avatar teleported to '+ $scope.meeting.room.name +' in region: '+ $scope.meeting.room.region.name +' on grid '+ $scope.meeting.room.grid.name, type: 'success'});
-                            return true;
+                            if(!teleportResponse.success) {
+                                $alert({title: 'Error!', content: teleportResponse.error, type: 'danger'});
+                                return false;
+                            } else {
+                                $alert({title: 'Teleported!', content: 'Avatar teleported to '+ $scope.meeting.room.name +' in region: '+ $scope.meeting.room.region.name +' on grid '+ $scope.meeting.room.grid.name, type: 'success'});
+                                return true;
+                            }
                         });
                     }
                 }
                 // No match found?
                 if(!avatarFound) {
-                    $alert({title: 'No avatar found!', content: 'Currently there is no avatar online, linked to your user account, on this grid to teleport.', type: 'danger'});
+                    $alert({title: 'No avatar found!', content: 'Currently there is no avatar linked to your user account on this grid to teleport.', type: 'danger'});
                 }
             });
             return false;
