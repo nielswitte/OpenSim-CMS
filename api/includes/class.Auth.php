@@ -37,21 +37,26 @@ class Auth {
         $result     = FALSE;
         $headers    = getallheaders();
         if(isset($headers["X-SecondLife-Shard"]) && $id == 1) {
-            // Check server IP to grid list
-            $db     = \Helper::getDB();
-            $grids  = $db->get('grids');
+            // Allow localhost
+            if($ip == '127.0.0.1') {
+                $result = TRUE;
+            } else {
+                // Check server IP to grid list
+                $db     = \Helper::getDB();
+                $grids  = $db->get('grids');
 
-            // Check all grids
-            foreach($grids as $grid) {
-                $osIp = $grid['osIp'];
-                // Check if grid uses IP or hostname
-                if(!filter_var($osIp, FILTER_VALIDATE_IP)) {
-                    $osIp = gethostbyname($osIp);
-                }
-                // Match found? Stop!
-                if($osIp == $ip || $osIp == "127.0.0.1") {
-                    $result = TRUE;
-                    break;
+                // Check all grids
+                foreach($grids as $grid) {
+                    $osIp = $grid['osIp'];
+                    // Check if grid uses IP or hostname
+                    if(!filter_var($osIp, FILTER_VALIDATE_IP)) {
+                        $osIp = gethostbyname($osIp);
+                    }
+                    // Match found? Stop!
+                    if($osIp == $ip || $osIp == '127.0.0.1') {
+                        $result = TRUE;
+                        break;
+                    }
                 }
             }
         }
