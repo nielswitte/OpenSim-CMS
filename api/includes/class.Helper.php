@@ -5,8 +5,8 @@ defined('EXEC') or die('Config not loaded');
  * Helper class to support the CMS and API
  *
  * @author Niels Witte
- * @version 0.4b
- * @date April 28th, 2014
+ * @version 0.4c
+ * @date April 30, 2014
  * @since February 12th, 2014
  */
 class Helper {
@@ -281,8 +281,11 @@ class Helper {
         mkdir($path, 0777, TRUE);
         // Command requires jpeg instead of jpg
         $image_type = IMAGE_TYPE == 'jpg' ? 'jpeg' : IMAGE_TYPE;
+
+        // Just do it plain and simple, ignoring all the other options because they are not supported in poppler tools below version 0.26
+        $command = 'pdftocairo -'. $image_type .' '. $file .' '. $destination;
         // Exec the command uses the largest of the image width or height as limit
-        if($fit) {
+        /*if($fit) {
             $command = 'pdftoppm -'. $image_type .' -scale-to '. ($width >= $height ? $width : $height) .' -aa yes -aaVector yes '. $file .' '. $destination;
         } else {
             // Scale the image to the largest max side or use height (especially for documents) when equal
@@ -291,7 +294,7 @@ class Helper {
             } else {
                 $command = 'pdftoppm -'. $image_type .' -scale-to-x -1 -scale-to-y '. $height .' -aa yes -aaVector yes '. $file .' '. $destination;
             }
-        }
+        }*/
         exec($command);
     }
 
@@ -464,6 +467,12 @@ END:VCALENDAR";
 
         // Generate a random filename
         $filename = \Helper::generateToken(16) .'.ics';
+
+        // Check if output directory exists
+        if(!file_exists(FILES_LOCATION . DS .'ical')) {
+            mkdir(FILES_LOCATION . DS .'ical');
+        }
+        // Save ICS
         file_put_contents(FILES_LOCATION . DS .'ical'. DS . $filename, $ical);
 
         return FILES_LOCATION . DS .'ical'. DS . $filename;

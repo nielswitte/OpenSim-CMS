@@ -1,4 +1,4 @@
-Before you start, you require a web server with [Apache](https://httpd.apache.org/), [PHP 5.4+](http://www.php.net) and [MySQL 5.6+](http://www.mysql.com). On windows you can use for example [XAMPP](https://www.apachefriends.org/index.html). On Linux the software can be installed by your package manager.
+Before you start, you require a web server with [Apache](https://httpd.apache.org/), [PHP 5.5+](http://www.php.net) and [MySQL 5.6+](http://www.mysql.com). On windows you can use for example [XAMPP](https://www.apachefriends.org/index.html). On Linux the software can be installed by your package manager.
 
 PHP requires the following extensions to be enabled:
 
@@ -101,9 +101,9 @@ You can login into the CMS with the `admin` user. The passwords are lower case.
 **WARNING:** Both users have maximum permissions for every part of the API and therefore it is highly recommended to change the passwords as quick as possible.
 
 # Linux
-Some of the functions for the processing of documents and presentations rely on `pdftoppm`. This program, located in `poppler-utils`, needs to be installed on your Linux server for conversion of PDF to images to work.
+Some of the functions for the processing of documents and presentations rely on `pdftocairo`. This program, located in `poppler-utils`, needs to be installed on your Linux server for conversion of PDF to images to work.
 
 On Ubuntu this can be done by using: `apt-get install poppler-utils`.
 
 # Apache
-Apache requires `mod_rewrite` and optionally `mod_expires`. In addition PHP 5.4 or higher is required with CURL, JSON, GD and XML support.
+Apache requires `mod_rewrite` and optionally `mod_expires`. In addition PHP 5.5 or higher is required with cURL, JSON, GD and XML support.

@@ -1,5 +1,6 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteBase /OpenSim-CMS/api
     RewriteCond %{REQUEST_FILENAME} !-f
     Options -MultiViews
     RewriteRule ^(.*)$ index.php?_url=/$1 [QSA,L]

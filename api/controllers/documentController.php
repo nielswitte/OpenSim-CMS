@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the Document controller
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 22nd, 2014
+ * @version 0.2a
+ * @date April 30, 2014
  * @since April 4th, 2014
  */
 class DocumentController {
@@ -88,7 +88,7 @@ class DocumentController {
                 if(isset($pagesDirectory)) {
                     \Helper::removeDirAndContents($pagesDirectory);
 
-                    throw new \Exception('Failed to save paeges to storage', 7);
+                    throw new \Exception('Failed to save pages to storage', 7);
                 } else {
                     throw new \Exception('Failed to save pdf to temp storage', 6);
                 }
