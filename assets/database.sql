@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS `avatars` (
   `confirmed` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`gridId`,`uuid`),
   KEY `FK_avatars_users` (`userId`),
-  CONSTRAINT `FK_avatars_grids` FOREIGN KEY (`gridId`) REFERENCES `grids` (`id`),
-  CONSTRAINT `FK_avatars_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`)
+  CONSTRAINT `FK_avatars_grids` FOREIGN KEY (`gridId`) REFERENCES `grids` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_avatars_users` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 -- Data exporteren was gedeselecteerd

@@ -58,7 +58,7 @@ This authentication request will return, on success the following JSON:
 }
 ```
 
-The validity of the token depends on the config settings and is extended every time the token is used. The user OpenSim with user ID `-1` can only accessed from the IP/Hostname which is used by OpenSim according to the grid list. In addition the `X-SecondLife-Shard` header needs to be set to access this user, this is done by default for OpenSim.
+The validity of the token depends on the config settings and is extended every time the token is used. The user OpenSim with user ID `1` can only accessed from the IP/Hostname which is used by OpenSim according to the grid list. In addition the `X-SecondLife-Shard` header needs to be set to access this user, this is done by default for OpenSim.
 
 ### Using the token
 The token needs to be used as a final parameter to the API URL and used as `?token=<API-TOKEN>`. For example the [Users](Users.html) API is protected and requires at least `READ` permission and thus a valid token. To retrieve information about the user which is known in the database as ID `1` the following API URL can be used:

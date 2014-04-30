@@ -5,8 +5,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is used to check authorization tokens
  *
  * @author Niels Witte
- * @version 0.4
- * @data April 22nd, 2014
+ * @version 0.4a
+ * @data April 30, 2014
  * @since February 19th, 2014
  */
 class Auth {
@@ -22,11 +22,11 @@ class Auth {
      */
     private static $userFiles;
 
-    const NONE      = 0b000; // 0 - No rights
-    const READ      = 0b100; // 4 - Read access
-    const EXECUTE   = 0b101; // 5 - Allows to read and execute functions (i.e. create events, confirm avatar links, clear cache)
-    const WRITE     = 0b110; // 6 - Allows to read and modify data
-    const ALL       = 0b111; // 7 - All above
+    const NONE      = 0; //0b000 - No rights
+    const READ      = 4; //0b100 - Read access
+    const EXECUTE   = 5; //0b101 - Allows to read and execute functions (i.e. create events, confirm avatar links, clear cache)
+    const WRITE     = 6; //0b110 - Allows to read and modify data
+    const ALL       = 7; //0b111 - All above
 
     /**
      * Request from OpenSim? Add this additional check because of the access rights of OpenSim
@@ -36,7 +36,7 @@ class Auth {
     public static function isGrid($id, $ip) {
         $result     = FALSE;
         $headers    = getallheaders();
-        if(isset($headers["X-SecondLife-Shard"]) && $id == 0) {
+        if(isset($headers["X-SecondLife-Shard"]) && $id == 1) {
             // Check server IP to grid list
             $db     = \Helper::getDB();
             $grids  = $db->get('grids');
@@ -220,7 +220,7 @@ class Auth {
             self::$userId       = $result['userId'];
             $db->where('token', $db->escape(self::$token));
             // OpenSim uses EXPIRES2
-            if($result['userId'] == 0) {
+            if($result['userId'] == 1) {
                 $data['expires']    = $db->escape(date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES2)));
             } else {
                 $data['expires']    = $db->escape(date('Y-m-d H:i:s', strtotime('+'. SERVER_API_TOKEN_EXPIRES)));

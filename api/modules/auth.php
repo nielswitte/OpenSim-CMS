@@ -9,8 +9,8 @@ require_once dirname(__FILE__) .'/module.php';
  * Implements the functions for authentication
  *
  * @author Niels Witte
- * @version 0.3
- * @date April 15th, 2014
+ * @version 0.3a
+ * @date April 30, 2014
  * @since February 24th, 2014
  */
 class Auth extends Module {
@@ -101,7 +101,7 @@ class Auth extends Module {
         $ip                     = isset($input['ip']) ? $input['ip'] : FALSE;
 
         // Default settings
-        $userId = ($username == 'OpenSim' ? 0 : -1);
+        $userId = ($username == 'OpenSim' ? 1 : -1);
 
         $db                     = \Helper::getDB();
         // Basic output data
@@ -113,7 +113,7 @@ class Auth extends Module {
         $data['expires']        = $db->escape(date('Y-m-d H:i:s', strtotime('+'. $expireTime)));
 
         // Attempt to access with OpenSim from outside the Grid
-        if($userId == 0 && !$isGrid) {
+        if($userId == 1 && !$isGrid) {
             throw new \Exception('Not allowed to login as OpenSim outside the Grid', 2);
         }
 
