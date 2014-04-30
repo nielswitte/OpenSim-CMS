@@ -54,9 +54,10 @@ The parameters that can be used are the following:
 | startRegionY      | integer   | [Optional] Y-coordinate of the start region (default: 0)      |
 
 This request will return a JSON message with the result. It contains two or three elements.
-* 1) success, a boolean wheter or not the request was processed successful.
-* 2) Optional, only used when the request is not successful.
-* 3) the UUID of the newly created user, which is filled with zeros on failure.
+
+1. `success`, a boolean whether or not the request was processed successful.
+2. `error`, [Optional] only used when the request was not successful.
+3. `avatar_uuid`, the newly created avatar's UUID, which is filled with zeros on failure.
 
 Two examples of output are listed below, first a successful request, second a failure because the user's first and lastname were already used.
 
