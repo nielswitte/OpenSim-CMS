@@ -16,9 +16,9 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  * Implements the functions for users
  *
  * @author Niels Witte
- * @version 0.9a
- * @date April 22nd, 2014
- * @since February 24th, 2014
+ * @version 1.0
+ * @date May 1, 2014
+ * @since February 24, 2014
  */
 class User extends Module {
     private $api;
@@ -169,9 +169,16 @@ class User extends Module {
      * Removes the given user
      * @param array $args
      * @return array
+     * @throws \Exception
      */
     public function deleteUserById($args) {
         $user     = new \Models\User($args[1]);
+
+        // Do not allow removing of OpenSim or own account
+        if($user->getId() == 0 || \Auth::getUser()->getId() == $user->getId()) {
+            throw new \Exception('You cannot remove your own account or the OpenSim account.', 3);
+        }
+
         $userCtrl = new \Controllers\UserController($user);
         $data     =  $userCtrl->removeUser();
 
