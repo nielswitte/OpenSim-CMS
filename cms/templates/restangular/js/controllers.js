@@ -478,7 +478,7 @@ angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$
 
             // Fix for autocomplete
             if(!user) {
-                user = { username: jQuery('#LoginUsername').val(), password: jQuery('#LoginPassword').val() };
+                user = { user: jQuery('#LoginUsername').val(), password: jQuery('#LoginPassword').val() };
             }
 
             var auth = Restangular.one('auth').post('user', user).then(function(authResponse) {
