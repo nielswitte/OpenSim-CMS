@@ -12,6 +12,11 @@ If you have just installed the CMS, be sure to import the `users.sql` file as we
 |--------------|------------|
 | admin        | password   |
 
+### My username and password are correct but I cannot login.
+In some cases using saved usernames and passwords which are automatically entered by your browser can result in displaying login failure messages. Preferably enter your username and password manually.
+
+If logging in still fails, contact the system administrator and let him check your user account's permissions.
+
 ### How can I change my username?
 You can not change your username. The only way this could be done is by letting the system administrator change your username in the `users` table in the MySQL database.
 
