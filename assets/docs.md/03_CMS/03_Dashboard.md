@@ -10,7 +10,7 @@ The meetings are ordered by start date and time, and use the same color schema a
 Only minutes from meetings that are scheduled now or in the past have a button `Minutes`. Because future meetings should not have any minutes yet.
 
 ## Comments
-Comments contain all visible comments to your account posted after the last time you logged in. This includes comments posted during
+Comments contain all visible comments to your account posted after the last time you logged in. This includes comments posted during the current session.
 
 ## Documents
 The list with documents is ordered by date, with the latest first. The list only contains documents to which you have access.
