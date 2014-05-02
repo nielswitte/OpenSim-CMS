@@ -1124,6 +1124,7 @@ angularRest.controller('documentController', ['Restangular', 'RestangularCache',
 
         // Open dialog with the Slide preview
         $scope.lightbox = function(number, url) {
+            $scope.buttons          = [];
             $modal({
                 title: 'Preview '+ number,
                 content: '<img src="'+ url+'?token='+ sessionStorage.token +'" class="img-responsive">',
