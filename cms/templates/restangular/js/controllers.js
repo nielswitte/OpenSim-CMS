@@ -2793,7 +2793,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
         // Show delete button only when allowed to delete
         $scope.allowDelete = function(userId) {
-            if(userId != sessionStorage.id && userId != 0 && sessionStorage.userPermission >= WRITE) {
+            if(userId != sessionStorage.id && userId != 1 && sessionStorage.userPermission >= WRITE) {
                 return true;
             } else {
                 return false;
