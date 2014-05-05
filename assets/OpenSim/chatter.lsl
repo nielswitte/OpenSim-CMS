@@ -11,11 +11,11 @@
  *
  * @author Niels Witte
  * @date March 21st, 2014
- * @version 0.1
+ * @version 0.2
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
-integer debug = 1;              // Enables showing debugging comments
+integer debug = 0;              // Enables showing debugging comments
 string APIUsername = "OpenSim"; // API user name to be used
 string APIPassword = "OpenSim"; // API password
 integer serverId = 1;           // The ID of this server in OpenSim-CMS
@@ -101,8 +101,8 @@ integer request_avatar_by_uuid (key uuid) {
     integer res = llListFindList(userUuidLinks, [uuid]);
     // Cached match found?
     if(res > -1) {
-        if(debug) llInstantMessage(userUuid, "[Debug] Looking up UUID: "+ uuid + " and matched to cached result");
-        return res+1;
+        if(debug) llInstantMessage(userUuid, "[Debug] Looking up UUID: "+ uuid + " and matched to cached result (ID: "+ llList2Integer(userUuidLinks, res+1) +")");
+        return llList2Integer(userUuidLinks, res+1);
     } else {
         if(debug) llInstantMessage(userUuid, "[Debug] Looking up UUID: "+ uuid + " and need to search server");
         // Request user by avatar
@@ -253,7 +253,7 @@ state chatting {
             if(debug) llInstantMessage(userUuid, "[Debug] Requested user by avatar and got response: ID = "+ userId);
 
             // Got a result?
-            if(userId > 0) {
+            if(userId > 1) {
                 userUuidLinks += [userId];
             // No match found
             } else {
