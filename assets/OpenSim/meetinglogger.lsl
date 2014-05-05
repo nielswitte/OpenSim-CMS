@@ -17,13 +17,14 @@
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
-integer debug = 1;              // Enables showing debugging comments
+integer debug = 0;              // Enables showing debugging comments
 string APIUsername = "OpenSim"; // API user name to be used
 string APIPassword = "OpenSim"; // API password
+integer serverId = 1;           // The ID of this server in OpenSim-CMS
 
 // Some general parameters
-key viewerUuid = "b7db0f12-21e7-46da-8a9b-468b9d049cb5"; // The UUID of the viewer of the agenda
-integer channelListen = -9;     // Channel to listen to
+key viewerUuid = "37f014bf-499a-47fc-894a-6cb9c6d268d9"; // The UUID of the viewer of the agenda
+integer channelListen = -9231;  // Channel to listen to
 integer channelChat = 0;        // Channel to log chat on
 string APIToken;                // The token to be used for the API
 list Listener;                  // The navigation listener
@@ -295,7 +296,6 @@ state startup {
     state_entry() {
         // SET COLOR ORANGE
         llSetColor(<255, 200, 0>, ALL_SIDES);
-        if(debug) llInstantMessage(userUuid, "Starting meeting logger");
 
         // Get API Key
         request_api_token();
@@ -533,7 +533,7 @@ state logging {
 
     // Loop through requests
     timer() {
-        if(debug) llInstantMessage(userUuid, "[Debug] Timer fired ("+ (string) timerfiredcount +")");
+        if(debug) llInstantMessage(userUuid, "[Debug] Timer fired ("+ timerfiredcount +")");
         // Only send chat every 6th cycle (starting at 0)
         if(timerfiredcount >= 5) {
             timerfiredcount = 0;
