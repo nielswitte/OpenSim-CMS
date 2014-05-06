@@ -1074,40 +1074,6 @@ angularRest.controller('documentController', ['Restangular', 'RestangularCache',
                 $scope.document = documentResponse;
                 $scope.token    = sessionStorage.token;
                 Page.setTitle(documentResponse.title);
-
-                // Init select2
-                jQuery('#inputOwner').select2({
-                    placeholder: 'Search for an user',
-                    minimumInputLength: 3,
-                    ajax: {
-                        url: function(term, page) {
-                            return base_url +'/api/users/'+ term +'/?token='+ sessionStorage.token;
-                        },
-                        dataType: 'json',
-                        results: function(data, page) {
-                            var result = [];
-                            jQuery.each(data, function(i, item) {
-                                var items = {id: i, text: item.username};
-                                result.push(items);
-                            });
-
-                            return {results: result};
-                        }
-                    },
-                    initSelection: function(element, callback) {
-                        var id = jQuery(element).val();
-                        if (id != '') {
-                            jQuery.ajax(base_url +'/api/user/'+ id +'/?token='+ sessionStorage.token, {
-                                dataType: 'json'
-                            }).done(function(data) {
-                                callback({id: data.id, text: data.username});
-                            });
-                        }
-                    }
-                });
-
-                // Trigger change and update
-                jQuery('#inputOwner').select2('val', documentResponse.ownerId, true);
             }
             // Remove loading screen
             jQuery('#loading').hide();
