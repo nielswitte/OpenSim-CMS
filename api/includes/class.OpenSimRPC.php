@@ -41,10 +41,10 @@ class OpenSimRPC {
      * @param array $parameters - Array with parameters for the function
      * @return XML or boolean FALSE when failed to connect
      */
-    public function call($command, $parameters) {
+    public function call($command, $parameters, $close = TRUE) {
         $parameters['password'] = $this->password;
-        $request                = xmlrpc_encode_request($command, $parameters);
-        $ch                     = curl_init();
+        $request                 = xmlrpc_encode_request($command, $parameters);
+        $ch                      = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->serverUri);
         curl_setopt($ch, CURLOPT_PORT, $this->serverPort);
         curl_setopt($ch, CURLOPT_POST, 1);
@@ -53,7 +53,12 @@ class OpenSimRPC {
         curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
         $result = curl_exec($ch);
         $error  = curl_error($ch);
-        curl_close($ch);
+
+        // Close the connection?
+        if($close) {
+            curl_close($ch);
+        }
+
         return $error == '' ? xmlrpc_decode($result) : FALSE;
     }
 
