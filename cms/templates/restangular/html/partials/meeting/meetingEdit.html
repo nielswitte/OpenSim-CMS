@@ -62,7 +62,8 @@
             <div class="form-group">
                 <label class="col-sm-2 control-label" for="inputRegion">Rooms</label>
                 <div class="col-sm-10">
-                    <select id="inputRegion" class="form-control" ng-model="meeting.room.id" ng-options="room.id as room.name for room in rooms" required></select>
+                    <p class="form-control-static" ng-show="rooms.length == 0">No rooms in this region</p>
+                    <select id="inputRegion" class="form-control" ng-show="rooms.length >= 1" ng-model="meeting.room.id" ng-options="room.id as room.name for room in rooms" required></select>
                 </div>
             </div>
             <fieldset>

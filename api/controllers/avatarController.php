@@ -7,9 +7,9 @@ defined('EXEC') or die('Config not loaded');
  * This class is the user controller
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 1st, 2014
- * @since February 27th, 2014
+ * @version 0.3
+ * @date May 7, 2014
+ * @since February 27, 2014
  */
 class AvatarController {
     private $avatar;
@@ -36,16 +36,19 @@ class AvatarController {
      *              * string $password - the password for the user
      *              * integer $start_region_x - [Optional] region x coordinate, default 0
      *              * integer $start_region_y - [Optional] region y coordinate, default 0
-     * @return xml
+     * @return array
      */
     public function createAvatar($parameters) {
         // Retrieve grid information for remote admin
         $gridId = $parameters['gridId'];
         $grid   = new \Models\Grid($gridId);
-        $grid->getInfoFromDatabase();
+        $grid->getInfoFromDatabase(FALSE);
 
         // Call the Grid's remote admin
         $raXML = new \OpenSimRPC($grid->getRaUrl(), $grid->getRaPort(), $grid->getRaPassword());
+
+        /*
+        //Old way of making a new avatar... However this fails to load the default shape/clothing...
         $callData = array(
             'user_firstname'    => $parameters['firstName'],
             'user_lastname'     => $parameters['lastName'],
@@ -56,8 +59,29 @@ class AvatarController {
         );
 
         $result = $raXML->call('admin_create_user', $callData);
-
         return $result;
+        */
+
+        // Generate random UUID
+        $uuid    = \Helper::generateUuid();
+        if(!\Helper::isValidUuid($uuid)) {
+            throw new \Exception('Invalid UUID generated, try again', 1);
+        }
+
+        $command = 'create user '. $parameters['firstName'] .' '. $parameters['lastName'] .' '. $parameters['password'] .' '. $parameters['email'] .' '. $uuid;
+        // Successful request
+        if($raXML->call('admin_console_command', array('command' => $command), TRUE) !== FALSE) {
+            return array(
+                'success'       => TRUE,
+                'avatar_uuid'   => $uuid
+            );
+        } else {
+            return array(
+                'success'       => FALSE,
+                'error'         => 'failed to create new user '. $parameters['firstName'] .' '. $parameters['lastName'] .'. Something when wrong while preforming the request to the server. Please try again. If you receive the message Avatar already exists, try logging in.',
+                'avatar_uuid'   => '00000000-0000-0000-0000-000000000000'
+            );
+        }
     }
 
     /**
@@ -114,7 +138,7 @@ class AvatarController {
         // Retrieve grid information for remote admin
         $gridId = $parameters['gridId'];
         $grid   = new \Models\Grid($gridId);
-        $grid->getInfoFromDatabase();
+        $grid->getInfoFromDatabase(FALSE);
 
         // Call the Grid's remote admin
         $raXML = new \OpenSimRPC($grid->getRaUrl(), $grid->getRaPort(), $grid->getRaPassword());
@@ -183,6 +207,7 @@ class AvatarController {
      * Checks to see if the given fistName and lastName are already in use on the selected grid
      *
      * @param array $parameters
+     *              * integer gridId - The ID of the grid in the API
      *              * string firstName - Avatars first name
      *              * string lastName - Avatars last name
      * @return array
@@ -191,7 +216,7 @@ class AvatarController {
         // Retrieve grid information for remote admin
         $gridId = $parameters['gridId'];
         $grid   = new \Models\Grid($gridId);
-        $grid->getInfoFromDatabase();
+        $grid->getInfoFromDatabase(FALSE);
 
         // Call the Grid's remote admin
         $raXML = new \OpenSimRPC($grid->getRaUrl(), $grid->getRaPort(), $grid->getRaPassword());

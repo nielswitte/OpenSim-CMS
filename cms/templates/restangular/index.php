@@ -15,8 +15,6 @@ defined('EXEC') or die('Config not loaded');
         <link href="templates/restangular/css/bootstrap.min.css" rel="stylesheet" type="text/css">
         <link href="templates/restangular/css/bootstrap-additions.min.css" rel="stylesheet" type="text/css">
         <link href="templates/restangular/css/angular-motion.min.css" rel="stylesheet" type="text/css">
-        <link href="templates/restangular/css/select2.css" rel="stylesheet" type="text/css">
-        <link href="templates/restangular/css/select2-bootstrap.css" rel="stylesheet" type="text/css">
         <link href="templates/restangular/less/main.less" rel="stylesheet/less" type="text/css">
 
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -89,7 +87,6 @@ defined('EXEC') or die('Config not loaded');
         <script src="templates/restangular/js/libs/underscore.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/moment.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/bootstrap-calendar.js" type="text/javascript"></script>
-        <script src="templates/restangular/js/libs/select2.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/markdown.min.js" type="text/javascript"></script>
         <script src="templates/restangular/js/libs/less.min.js" type="text/javascript"></script>
         <!-- Angular implementations -->

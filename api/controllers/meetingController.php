@@ -7,9 +7,9 @@ defined('EXEC') or die('Config not loaded');
  * This class is the Meeting controller
  *
  * @author Niels Witte
- * @version 0.4a
- * @date April 22nd, 2014
- * @since March 13th, 2014
+ * @version 0.4b
+ * @date May 5, 2014
+ * @since March 13, 2014
  */
 class MeetingController {
     private $meeting;
@@ -132,13 +132,13 @@ class MeetingController {
         // Update the agenda
         $agenda = $this->parseAgendaString($parameters['agenda']);
         $this->removeAgenda();
-        $this->setAgenda($agenda);
+        $agendaResult = $this->setAgenda($agenda);
 
         // Were any updates made?
-        if($update || $participants || $documents) {
+        if($update || $participants || $documents || $agendaResult) {
             return TRUE;
         } else {
-            throw new \Exception('No changes were made to this meeting', 6);
+            throw new \Exception('No changes were made to this meeting.', 6);
         }
     }
 

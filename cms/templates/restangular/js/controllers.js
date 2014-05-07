@@ -478,7 +478,7 @@ angularRest.controller('loginController', ['Restangular', 'RestangularCache', '$
 
             // Fix for autocomplete
             if(!user) {
-                user = { username: jQuery('#LoginUsername').val(), password: jQuery('#LoginPassword').val() };
+                user = { user: jQuery('#LoginUsername').val(), password: jQuery('#LoginPassword').val() };
             }
 
             var auth = Restangular.one('auth').post('user', user).then(function(authResponse) {
@@ -1074,40 +1074,6 @@ angularRest.controller('documentController', ['Restangular', 'RestangularCache',
                 $scope.document = documentResponse;
                 $scope.token    = sessionStorage.token;
                 Page.setTitle(documentResponse.title);
-
-                // Init select2
-                jQuery('#inputOwner').select2({
-                    placeholder: 'Search for an user',
-                    minimumInputLength: 3,
-                    ajax: {
-                        url: function(term, page) {
-                            return base_url +'/api/users/'+ term +'/?token='+ sessionStorage.token;
-                        },
-                        dataType: 'json',
-                        results: function(data, page) {
-                            var result = [];
-                            jQuery.each(data, function(i, item) {
-                                var items = {id: i, text: item.username};
-                                result.push(items);
-                            });
-
-                            return {results: result};
-                        }
-                    },
-                    initSelection: function(element, callback) {
-                        var id = jQuery(element).val();
-                        if (id != '') {
-                            jQuery.ajax(base_url +'/api/user/'+ id +'/?token='+ sessionStorage.token, {
-                                dataType: 'json'
-                            }).done(function(data) {
-                                callback({id: data.id, text: data.username});
-                            });
-                        }
-                    }
-                });
-
-                // Trigger change and update
-                jQuery('#inputOwner').select2('val', documentResponse.ownerId, true);
             }
             // Remove loading screen
             jQuery('#loading').hide();
@@ -1124,6 +1090,7 @@ angularRest.controller('documentController', ['Restangular', 'RestangularCache',
 
         // Open dialog with the Slide preview
         $scope.lightbox = function(number, url) {
+            $scope.buttons          = [];
             $modal({
                 title: 'Preview '+ number,
                 content: '<img src="'+ url+'?token='+ sessionStorage.token +'" class="img-responsive">',
@@ -1344,7 +1311,7 @@ angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$s
             Restangular.one('user', sessionStorage.id).get().then(function(userResponse) {
                 var uuid;
                 for(var i = 0; i < userResponse.avatars.length; i++) {
-                    // Avatar on grid and online?
+                    // Avatar on grid?
                     if(userResponse.avatars[i].gridId == $scope.grid.id) {
                         avatarFound = true;
                         // Teleport the found avatar
@@ -1354,10 +1321,7 @@ angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$s
                             posZ: 25,
                             regionName: name
                         }, 'teleport').then(function(teleportResponse) {
-                            if(!teleportResponse.success) {
-                                $alert({title: 'Error!', content: teleportResponse.error, type: 'danger'});
-                                return false;
-                            } else {
+                            if(teleportResponse.success) {
                                 $alert({title: 'Teleported!', content: 'Avatar teleported to region: '+ name +' on grid '+ $scope.grid.name, type: 'success'});
                                 return true;
                             }
@@ -2793,7 +2757,7 @@ angularRest.controller('usersController', ['RestangularCache', 'Restangular', '$
 
         // Show delete button only when allowed to delete
         $scope.allowDelete = function(userId) {
-            if(userId != sessionStorage.id && userId != 0 && sessionStorage.userPermission >= WRITE) {
+            if(userId != sessionStorage.id && userId != 1 && sessionStorage.userPermission >= WRITE) {
                 return true;
             } else {
                 return false;
@@ -3199,7 +3163,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                         if(!avatarLinkResponse.success) {
                             $alert({title: 'Error!', content: avatarLinkResponse.error, type: 'danger'});
                         } else {
-                            $alert({title: 'Avatar linked!', content: 'The avatar '+ $scope.avatar.firstName +' '+ $scope.avatar.lastName +' has been linked to this user.', type: 'success'});
+                            $alert({title: 'Avatar linked!', content: 'The avatar '+ $scope.avatar.firstName +' '+ $scope.avatar.lastName +' has been linked to this user. You only need to confirm the link.', type: 'success'});
                         }
                     });
                     modal.hide();

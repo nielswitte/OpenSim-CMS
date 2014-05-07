@@ -23,7 +23,6 @@ Kudos to those who created the packages and classes which are used by this progr
  * Mgcrea for Angular-Strap ([https://github.com/mgcrea/angular-strap](https://github.com/mgcrea/angular-strap))
  * Serhioromano for Bootstrap-calendar ([https://github.com/Serhioromano/bootstrap-calendar](https://github.com/Serhioromano/bootstrap-calendar))
  * Tobiasahlin for SpinKit ([https://github.com/tobiasahlin/SpinKit](https://github.com/tobiasahlin/SpinKit))
- * Ivaynberg for Select2 ([https://github.com/ivaynberg/select2](https://github.com/ivaynberg/select2))
  * Moment ([https://github.com/moment/moment](https://github.com/moment/moment))
  * Jashkenas for Underscore ([https://github.com/jashkenas/underscore](https://github.com/jashkenas/underscore))
  * Evilstreak for Markdown-js ([https://github.com/evilstreak/markdown-js](https://github.com/evilstreak/markdown-js))

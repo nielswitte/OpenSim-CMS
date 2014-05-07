@@ -13,7 +13,7 @@
  *
  * @author Niels Witte
  * @date February 11th, 2014
- * @version 1.0
+ * @version 1.1
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
@@ -30,7 +30,7 @@ integer mListener;              // The main listener
 integer gListener;              // The navigation listener
 key userUuid = NULL_KEY;        // The toucher's UUID (default the owner)
 key objectUuid;                 // The object's UUID
-integer channel = 7;            // The channel to be used
+integer channel = -8862;        // The channel to be used
 integer media = 0;              // Media type [0 = off, 1 = presentation]
 list textureCache;              // Cache the textures to only require loading once
 integer item = 1;               // The current page/slide
@@ -160,12 +160,12 @@ load_item_comments(integer index, string type) {
  * @param string rawComments
  */
 parse_comments(string rawComments) {
-    if(debug) llInstantMessage(userUuid, "Parsing comments: JSON");
+    llInstantMessage(userUuid, "Parsing comments...");
 
     key json_comments   = JsonCreateStore(rawComments);
     integer count       = (integer) JsonGetValue(json_comments, "commentCount");
-    string buffer   = "";
-    integer i       = 0;
+    string buffer       = "";
+    integer i           = 0;
     llSay(0, "Showing "+ count +" comments --------------------------------------------------------");
 
     for(i = 0; i < JsonGetArrayLength(json_comments, "comments"); i++) {
@@ -535,10 +535,9 @@ state presentation {
             // Parse the slides section
             key json_slides     = JsonCreateStore(slides_body);
             // Empty slides and cache list
-            list empty          = [];
-            textureCache        = empty;
-            itemsList           = empty;
-            itemIds             = empty;
+            textureCache        = [];
+            itemsList           = [];
+            itemIds             = [];
             if(debug) llInstantMessage(userUuid, "[Debug] Slide list is currently: "+ (string) itemsList);
             integer x;
             integer length      = (integer) JsonGetValue(json_body, "slidesCount");
@@ -784,10 +783,9 @@ state document {
             // Parse the pages section
             key json_pages     = JsonCreateStore(pages_body);
             // Empty pages and cache list
-            list empty          = [];
-            textureCache        = empty;
-            itemsList           = empty;
-            itemIds             = empty;
+            textureCache        = [];
+            itemsList           = [];
+            itemIds             = [];
             if(debug) llInstantMessage(userUuid, "[Debug] Page list is currently: "+ (string) itemsList);
             integer x;
             integer length      = (integer) JsonGetValue(json_body, "pagesCount");
@@ -975,7 +973,7 @@ state image {
         // Only execute when a media object has been loaded
         if(media == 1) {
             if(llList2String(commands, 0) == "Comments") {
-                load_item_comments((item - 1), "file");
+                load_item_comments(0, "file");
             // Invalid command
             } else {
                 // Other
@@ -1018,10 +1016,9 @@ state image {
             }
 
             // Empty pages and cache list
-            list empty          = [];
-            textureCache        = empty;
-            itemsList           = empty;
-            itemIds             = empty;
+            textureCache        = [];
+            itemsList           = [];
+            itemIds             = [];
 
             string imageUuid     = "";
             string imageExpired  = "";
@@ -1162,8 +1159,7 @@ state off {
         llSay(0, "turning off!");
 
         // Clear cache
-        list empty = [];
-        textureCache = empty;
+        textureCache = [];
         // Set color to black
         llSetColor(ZERO_VECTOR, ALL_SIDES);
         llSetTexture(TEXTURE_BLANK, ALL_SIDES);

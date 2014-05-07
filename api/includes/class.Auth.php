@@ -5,9 +5,9 @@ defined('EXEC') or die('Config not loaded');
  * This class is used to check authorization tokens
  *
  * @author Niels Witte
- * @version 0.4a
- * @data April 30, 2014
- * @since February 19th, 2014
+ * @version 0.5
+ * @data May 7, 2014
+ * @since February 19, 2014
  */
 class Auth {
     private static $token = '';
@@ -132,12 +132,12 @@ class Auth {
      */
     public static function checkComment($type, $itemId) {
         $result = FALSE;
+        $db     = \Helper::getDB();
         // All permission?
         if(\Auth::checkRights('comment', \Auth::ALL)) {
             $result = TRUE;
         // Extended permissions check for specific comment types
         } elseif(in_array($type, array('file', 'document', 'presentation', 'page', 'slide'))) {
-            $db = \Helper::getDB();
             // Get parent of page or slide
             if($type == 'page') {
                 $db->where('id', $db->escape($itemId));
@@ -155,6 +155,12 @@ class Auth {
             if(\Auth::checkUserFiles($parentId) || \Auth::checkGroupFile($parentId)) {
                 $result = TRUE;
             }
+        // Check meeting comments
+        } elseif($type == 'meeting') {
+            $db->where('meetingId', $db->escape($itemId));
+            $db->where('userId', $db->escape(\Auth::getUser()->getId()));
+            $data = $db->getOne('meeting_participants', 'COUNT(*) as count');
+            $result = $data['count'] == 1 ? TRUE : FALSE;
         // No need to check type?
         } else {
             $result = TRUE;
