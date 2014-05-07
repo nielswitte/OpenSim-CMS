@@ -1872,11 +1872,8 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
                             posZ: $scope.meeting.room.coordinates.z,
                             regionName: $scope.meeting.room.region.name
                         }, 'teleport').then(function(teleportResponse) {
-                            if(!teleportResponse.success) {
-                                $alert({title: 'Error!', content: teleportResponse.error, type: 'danger'});
-                                return false;
-                            } else {
-                                $alert({title: 'Teleported!', content: 'Avatar teleported to '+ $scope.meeting.room.name +' in region: '+ $scope.meeting.room.region.name +' on grid '+ $scope.meeting.room.grid.name, type: 'success'});
+                            if(teleportResponse.success) {
+                                $alert({title: 'Teleported!', content: 'Avatar teleported to '+ $scope.meeting.room.name +' in region '+ $scope.meeting.room.region.name +' on grid '+ $scope.meeting.room.grid.name, type: 'success'});
                                 return true;
                             }
                         });

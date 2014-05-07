@@ -11,9 +11,9 @@ require_once dirname(__FILE__) .'/../controllers/commentController.php';
  * Implements the functions for comments
  *
  * @author Niels Witte
- * @version 0.4
- * @date April 22nd, 2014
- * @since March 28th, 2014
+ * @version 0.4a
+ * @date May 7, 2014
+ * @since March 28, 2014
  */
 class Comment extends Module {
     /**
@@ -223,7 +223,7 @@ class Comment extends Module {
                 'type'          => $comment->getType(),
                 'timestamp'     => $comment->getTimestamp(),
                 'editTimestamp' => $comment->getEditTimestamp(),
-                'message'       => $comment->getMessage(),
+                'message'       => stripslashes($comment->getMessage()),
                 'childrenCount' => count($comment->getChildren()),
                 'children'      => $this->getCommentData($comment)
             );
