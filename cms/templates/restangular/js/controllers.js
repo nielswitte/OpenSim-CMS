@@ -1311,7 +1311,7 @@ angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$s
             Restangular.one('user', sessionStorage.id).get().then(function(userResponse) {
                 var uuid;
                 for(var i = 0; i < userResponse.avatars.length; i++) {
-                    // Avatar on grid and online?
+                    // Avatar on grid?
                     if(userResponse.avatars[i].gridId == $scope.grid.id) {
                         avatarFound = true;
                         // Teleport the found avatar
@@ -1321,10 +1321,7 @@ angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$s
                             posZ: 25,
                             regionName: name
                         }, 'teleport').then(function(teleportResponse) {
-                            if(!teleportResponse.success) {
-                                $alert({title: 'Error!', content: teleportResponse.error, type: 'danger'});
-                                return false;
-                            } else {
+                            if(teleportResponse.success) {
                                 $alert({title: 'Teleported!', content: 'Avatar teleported to region: '+ name +' on grid '+ $scope.grid.name, type: 'success'});
                                 return true;
                             }
