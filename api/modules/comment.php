@@ -223,7 +223,7 @@ class Comment extends Module {
                 'type'          => $comment->getType(),
                 'timestamp'     => $comment->getTimestamp(),
                 'editTimestamp' => $comment->getEditTimestamp(),
-                'message'       => $comment->getMessage(),
+                'message'       => stripslashes($comment->getMessage()),
                 'childrenCount' => count($comment->getChildren()),
                 'children'      => $this->getCommentData($comment)
             );
