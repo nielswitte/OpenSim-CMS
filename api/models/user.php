@@ -11,9 +11,9 @@ require_once dirname(__FILE__) .'/group.php';
  * This class is the user model
  *
  * @author Niels Witte
- * @version 0.6
- * @date April 17th, 2014
- * @since February 10th, 2014
+ * @version 0.6a
+ * @date May 7, 2014
+ * @since February 10, 2014
  */
 class User implements SimpleModel {
     /**
@@ -140,7 +140,7 @@ class User implements SimpleModel {
     /**
      * Gets the user's avatars from the database
      *
-     * @param boolean $full - Also get information from Grid if possible
+     * @param boolean $full - [Optional] Also get information from Grid if possible (default: TRUE)
      */
     public function getAvatarsFromDatabase($full = TRUE) {
         $db = \Helper::getDB();
@@ -148,6 +148,7 @@ class User implements SimpleModel {
         $db->where('userId', $db->escape($this->getId()));
         $avatars = $db->get('avatars');
 
+        $this->avatars = array();
         foreach($avatars as $avatar) {
             $grid       = new \Models\Grid($avatar['gridId']);
             $newAvatar  = new \Models\Avatar($grid, $avatar['uuid']);
