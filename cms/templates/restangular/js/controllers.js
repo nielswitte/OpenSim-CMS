@@ -3166,7 +3166,7 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
                         if(!avatarLinkResponse.success) {
                             $alert({title: 'Error!', content: avatarLinkResponse.error, type: 'danger'});
                         } else {
-                            $alert({title: 'Avatar linked!', content: 'The avatar '+ $scope.avatar.firstName +' '+ $scope.avatar.lastName +' has been linked to this user.', type: 'success'});
+                            $alert({title: 'Avatar linked!', content: 'The avatar '+ $scope.avatar.firstName +' '+ $scope.avatar.lastName +' has been linked to this user. You only need to confirm the link.', type: 'success'});
                         }
                     });
                     modal.hide();
