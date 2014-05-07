@@ -7,9 +7,9 @@ defined('EXEC') or die('Config not loaded');
  * This class is the user controller
  *
  * @author Niels Witte
- * @version 0.2
- * @date April 1st, 2014
- * @since February 27th, 2014
+ * @version 0.2a
+ * @date May 7, 2014
+ * @since February 27, 2014
  */
 class AvatarController {
     private $avatar;
@@ -183,6 +183,7 @@ class AvatarController {
      * Checks to see if the given fistName and lastName are already in use on the selected grid
      *
      * @param array $parameters
+     *              * integer gridId - The ID of the grid in the API
      *              * string firstName - Avatars first name
      *              * string lastName - Avatars last name
      * @return array
