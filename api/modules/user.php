@@ -447,9 +447,17 @@ class User extends Module {
      * @return array
      */
     public function teleportAvatarByUuid($args) {
-        // Only allow when the user has write access or wants to update his/her own profile
-        if(!\Auth::checkRights($this->getName(), \Auth::WRITE) && $args[1] != \Auth::getUser()->getId()) {
-            throw new \Exception('You do not have permissions to teleport this user.', 6);
+
+        // Only allow when the user has access to other avatars or wants to teleport his/her own avatar
+        if(!\Auth::checkRights($this->getName(), \Auth::WRITE)) {
+            // Get user's own avatars
+            if(!is_array(\Auth::getUser()->getAvatars())) {
+                \Auth::getUser()->getAvatarsFromDatabase(FALSE);
+            }
+            // No matching avatar found?
+            if(\Auth::getUser()->getAvatarByUuid($args[2]) === FALSE) {
+                throw new \Exception('You do not have permissions to teleport this user.', 6);
+            }
         }
 
         $parsedPutData  = \Helper::getInput(TRUE);
