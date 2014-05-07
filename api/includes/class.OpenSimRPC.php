@@ -8,7 +8,7 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author OpenSim (original)
  * @author Niels Witte (modified by)
- * @version 0.1a
+ * @version 0.2
  * @date May 7, 2014
  * @since February 13, 2014
  */
@@ -16,6 +16,7 @@ class OpenSimRPC {
     private $serverUri;
     private $serverPort;
     private $password;
+    private $timeout;
 
     /**
      * Creates a new OpenSim Remote PC instance
@@ -24,11 +25,13 @@ class OpenSimRPC {
      * @param string $uri - http://opensim.server.address
      * @param integer $port - Remote Admin port
      * @param string $password - Remote Admin password
+     * @param integer $timeout - [Optional] Time time in seconds before the request times out
      */
-    public function __construct($uri, $port, $password) {
-        $this->serverUri = $uri;
-        $this->serverPort = $port;
-        $this->password = $password;
+    public function __construct($uri, $port, $password, $timeout = 5) {
+        $this->serverUri    = $uri;
+        $this->serverPort   = $port;
+        $this->password     = $password;
+        $this->timeout      = $timeout;
     }
 
     /**
@@ -47,7 +50,7 @@ class OpenSimRPC {
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
         $result = curl_exec($ch);
         $error  = curl_error($ch);
         curl_close($ch);
