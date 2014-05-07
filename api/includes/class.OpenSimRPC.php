@@ -8,9 +8,9 @@ defined('EXEC') or die('Config not loaded');
  *
  * @author OpenSim (original)
  * @author Niels Witte (modified by)
- * @version 0.1
- * @date April 3rd, 2014
- * @since February 13th, 2014
+ * @version 0.1a
+ * @date May 7, 2014
+ * @since February 13, 2014
  */
 class OpenSimRPC {
     private $serverUri;
@@ -47,7 +47,7 @@ class OpenSimRPC {
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         $result = curl_exec($ch);
         $error  = curl_error($ch);
         curl_close($ch);
