@@ -45,7 +45,7 @@ class AvatarController {
         $grid->getInfoFromDatabase();
 
         // Call the Grid's remote admin
-        $raXML = new \OpenSimRPC($grid->getRaUrl(), $grid->getRaPort(), $grid->getRaPassword());
+        $raXML = new \OpenSimRPC($grid->getRaUrl(), $grid->getRaPort(), $grid->getRaPassword(), 15);
         $callData = array(
             'user_firstname'    => $parameters['firstName'],
             'user_lastname'     => $parameters['lastName'],
