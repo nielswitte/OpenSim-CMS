@@ -138,7 +138,7 @@ class AvatarController {
         // Retrieve grid information for remote admin
         $gridId = $parameters['gridId'];
         $grid   = new \Models\Grid($gridId);
-        $grid->getInfoFromDatabase();
+        $grid->getInfoFromDatabase(FALSE);
 
         // Call the Grid's remote admin
         $raXML = new \OpenSimRPC($grid->getRaUrl(), $grid->getRaPort(), $grid->getRaPassword());
