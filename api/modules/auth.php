@@ -106,7 +106,7 @@ class Auth extends Module {
         $db                     = \Helper::getDB();
         // Basic output data
         $data['token']          = $db->escape(\Helper::generateToken(48));
-        $data['ip']             = ($ip !== FALSE && $ip !== NULL) ? $ip : $_SERVER['REMOTE_ADDR'];
+        $data['ip']             = ($ip !== FALSE && $ip !== NULL) ? $ip : getenv('REMOTE_ADDR');
         $isGrid                 = \Auth::isGrid($userId, $data['ip']);
         // OpenSim sessions are valid longer
         $expireTime             = $isGrid ? SERVER_API_TOKEN_EXPIRES2 : SERVER_API_TOKEN_EXPIRES;
