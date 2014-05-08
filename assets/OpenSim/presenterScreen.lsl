@@ -31,7 +31,7 @@ integer gListener;              // The navigation listener
 key userUuid = NULL_KEY;        // The toucher's UUID (default the owner)
 key objectUuid;                 // The object's UUID
 integer channel = -8862;        // The channel to be used
-integer media = 0;              // Media type [0 = off, 1 = presentation]
+integer media = 0;              // Media type [0 = off, 1 = on]
 list textureCache;              // Cache the textures to only require loading once
 integer item = 1;               // The current page/slide
 integer totalItems = 0;         // Total number of pages/slides
@@ -193,7 +193,7 @@ parse_comments(string rawComments) {
     integer count       = (integer) JsonGetValue(json_comments, "commentCount");
     string buffer       = "";
     integer i           = 0;
-    llSay(0, "Showing "+ (string) count +" comments --------------------------------------------------------");
+    llSay(0, "Showing "+ (string) count +" comments for "+ itemTitle +" ("+ (string) item +"): ");
 
     for(i = 0; i < JsonGetArrayLength(json_comments, "comments"); i++) {
         if(debug) llInstantMessage(userUuid, "Processing comment "+ (string) (i + 1) + " of "+ (string) count);
