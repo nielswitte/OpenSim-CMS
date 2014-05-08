@@ -13,7 +13,7 @@
  *
  * @author Niels Witte
  * @date March 19th, 2014
- * @version 0.2
+ * @version 0.3
  */
 string title;                       // Meeting title
 string agenda;                      // Meeting agenda
@@ -43,7 +43,7 @@ writeAgenda() {
     llSetColor(<1.0, 1.0, 1.0>, ALL_SIDES);
 
     string agendaList = ""; // Storage for our drawing commands
-    list agendaItems  = llParseString2List(agenda, "\n", "");
+    list agendaItems  = llParseString2List(agenda, ["\n"], [""]);
 
     // Set title
     agendaList = osSetFontSize(agendaList, 30);

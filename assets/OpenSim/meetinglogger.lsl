@@ -20,7 +20,6 @@ string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
 integer debug = 0;              // Enables showing debugging comments
 string APIUsername = "OpenSim"; // API user name to be used
 string APIPassword = "OpenSim"; // API password
-integer serverId = 1;           // The ID of this server in OpenSim-CMS
 
 // Some general parameters
 key viewerUuid = "37f014bf-499a-47fc-894a-6cb9c6d268d9"; // The UUID of the viewer of the agenda
@@ -76,8 +75,8 @@ request_meetings() {
  * @param intger id
  */
 request_meeting(integer id) {
-    if(debug) llInstantMessage(userUuid, "[Debug] Requesting meeting with id: "+ id);
-    http_request_meeting = llHTTPRequest(serverUrl +"/meeting/"+ id +"/?token="+ APIToken, [], "");
+    if(debug) llInstantMessage(userUuid, "[Debug] Requesting meeting with id: "+ (string) id);
+    http_request_meeting = llHTTPRequest(serverUrl +"/meeting/"+ (string) id +"/?token="+ APIToken, [], "");
 }
 
 /**
@@ -92,7 +91,7 @@ request_send_chat() {
         } else {
             count = 0;
         }
-        llInstantMessage(userUuid, "[Debug] Sending ("+ count +") messages");
+        llInstantMessage(userUuid, "[Debug] Sending ("+ (string) count +") messages");
     }
 
     // Only send when there are messages
@@ -113,7 +112,7 @@ request_send_chat() {
         body = body + body_messages + "]";
         // Empty list
         messages = [];
-        http_request_send_chat = llHTTPRequest(serverUrl +"/meeting/"+ meetingId +"/minutes/?token="+ APIToken, [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/json"], body);
+        http_request_send_chat = llHTTPRequest(serverUrl +"/meeting/"+ (string) meetingId +"/minutes/?token="+ APIToken, [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/json"], body);
     }
 }
 
@@ -146,7 +145,7 @@ removeListeners() {
  */
 agendaItem(integer index) {
     if(llGetListLength(agendaItems) > index) {
-        llMessageLinked(LINK_ALL_OTHERS, 2, ""+ index, "");
+        llMessageLinked(LINK_ALL_OTHERS, 2, (string) index, "");
         currentAgendaItem  = index;
         list TimeStamp     = llParseString2List(llGetTimestamp(),["-",":"],["T"]); //Get timestamp and split into parts in a list
         integer hour       = llList2Integer(TimeStamp,4);
@@ -208,16 +207,16 @@ cast_vote(string msg, key id) {
         // Process vote
         if (msg == "Approve") {
             votes_approve++;
-            if (debug) llInstantMessage(userUuid, "[Debug] Voted approve (" + id + ")");
+            if (debug) llInstantMessage(userUuid, "[Debug] Voted approve ("+ (string) id +")");
         } else if (msg == "Reject") {
             votes_reject++;
-            if (debug) llInstantMessage(userUuid, "[Debug] Voted reject (" + id + ")");
+            if (debug) llInstantMessage(userUuid, "[Debug] Voted reject ("+ (string) id +")");
         } else if (msg == "Blank") {
             votes_blank++;
-            if (debug) llInstantMessage(userUuid, "[Debug] Voted blank (" + id + ")");
+            if (debug) llInstantMessage(userUuid, "[Debug] Voted blank ("+ (string) id +")");
         } else if (msg == "None") {
             votes_none++;
-            if (debug) llInstantMessage(userUuid, "[Debug] Voted none (" + id + ")");
+            if (debug) llInstantMessage(userUuid, "[Debug] Voted none ("+ (string) id +")");
         }
         llInstantMessage(id, "[Meeting] You voted: "+ msg);
     }
@@ -244,13 +243,13 @@ end_voting() {
     voteListeners = [];
 
     // Say results
-    llSay(0, "[Meeting] A total of "+ llGetListLength(avatarsVoted) +" out of "+ allowedToVito +" avatars voted:");
-    llSay(0, "[Meeting]    Approve: "+ votes_approve);
-    llSay(0, "[Meeting]    Reject: "+ votes_reject);
-    llSay(0, "[Meeting]    Blank: "+ votes_blank);
-    llSay(0, "[Meeting]    None: "+ (votes_none + notVoted));
+    llSay(0, "[Meeting] A total of "+ (string) llGetListLength(avatarsVoted) +" out of "+ (string) allowedToVito +" avatars voted:");
+    llSay(0, "[Meeting]    Approve: "+ (string) votes_approve);
+    llSay(0, "[Meeting]    Reject: "+ (string) votes_reject);
+    llSay(0, "[Meeting]    Blank: "+ (string) votes_blank);
+    llSay(0, "[Meeting]    None: "+ (string) (votes_none + notVoted));
     // Also send results to API
-    queueMessage(llGetUnixTime(), "", "Server", "[Voting Results] "+ votes_approve +","+ votes_reject +","+ votes_blank +","+ votes_none);
+    queueMessage(llGetUnixTime(), "", "Server", "[Voting Results] "+ (string) votes_approve +","+ (string) votes_reject +","+ (string) votes_blank +","+ (string) votes_none);
 }
 
 /**
@@ -320,7 +319,7 @@ state startup {
     http_response(key request_id, integer status, list metadata, string body) {
         // Catch errors
         if(status != 200) {
-            if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
+            if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: "+ (string) status);
             // Send a more specific and meaningful response to the user
             if(request_id == http_request_api_token) {
                 llInstantMessage(userUuid, "[Meeting] Invalid username/password combination used.");
@@ -342,7 +341,7 @@ state startup {
         } else if(request_id == http_request_meetings) {
             key json_body   = JsonCreateStore(body);
             integer meetingsLength = JsonGetArrayLength(json_body, "");
-            if(debug) llInstantMessage(userUuid, "[Debug] Found: "+ meetingsLength +" meetings which are today or in the future");
+            if(debug) llInstantMessage(userUuid, "[Debug] Found: "+ (string) meetingsLength +" meetings which are today or in the future");
             integer x;
             string today = llGetDate();
             list meetingsToday = [];
@@ -396,10 +395,10 @@ state startup {
             // Load a meeting
             } else {
                 integer endOfId = llSubStringIndex(message, ")");
-                integer meetingId = (integer) llGetSubString(message, 0, endOfId - 1);
-                if(meetingId > 0) {
+                integer mid = (integer) llGetSubString(message, 0, endOfId - 1);
+                if(mid > 0) {
                     // Request a meeting
-                    request_meeting(meetingId);
+                    request_meeting(mid);
                 }
             }
         }
@@ -425,7 +424,7 @@ state logging {
         // Broadcast meeting Agenda
         llSay(channelChat, "[Meeting] Meeting Agenda: \n"+ JsonGetValue(jsonMeeting, "agenda"));
         // Items to list
-        agendaItems = llParseString2List(JsonGetValue(jsonMeeting, "agenda"), "\n", "");
+        agendaItems = llParseString2List(JsonGetValue(jsonMeeting, "agenda"), ["\n"], [""]);
 
         // Init viewer
         llMessageLinked(LINK_ALL_OTHERS, 3, JsonGetValue(jsonMeeting, "name"), "");
@@ -489,7 +488,7 @@ state logging {
     http_response(key request_id, integer status, list metadata, string body) {
         // Catch errors
         if(status != 200) {
-            if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
+            if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: "+ (string) status);
             // Send a more specific and meaningful response to the user
 
             // @todo
@@ -515,10 +514,10 @@ state logging {
                 state default;
             // Go to the previous agenda item
             } else if(message == "Previous") {
-                agendaItem(currentAgendaItem-1);
+                agendaItem(currentAgendaItem - 1);
             // Go to the next agenda item
             } else if(message == "Next") {
-                agendaItem(currentAgendaItem+1);
+                agendaItem(currentAgendaItem + 1);
             } else if(message == "Start Vote") {
                 start_voting();
             } else if(voting == TRUE && (message == "Approve" || message == "Reject" || message == "Blank" || message == "None")) {
@@ -533,7 +532,7 @@ state logging {
 
     // Loop through requests
     timer() {
-        if(debug) llInstantMessage(userUuid, "[Debug] Timer fired ("+ timerfiredcount +")");
+        if(debug) llInstantMessage(userUuid, "[Debug] Timer fired ("+ (string) timerfiredcount +")");
         // Only send chat every 6th cycle (starting at 0)
         if(timerfiredcount >= 5) {
             timerfiredcount = 0;

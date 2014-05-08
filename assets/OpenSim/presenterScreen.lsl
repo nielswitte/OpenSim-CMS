@@ -13,7 +13,7 @@
  *
  * @author Niels Witte
  * @date February 11th, 2014
- * @version 1.3
+ * @version 1.1
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
@@ -114,14 +114,14 @@ integer IsInteger(string var) {
  * @param key uuid - the element's UUID
  */
 set_uuid_of_object(string type, integer id, key uuid) {
-    if(debug) llInstantMessage(userUuid, "[Debug] Update "+ type +": "+ id + " to UUID:"+ uuid);
-    string body = "uuid="+ (string)uuid +"&gridId="+ (string)serverId;
+    if(debug) llInstantMessage(userUuid, "[Debug] Update "+ type +": "+ (string) id + " to UUID:"+ (string) uuid);
+    string body = "uuid="+ (string) uuid +"&gridId="+ (string) serverId;
     if(type == "slide") {
-        http_request_set = llHTTPRequest(serverUrl +"/presentation/"+ itemId +"/slide/number/"+ id +"/?token="+ APIToken, [HTTP_METHOD, "PUT", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
+        http_request_set = llHTTPRequest(serverUrl +"/presentation/"+ (string) itemId +"/slide/number/"+ (string) id +"/?token="+ APIToken, [HTTP_METHOD, "PUT", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
     } else if(type == "page") {
-        http_request_set = llHTTPRequest(serverUrl +"/document/"+ itemId +"/page/number/"+ id +"/?token="+ APIToken, [HTTP_METHOD, "PUT", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
+        http_request_set = llHTTPRequest(serverUrl +"/document/"+ (string) itemId +"/page/number/"+ (string) id +"/?token="+ APIToken, [HTTP_METHOD, "PUT", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
     } else if(type == "image") {
-        http_request_set = llHTTPRequest(serverUrl +"/file/"+ itemId +"/image/?token="+ APIToken, [HTTP_METHOD, "PUT", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
+        http_request_set = llHTTPRequest(serverUrl +"/file/"+ (string) itemId +"/image/?token="+ APIToken, [HTTP_METHOD, "PUT", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
     }
 }
 
@@ -139,7 +139,7 @@ request_api_token() {
  */
 load_users_files() {
     llInstantMessage(userUuid, "Searching for your documents... Please be patient");
-    http_request_files = llHTTPRequest(serverUrl +"/grid/"+ serverId +"/avatar/"+ userUuid +"/files/?token="+ APIToken, [], "");
+    http_request_files = llHTTPRequest(serverUrl +"/grid/"+ (string) serverId +"/avatar/"+ (string) userUuid +"/files/?token="+ APIToken, [], "");
 }
 
 
@@ -164,7 +164,7 @@ load_item_comments(integer index, string type) {
  * @return integer FALSE (0)
  */
 integer http_error(key request_id, integer status, list metedata, string body) {
-    if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
+    if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: "+ (string) status);
 
     // API key expired
     if(status == 401) {
@@ -193,10 +193,10 @@ parse_comments(string rawComments) {
     integer count       = (integer) JsonGetValue(json_comments, "commentCount");
     string buffer       = "";
     integer i           = 0;
-    llSay(0, "Showing "+ count +" comments --------------------------------------------------------");
+    llSay(0, "Showing "+ (string) count +" comments --------------------------------------------------------");
 
     for(i = 0; i < JsonGetArrayLength(json_comments, "comments"); i++) {
-        if(debug) llInstantMessage(userUuid, "Processing comment "+ (i + 1) + " of "+ count);
+        if(debug) llInstantMessage(userUuid, "Processing comment "+ (string) (i + 1) + " of "+ (string) count);
 
         buffer += "["+ JsonGetValue(json_comments, "comments["+ i +"].timestamp") +"] "+
                 JsonGetValue(json_comments, "comments["+ i +"].user.{username}") +
@@ -218,8 +218,8 @@ parse_comments(string rawComments) {
             length = llStringLength(buffer);
         }
 
-        string partial  = llGetSubString(buffer, 0, length-1);
-        buffer          = llGetSubString(buffer, llStringLength(partial)-1, llStringLength(buffer) -1);
+        string partial  = llGetSubString(buffer, 0, length - 1);
+        buffer          = llGetSubString(buffer, llStringLength(partial) - 1, llStringLength(buffer) - 1);
         llSay(0, "\n"+ partial);
         i++;
     }
@@ -248,7 +248,7 @@ string parse_comment_childs(string comments, integer level) {
         result += tab + strReplace(strReplace("["+ JsonGetValue(json, "["+ i +"].timestamp") +"] "+ JsonGetValue(json, "["+ i +"].user.{username}") +" ("+ JsonGetValue(json, "["+ i +"].user.{firstName}") +" "+ JsonGetValue(json, "["+ i +"].user.{firstName}") + "):\n"+ JsonGetValue(json, "["+ i +"].message"), "\n", "\r"), "\r", "\n"+ tab) +"\n\n";
 
         if((integer) JsonGetValue(json, "["+ i +"].childrenCount") > 0) {
-            result += parse_comment_childs(JsonGetJson(json, "["+ i +"].children"), (level+1));
+            result += parse_comment_childs(JsonGetJson(json, "["+ i +"].children"), (level + 1));
         }
     }
     // Destroy the JSON stores
@@ -271,9 +271,9 @@ string strReplace(string source, string pattern, string replace) {
         integer len = llStringLength(pattern);
         integer pos = llSubStringIndex(source, pattern);
         if (llStringLength(source) == len) { source = replace; }
-        else if (pos == 0) { source = replace+llGetSubString(source, pos+len, -1); }
-        else if (pos == llStringLength(source)-len) { source = llGetSubString(source, 0, pos-1)+replace; }
-        else { source = llGetSubString(source, 0, pos-1)+replace+llGetSubString(source, pos+len, -1); }
+        else if (pos == 0) { source = replace + llGetSubString(source, pos + len, last); }
+        else if (pos == llStringLength(source) - len) { source = llGetSubString(source, 0, pos - 1) + replace; }
+        else { source = llGetSubString(source, 0, pos - 1) + replace + llGetSubString(source, pos + len, last); }
     }
     return source;
 }
@@ -306,22 +306,22 @@ nav(integer next, string type) {
 
         // Update item number
         item        = next;
-        string url  = llList2String(itemsList, next-1);
+        string url  = llList2String(itemsList, next - 1);
         integer res = llListFindList(textureCache, [itemId, next]);
-        string params = "width:"+ width +",height:"+ height;
+        string params = "width:"+ (string) width +",height:"+ (string) height;
 
         // Check if texture is found in cache, only required on first usage
         if(res > -1) {
-            string texture = llList2String(textureCache, res+2);
-            if(debug) llInstantMessage(userUuid, "[Debug] Loading "+ type +" "+ item +" by local uuid from cache (" + texture +")");
+            string texture = llList2String(textureCache, res + 2);
+            if(debug) llInstantMessage(userUuid, "[Debug] Loading "+ type +" "+ (string) item +" by local uuid from cache (" + texture +")");
             llSetTexture(texture, 1);
         // Check if requested image has a valid UUID in the database
         } else if(isKey(url) == 2 && llGetSubString(url, 0, 3) != "http") {
-            if(debug) llInstantMessage(userUuid, "[Debug] Loading "+ type +" "+ item +" by remote uuid from cache (" + url +")");
+            if(debug) llInstantMessage(userUuid, "[Debug] Loading "+ type +" "+ (string) item +" by remote uuid from cache (" + url +")");
             llSetTexture(url, 1);
         // Load texture from remote server
         } else {
-            if(debug) llInstantMessage(userUuid, "[Debug] Loading "+ type +" "+ item +" by url (" + url +")");
+            if(debug) llInstantMessage(userUuid, "[Debug] Loading "+ type +" "+ (string) item +" by url (" + url +")");
             // Previous texture
             string oldtexture = llGetTexture(0);
 
@@ -345,7 +345,7 @@ nav(integer next, string type) {
             set_uuid_of_object(type,  item, texture);
         }
 
-        llSetText(type +" "+ (item) +" of "+ totalItems, <0,0,1>, 1.0);
+        llSetText(type +" "+ (string) item +" of "+ (string) totalItems, <0,0,1>, 1.0);
     }
 }
 
@@ -363,7 +363,7 @@ integer process_loaded_items(string type, string json) {
     fileIds                     = [];
     // Create buttons for max 12 images
     list itemButtons;
-    if(debug) llInstantMessage(userUuid, "[Debug] Found "+ filesCount + " files.");
+    if(debug) llInstantMessage(userUuid, "[Debug] Found "+ (string) filesCount + " files.");
     // List with files is not empty?
     if(filesCount > 0) {
         integer x;
@@ -379,7 +379,7 @@ integer process_loaded_items(string type, string json) {
 
         // Count items
         itemsCount = llGetListLength(fileIds);
-        if(debug) llInstantMessage(userUuid, "[Debug] Containing "+ itemsCount + " "+ type +"(s).");
+        if(debug) llInstantMessage(userUuid, "[Debug] Containing "+ (string) itemsCount + " "+ type +"(s).");
 
         // Create buttons for presentations
         for (x = 0; x < itemsCount && x < 11; x++) {
@@ -388,7 +388,7 @@ integer process_loaded_items(string type, string json) {
     }
     itemButtons += ["Main","Quit","Load #"];
     // Open presentation selection menu
-    open_menu(userUuid, "Found "+ itemsCount +" "+ type +"(s).\nShowing only the latest 9 "+ type +"s below.\nCommand: '/"+ channel +" Load <#>' can be used to load an "+ type +" that is not listed.\nIf your avatar is not linked to your CMS user account, the list will be empty." , itemButtons);
+    open_menu(userUuid, "Found "+ (string) itemsCount +" "+ type +"(s).\nShowing only the latest 9 "+ type +"s below.\nCommand: '/"+ (string) channel +" Load <#>' can be used to load an "+ type +" that is not listed.\nIf your avatar is not linked to your CMS user account, the list will be empty.", itemButtons);
     // Destroy the JSON stores
     JsonDestroyStore(json_body);
     return TRUE;
@@ -559,7 +559,7 @@ default {
     http_response(key request_id, integer status, list metadata, string body) {
         // Catch errors
         if(status != 200) {
-            if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
+            if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: "+ (string) status);
             // Send a more specific and meaningful response to the user
             if(request_id == http_request_api_token) {
                 llInstantMessage(userUuid, "Invalid username/password combination used.");
@@ -582,8 +582,8 @@ default {
     /**
      * Listen and fetch certain commands
      */
-    listen(integer channel, string name, key id, string message) {
-        list commands = llParseString2List(message, " ", []);
+    listen(integer chan, string name, key id, string message) {
+        list commands = llParseString2List(message, [" "], []);
         if(llList2String(commands, 0) == "Presentation") {
             llInstantMessage(userUuid, "Entering presentation mode");
             state presentation;
@@ -594,7 +594,7 @@ default {
             llInstantMessage(userUuid, "Entering Image mode");
             state image;
         } else if(llList2String(commands, 0) == "UUID") {
-            llInstantMessage(userUuid, "Object's UUID is: "+ objectUuid);
+            llInstantMessage(userUuid, "Object's UUID is: "+ (string) objectUuid);
         // Shutdown
         } else if(llList2String(commands, 0) == "Quit") {
             media = 0;
@@ -621,8 +621,8 @@ state presentation {
     /**
      * Listen and fetch certain commands
      */
-    listen(integer channel, string name, key id, string message) {
-        list commands = llParseString2List(message, " ", []);
+    listen(integer chan, string name, key id, string message) {
+        list commands = llParseString2List(message, [" "], []);
 
         // When only a number has been given
         if(IsInteger(llList2String(commands, 0))) {
@@ -640,9 +640,9 @@ state presentation {
             // Loads JSON from server
             // Loads JSON from server
             if(llListFindList(fileIds, [itemId]) > -1) {
-                http_request_id = llHTTPRequest(serverUrl +"/presentation/"+ itemId +"/?token="+ APIToken, [], "");
+                http_request_id = llHTTPRequest(serverUrl +"/presentation/"+ (string) itemId +"/?token="+ APIToken, [], "");
             } else {
-                llInstantMessage(userUuid, "The file with ID: "+ itemId +" is not owned by, or shared with you!");
+                llInstantMessage(userUuid, "The file with ID: "+ (string) itemId +" is not owned by, or shared with you!");
             }
         // Show dialog to load a specific presentation
         } else if(llList2String(commands, 0) == "Load" && llList2String(commands, 1) == "#") {
@@ -698,10 +698,10 @@ state presentation {
         } else if(request_id == http_request_files) {
             process_loaded_items("presentation", body);
         // Update slide uuid
-        } else if(request_id = http_request_set) {
-            if(debug) llInstantMessage(userUuid, "[Debug] UUID set for slide "+ item +": "+ (string) body);
+        } else if(request_id == http_request_set) {
+            if(debug) llInstantMessage(userUuid, "[Debug] UUID set for slide "+ (string) item +": "+ (string) body);
         // Loaded comments
-        } else if(request_id = http_request_comments) {
+        } else if(request_id == http_request_comments) {
             if(debug) llInstantMessage(userUuid, "[Debug] Comments received from server");
             parse_comments(body);
         }
@@ -717,7 +717,7 @@ state presentation {
         llListenRemove(mListener);
 
         // Listen at channel
-        mListener = llListen(channel,"", userUuid,"");
+        mListener = llListen(channel, "", userUuid, "");
 
         // Load files
         load_users_files();
@@ -736,7 +736,7 @@ state presentation {
         objectUuid = llGetKey();
 
         // Listen at channel
-        mListener = llListen(channel,"", userUuid,"");
+        mListener = llListen(channel, "", userUuid, "");
 
         // Open menu when continuing usage
         if(media == 1) {
@@ -762,8 +762,8 @@ state document {
     /**
      * Listen and fetch certain commands
      */
-    listen(integer channel, string name, key id, string message) {
-        list commands = llParseString2List(message, " ", []);
+    listen(integer chan, string name, key id, string message) {
+        list commands = llParseString2List(message, [" "], []);
 
         // When only a number has been given
         if(IsInteger(llList2String(commands, 0))) {
@@ -780,9 +780,9 @@ state document {
             itemId = llList2String(commands, 1);
             // Loads JSON from server
             if(llListFindList(fileIds, [itemId]) > -1) {
-                http_request_id = llHTTPRequest(serverUrl +"/document/"+ itemId +"/?token="+ APIToken, [], "");
+                http_request_id = llHTTPRequest(serverUrl +"/document/"+ (string) itemId +"/?token="+ APIToken, [], "");
             } else {
-                llInstantMessage(userUuid, "The file with ID: "+ itemId +" is not owned by, or shared with you!");
+                llInstantMessage(userUuid, "The file with ID: "+ (string) itemId +" is not owned by, or shared with you!");
             }
         // Show dialog to load a specific document
         } else if(llList2String(commands, 0) == "Load" && llList2String(commands, 1) == "#") {
@@ -838,10 +838,10 @@ state document {
         } else if(request_id == http_request_files) {
             process_loaded_items("document", body);
         // Update page uuid
-        } else if(request_id = http_request_set) {
-            if(debug) llInstantMessage(userUuid, "[Debug] UUID set for page "+ item +": "+ (string) body);
+        } else if(request_id == http_request_set) {
+            if(debug) llInstantMessage(userUuid, "[Debug] UUID set for page "+ (string) item +": "+ (string) body);
         // Loaded comments
-        } else if(request_id = http_request_comments) {
+        } else if(request_id == http_request_comments) {
             if(debug) llInstantMessage(userUuid, "[Debug] Comments received from server");
             parse_comments(body);
         }
@@ -876,7 +876,7 @@ state document {
         objectUuid = llGetKey();
 
         // Listen at channel
-        mListener = llListen(channel,"", userUuid,"");
+        mListener = llListen(channel, "", userUuid, "");
 
         // Open menu when continuing usage
         if(media == 1) {
@@ -902,8 +902,8 @@ state image {
     /**
      * Listen and fetch certain commands
      */
-    listen(integer channel, string name, key id, string message) {
-        list commands = llParseString2List(message, " ", []);
+    listen(integer chan, string name, key id, string message) {
+        list commands = llParseString2List(message, [" "], []);
 
         // When only a number has been given
         if(IsInteger(llList2String(commands, 0))) {
@@ -921,7 +921,7 @@ state image {
             // Loads JSON from server
             // Loads JSON from server
             if(llListFindList(fileIds, [itemId]) > -1) {
-                http_request_id = llHTTPRequest(serverUrl +"/file/"+ itemId +"/?token="+ APIToken, [], "");
+                http_request_id = llHTTPRequest(serverUrl +"/file/"+ (string) itemId +"/?token="+ APIToken, [], "");
             } else {
                 llInstantMessage(userUuid, "The file with ID: "+ itemId +" is not owned by, or shared with you!");
             }
@@ -967,10 +967,10 @@ state image {
         } else if(request_id == http_request_files) {
             process_loaded_items("image", body);
         // Update image uuid
-        } else if(request_id = http_request_set) {
-            if(debug) llInstantMessage(userUuid, "[Debug] UUID set for image "+ itemId +": "+ (string) body);
+        } else if(request_id == http_request_set) {
+            if(debug) llInstantMessage(userUuid, "[Debug] UUID set for image "+ (string) itemId +": "+ (string) body);
         // Process comments
-        } else if(request_id = http_request_comments) {
+        } else if(request_id == http_request_comments) {
             if(debug) llInstantMessage(userUuid, "[Debug] Comments received from server");
             parse_comments(body);
         }
@@ -986,7 +986,7 @@ state image {
         llListenRemove(mListener);
 
         // Listen at channel
-        mListener = llListen(channel,"", userUuid,"");
+        mListener = llListen(channel, "", userUuid, "");
 
         // Load presentations
         load_users_files();
@@ -1005,7 +1005,7 @@ state image {
         objectUuid = llGetKey();
 
         // Listen at channel
-        mListener = llListen(channel,"", userUuid,"");
+        mListener = llListen(channel, "", userUuid, "");
 
         // Open menu when continuing usage
         if(media == 1) {

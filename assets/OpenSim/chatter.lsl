@@ -11,7 +11,7 @@
  *
  * @author Niels Witte
  * @date March 21st, 2014
- * @version 0.2
+ * @version 0.3
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
@@ -57,7 +57,7 @@ request_send_chat() {
         } else {
             count = 0;
         }
-        llInstantMessage(userUuid, "[Debug] Sending ("+ count +") messages");
+        llInstantMessage(userUuid, "[Debug] Sending ("+ (string) count +") messages");
     }
 
     // Only send when there are messages
@@ -66,9 +66,8 @@ request_send_chat() {
         string body = "[";
         string body_messages = "";
         // Parse messages
-        for(i = 0; i < llGetListLength(messages); i=i+3) {
-            body_messages = body_messages + "{ "+
-                    "\"timestamp\": \""+ llList2String(messages, i) +"\", \"userId\": "+ llList2Integer(messages, i+1) +", \"message\": \""+ llEscapeURL(llList2String(messages, i+2)) +"\", \"fromCMS\": 0}";
+        for(i = 0; i < llGetListLength(messages); i = i + 3) {
+            body_messages = body_messages + "{\"timestamp\": \""+ llList2String(messages, i) +"\", \"userId\": "+ (string) llList2Integer(messages, i + 1) +", \"message\": \""+ llEscapeURL(llList2String(messages, i + 2)) +"\", \"fromCMS\": 0}";
 
             // Add comma when not last element
             if(i+3 < llGetListLength(messages)) {
@@ -79,7 +78,7 @@ request_send_chat() {
         body = body + body_messages + "]";
         // Empty list
         messages = [];
-        http_request_send_chat = llHTTPRequest(serverUrl +"/grid/"+ serverId +"/chats/?token="+ APIToken, [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/json"], body);
+        http_request_send_chat = llHTTPRequest(serverUrl +"/grid/"+ (string) serverId +"/chats/?token="+ APIToken, [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/json"], body);
     }
 }
 
@@ -87,8 +86,8 @@ request_send_chat() {
  * Loads the chats from the server
  */
 request_receive_chat() {
-    http_request_receive_chat = llHTTPRequest(serverUrl +"/grid/"+ serverId +"/chats/"+ lastUpdate +"/?token="+ APIToken, [], "");
-    if(debug) llInstantMessage(userUuid, "[Debug] Requesting new messages, newer than: "+ lastUpdate);
+    http_request_receive_chat = llHTTPRequest(serverUrl +"/grid/"+ (string) serverId +"/chats/"+ (string) lastUpdate +"/?token="+ APIToken, [], "");
+    if(debug) llInstantMessage(userUuid, "[Debug] Requesting new messages, newer than: "+ (string) lastUpdate);
 }
 
 /**
@@ -101,12 +100,12 @@ integer request_avatar_by_uuid (key uuid) {
     integer res = llListFindList(userUuidLinks, [uuid]);
     // Cached match found?
     if(res > -1) {
-        if(debug) llInstantMessage(userUuid, "[Debug] Looking up UUID: "+ uuid + " and matched to cached result (ID: "+ llList2Integer(userUuidLinks, res+1) +")");
-        return llList2Integer(userUuidLinks, res+1);
+        if(debug) llInstantMessage(userUuid, "[Debug] Looking up UUID: "+ (string) uuid + " and matched to cached result (ID: "+ (string) llList2Integer(userUuidLinks, res+1) +")");
+        return llList2Integer(userUuidLinks, res + 1);
     } else {
-        if(debug) llInstantMessage(userUuid, "[Debug] Looking up UUID: "+ uuid + " and need to search server");
+        if(debug) llInstantMessage(userUuid, "[Debug] Looking up UUID: "+ (string) uuid + " and need to search server");
         // Request user by avatar
-        http_request_avatar = llHTTPRequest(serverUrl +"/grid/"+ serverId +"/avatar/"+ uuid +"?token="+ APIToken, [], "");
+        http_request_avatar = llHTTPRequest(serverUrl +"/grid/"+ (string) serverId +"/avatar/"+ (string) uuid +"?token="+ APIToken, [], "");
 
         // Store UUID
         userUuidLinks += [uuid];
@@ -179,7 +178,7 @@ state startup {
     http_response(key request_id, integer status, list metadata, string body) {
         // Catch errors
         if(status != 200) {
-            if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
+            if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: "+ (string) status);
             // Send a more specific and meaningful response to the user
             if(request_id == http_request_api_token) {
                 llInstantMessage(userUuid, "[Meeting] Invalid username/password combination used.");
@@ -216,7 +215,7 @@ state chatting {
         lastUpdate = llGetUnixTime();
 
         // Listen to everything
-        Listener = llListen(channelChat, "", NULL_KEY, "" );
+        Listener = llListen(channelChat, "", NULL_KEY, "");
 
         // Start processing messages
         llSetTimerEvent(2.0);
@@ -238,7 +237,7 @@ state chatting {
 
         // Catch errors
         if(status != 200) {
-            if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
+            if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: "+ (string) status);
 
             return;
         }
@@ -250,7 +249,7 @@ state chatting {
         } else if(request_id == http_request_avatar) {
             key json_body   = JsonCreateStore(body);
             integer userId  = (integer) JsonGetValue(json_body, "id");
-            if(debug) llInstantMessage(userUuid, "[Debug] Requested user by avatar and got response: ID = "+ userId);
+            if(debug) llInstantMessage(userUuid, "[Debug] Requested user by avatar and got response: ID = "+ (string) userId);
 
             // Got a result?
             if(userId > 1) {
@@ -263,7 +262,7 @@ state chatting {
         } else if(request_id == http_request_receive_chat) {
             key json_body       = JsonCreateStore(body);
             integer chatLength  = JsonGetArrayLength(json_body, "");
-            if(debug) llInstantMessage(userUuid, "[Debug] Got response from server, "+ chatLength +" new messages.");
+            if(debug) llInstantMessage(userUuid, "[Debug] Got response from server, "+ (string) chatLength +" new messages.");
 
             if(chatLength >= 1) {
                 // Update timestamp
