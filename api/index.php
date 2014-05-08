@@ -19,9 +19,9 @@ require_once dirname(__FILE__) .'/modules/user.php';
  * This class is catches the API calls and searches for the matching function
  *
  * @author Niels Witte
- * @version 0.7
- * @date April 16th, 2014
- * @since February 10th, 2014
+ * @version 0.8
+ * @date May 8, 2014
+ * @since February 10, 2014
  */
 
 // Remove expired tokens
@@ -38,9 +38,8 @@ try {
     $selectors          = array();
 
     // Auth user
-    $auth               = new \Auth();
-    $auth::setToken($token);
-    $authorized         = $auth::validate();
+    \Auth::setToken($token);
+    $authorized         = \Auth::validate();
 
     // Create new API
     $api                = new \API\API();
@@ -92,4 +91,9 @@ if($result != '') {
     } else {
         echo json_encode($result);
     }
+}
+
+// Log requests to a file
+if(SERVER_DEBUG) {
+    file_put_contents('logs/access.log', '['. date('Y-m-d H:i:s') .'] '. getenv('REMOTE_ADDR') .' '. getenv('REQUEST_METHOD') .' /api'. $get ."\n\r", FILE_APPEND);
 }
