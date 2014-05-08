@@ -13,7 +13,7 @@
  *
  * @author Niels Witte
  * @date February 11th, 2014
- * @version 1.1
+ * @version 1.3
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
@@ -152,6 +152,33 @@ load_users_files() {
 load_item_comments(integer index, string type) {
     if(debug) llInstantMessage(userUuid, "Loading comments for "+ type +" with ID: "+ llList2String(itemIds, index));
     http_request_comments = llHTTPRequest(serverUrl +"/comments/"+ type +"/"+ llList2String(itemIds, index) +"/?token="+ APIToken, [], "");
+}
+
+/**
+ * Processes an HTTP request error
+ *
+ * @param key request_id
+ * @param integer status
+ * @param list metedata
+ * @param string body
+ * @return integer FALSE (0)
+ */
+integer http_error(key request_id, integer status, list metedata, string body) {
+    if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
+
+    // API key expired
+    if(status == 401) {
+        llInstantMessage(userUuid, "The API key expired, turn the presenter off and on again: ");
+        open_menu(userUuid, mainNavigationText, mainNavigationButtons);
+    } else {
+        // Send a more specific and meaningful response to the user
+        if(request_id == http_request_files) {
+            llInstantMessage(userUuid, "User not found");
+        } else if(request_id == http_request_id) {
+            llInstantMessage(userUuid, "Document not found");
+        }
+    }
+    return FALSE;
 }
 
 /**
@@ -320,6 +347,166 @@ nav(integer next, string type) {
 
         llSetText(type +" "+ (item) +" of "+ totalItems, <0,0,1>, 1.0);
     }
+}
+
+/**
+ * Processes the list with files to filter only images, documents or presentations
+ *
+ * @param string type [document, image, presentation]
+ * @param string json
+ * @return boolean TRUE
+ */
+integer process_loaded_items(string type, string json) {
+    key json_body               = JsonCreateStore(json);
+    integer itemsCount          = 0;
+    integer filesCount          = JsonGetArrayLength(json_body, "");
+    fileIds                     = [];
+    // Create buttons for max 12 images
+    list itemButtons;
+    if(debug) llInstantMessage(userUuid, "[Debug] Found "+ filesCount + " files.");
+    // List with files is not empty?
+    if(filesCount > 0) {
+        integer x;
+        // List all presentations
+        for(x = 0; x < filesCount; x++) {
+            if(JsonGetValue(json_body, "["+ x +"].type") == type) {
+                fileIds += [JsonGetValue(json_body, "["+ x +"].id")];
+            }
+        }
+
+        // Newest item first
+        fileIds = llListSort(fileIds, 1, FALSE);
+
+        // Count items
+        itemsCount = llGetListLength(fileIds);
+        if(debug) llInstantMessage(userUuid, "[Debug] Containing "+ itemsCount + " "+ type +"(s).");
+
+        // Create buttons for presentations
+        for (x = 0; x < itemsCount && x < 11; x++) {
+            itemButtons += ["Load "+ llList2String(fileIds, x)];
+        }
+    }
+    itemButtons += ["Main","Quit","Load #"];
+    // Open presentation selection menu
+    open_menu(userUuid, "Found "+ itemsCount +" "+ type +"(s).\nShowing only the latest 9 "+ type +"s below.\nCommand: '/"+ channel +" Load <#>' can be used to load an "+ type +" that is not listed.\nIf your avatar is not linked to your CMS user account, the list will be empty." , itemButtons);
+    // Destroy the JSON stores
+    JsonDestroyStore(json_body);
+    return TRUE;
+}
+
+/**
+ * Processes the JSON as the given type
+ *
+ * @param string type [document, presentation, image]
+ * @param string json
+ * @return boolean
+ */
+integer process_loaded_item(string type, string json) {
+    // Parse the returned body to JSON
+    key json_body       = JsonCreateStore(json);
+
+    // Error occurred during loading of document?
+    if(JsonGetValue(json_body, "error") != "" || (type != "image" && type != "presentation" && type != "document")) {
+        llInstantMessage(userUuid, type +" not found");
+        return FALSE;
+    }
+
+    string itemParts = "";
+    integer length   = 0;
+
+    // Process document pages
+    if(type == "document") {
+        itemParts = JsonGetJson(json_body, "pages");
+        length    = (integer) JsonGetValue(json_body, "pagesCount");
+    // Process presentation slides
+    } else if(type == "presentation") {
+        itemParts = JsonGetJson(json_body, "slides");
+        length    = (integer) JsonGetValue(json_body, "slidesCount");
+    } else {
+        length    = 1;
+    }
+
+    // Parse the pages section
+    key json_parts     = JsonCreateStore(itemParts);
+    // Empty pages and cache list
+    textureCache        = [];
+    itemsList           = [];
+    itemIds             = [];
+    if(debug) llInstantMessage(userUuid, "[Debug] Items list is currently: "+ (string) itemsList);
+    integer x;
+    // Get from each page/slide the URL or the UUID
+    if(type != "image") {
+        for (x = 0; x < length; x++) {
+            string itemUuid     = "";
+            string itemExpired  = "";
+            // Only process if there is a cache (to prevent console warnings)
+            if(JsonGetJson(json_parts, "["+ x +"].cache") != "[]") {
+                itemUuid        = JsonGetValue(json_parts, "["+ x +"].cache.{"+ serverId +"}.uuid");
+                itemExpired     = JsonGetValue(json_parts, "["+ x +"].cache.{"+ serverId +"}.isExpired");
+            }
+            string itemUrl      = JsonGetValue(json_parts, "["+ x +"].image");
+            itemIds             += [JsonGetValue(json_parts, "["+ x +"].id")];
+
+            // UUID set and not expired?
+            if(itemUuid != "" && itemExpired == "0") {
+                itemsList += [(key) itemUuid];
+                if(debug) llInstantMessage(userUuid, "[Debug] use UUID ("+ itemUuid +") for item: "+ (x+1));
+            // Use URL
+            } else {
+                itemsList += [itemUrl];
+                if(debug) llInstantMessage(userUuid, "[Debug] use URL ("+ itemUrl +") for item: "+ (x+1));
+            }
+        }
+    // Process single image
+    } else {
+        string itemUuid     = JsonGetValue(json_body, "cache.{"+ serverId +"}.uuid");;
+        string itemExpired  = JsonGetValue(json_body, "cache.{"+ serverId +"}.isExpired");
+        string itemUrl      = JsonGetValue(json_body, "url") +"image/";
+        itemIds             += [JsonGetValue(json_body, "id")];
+        // UUID set and not expired?
+        if(itemUuid != "" && itemExpired == "0") {
+            itemsList += [(key) itemUuid];
+            if(debug) llInstantMessage(userUuid, "[Debug] use UUID ("+ itemUuid +") for item");
+        // Use URL
+        } else {
+            itemsList += [itemUrl];
+            if(debug) llInstantMessage(userUuid, "[Debug] use URL ("+ itemUrl +") for item");
+        }
+    }
+
+    // Count the pages
+    totalItems = (integer) length;
+    // Get documents title
+    itemTitle  = JsonGetValue(json_body, "title");
+    // Show loaded message
+    llInstantMessage(userUuid, "Loaded: "+ itemTitle);
+
+    // loads the first page/slide/image
+    if(type == "document") {
+        // Load first page
+        nav(1, "page");
+        // Open navigation dialog
+        open_menu(userUuid, documentNavigationText, documentNavigationButtons);
+    } else if(type == "image") {
+        // loads image
+        nav(1, "image");
+        // Open navigation dialog
+        open_menu(userUuid, imageNavigationText, imageNavigationButtons);
+    } else if(type == "presentation") {
+        // loads the first slide
+        nav(1, "slide");
+        // Open navigation dialog
+        open_menu(userUuid, presentationNavigationText, presentationNavigationButtons);
+    } else {
+
+    }
+
+    // Destroy the JSON stores
+    JsonDestroyStore(json_body);
+    if(type != "image") {
+        JsonDestroyStore(json_parts);
+    }
+    return TRUE;
 }
 
 /**
@@ -503,128 +690,20 @@ state presentation {
     http_response(key request_id, integer status, list metadata, string body) {
         // Catch errors
         if(status != 200) {
-            if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
-
-            // API key expired
-            if(status == 401) {
-                llInstantMessage(userUuid, "The API key expired, turn the presenter off and on again: ");
-                open_menu(userUuid, mainNavigationText, mainNavigationButtons);
-            } else {
-                // Send a more specific and meaningful response to the user
-                if(request_id == http_request_files) {
-                    llInstantMessage(userUuid, "User not found");
-                } else if(request_id == http_request_id) {
-                    llInstantMessage(userUuid, "Presentation not found");
-                }
-            }
-            return;
-        }
-
+            http_error(request_id, status, metadata, body);
         // Loaded presentation
-        if(request_id == http_request_id) {
-            // Parse the returned body to JSON
-            key json_body       = JsonCreateStore(body);
-
-            // Error occured during loading of presentation?
-            if(JsonGetValue(json_body, "error") != "") {
-                llInstantMessage(userUuid, "Presentation not found");
-                return;
-            }
-
-            string slides_body  = JsonGetJson(json_body, "slides");
-            // Parse the slides section
-            key json_slides     = JsonCreateStore(slides_body);
-            // Empty slides and cache list
-            textureCache        = [];
-            itemsList           = [];
-            itemIds             = [];
-            if(debug) llInstantMessage(userUuid, "[Debug] Slide list is currently: "+ (string) itemsList);
-            integer x;
-            integer length      = (integer) JsonGetValue(json_body, "slidesCount");
-            // Get from each slide the URL or the UUID
-            for (x = 0; x < length; x++) {
-                string slideUuid     = "";
-                string slideExpired  = "";
-                // Only process if there is a cache (to prevent console warnings)
-                if(JsonGetJson(json_slides, "["+ x +"].cache") != "[]") {
-                    slideUuid        = JsonGetValue(json_slides, "["+ x +"].cache.{"+ serverId +"}.uuid");
-                    slideExpired     = JsonGetValue(json_slides, "["+ x +"].cache.{"+ serverId +"}.isExpired");
-                }
-                string slideUrl      = JsonGetValue(json_slides, "["+ x +"].image");
-                itemIds             += [JsonGetValue(json_slides, "["+ x +"].id")];
-                // UUID set and not expired?
-                if(slideUuid != "" && slideExpired == "0") {
-                    itemsList += [(key) slideUuid];
-                    if(debug) llInstantMessage(userUuid, "[Debug] use UUID ("+ slideUuid +") for slide: "+ (x+1));
-                // Use URL
-                } else {
-                    itemsList += [slideUrl];
-                    if(debug) llInstantMessage(userUuid, "[Debug] use URL ("+ slideUrl +") for slide: "+ (x+1));
-                }
-            }
-
-            // Count the slides
-            totalItems = (integer)JsonGetValue(json_body, "slidesCount");
-            // Get presentation title
-            itemTitle  = JsonGetValue(json_body, "title");
-            // Show loaded message
-            llInstantMessage(userUuid, "Loaded presentation: "+ itemTitle);
-            // loads the first slide
-            nav(1, "slide");
-            // Open navigation dialog
-            open_menu(userUuid, presentationNavigationText, presentationNavigationButtons);
-            // Destroy the JSON stores
-            JsonDestroyStore(json_body);
-            JsonDestroyStore(json_slides);
+        } else if(request_id == http_request_id) {
+            process_loaded_item("presentation", body);
         // Loaded user's documents
         } else if(request_id == http_request_files) {
-            key json_body               = JsonCreateStore(body);
-            integer presentationCount   = 0;
-            string json_presentations   = JsonGetJson(json_body, "");
-            integer filesCount          = JsonGetArrayLength(json_body, "");
-            fileIds                     = [];
-            // Create buttons for max 12 presentations
-            list presentationButtons;
-            if(debug) llInstantMessage(userUuid, "[Debug] Found "+ filesCount + " files.");
-            // List with presentations is not empty?
-            if(filesCount > 0) {
-                integer x;
-
-                // List all presentations
-                for(x = 0; x < filesCount; x++) {
-                    if(JsonGetValue(json_body, "["+ x +"].type") == "presentation") {
-                        fileIds += [JsonGetValue(json_body, "["+ x +"].id")];
-                    }
-                }
-
-                // Newest presentations first
-                fileIds = llListSort(fileIds, 1, FALSE);
-
-                // Count presentations
-                presentationCount = llGetListLength(fileIds);
-                if(debug) llInstantMessage(userUuid, "[Debug] Containing "+ presentationCount + " presentations.");
-
-                // Create buttons for presentations
-                for (x = 0; x < presentationCount && x < 13; x++) {
-                    presentationButtons += ["Load "+ llList2String(fileIds, x)];
-                }
-            }
-
-            presentationButtons += ["Main","Quit","Load #"];
-            // Open presentation selection menu
-            open_menu(userUuid, "Found "+ presentationCount +" presentation(s).\nShowing only the latest 9 presentations below.\nCommand: '/"+ channel +" Load <#>' can be used to load a presentation that is not listed.\nIf your avatar is not linked to your CMS user account, the list will be empty." , presentationButtons);
-
-            // Destroy the JSON stores
-            JsonDestroyStore(json_body);
+            process_loaded_items("presentation", body);
         // Update slide uuid
         } else if(request_id = http_request_set) {
             if(debug) llInstantMessage(userUuid, "[Debug] UUID set for slide "+ item +": "+ (string) body);
         // Loaded comments
         } else if(request_id = http_request_comments) {
+            if(debug) llInstantMessage(userUuid, "[Debug] Comments received from server");
             parse_comments(body);
-        // HTTP response which isn't requested?
-        } else {
-            return;
         }
     }
 
@@ -751,127 +830,20 @@ state document {
     http_response(key request_id, integer status, list metadata, string body) {
         // Catch errors
         if(status != 200) {
-            if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
-
-            // API key expired
-            if(status == 401) {
-                llInstantMessage(userUuid, "The API key expired, turn the presenter off and on again: ");
-                open_menu(userUuid, mainNavigationText, mainNavigationButtons);
-            } else {
-                // Send a more specific and meaningful response to the user
-                if(request_id == http_request_files) {
-                    llInstantMessage(userUuid, "User not found");
-                } else if(request_id == http_request_id) {
-                    llInstantMessage(userUuid, "Document not found");
-                }
-            }
-            return;
-        }
-
+            http_error(request_id, status, metadata, body);
         // Loaded documents
-        if(request_id == http_request_id) {
-            // Parse the returned body to JSON
-            key json_body       = JsonCreateStore(body);
-
-            // Error occured during loading of document?
-            if(JsonGetValue(json_body, "error") != "") {
-                llInstantMessage(userUuid, "Document not found");
-                return;
-            }
-
-            string pages_body  = JsonGetJson(json_body, "pages");
-            // Parse the pages section
-            key json_pages     = JsonCreateStore(pages_body);
-            // Empty pages and cache list
-            textureCache        = [];
-            itemsList           = [];
-            itemIds             = [];
-            if(debug) llInstantMessage(userUuid, "[Debug] Page list is currently: "+ (string) itemsList);
-            integer x;
-            integer length      = (integer) JsonGetValue(json_body, "pagesCount");
-            // Get from each page the URL or the UUID
-            for (x = 0; x < length; x++) {
-                string pageUuid     = "";
-                string pageExpired  = "";
-                // Only process if there is a cache (to prevent console warnings)
-                if(JsonGetJson(json_pages, "["+ x +"].cache") != "[]") {
-                    pageUuid        = JsonGetValue(json_pages, "["+ x +"].cache.{"+ serverId +"}.uuid");
-                    pageExpired     = JsonGetValue(json_pages, "["+ x +"].cache.{"+ serverId +"}.isExpired");
-                }
-                string pageUrl      = JsonGetValue(json_pages, "["+ x +"].image");
-                itemIds             += [JsonGetValue(json_pages, "["+ x +"].id")];
-
-                // UUID set and not expired?
-                if(pageUuid != "" && pageExpired == "0") {
-                    itemsList += [(key) pageUuid];
-                    if(debug) llInstantMessage(userUuid, "[Debug] use UUID ("+ pageUuid +") for page: "+ (x+1));
-                // Use URL
-                } else {
-                    itemsList += [pageUrl];
-                    if(debug) llInstantMessage(userUuid, "[Debug] use URL ("+ pageUrl +") for page: "+ (x+1));
-                }
-            }
-
-            // Count the pages
-            totalItems = (integer)JsonGetValue(json_body, "pagesCount");
-            // Get documents title
-            itemTitle  = JsonGetValue(json_body, "title");
-            // Show loaded message
-            llInstantMessage(userUuid, "Loaded document: "+ itemTitle);
-            // loads the first page
-            nav(1, "page");
-            // Open navigation dialog
-            open_menu(userUuid, documentNavigationText, documentNavigationButtons);
-
-            // Destroy the JSON stores
-            JsonDestroyStore(json_body);
-            JsonDestroyStore(json_pages);
+        } else if(request_id == http_request_id) {
+            process_loaded_item("document", body);
         // Loaded user's documents
         } else if(request_id == http_request_files) {
-            key json_body               = JsonCreateStore(body);
-            string json_documents       = JsonGetJson(json_body, "");
-            integer documentCount       = 0;
-            integer filesCount          = JsonGetArrayLength(json_body, "");
-            fileIds                     = [];
-            // Create buttons for max 12 documents
-            list documentButtons;
-            if(debug) llInstantMessage(userUuid, "[Debug] Found "+ filesCount + " files.");
-            // List with documents is not empty?
-            if(filesCount > 0) {
-                integer x;
-                // List all presentations
-                for(x = 0; x < filesCount; x++) {
-                    if(JsonGetValue(json_body, "["+ x +"].type") == "document") {
-                        fileIds += [JsonGetValue(json_body, "["+ x +"].id")];
-                    }
-                }
-
-                // Newest presentations first
-                fileIds = llListSort(fileIds, 1, FALSE);
-
-                // Count presentations
-                documentCount = llGetListLength(fileIds);
-                if(debug) llInstantMessage(userUuid, "[Debug] Containing "+ documentCount + " documents.");
-
-                // Create buttons for presentations
-                for (x = 0; x < documentCount && x < 11; x++) {
-                    documentButtons += ["Load "+ llList2String(fileIds, x)];
-                }
-            }
-            documentButtons += ["Main","Quit","Load #"];
-            // Open presentation selection menu
-            open_menu(userUuid, "Found "+ documentCount +" document(s).\nShowing only the latest 9 documents below.\nCommand: '/"+ channel +" Load <#>' can be used to load a document that is not listed.\nIf your avatar is not linked to your CMS user account, the list will be empty." , documentButtons);
-            // Destroy the JSON stores
-            JsonDestroyStore(json_body);
+            process_loaded_items("document", body);
         // Update page uuid
         } else if(request_id = http_request_set) {
             if(debug) llInstantMessage(userUuid, "[Debug] UUID set for page "+ item +": "+ (string) body);
         // Loaded comments
         } else if(request_id = http_request_comments) {
+            if(debug) llInstantMessage(userUuid, "[Debug] Comments received from server");
             parse_comments(body);
-        // HTTP response which isn't requested?
-        } else {
-            return;
         }
     }
 
@@ -987,116 +959,20 @@ state image {
     http_response(key request_id, integer status, list metadata, string body) {
         // Catch errors
         if(status != 200) {
-            if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
-
-            // API key expired
-            if(status == 401) {
-                llInstantMessage(userUuid, "The API key expired, turn the presenter off and on again: ");
-                open_menu(userUuid, mainNavigationText, mainNavigationButtons);
-            } else {
-                // Send a more specific and meaningful response to the user
-                if(request_id == http_request_files) {
-                    llInstantMessage(userUuid, "User not found");
-                } else if(request_id == http_request_id) {
-                    llInstantMessage(userUuid, "Image not found");
-                }
-            }
-            return;
-        }
-
+            http_error(request_id, status, metadata, body);
         // Loaded image
-        if(request_id == http_request_id) {
-            // Parse the returned body to JSON
-            key json_body       = JsonCreateStore(body);
-
-            // Error occured during loading of presentation?
-            if(JsonGetValue(json_body, "error") != "") {
-                llInstantMessage(userUuid, "Image not found");
-                return;
-            }
-
-            // Empty pages and cache list
-            textureCache        = [];
-            itemsList           = [];
-            itemIds             = [];
-
-            string imageUuid     = "";
-            string imageExpired  = "";
-            // Only process if there is a cache (to prevent console warnings)
-            if(JsonGetJson(json_body, "cache") != "[]") {
-                imageUuid        = JsonGetValue(json_body, "cache.{"+ serverId +"}.uuid");
-                imageExpired     = JsonGetValue(json_body, "cache.{"+ serverId +"}.isExpired");
-            }
-            string imageUrl      = JsonGetValue(json_body, "url") +"image/";
-            itemIds             += [JsonGetValue(json_body, "id")];
-            // UUID set and not expired?
-            if(imageUuid != "" && imageExpired == "0") {
-                itemsList += [(key) imageUuid];
-                if(debug) llInstantMessage(userUuid, "[Debug] use UUID ("+ imageUuid +") for image");
-            // Use URL
-            } else {
-                itemsList += [imageUrl];
-                if(debug) llInstantMessage(userUuid, "[Debug] use URL ("+ imageUrl +") for image");
-            }
-
-            // Count the pages
-            totalItems = 1;
-            // Get presentation title
-            itemTitle  = JsonGetValue(json_body, "title");
-            // Show loaded message
-            llInstantMessage(userUuid, "Loaded image: "+ itemTitle);
-            // loads image
-            nav(1, "image");
-            // Open navigation dialog
-            open_menu(userUuid, imageNavigationText, imageNavigationButtons);
-
-            // Destroy the JSON stores
-            JsonDestroyStore(json_body);
+        } else if(request_id == http_request_id) {
+            process_loaded_item("image", body);
         // Loaded user's images
         } else if(request_id == http_request_files) {
-            key json_body               = JsonCreateStore(body);
-            string json_images          = JsonGetJson(json_body, "");
-            integer imagesCount         = 0;
-            integer filesCount          = JsonGetArrayLength(json_body, "");
-            fileIds                     = [];
-            // Create buttons for max 12 images
-            list imagesButtons;
-            if(debug) llInstantMessage(userUuid, "[Debug] Found "+ filesCount + " files.");
-            // List with files is not empty?
-            if(filesCount > 0) {
-                integer x;
-                // List all presentations
-                for(x = 0; x < filesCount; x++) {
-                    if(JsonGetValue(json_body, "["+ x +"].type") == "image") {
-                        fileIds += [JsonGetValue(json_body, "["+ x +"].id")];
-                    }
-                }
-
-                // Newest presentations first
-                fileIds = llListSort(fileIds, 1, FALSE);
-
-                // Count presentations
-                imagesCount = llGetListLength(fileIds);
-                if(debug) llInstantMessage(userUuid, "[Debug] Containing "+ imagesCount + " images.");
-
-                // Create buttons for presentations
-                for (x = 0; x < imagesCount && x < 11; x++) {
-                    imagesButtons += ["Load "+ llList2String(fileIds, x)];
-                }
-            }
-            imagesButtons += ["Main","Quit","Load #"];
-            // Open presentation selection menu
-            open_menu(userUuid, "Found "+ imagesCount +" document(s).\nShowing only the latest 9 images below.\nCommand: '/"+ channel +" Load <#>' can be used to load an image that is not listed.\nIf your avatar is not linked to your CMS user account, the list will be empty." , imagesButtons);
-            // Destroy the JSON stores
-            JsonDestroyStore(json_body);
+            process_loaded_items("image", body);
         // Update image uuid
         } else if(request_id = http_request_set) {
             if(debug) llInstantMessage(userUuid, "[Debug] UUID set for image "+ itemId +": "+ (string) body);
+        // Process comments
         } else if(request_id = http_request_comments) {
+            if(debug) llInstantMessage(userUuid, "[Debug] Comments received from server");
             parse_comments(body);
-        // HTTP response which isn't requested?
-        } else {
-            return;
         }
     }
 
