@@ -269,7 +269,7 @@ class User extends Module {
         $user = new \Models\User($args[1]);
         $user->getInfoFromDatabase();
         $user->getGroupsFromDatabase();
-        $user->getAvatarsFromDatabase();
+        $user->getAvatarsFromDatabase(TRUE);
         return $this->getUserData($user, TRUE);
     }
 

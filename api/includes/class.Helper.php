@@ -5,8 +5,8 @@ defined('EXEC') or die('Config not loaded');
  * Helper class to support the CMS and API
  *
  * @author Niels Witte
- * @version 0.5
- * @date May 7, 2014
+ * @version 0.5a
+ * @date May 8, 2014
  * @since February 12, 2014
  */
 class Helper {
@@ -134,7 +134,7 @@ class Helper {
      * @return strin
      */
     public static function filterString($string) {
-        return preg_replace("#[^a-zA-Z0-9-_ \.\(\)]*#", '', $string);
+        return preg_replace("#[^a-zA-Z0-9-_\.\(\)]*#", '', $string);
     }
 
     /**
