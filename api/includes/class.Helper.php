@@ -104,7 +104,7 @@ class Helper {
      */
     public static function checkInput() {
         $result  = TRUE;
-        $request = $_SERVER['REQUEST_METHOD'];
+        $request = getenv('REQUEST_METHOD');
         // Only for PUT and POST requests
         if($request == 'PUT' || $request == 'POST') {
             $max = ini_get('post_max_size');
@@ -119,8 +119,8 @@ class Helper {
             }
 
             // Check content-length
-            if($_SERVER['CONTENT_LENGTH'] > $max) {
-                throw new \Exception('Received '. $_SERVER['CONTENT_LENGTH'] .' bytes where only '. $max .' bytes can be handled by the server. Please check the filesize of uploaded documents.');
+            if(getenv('CONTENT_LENGTH') > $max) {
+                throw new \Exception('Received '. getenv('CONTENT_LENGTH') .' bytes where only '. $max .' bytes can be handled by the server. Please check the filesize of uploaded documents.');
             }
         }
 
@@ -144,10 +144,10 @@ class Helper {
      * @return string or array on success, or boolean FALSE when failed
      */
     public static function getInput($parse = FALSE) {
-        $request = $_SERVER['REQUEST_METHOD'];
+        $request = getenv('REQUEST_METHOD');
         // Only for PUT and POST requests
         if($request == 'PUT' || $request == 'POST') {
-            $input  = file_get_contents('php://input', false , null, -1 , $_SERVER['CONTENT_LENGTH']);
+            $input  = file_get_contents('php://input', false , null, -1 , getenv('CONTENT_LENGTH'));
             $output = $parse ? self::parseInput($input) : $input;
             return $output;
         } else {
@@ -173,7 +173,7 @@ class Helper {
         // Parse other form types
         } else {
             // grab multipart boundary from content type header
-            preg_match('/boundary=(.*)$/', @$_SERVER['CONTENT_TYPE'], $matches);
+            preg_match('/boundary=(.*)$/', getenv('CONTENT_TYPE'), $matches);
             // Is multipart form?
             if(isset($matches[1])) {
                 $boundary = $matches[1];
@@ -183,13 +183,13 @@ class Helper {
                 array_pop($a_blocks);
 
                 // loop data blocks
-                foreach ($a_blocks as $id => $block) {
-                    if (empty($block))
+                foreach($a_blocks as $id => $block) {
+                    if(empty($block))
                         continue;
 
                     // you'll have to var_dump $block to understand this and maybe replace \n or \r with a visibile char
                     // parse uploaded files
-                    if (strpos($block, 'application/octet-stream') !== FALSE) {
+                    if(strpos($block, 'application/octet-stream') !== FALSE) {
                         // match "name", then everything after "stream" (optional) except for prepending newlines
                         preg_match("/name=\"([^\"]*)\".*stream[\n|\r]+([^\n\r].*)?$/s", $block, $matches);
                     }
@@ -542,11 +542,11 @@ END:VCALENDAR";
         // Use SMTP?
         if(SERVER_SMTP) {
             $mail->isSMTP();                                    // Set mailer to use SMTP
-            $mail->Host = SERVER_SMTP_HOST;                     // Specify main and backup server
-            $mail->SMTPAuth = SERVER_SMTP_AUTH;                 // Enable SMTP authentication
-            $mail->Username = SERVER_SMTP_AUTH_USERNAME;        // SMTP username
-            $mail->Password = SERVER_SMTP_AUTH_PASSWORD;        // SMTP password
-            $mail->SMTPSecure = SERVER_SMTP_ENCRYPTION;         // Enable encryption, 'ssl' also accepted
+            $mail->Host         = SERVER_SMTP_HOST;             // Specify main and backup server
+            $mail->SMTPAuth     = SERVER_SMTP_AUTH;             // Enable SMTP authentication
+            $mail->Username     = SERVER_SMTP_AUTH_USERNAME;    // SMTP username
+            $mail->Password     = SERVER_SMTP_AUTH_PASSWORD;    // SMTP password
+            $mail->SMTPSecure   = SERVER_SMTP_ENCRYPTION;       // Enable encryption, 'ssl' also accepted
         }
 
         return $mail;
