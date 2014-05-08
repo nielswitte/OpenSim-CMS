@@ -24,7 +24,9 @@ git clone https://github.com/nielswitte/OpenSim-CMS.git
 
 Go to the `OpenSim-CMS` directory.
 
-Copy `config.php.example` and rename it to `config.php` in `OpenSim-CMS/api` and `OpenSim-CMS/cms` directories . Change the values in `config.php` to the values for your installation and create a new MySQL database and importing the structure from the `database.sql` file in the `assets` directory. And add default users to enable access to the API by importing `users.sql` into the newly created database.
+Copy `config.php.example` and rename it to `config.php` in `OpenSim-CMS/api` and `OpenSim-CMS/cms` directories . Change the values in `config.php` to the values for your installation and create a new MySQL database and importing the structure from the `database.sql` file in the `assets` directory. And add default users to enable access to the API by importing `users.sql` into the newly created database. The webserver requires write access to your storage, temp and optionally logs directories.
+
+If you plan to use the debugging options, you need to create the directory `OpenSim-CMS/api/logs`.
 
 ### Configuration
 The API configuration contains the following settings:
