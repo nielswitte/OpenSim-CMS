@@ -95,5 +95,5 @@ if($result != '') {
 
 // Log requests to a file
 if(SERVER_DEBUG) {
-    file_put_contents('logs/access.log', '['. date('Y-m-d H:i:s') .'] '. getenv('REMOTE_ADDR') .' '. getenv('REQUEST_METHOD') .' /api'. $get ."\n\r", FILE_APPEND);
+    file_put_contents('logs/access.log', '['. date('Y-m-d H:i:s') .'] '. getenv('REMOTE_ADDR') .' '. getenv('REQUEST_METHOD') .' /api'. $get ."\n", FILE_APPEND);
 }
