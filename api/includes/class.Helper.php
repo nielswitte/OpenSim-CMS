@@ -5,8 +5,8 @@ defined('EXEC') or die('Config not loaded');
  * Helper class to support the CMS and API
  *
  * @author Niels Witte
- * @version 0.5a
- * @date May 8, 2014
+ * @version 0.6
+ * @date May 12, 2014
  * @since February 12, 2014
  */
 class Helper {
@@ -131,10 +131,14 @@ class Helper {
      * Removes all non allowed characters from the string
      *
      * @param string $string
-     * @return strin
+     * @param boolean $allowSpaces - [Optional] Allow spaces (default: TRUE)
+     * @return string
      */
-    public static function filterString($string) {
-        return preg_replace("#[^a-zA-Z0-9-_\.\(\)]*#", '', $string);
+    public static function filterString($string, $allowSpaces = TRUE) {
+        if(!$allowSpaces) {
+            $string = str_replace(' ', '', $string);
+        }
+        return preg_replace("#[^a-zA-Z0-9-_ \.\(\)]*#", '', $string);
     }
 
     /**

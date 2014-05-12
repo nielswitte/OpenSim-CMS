@@ -7,8 +7,9 @@ defined('EXEC') or die('Config not loaded');
  * This class is the group controller
  *
  * @author Niels Witte
- * @version 0.2a
- * @since April 22nd, 2014
+ * @version 0.3
+ * @date May 12, 2014
+ * @since April 22, 2014
  */
 class GroupController {
     /**
@@ -35,7 +36,7 @@ class GroupController {
      */
     public function createGroup($parameters) {
         $db = \Helper::getDB();
-        $data = array('name' => $db->escape(\Helper::filterString($parameters['name'])));
+        $data = array('name' => $db->escape(\Helper::filterString($parameters['name'], TRUE)));
         return $db->insert('groups', $data);
     }
 
@@ -78,7 +79,7 @@ class GroupController {
         // Group name
         $db     = \Helper::getDB();
         $data   = array(
-            'name'  => $db->escape(\Helper::filterString($parameters['name']))
+            'name'  => $db->escape(\Helper::filterString($parameters['name'], TRUE))
         );
         $db->where('id', $db->escape($this->group->getId()));
         $name = $db->update('groups', $data);

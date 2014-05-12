@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the user controller
  *
  * @author Niels Witte
- * @version 0.3a
- * @date May 8, 2014
+ * @version 0.4
+ * @date May 12, 2014
  * @since February 27, 2014
  */
 class AvatarController {
@@ -68,7 +68,7 @@ class AvatarController {
             throw new \Exception('Invalid UUID generated, try again', 1);
         }
 
-        $command = 'create user '. $parameters['firstName'] .' '. $parameters['lastName'] .' '. $parameters['password'] .' '. $parameters['email'] .' '. $uuid;
+        $command = 'create user '. \Helper::filterString($parameters['firstName'], FALSE) .' '. \Helper::filterString($parameters['lastName'], FALSE) .' '. \Helper::filterString($parameters['password'], FALSE) .' '. $parameters['email'] .' '. $uuid;
         // Successful request
         if($raXML->call('admin_console_command', array('command' => $command), TRUE) !== FALSE) {
             return array(

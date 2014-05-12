@@ -29,5 +29,11 @@ You can only add members to a group if you have `WRITE` permission for the User 
 ## Files, Documents and Presentations
 The following questions and solutions are related to files, documents and presentations.
 
-## The document I've added to a meeting is visible in the meeting details but other participants can not access the document
+### The document I've added to a meeting is visible in the meeting details but other participants can not access the document
 Only users with `ALL` permission for the Files API can access documents of all users. If you want others to access your documents, create a group with those users and share the document with the group.
+
+## Assets in OpenSim
+General questions about the use of the OpenSim assets.
+
+### The presenter can connect to the API, but cannot access the images
+It could be the case that the `serverUrl` is incorrect. When the server is connected to the Internet and on the same machine as the API, you should use the remote IP of the server instead of `localhost` or `127.0.0.1`. Especially `presenterScreen.lsl` is quite sensitive for this.
