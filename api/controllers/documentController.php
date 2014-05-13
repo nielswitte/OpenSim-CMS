@@ -7,9 +7,9 @@ defined('EXEC') or die('Config not loaded');
  * This class is the Document controller
  *
  * @author Niels Witte
- * @version 0.2a
- * @date April 30, 2014
- * @since April 4th, 2014
+ * @version 0.3
+ * @date May 12, 2014
+ * @since April 4, 2014
  */
 class DocumentController {
     private $document;
@@ -43,7 +43,7 @@ class DocumentController {
 
         // Insert main document data into database to get a autoincrement ID
         $data           = array(
-            'title'         => $db->escape(\Helper::filterString($parameters['title'])),
+            'title'         => $db->escape(\Helper::filterString($parameters['title'], TRUE)),
             'type'          => $db->escape($parameters['type']),
             'ownerId'       => $db->escape(\Auth::getUser()->getId()),
             'creationDate'  => $db->now(),

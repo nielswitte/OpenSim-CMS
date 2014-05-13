@@ -13,9 +13,9 @@ require_once dirname(__FILE__) .'/../controllers/pageController.php';
  * Implements the functions for documents
  *
  * @author Niels Witte
- * @version 0.5a
- * @date April 22nd, 2014
- * @since March 3rd, 2014
+ * @version 0.6
+ * @date May 13, 2014
+ * @since March 3, 2014
  */
 class Document extends Module {
     private $api;
@@ -60,49 +60,21 @@ class Document extends Module {
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
         // Get 50 documents from the given offset
+        $db->join('users u', 'd.ownerId = u.id', 'LEFT');
+        $db->where('d.type', $db->escape('document'));
+        $db->orderBy('d.creationDate', 'DESC');
+
         // User does not have all permissions? -> Can only see own or group documents
         if(!\Auth::checkRights($this->getName(), \Auth::ALL)) {
-            $params = array(
-                $db->escape('document'),
-                $db->escape(\Auth::getUser()->getId()),
-                $db->escape(\Auth::getUser()->getId()),
-                $db->escape($args[1]),
-                50
-            );
-            // This query fails when written as DB object
             // Retrieve all documents the user can access as the member of a group
             // or as documents owned by the user self
-            $resutls = $db->rawQuery('
-                SELECT DISTINCT
-                    d.*,
-                    u.*,
-                    d.id AS documentId,
-                    u.id AS userId
-                FROM
-                    documents d
-                LEFT JOIN
-                    users u
-                ON
-                    d.ownerId = u.id
-                WHERE
-                    d.type = ?
-                AND (
-                    d.ownerId = ?
-                OR
-                    d.id IN (SELECT gd.documentId FROM group_documents gd, group_users gu WHERE gu.userId = ? AND gu.groupId = gd.groupId)
-                ) ORDER BY
-                    d.creationDate DESC
-                LIMIT
-                    ?, ?'
-                , $params);
-
+            $db->Where('(d.ownerId = ? OR d.id IN (SELECT gd.documentId FROM group_documents gd, group_users gu WHERE gu.userId = ? AND gu.groupId = gd.groupId))', array($db->escape($args[1]), $db->escape(\Auth::getUser()->getId())));
+            $resutls        = $db->get('documents d', array($db->escape($args[1]), 50), 'DISTINCT d.*, u.*, d.id AS documentId, u.id AS userId');
         // No extra filtering required
         } else {
-            $db->join('users u', 'd.ownerId = u.id', 'LEFT');
-            $db->where('type', 'document');
-            $db->orderBy('creationDate', 'DESC');
             $resutls        = $db->get('documents d', array($args[1], 50), '*, d.id AS documentId, u.id AS userId');
         }
+
         // Process results
         $data           = array();
         foreach($resutls as $result) {
@@ -121,24 +93,11 @@ class Document extends Module {
      */
     public function getDocumentsByTitle($args) {
         $db             = \Helper::getDB();
-        $params         = array("%". strtolower($db->escape($args[1])) ."%", 'document');
-        $results        = $db->rawQuery('
-            SELECT DISTINCT
-                *,
-                d.id AS documentId,
-                u.id AS userId
-            FROM
-                documents d,
-                users u
-            WHERE
-                LOWER(d.title) LIKE ?
-            AND
-                d.type = ?
-            AND
-                d.ownerId = u.id
-            ORDER BY
-                LOWER(d.title) ASC'
-            , $params);
+        $db->join('users u', 'd.ownerId = u.id', 'LEFT');
+        $db->where('LOWER(d.title)', array('LIKE' => "%". strtolower($db->escape($args[1])) ."%"));
+        $db->where('d.type', $db->escape('document'));
+        $db->orderBy('LOWER(d.title)', 'ASC');
+        $results        = $db->get('documents d', NULL, 'DISTINCT *, d.id AS documentId, u.id AS userId');
         $data           = array();
         foreach($results as $result) {
             if($result['userId'] == \Auth::getUser()->getId() || \Auth::checkRights($this->getName(), \Auth::ALL) || \Auth::checkGroupFile($result['documentId'])) {
@@ -343,7 +302,7 @@ class Document extends Module {
      * @return array
      */
     public function getDocumentData(\Models\Document $document, $full = TRUE) {
-        $data       = $this->api->getModule('file')->getFileData($document);
+        $data       = $this->api->getModule('file')->getFileData($document, $full);
         // Include all data?
         if($full) {
             $pages  = array();

@@ -14,9 +14,9 @@ require_once dirname(__FILE__) .'/../controllers/fileController.php';
  * Implements the functions for presentations
  *
  * @author Niels Witte
- * @version 0.7
- * @date April 22nd, 2014
- * @since March 3rd, 2014
+ * @version 0.8
+ * @date May 13, 2014
+ * @since March 3, 2014
  */
 class File extends Module{
     private $api;
@@ -60,45 +60,19 @@ class File extends Module{
         $db             = \Helper::getDB();
         // Offset parameter given?
         $args[1]        = isset($args[1]) ? $args[1] : 0;
+        $db->join('users u', 'd.ownerId = u.id', 'LEFT');
+        $db->orderBy('d.creationDate', 'DESC');
 
         // User does not have all permissions? -> Can only see own or group documents
         if(!\Auth::checkRights($this->getName(), \Auth::ALL)) {
-            $params = array(
-                $db->escape(\Auth::getUser()->getId()),
-                $db->escape(\Auth::getUser()->getId()),
-                $db->escape($args[1]),
-                50
-            );
-            // This query fails when written as DB object
             // Retrieve all documents the user can access as the member of a group
             // or as documents owned by the user self
-            $results = $db->rawQuery('
-                SELECT DISTINCT
-                    d.*,
-                    u.*,
-                    d.id AS documentId,
-                    u.id AS userId
-                FROM
-                    documents d
-                LEFT JOIN
-                    users u
-                ON
-                    d.ownerId = u.id
-                WHERE
-                    d.ownerId = ?
-                OR
-                    d.id IN (SELECT gd.documentId FROM group_documents gd, group_users gu WHERE gu.userId = ? AND gu.groupId = gd.groupId)
-                ORDER BY
-                    d.creationDate DESC
-                LIMIT
-                    ?, ?'
-                , $params);
-
+            $db->orwhere('d.ownerId', $db->escape(\Auth::getUser()->getId()));
+            $db->orWhere('d.id IN (SELECT gd.documentId FROM group_documents gd, group_users gu WHERE gu.userId = ? AND gu.groupId = gd.groupId)', array($db->escape(\Auth::getUser()->getId())));
+            $results = $db->get('documents d', array($db->escape($args[1]), 50), 'DISTINCT d.*, u.*, d.id AS documentId, u.id AS userId');
         // No extra filtering required
         } else {
             // Get 50 presentations from the given offset
-            $db->join('users u', 'd.ownerId = u.id', 'LEFT');
-            $db->orderBy('d.creationDate', 'DESC');
             $results = $db->get('documents d', array($args[1], 50), '*, d.id AS documentId, u.id AS userId');
         }
 
@@ -120,22 +94,10 @@ class File extends Module{
      */
     public function getFilesByTitle($args) {
         $db             = \Helper::getDB();
-        $params         = array("%". strtolower($db->escape($args[1])) ."%");
-        $results        = $db->rawQuery('
-            SELECT DISTINCT
-                *,
-                d.id AS documentId,
-                u.id AS userId
-            FROM
-                documents d,
-                users u
-            WHERE
-                LOWER(d.title) LIKE ?
-            AND
-                d.ownerId = u.id
-            ORDER BY
-                LOWER(d.title) ASC'
-            , $params);
+        $db->join('users u', 'd.ownerId = u.id', 'LEFT');
+        $db->where('LOWER(d.title)', array('LIKE' => "%". strtolower($db->escape($args[1])) ."%"));
+        $db->orderBy('LOWER(d.title)', 'ASC');
+        $results        = $db->get('documents d', NULL, 'DISTINCT *, d.id AS documentId, u.id AS userId');
 
         $data           = array();
         foreach($results as $result) {

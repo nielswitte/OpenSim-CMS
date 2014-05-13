@@ -16,8 +16,8 @@ require_once dirname(__FILE__) .'/../controllers/userController.php';
  * Implements the functions for users
  *
  * @author Niels Witte
- * @version 1.0
- * @date May 1, 2014
+ * @version 1.1
+ * @date May 13, 2014
  * @since February 24, 2014
  */
 class User extends Module {
@@ -248,8 +248,10 @@ class User extends Module {
      */
     public function getUsersByUsername($args) {
         $db             = \Helper::getDB();
-        $params         = array("%". strtolower($db->escape($args[1])) ."%");
-        $results        = $db->rawQuery('SELECT * FROM users WHERE LOWER(username) LIKE ? ORDER BY LOWER(username) ASC', $params);
+        $db->where('LOWER(username)', array('LIKE' => "%". strtolower($db->escape($args[1])) ."%"));
+        $db->orderBy('LOWER(username)', 'ASC');
+        $results        = $db->get('users');
+
         $data           = array();
         foreach($results as $result) {
             $user       = new \Models\User($result['id']);
@@ -269,7 +271,7 @@ class User extends Module {
         $user = new \Models\User($args[1]);
         $user->getInfoFromDatabase();
         $user->getGroupsFromDatabase();
-        $user->getAvatarsFromDatabase();
+        $user->getAvatarsFromDatabase(TRUE);
         return $this->getUserData($user, TRUE);
     }
 
@@ -540,28 +542,14 @@ class User extends Module {
             $db->escape($args[1]),
             $db->escape($args[1]),
         );
-        // This query fails when written as DB object
+
         // Retrieve all documents the user can access as the member of a group
         // or as documents owned by the user self
-        $documents = $db->rawQuery('
-            SELECT DISTINCT
-                d.*,
-                u.*,
-                d.id AS documentId,
-                u.id AS userId
-            FROM
-                documents d
-            LEFT JOIN
-                users u
-            ON
-                d.ownerId = u.id
-            WHERE
-                d.ownerId = ?
-            OR
-                d.id IN (SELECT gd.documentId FROM group_documents gd, group_users gu WHERE gu.userId = ? AND gu.groupId = gd.groupId)
-            ORDER BY
-                d.creationDate DESC'
-            , $params);
+        $db->join('users u', 'd.ownerId = u.id', 'LEFT');
+        $db->orwhere('d.ownerId', $db->escape($args[1]));
+        $db->orWhere('d.id IN (SELECT gd.documentId FROM group_documents gd, group_users gu WHERE gu.userId = ? AND gu.groupId = gd.groupId)', array($db->escape($args[1])));
+        $db->orderBy('d.creationDate', 'DESC');
+        $documents = $db->get('documents d', NULL, 'DISTINCT d.*, u.*, d.id AS documentId, u.id AS userId');
 
         foreach($documents as $document) {
             $user   = new \Models\User($document['userId'], $document['username'], $document['email'], $document['firstName'], $document['lastName'], $document['lastLogin']);
@@ -682,8 +670,9 @@ class User extends Module {
      */
     public function getGroupsByName($args) {
         $db             = \Helper::getDB();
-        $params         = array("%". strtolower($db->escape($args[1])) ."%");
-        $groups         = $db->rawQuery('SELECT * FROM groups WHERE LOWER(name) LIKE ? ORDER BY LOWER(name) ASC', $params);
+        $db->where('LOWER(name)', array('LIKE' => "%". strtolower($db->escape($args[1])) ."%"));
+        $db->orderBy('LOWER(name)', 'ASC');
+        $groups         = $db->get('groups');
         $data           = array();
         foreach($groups as $group) {
             $group = new \Models\Group($group['id'], $group['name']);

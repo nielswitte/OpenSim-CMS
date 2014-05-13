@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the user controller
  *
  * @author Niels Witte
- * @version 0.3
- * @date May 7, 2014
+ * @version 0.4
+ * @date May 12, 2014
  * @since February 27, 2014
  */
 class AvatarController {
@@ -68,7 +68,7 @@ class AvatarController {
             throw new \Exception('Invalid UUID generated, try again', 1);
         }
 
-        $command = 'create user '. $parameters['firstName'] .' '. $parameters['lastName'] .' '. $parameters['password'] .' '. $parameters['email'] .' '. $uuid;
+        $command = 'create user '. \Helper::filterString($parameters['firstName'], FALSE) .' '. \Helper::filterString($parameters['lastName'], FALSE) .' '. \Helper::filterString($parameters['password'], FALSE) .' '. $parameters['email'] .' '. $uuid;
         // Successful request
         if($raXML->call('admin_console_command', array('command' => $command), TRUE) !== FALSE) {
             return array(
@@ -97,16 +97,16 @@ class AvatarController {
             throw new \Exception('Invalid number of parameters, uses 5 to 7 parameters', 4);
         } elseif(!isset($parameters['gridId'])) {
             throw new \Exception('Missing parameter (integer) "gridId"', 5);
-        } elseif(!isset($parameters['firstName'])) {
-            throw new \Exception('Missing parameter (string) "firstName"', 6);
-        } elseif(!isset($parameters['lastName'])) {
-            throw new \Exception('Missing parameter (string) "lastName"', 7);
+        } elseif(!isset($parameters['firstName']) || strpos($parameters['firstName'], ' ') !== FALSE) {
+            throw new \Exception('Missing parameter (string) "firstName", or firstName contains a space', 6);
+        } elseif(!isset($parameters['lastName']) || strpos($parameters['lastName'], ' ') !== FALSE) {
+            throw new \Exception('Missing parameter (string) "lastName", or lastName contains a space', 7);
         } elseif(!isset($parameters['password'])) {
             throw new \Exception('Missing parameter (string) "password"', 8);
         } elseif(isset($parameters['password']) && $this->checkPasswordForIlligalCharacters($parameters['password'])) {
-            throw new \Exception('Parameter (string) "password" contains one of the following characters: '. implode('', $this->notAllowedChars), 8);
-        } elseif(!isset($parameters['email'])) {
-            throw new \Exception('Missing parameter (string) "email"', 9);
+            throw new \Exception('Parameter (string) "password" contains one of the following characters: '. implode('', $this->notAllowedChars) .'. It should not contain spaces, quotes or other special characters.', 8);
+        } elseif(!isset($parameters['email']) || !filter_var($parameters['email'], FILTER_VALIDATE_EMAIL) ) {
+            throw new \Exception('Missing parameter (string) "email" or not a valid e-mail provided', 9);
         } elseif(isset($parameters['startRegionY']) && (!isset($parameters['startRegionX']) || !is_numeric($parameters['startRegionX']))) {
             throw new \Exception('Missing parameter (integer) "startRegionX"', 10);
         } elseif(isset($parameters['startRegionX']) && (!isset($parameters['startRegionY']) || !is_numeric($parameters['startRegionY']))) {

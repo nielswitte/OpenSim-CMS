@@ -65,9 +65,9 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>Installation                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Wednesday, April 30, 2014                                        </span>
+                                            Thursday, May 8, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            1:26 PM                                        </span>
+                                            1:23 PM                                        </span>
                                 </div>
                                                         <p>Before you start, you require a web server with <a href="https://httpd.apache.org/">Apache</a>, <a href="http://www.php.net">PHP 5.5+</a> and <a href="http://www.mysql.com">MySQL 5.6+</a>. On windows you can use for example <a href="https://www.apachefriends.org/index.html">XAMPP</a>. On Linux the software can be installed by your package manager.</p>
 
@@ -96,7 +96,9 @@
 
 <p>Go to the <code>OpenSim-CMS</code> directory.</p>
 
-<p>Copy <code>config.php.example</code> and rename it to <code>config.php</code> in <code>OpenSim-CMS/api</code> and <code>OpenSim-CMS/cms</code> directories . Change the values in <code>config.php</code> to the values for your installation and create a new MySQL database and importing the structure from the <code>database.sql</code> file in the <code>assets</code> directory. And add default users to enable access to the API by importing <code>users.sql</code> into the newly created database.</p>
+<p>Copy <code>config.php.example</code> and rename it to <code>config.php</code> in <code>OpenSim-CMS/api</code> and <code>OpenSim-CMS/cms</code> directories . Change the values in <code>config.php</code> to the values for your installation and create a new MySQL database and importing the structure from the <code>database.sql</code> file in the <code>assets</code> directory. And add default users to enable access to the API by importing <code>users.sql</code> into the newly created database. The webserver requires write access to your storage, temp and optionally logs directories.</p>
+
+<p>If you plan to use the debugging options, you need to create the directory <code>OpenSim-CMS/api/logs</code>.</p>
 
 <h3>Configuration</h3>
 

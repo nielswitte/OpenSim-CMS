@@ -1,9 +1,11 @@
 /config.php
 /storage/presentations/1/
 /temp/test.php
+/api/logs/access.log
 /api/config.php
 /cms/config.php
 /storage/image/
 /storage/presentation/
 /storage/ical/
 /temp/
+/assets/OpenSim/Collada/

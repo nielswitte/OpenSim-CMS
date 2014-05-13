@@ -11,7 +11,7 @@
  *
  * @author Niels Witte
  * @date February 28th, 2014
- * @version 0.1
+ * @version 0.2
  */
 // Config values
 string serverUrl = "http://127.0.0.1/OpenSim-CMS/api";
@@ -50,7 +50,7 @@ request_set_avatar(key uuid, string username) {
     if(debug) llInstantMessage(userUuid, "[Debug] Linking avatar: "+ (string) uuid + " to user: "+ username);
 
     string body = "username="+ username;
-    http_request_set = llHTTPRequest(serverUrl +"/grid/"+ serverId +"/avatar/"+ (string)uuid +"/?token="+ APIToken, [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
+    http_request_set = llHTTPRequest(serverUrl +"/grid/"+ (string) serverId +"/avatar/"+ (string)uuid +"/?token="+ APIToken, [HTTP_METHOD, "POST", HTTP_MIMETYPE, "application/x-www-form-urlencoded"], body);
 }
 
 /**
@@ -122,7 +122,7 @@ state linking {
     http_response(key request_id, integer status, list metadata, string body) {
         // Catch errors
         if(status != 200) {
-            if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: " + status);
+            if(debug) llInstantMessage(userUuid, "[Debug] HTTP Request returned status: "+ (string) status);
             // Send a more specific and meaningful response to the user
             if(request_id == http_request_api_token) {
                 llInstantMessage(userUuid, "Invalid username/password combination used.");
@@ -138,7 +138,7 @@ state linking {
             APIToken        = JsonGetValue(json_body, "token");
             if(debug) llInstantMessage(userUuid, "[Debug] Storing API token: "+ APIToken);
         // Link avatar to username response?
-        } else if(request_id = http_request_set) {
+        } else if(request_id == http_request_set) {
             key json_body = JsonCreateStore(body);
             string success = JsonGetValue(json_body, "success");
             if(debug) llInstantMessage(userUuid, "[Debug] Server response on linking avatar ("+ success +"): "+ body);
@@ -156,7 +156,7 @@ state linking {
     /**
      * Listen and fetch certain commands
      */
-    listen(integer channel, string name, key id, string message) {
+    listen(integer chan, string name, key id, string message) {
         request_set_avatar(userUuid, message);
     }
 }

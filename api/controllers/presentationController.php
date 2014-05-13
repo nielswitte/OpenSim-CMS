@@ -7,9 +7,9 @@ defined('EXEC') or die('Config not loaded');
  * This class is the presentation controller
  *
  * @author Niels Witte
- * @version 0.3b
- * @date April 22nd, 2014
- * @since March 10th, 2014
+ * @version 0.4
+ * @date May 12, 2014
+ * @since March 10, 2014
  */
 class PresentationController {
     /**
@@ -47,7 +47,7 @@ class PresentationController {
 
         // Insert main document data into database to get a autoincrement ID
         $data           = array(
-            'title'         => $db->escape(\Helper::filterString($parameters['title'])),
+            'title'         => $db->escape(\Helper::filterString($parameters['title'], TRUE)),
             'type'          => $db->escape($parameters['type']),
             'ownerId'       => $db->escape(\Auth::getUser()->getId()),
             'creationDate'  => $db->now(),
