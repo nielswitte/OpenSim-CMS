@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the Meeting controller
  *
  * @author Niels Witte
- * @version 0.4b
- * @date May 5, 2014
+ * @version 0.6
+ * @date May 13, 2014
  * @since March 13, 2014
  */
 class MeetingController {
@@ -432,41 +432,16 @@ class MeetingController {
             $db->escape($startDate),
             $db->escape($endDate),
             $db->escape($startDate),
-            $db->escape($endDate),
-            $db->escape($roomId)
+            $db->escape($endDate)
         );
-        if($meetingId == 0) {
-            $result = $db->rawQuery('
-                    SELECT
-                        COUNT(*) AS count
-                    FROM
-                        meetings
-                    WHERE (
-                            startDate BETWEEN ? AND ?
-                        OR
-                            ? BETWEEN startDate AND endDate
-                        OR
-                            ? BETWEEN startDate AND endDate
-                    ) AND
-                        roomId = ?', $params);
-        } else {
-            $params[] = $db->escape($meetingId);
-            $result = $db->rawQuery('
-                    SELECT
-                        COUNT(*) AS count
-                    FROM
-                        meetings
-                    WHERE (
-                            startDate BETWEEN ? AND ?
-                        OR
-                            ? BETWEEN startDate AND endDate
-                        OR
-                            ? BETWEEN startDate AND endDate
-                    ) AND
-                        roomId = ?
-                    AND
-                        id != ?', $params);
+
+        $db->where('(startDate BETWEEN ? AND ? OR ? BETWEEN startDate AND endDate OR ? BETWEEN startDate AND endDate)', $params);
+        $db->where('roomId', $db->escape($roomId));
+        // Existing meeting
+        if($meetingId > 0) {
+            $db->where('id', array('!=' => $db->escape($meetingId)));
         }
+        $result = $db->get('meetings', NULL, 'COUNT(*) AS count');
 
         return $result[0]['count'] > 0 ? TRUE : FALSE;
     }
