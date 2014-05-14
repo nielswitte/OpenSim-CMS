@@ -2015,6 +2015,16 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
             return results;
         };
 
+        // Get the room's description
+        $scope.getRoomDescriptionById = function(roomId) {
+            for(var i = 0; i < $scope.rooms.length; i++) {
+                if($scope.rooms[i].id == roomId) {
+                    return $scope.rooms[i].description;
+                }
+            }
+            return false;
+        };
+
         // Adds the currently selected participant to the list
         $scope.addParticipant = function() {
             for(var i = 0; i < usernameSearchResults.length; i++) {
@@ -2377,6 +2387,16 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
                 var results = '';
             }
             return results;
+        };
+
+        // Get the room's description
+        $scope.getRoomDescriptionById = function(roomId) {
+            for(var i = 0; i < $scope.rooms.length; i++) {
+                if($scope.rooms[i].id == roomId) {
+                    return $scope.rooms[i].description;
+                }
+            }
+            return false;
         };
 
         // Adds the currently selected participant to the list

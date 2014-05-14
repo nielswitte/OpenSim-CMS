@@ -64,6 +64,9 @@
                 <div class="col-sm-10">
                     <p class="form-control-static" ng-show="rooms.length == 0">No rooms in this region</p>
                     <select id="inputRegion" class="form-control" ng-show="rooms.length >= 1" ng-model="meeting.room.id" ng-options="room.id as room.name for room in rooms" required></select>
+                    <div ng-show="meeting.room.id && rooms.length >= 1">
+                        <p class="form-control-static"><b>Description:</b> {{getRoomDescriptionById(meeting.room.id)}}</p>
+                    </div>
                 </div>
             </div>
             <fieldset>
