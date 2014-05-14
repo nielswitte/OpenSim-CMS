@@ -1,15 +1,16 @@
 # ChangeLog
 
+## Version 5.2.8 (May 14th 2014)
 * Increase timeout to match RFC2821 section 4.5.3.2 and thus not fail greetdelays, fixes #104
 * Add timestamps to default debug output
 * Add connection events and new level 3 to debug output options
 * Chinese language update (Thanks to @binaryoung)
-* Allow custom Mailer types (thanks to @michield)
+* Allow custom Mailer types (Thanks to @michield)
 * Cope with spaces around SMTP host specs
 * Fix processing of multiple hosts in connect string
 * Added Galician translation (Thanks to @donatorouco)
 * Autoloader now prepends
-* Minor docs update
+* Docs updates
 * Add Latvian translation (Thanks to @eddsstudio)
 * Add Belarusian translation (Thanks to @amaksymiuk)
 * Make autoloader work better on older PHP versions
@@ -25,6 +26,20 @@
 * Add Vietnamese translation (Thanks to @vinades)
 * Improve example images, switch to PNG
 * Add Croatian translation (Thanks to @hrvoj3e)
+* Remove setting the Return-Path and deprecate the Return-path property - it's just wrong!
+* Fix language file loading if CWD has changed (@stephandesouza)
+* Add HTML5 email validation pattern
+* Improve Turkish translations (Thanks to @yasinaydin)
+* Improve Romanian translations (Thanks to @aflorea)
+* Fix quoted-printable encoding of multiparts
+* Check php.ini for path to sendmail/qmail before using default
+* Improve Farsi translation (Thanks to @MHM5000)
+* Don't use quoted-printable encoding for multipart types
+* Add Serbian translation (Thanks to ajevremovic at gmail.com)
+* Remove useless PHP5 check
+* Use SVG for build status badges
+* Store MessageDate on creation
+* Better default behaviour for validateAddress
 
 ## Version 5.2.7 (September 12th 2013)
 * Add Ukranian translation from @Krezalis
@@ -148,7 +163,7 @@
                #52, #31, #41, #5. #70, #69
 
 ## Version 5.2.1 (January 16, 2012)
-* Closed several bugs#5
+* Closed several bugs #5
 * Performance improvements
 * MsgHTML() now returns the message as required.
 * New method: GetSentMIMEMessage() (returns full copy of sent message)
@@ -277,11 +292,11 @@ NOTE: WE HAVE A NEW LANGUAGE VARIABLE FOR DIGITALLY SIGNED S/MIME EMAILS. IF YOU
     to, an error was thrown for the date() functions used (line 1565 and 1569).
     This is NOT a PHPMailer error, it is the result of an incorrectly configured
     PHP5 installation. The fix is to modify your 'php.ini' file and include the
-    date.timezone = America/New York
+    date.timezone = Etc/UTC (or your own zone)
     directive, to your own server timezone
   - If you do get this error, and are unable to access your php.ini file:
     In your PHP script, add
-    `date_default_timezone_set('America/Toronto');`
+    `date_default_timezone_set('Etc/UTC');`
   - do not try to use
     `$myVar = date_default_timezone_get();`
     as a test, it will throw an error.
