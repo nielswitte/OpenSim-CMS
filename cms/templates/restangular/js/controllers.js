@@ -1038,9 +1038,10 @@ angularRest.controller('documentsController', ['Restangular', 'RestangularCache'
 );
 
 // documentController -------------------------------------------------------------------------------------------------------------------------------
-angularRest.controller('documentController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$modal', '$alert', '$location',
-    function(Restangular, RestangularCache, $scope, $routeParams, Page, $modal, $alert, $location) {
+angularRest.controller('documentController', ['Restangular', 'RestangularCache', '$scope', '$routeParams', 'Page', '$modal', '$alert', '$location', 'Cache',
+    function(Restangular, RestangularCache, $scope, $routeParams, Page, $modal, $alert, $location, Cache) {
         var groupSearchResults;
+        var documentUrl         = '';
         $scope.groupname        = '';
 
         // Show loading screen
@@ -1074,6 +1075,7 @@ angularRest.controller('documentController', ['Restangular', 'RestangularCache',
                 $scope.document = documentResponse;
                 $scope.token    = sessionStorage.token;
                 Page.setTitle(documentResponse.title);
+                documentUrl     = documentResponse.getRequestedUrl();
             }
             // Remove loading screen
             jQuery('#loading').hide();
@@ -1161,6 +1163,7 @@ angularRest.controller('documentController', ['Restangular', 'RestangularCache',
                     $alert({title: 'Error!', content: groupResponse.error, type: 'danger'});
                 } else {
                     $alert({title: 'Groups updated', content: 'The groups that share this file have been updated', type: 'success'});
+                    Cache.clearCachedUrl(documentUrl);
                     modal.hide();
                 }
             });
@@ -2015,6 +2018,16 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
             return results;
         };
 
+        // Get the room's description
+        $scope.getRoomDescriptionById = function(roomId) {
+            for(var i = 0; i < $scope.rooms.length; i++) {
+                if($scope.rooms[i].id == roomId) {
+                    return $scope.rooms[i].description;
+                }
+            }
+            return false;
+        };
+
         // Adds the currently selected participant to the list
         $scope.addParticipant = function() {
             for(var i = 0; i < usernameSearchResults.length; i++) {
@@ -2377,6 +2390,16 @@ angularRest.controller('meetingNewController', ['Restangular', 'RestangularCache
                 var results = '';
             }
             return results;
+        };
+
+        // Get the room's description
+        $scope.getRoomDescriptionById = function(roomId) {
+            for(var i = 0; i < $scope.rooms.length; i++) {
+                if($scope.rooms[i].id == roomId) {
+                    return $scope.rooms[i].description;
+                }
+            }
+            return false;
         };
 
         // Adds the currently selected participant to the list
