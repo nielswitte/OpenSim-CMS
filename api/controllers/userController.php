@@ -7,8 +7,8 @@ defined('EXEC') or die('Config not loaded');
  * This class is the user controller
  *
  * @author Niels Witte
- * @version 0.6
- * @date May 12, 2014
+ * @version 0.6a
+ * @date May 20, 2014
  * @since February 12, 2014
  */
 class UserController {
@@ -111,13 +111,14 @@ class UserController {
 
     /**
      * Check to see if the given username is unique
+     * Case insensitive
      *
      * @param string $username
      * @return boolean - TRUE when available
      */
     public function checkUsername($username) {
         $db = \Helper::getDB();
-        $db->where('username', $db->escape(\Helper::filterString($username, TRUE)));
+        $db->where('LOWER(username)', $db->escape(strtolower(\Helper::filterString($username, TRUE))));
         $result = $db->getOne('users');
 
         return !$result;
@@ -131,7 +132,7 @@ class UserController {
      */
     public function checkEmail($email) {
         $db = \Helper::getDB();
-        $db->where('email', $db->escape($email));
+        $db->where('LOWER(email)', $db->escape(strtolower($email)));
         $result = $db->getOne('users');
 
         return !$result;
