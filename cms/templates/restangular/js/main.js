@@ -32,3 +32,18 @@ var HOLIDAYS = {
 var TIME_START  = '06:00';
 /** @const End time of the day */
 var TIME_END    = '22:00';
+
+/**
+ * Prevent pressing backspace from going back to the previous page
+ *
+ * @source: http://stackoverflow.com/a/11112169
+ * @param string key
+ * @param string function
+ */
+jQuery(document).ready(function($) {
+    jQuery(document).on('keydown', function (e) {
+        if (e.which === 8 && !$(e.target).is('input, textarea')) {
+            e.preventDefault();
+        }
+    });
+});

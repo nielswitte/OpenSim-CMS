@@ -3142,7 +3142,9 @@ angularRest.controller('userController', ['Restangular', 'RestangularCache', '$s
         // Open the form for creating a new avatar
         $scope.newAvatar = function() {
             $scope.template         = partial_path +'/user/userNewAvatarForm.html';
-            $scope.avatar           = {};
+            $scope.avatar           = {
+                email: sessionStorage.email
+            };
             $scope.formSubmit       = 'createAvatar';
             $scope.buttons          = [{
                         text: 'Create',
