@@ -1316,7 +1316,6 @@ angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$s
                 for(var i = 0; i < userResponse.avatars.length; i++) {
                     // Avatar on grid?
                     if(userResponse.avatars[i].gridId == $scope.grid.id) {
-                        avatarFound = true;
                         // Teleport the found avatar
                         Restangular.one('grid', $scope.grid.id).one('avatar', userResponse.avatars[i].uuid).customPUT({
                             posX: 128,
@@ -1325,6 +1324,7 @@ angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$s
                             regionName: name
                         }, 'teleport').then(function(teleportResponse) {
                             if(teleportResponse.success) {
+                                avatarFound = true;
                                 $alert({title: 'Teleported!', content: 'Avatar teleported to region: '+ name +' on grid '+ $scope.grid.name, type: 'success'});
                                 return true;
                             }
@@ -1333,7 +1333,7 @@ angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$s
                 }
                 // No match found?
                 if(!avatarFound) {
-                    $alert({title: 'No avatar found!', content: 'Currently there is no avatar linked to your user account on this grid to teleport.', type: 'danger'});
+                    $alert({title: 'No avatar found!', content: 'Currently there is no avatar online which is linked to your user account on this grid to teleport.', type: 'danger'});
                 }
             });
             return false;
@@ -1867,7 +1867,6 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
                 for(var i = 0; i < userResponse.avatars.length; i++) {
                     // Avatar on grid and online?
                     if(userResponse.avatars[i].gridId == $scope.meeting.room.grid.id) {
-                        avatarFound = true;
                         // Teleport the found avatar
                         Restangular.one('grid', $scope.meeting.room.grid.id).one('avatar', userResponse.avatars[i].uuid).customPUT({
                             posX: $scope.meeting.room.coordinates.x,
@@ -1876,6 +1875,7 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
                             regionName: $scope.meeting.room.region.name
                         }, 'teleport').then(function(teleportResponse) {
                             if(teleportResponse.success) {
+                                avatarFound = true;
                                 $alert({title: 'Teleported!', content: 'Avatar teleported to '+ $scope.meeting.room.name +' in region '+ $scope.meeting.room.region.name +' on grid '+ $scope.meeting.room.grid.name, type: 'success'});
                                 return true;
                             }
@@ -1884,7 +1884,7 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
                 }
                 // No match found?
                 if(!avatarFound) {
-                    $alert({title: 'No avatar found!', content: 'Currently there is no avatar linked to your user account on this grid to teleport.', type: 'danger'});
+                    $alert({title: 'No avatar found!', content: 'Currently there is no avatar online which is linked to your user account on this grid to teleport.', type: 'danger'});
                 }
             });
             return false;
