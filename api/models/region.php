@@ -9,8 +9,8 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class represents a region
  *
  * @author Niels Witte
- * @version 0.5
- * @date May 23, 2014
+ * @version 0.5a
+ * @date May 27, 2014
  * @since February 17, 2014
  */
 class Region implements SimpleModel {
@@ -90,7 +90,7 @@ class Region implements SimpleModel {
 
             // Catch error returned by OpenSim
             if(isset($result['error'])) {
-                throw new Exception($result['error'], 3);
+                throw new \Exception($result['error'], 3);
             }
 
             // Set the online status
