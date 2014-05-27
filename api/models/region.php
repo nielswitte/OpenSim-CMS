@@ -104,8 +104,8 @@ class Region implements SimpleModel {
             // This means that if one region responds it is online, the grid is online, however just not all regions
             // Without this, when the last region to be checked is offline, the grid will respond it is offline eventhough
             // all previous regions can be online
-            if(!$this->getGrid()->getOnlineStatus()) {
-                $this->getGrid()->setOnlineStatus($this->getGrid()->getOnlineStatus());
+            if(!$this->getGrid()->getOnlineStatus() && isset($result['success'])) {
+                $this->getGrid()->setOnlineStatus($result['success']);
             }
 
             // Additional actions when region is online
