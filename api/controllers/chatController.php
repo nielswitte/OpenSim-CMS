@@ -64,7 +64,7 @@ class ChatController {
         foreach($parameters as $parameter) {
             if(count($parameter) < 3) {
                 throw new \Exception('Expected 3 parameters, '. count($parameter) .' given', 1);
-            } elseif(!isset($parameter['userId']) && is_numeric($parameter['userId'])) {
+            } elseif(!isset($parameter['userId']) || !is_numeric($parameter['userId'])) {
                 throw new \Exception('Missing parameter (integer) "userId"', 2);
             } elseif(!isset($parameter['message']) || strlen($parameter['message']) > 0) {
                 throw new \Exception('Missing parameter (string) "message" with a minumum length of 1 character', 3);
