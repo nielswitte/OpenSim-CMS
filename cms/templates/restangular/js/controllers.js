@@ -126,9 +126,11 @@ angularRest.controller('chatController', ['Restangular', 'RestangularCache', '$s
                     },
                     message: 'Chat enabled'
             }];
+            // Send enter the chat message
+            $scope.sendChat(selectedGridId, sessionStorage.firstName +' '+ sessionStorage.lastName +' has entered the chat.');
             // Reset last msg timestmap
             lastMsgTimestamp = moment().subtract('minutes', 30).unix();
-            // Get last chat entries for past one hour
+            // Get last chat entries for the past half hour
             updateChat();
             // Set autoscroll to true (overwrites it when switching grid)
             autoScroll       = true;
