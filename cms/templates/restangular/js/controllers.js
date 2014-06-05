@@ -1333,10 +1333,12 @@ angularRest.controller('gridController', ['Restangular', 'RestangularCache', '$s
                         });
                     }
                 }
-                // No match found?
-                if(!avatarFound) {
-                    $alert({title: 'No avatar found!', content: 'Currently there is no avatar online which is linked to your user account on this grid to teleport.', type: 'danger'});
-                }
+                // No match found? (wait half a second before showing error)
+                $timeout(function() {
+                    if(!avatarFound) {
+                        $alert({title: 'No avatar found!', content: 'Currently there is no avatar online which is linked to your user account on this grid to teleport.', type: 'danger'});
+                    }
+                }, 500);
             });
             return false;
         };
@@ -1884,10 +1886,13 @@ angularRest.controller('meetingController', ['Restangular', 'RestangularCache', 
                         });
                     }
                 }
-                // No match found?
-                if(!avatarFound) {
-                    $alert({title: 'No avatar found!', content: 'Currently there is no avatar online which is linked to your user account on this grid to teleport.', type: 'danger'});
-                }
+
+                // No match found? (wait half a second before showing error)
+                $timeout(function() {
+                    if(!avatarFound) {
+                        $alert({title: 'No avatar found!', content: 'Currently there is no avatar online which is linked to your user account on this grid to teleport.', type: 'danger'});
+                    }
+                }, 500);
             });
             return false;
         };
