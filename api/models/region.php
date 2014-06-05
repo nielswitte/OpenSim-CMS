@@ -9,9 +9,9 @@ require_once dirname(__FILE__) .'/simpleModel.php';
  * This class represents a region
  *
  * @author Niels Witte
- * @version 0.4a
- * @date April 17th, 2014
- * @since February 17th, 2014
+ * @version 0.5a
+ * @date May 27, 2014
+ * @since February 17, 2014
  */
 class Region implements SimpleModel {
     private $name;
@@ -90,16 +90,21 @@ class Region implements SimpleModel {
 
             // Catch error returned by OpenSim
             if(isset($result['error'])) {
-                throw new Exception($result['error'], 3);
+                throw new \Exception($result['error'], 3);
             }
 
-            $this->setOnlineStatus($result['success']);
+            // Set the online status
+            if(isset($result['success'])) {
+                $this->setOnlineStatus($result['success']);
+            } else {
+                $this->setOnlineStatus(FALSE);
+            }
 
             // Updates the online status of the grid, when so far the status is offline
             // This means that if one region responds it is online, the grid is online, however just not all regions
             // Without this, when the last region to be checked is offline, the grid will respond it is offline eventhough
             // all previous regions can be online
-            if(!$this->getGrid()->getOnlineStatus()) {
+            if(!$this->getGrid()->getOnlineStatus() && isset($result['success'])) {
                 $this->getGrid()->setOnlineStatus($result['success']);
             }
 

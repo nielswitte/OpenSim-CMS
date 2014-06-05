@@ -7,9 +7,9 @@ defined('EXEC') or die('Config not loaded');
  * This class is the Meeting controller
  *
  * @author Niels Witte
- * @version 0.1a
- * @date April 14th, 2014
- * @since March 21st, 2014
+ * @version 0.2
+ * @date June 4, 2014
+ * @since March 21, 2014
  */
 class ChatController {
     private $chat;
@@ -64,9 +64,9 @@ class ChatController {
         foreach($parameters as $parameter) {
             if(count($parameter) < 3) {
                 throw new \Exception('Expected 3 parameters, '. count($parameter) .' given', 1);
-            } elseif(!isset($parameter['userId']) && is_numeric($parameter['userId'])) {
+            } elseif(!isset($parameter['userId']) || !is_numeric($parameter['userId'])) {
                 throw new \Exception('Missing parameter (integer) "userId"', 2);
-            } elseif(!isset($parameter['message']) && strlen($parameter['message']) > 0) {
+            } elseif(!isset($parameter['message']) || strlen($parameter['message']) == 0) {
                 throw new \Exception('Missing parameter (string) "message" with a minumum length of 1 character', 3);
             } elseif(!isset($parameter['timestamp']) || !preg_match("/[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}/", $parameter['timestamp'])) {
                 throw new \Exception('Missing parameter (string) "timestamp", which should be in the format YYYY-MM-DD HH:mm:ss', 4);
