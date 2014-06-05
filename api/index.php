@@ -19,8 +19,8 @@ require_once dirname(__FILE__) .'/modules/user.php';
  * This class is catches the API calls and searches for the matching function
  *
  * @author Niels Witte
- * @version 0.9
- * @date May 20, 2014
+ * @version 0.9a
+ * @date June 5, 2014
  * @since February 10, 2014
  */
 
@@ -37,9 +37,9 @@ try {
     $token              = filter_input(INPUT_GET, 'token', FILTER_SANITIZE_SPECIAL_CHARS);
     $selectors          = array();
 
-    // Log requests to a file
+    // Log requests to a file, one file every hour
     if(SERVER_DEBUG) {
-        file_put_contents('logs/access.log', '['. date('Y-m-d H:i:s') .'] '. getenv('REMOTE_ADDR') .' '. getenv('REQUEST_METHOD') .' /api'. $get ."\n", FILE_APPEND);
+        file_put_contents('logs/access-'. date('Y-m-d_H') .'.log', '['. date('Y-m-d H:i:s') .'] '. getenv('REMOTE_ADDR') .' '. getenv('REQUEST_METHOD') .' /api'. $get ."\n", FILE_APPEND);
     }
 
     // Auth user
@@ -82,7 +82,7 @@ try {
         $result['Trace']    = $e->getTrace();
 
         // Add errors to log
-        file_put_contents('logs/errors.log', '['. date('Y-m-d H:i:s') .'] '. $e->getMessage() ."\n", FILE_APPEND);
+        file_put_contents('logs/errors-'. date('Y-m-d_H') .'.log', '['. date('Y-m-d H:i:s') .'] '. $e->getMessage() ."\n", FILE_APPEND);
     }
 }
 
