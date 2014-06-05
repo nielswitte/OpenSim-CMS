@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Font -->
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
 
     <!-- LESS -->
             <style type="text/less">
@@ -69,28 +69,18 @@
                                         <span style="float: right; font-size: 10px; color: gray;">
                                             9:59 AM                                        </span>
                                 </div>
-                                                        <p><strong>NOTICE:</strong> You can only retrieve files if you meet at least one of the following requirements.<br />
+                                                        <p><strong>NOTICE:</strong> You can only retrieve files if you meet at least one of the following requirements.</p>
 <ul>
 <li>You have <code>ALL</code> permissions</li>
 <li>You created the file</li>
 <li>You are a member of a group to which the file is attached</li>
-</ul></p>
-
+</ul>
 <p>The documents API is quite similar to the Files API since it is a subset. The main difference is that it will only return files with the type <code>document</code> and that documents have children in the form of <code>pages</code>.</p>
-
-<pre><code class="language-http">GET /api/documents/ HTTP/1.1
-</code></pre>
-
-<pre><code class="language-http">GET /api/documents/&lt;OFFSET&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/documents/ HTTP/1.1</code></pre>
+<pre><code class="language-http">GET /api/documents/&lt;OFFSET&gt;/ HTTP/1.1</code></pre>
 <h2>Search by title</h2>
-
-<pre><code class="language-http">GET /api/documents/&lt;SEARCH&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/documents/&lt;SEARCH&gt;/ HTTP/1.1</code></pre>
 <p>All the above functions will output a list like this:</p>
-
 <pre><code class="language-json">[
     {
         "id": 133,
@@ -113,18 +103,11 @@
     },
     { (...) },
     (...)
-]
-</code></pre>
-
+]</code></pre>
 <h2>Get a single document</h2>
-
 <p>When retrieving a sinlg document you will get a lot of information, including a list with all pages and their cache information.</p>
-
-<pre><code class="language-http">GET /api/document/&lt;DOCUMENT-ID&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/document/&lt;DOCUMENT-ID&gt;/ HTTP/1.1</code></pre>
 <p>For example when retrieving the document with ID 133 you can expect something like this:</p>
-
 <pre><code class="language-json">{
     "id": 133,
     "type": "document",
@@ -175,87 +158,66 @@
         (...)
     ],
     "pagesCount": 22
-}
-</code></pre>
-
+}</code></pre>
 <h2>Add a new document</h2>
-
-<pre><code class="language-http">POST /api/document/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">POST /api/document/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>title</td>
-  <td>string</td>
-  <td>The title of the document</td>
+<td>title</td>
+<td>string</td>
+<td>The title of the document</td>
 </tr>
 <tr>
-  <td>type</td>
-  <td>string</td>
-  <td>The document type</td>
+<td>type</td>
+<td>string</td>
+<td>The document type</td>
 </tr>
 <tr>
-  <td>file</td>
-  <td>file</td>
-  <td>Base64 encoded file</td>
+<td>file</td>
+<td>file</td>
+<td>Base64 encoded file</td>
 </tr>
 </tbody>
 </table>
-
 <h2>Specific document page</h2>
-
 <p>The page details for just one specific page can be accessed through its ID:</p>
-
-<pre><code class="language-http">GET /api/document/&lt;ID&gt;/page/&lt;PAGE-ID&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/document/&lt;ID&gt;/page/&lt;PAGE-ID&gt;/ HTTP/1.1</code></pre>
 <p>However, it is often easier to navigate based on page number:</p>
-
-<pre><code class="language-http">GET /api/document/&lt;ID&gt;/page/number/&lt;PAGE#&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/document/&lt;ID&gt;/page/number/&lt;PAGE#&gt;/ HTTP/1.1</code></pre>
 <p>The given image URL will provide an IMAGE_TYPE of the page resized and centered at IMAGE_WIDTH x IMAGE_HEIGHT with a black or white background.</p>
-
-<pre><code class="language-http">GET /api/document/&lt;ID&gt;/page/number/&lt;PAGE#&gt;/image/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/document/&lt;ID&gt;/page/number/&lt;PAGE#&gt;/image/ HTTP/1.1</code></pre>
 <h2>Cache</h2>
-
 <p>When an page has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with the page to speed up future use. The cache period (<code>FileCacheTimeout</code>) is set in the <code>FlotsamCache.ini</code> configuration and needs to be matched by the configuration value for the grid in the CMS.</p>
-
-<pre><code class="language-http">PUT /api/document/&lt;ID&gt;/page/number/&lt;PAGE#&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">PUT /api/document/&lt;ID&gt;/page/number/&lt;PAGE#&gt;/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>uuid</td>
-  <td>string</td>
-  <td>UUID of the page to be saved</td>
+<td>uuid</td>
+<td>string</td>
+<td>UUID of the page to be saved</td>
 </tr>
 <tr>
-  <td>gridId</td>
-  <td>integer</td>
-  <td>The ID of the grid, as used in the CMS database</td>
+<td>gridId</td>
+<td>integer</td>
+<td>The ID of the grid, as used in the CMS database</td>
 </tr>
 </tbody>
-</table>
-                                                    </article>
+</table>                                                    </article>
                     </div>
                 </div>
             </div>

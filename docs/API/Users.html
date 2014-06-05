@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Font -->
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
 
     <!-- LESS -->
             <style type="text/less">
@@ -70,19 +70,11 @@
                                             10:10 AM                                        </span>
                                 </div>
                                                         <p><strong>Notice:</strong> The following <code>GET</code> functions require at least <code>READ</code> permissions to the User API.</p>
-
 <p>To get a list of 50 users, use:</p>
-
-<pre><code class="language-http">GET /api/users/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/users/ HTTP/1.1</code></pre>
 <p>Or use the following API request with a offset to get more users. For example if the total user base contains 100 users, use offset: 50 to get users 51 to 100;</p>
-
-<pre><code class="language-http">GET /api/users/&lt;OFFSET&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/users/&lt;OFFSET&gt;/ HTTP/1.1</code></pre>
 <p>Both will return a list similar to this:</p>
-
 <pre><code class="language-json">[
     {
         "id": 4,
@@ -103,18 +95,11 @@
         "lastLogin": "2014-04-16 11:17:04"
     },
     (...)
-]
-</code></pre>
-
+]</code></pre>
 <h2>Search for users by username</h2>
-
 <p>To search for a specific user by his or her username, the following API can be used. At least 3 characters are required.</p>
-
-<pre><code class="language-http">GET /api/user/&lt;SEARCH&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/user/&lt;SEARCH&gt;/ HTTP/1.1</code></pre>
 <p>The output is similar to the user list request, but displayed as a list ordered by username.</p>
-
 <pre><code class="language-json">{
     {
         "id": 4,
@@ -128,23 +113,13 @@
     { (...) },
     { (...) },
     (...)
-}
-</code></pre>
-
+}</code></pre>
 <h2>Individual user</h2>
-
 <p>User information can be accessed by using, the UUID of the user's avatar in OpenSim on the given Grid:</p>
-
-<pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/avatar/&lt;UUID&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/avatar/&lt;UUID&gt;/ HTTP/1.1</code></pre>
 <p>Or request an user by its ID in the CMS:</p>
-
-<pre><code class="language-http">GET /api/user/&lt;ID&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/user/&lt;ID&gt;/ HTTP/1.1</code></pre>
 <p>Example of output</p>
-
 <pre><code class="language-json">{
     "id": 4,
     "username": "janedoe",
@@ -182,202 +157,162 @@
             "name": "The Doe's"
         }
     ]
-}
-</code></pre>
-
+}</code></pre>
 <p>When OpenSim uses a MySQL database and the CMS is configured correctly, the following additional information is available about the avatars of the user. For each avatar the following information is shown below <code>gridName</code>:</p>
-
 <pre><code class="language-json">{
     "online": 1,
     "lastLogin": "2014-02-17 13:39:28",
     "lastPosition": "&lt;123.6372, 124.9078, 26.18366&gt;",
     "lastRegionUuid": "72efcc78-2b1a-4571-8704-fea352998c0c"
-}
-</code></pre>
-
+}</code></pre>
 <h2>Create user</h2>
-
-<p>To add a new user to the CMS user the following API URL with the parameters as described in the table below. The e-mail address and username need to be unique.<br />
+<p>To add a new user to the CMS user the following API URL with the parameters as described in the table below. The e-mail address and username need to be unique.
 The password parameters are optional and when not set, or left empty a random password will be generated.</p>
-
 <p><strong>Notice:</strong> Creating a user requires <code>WRITE</code> permission to the User API.</p>
-
-<pre><code class="language-http">POST /api/user/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">POST /api/user/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>username</td>
-  <td>String</td>
-  <td>The username of the new user</td>
+<td>username</td>
+<td>String</td>
+<td>The username of the new user</td>
 </tr>
 <tr>
-  <td>email</td>
-  <td>String</td>
-  <td>The email address for the new user</td>
+<td>email</td>
+<td>String</td>
+<td>The email address for the new user</td>
 </tr>
 <tr>
-  <td>firstName</td>
-  <td>String</td>
-  <td>The first name of the new user</td>
+<td>firstName</td>
+<td>String</td>
+<td>The first name of the new user</td>
 </tr>
 <tr>
-  <td>lastName</td>
-  <td>String</td>
-  <td>The last name of the new user</td>
+<td>lastName</td>
+<td>String</td>
+<td>The last name of the new user</td>
 </tr>
 <tr>
-  <td>password</td>
-  <td>String</td>
-  <td>[Optional] The new user's password</td>
+<td>password</td>
+<td>String</td>
+<td>[Optional] The new user's password</td>
 </tr>
 <tr>
-  <td>password2</td>
-  <td>String</td>
-  <td>[Optional] The new user's password again, to check if no typo has been made</td>
+<td>password2</td>
+<td>String</td>
+<td>[Optional] The new user's password again, to check if no typo has been made</td>
 </tr>
 </tbody>
 </table>
-
 <p>The result of a successful request to create an user will be as follows:</p>
-
 <pre><code class="language-json">{
     "success": true,
     "userId": &lt;NEW-USER-ID&gt;
-}
-</code></pre>
-
+}</code></pre>
 <p>Beside this response an e-mail is sent to the user containing the username and password.</p>
-
 <h2>Update user</h2>
-
 <p>Change some information about the user. The username and id are locked. The password is a separate function.</p>
-
-<pre><code class="language-http">PUT /api/user/&lt;USER-ID&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">PUT /api/user/&lt;USER-ID&gt;/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>email</td>
-  <td>String</td>
-  <td>The email address for the new user</td>
+<td>email</td>
+<td>String</td>
+<td>The email address for the new user</td>
 </tr>
 <tr>
-  <td>firstName</td>
-  <td>String</td>
-  <td>The first name of the new user</td>
+<td>firstName</td>
+<td>String</td>
+<td>The first name of the new user</td>
 </tr>
 <tr>
-  <td>lastName</td>
-  <td>String</td>
-  <td>The last name of the new user</td>
+<td>lastName</td>
+<td>String</td>
+<td>The last name of the new user</td>
 </tr>
 <tr>
-  <td>permissions</td>
-  <td>Array</td>
-  <td>The permission levels for the user (see permissions)</td>
+<td>permissions</td>
+<td>Array</td>
+<td>The permission levels for the user (see permissions)</td>
 </tr>
 <tr>
-  <td>groups</td>
-  <td>Array</td>
-  <td>An array containing group IDs <code>[1,2,3]</code> or Group objects <code>[{id: 1, name: x}, {id: 2, name: y}]</code></td>
+<td>groups</td>
+<td>Array</td>
+<td>An array containing group IDs <code>[1,2,3]</code> or Group objects <code>[{id: 1, name: x}, {id: 2, name: y}]</code></td>
 </tr>
 </tbody>
 </table>
-
 <p><strong>Notice:</strong> Users can only update their own basic information. To make changes to the permissions or to other users <code>WRITE</code> permission to the User API is required.</p>
-
 <p><strong>Notice:</strong> You can not give yourself or another user <code>ALL</code> permissions on an API when you do not have <code>ALL</code> permissions on that API.</p>
-
 <p><strong>Notice:</strong> Users without <code>WRITE</code> or <code>ALL</code> permission can only remove themselves from groups, they cannot add new groups.</p>
-
 <h2>Change profile picture</h2>
-
 <p>Attach a profile picture to the given user, which will be resized to 250x250 pixels and displayed in the CMS for example next to comments and on the user's profile page. When you upload a new picture the previous picture will be overwritten.</p>
-
-<pre><code class="language-http">PUT /api/user/&lt;USER-ID&gt;/picture/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">PUT /api/user/&lt;USER-ID&gt;/picture/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>image</td>
-  <td>File</td>
-  <td>Base64 encoded file, needs to be jpeg, jpg, png or gif</td>
+<td>image</td>
+<td>File</td>
+<td>Base64 encoded file, needs to be jpeg, jpg, png or gif</td>
 </tr>
 </tbody>
 </table>
-
 <p><strong>Notice:</strong> Users can only their own profile picture. To make changes to other users <code>WRITE</code> permission to the User API is required.</p>
-
 <h2>Change password</h2>
-
 <p>Use the following function to update the user's password. You can update passwords of other users when you at least have <code>WRITE</code> permissions or when you know the <code>currentPassword</code>.</p>
-
-<pre><code class="language-http">PUT /api/user/&lt;USER-ID&gt;/password/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">PUT /api/user/&lt;USER-ID&gt;/password/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>password</td>
-  <td>String</td>
-  <td>The user's new password</td>
+<td>password</td>
+<td>String</td>
+<td>The user's new password</td>
 </tr>
 <tr>
-  <td>password2</td>
-  <td>String</td>
-  <td>The user's new password again, to check if no typo has been made</td>
+<td>password2</td>
+<td>String</td>
+<td>The user's new password again, to check if no typo has been made</td>
 </tr>
 <tr>
-  <td>currentPassword</td>
-  <td>String</td>
-  <td>[Optional] The user's current password, only required when no WRITE permissions for users</td>
+<td>currentPassword</td>
+<td>String</td>
+<td>[Optional] The user's current password, only required when no WRITE permissions for users</td>
 </tr>
 </tbody>
 </table>
-
 <p><strong>Notice:</strong> Users can only their own password. To make changes to other users <code>WRITE</code> permission to the User API is required or the current password of the user needs to be known.</p>
-
 <h2>Delete user</h2>
-
 <p>This will remove an user from the CMS, however it is not recommended to use. All files, comments and meetings are attached to an user, removing the user can cause items to disappear. The recommended solution is to set all permissions to <code>NONE</code> for an user.</p>
-
-<pre><code class="language-http">DELETE /api/user/&lt;USER-ID&gt;/ HTTP/1.1
-</code></pre>
-
-<p><strong>Notice:</strong> To remove an user <code>WRITE</code> permission to the User API is required.</p>
-                                                    </article>
+<pre><code class="language-http">DELETE /api/user/&lt;USER-ID&gt;/ HTTP/1.1</code></pre>
+<p><strong>Notice:</strong> To remove an user <code>WRITE</code> permission to the User API is required.</p>                                                    </article>
                     </div>
                 </div>
             </div>

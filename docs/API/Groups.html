@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Font -->
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
 
     <!-- LESS -->
             <style type="text/less">
@@ -70,21 +70,12 @@
                                             9:57 AM                                        </span>
                                 </div>
                                                         <p>Users can be added to groups to share access to specific files.</p>
-
 <h2>Get groups</h2>
-
 <p>To retrieve a list of 50 available groups the following request can be made to the API:</p>
-
-<pre><code class="language-http">GET /api/groups/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/groups/ HTTP/1.1</code></pre>
 <p>Or starting at a given offset:</p>
-
-<pre><code class="language-http">GET /api/groups/&lt;OFFSET&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/groups/&lt;OFFSET&gt;/ HTTP/1.1</code></pre>
 <p>This will return an array with all groups, containing their ID and name.</p>
-
 <pre><code class="language-json">[
     {
         "id": 1,
@@ -92,25 +83,14 @@
     },
     { (...) },
     (...)
-]
-</code></pre>
-
+]</code></pre>
 <h2>Search by group name</h2>
-
 <p>To search for a specific group, it is possible to search by using a minimum of 3 characters of the group name.</p>
-
-<pre><code class="language-http">GET /api/groups/&lt;SEARCH&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/groups/&lt;SEARCH&gt;/ HTTP/1.1</code></pre>
 <h2>Specific group</h2>
-
 <p>A specific group can be retrieved with its full details by using the following API URL:</p>
-
-<pre><code class="language-http">GET /api/group/&lt;GROUP-ID&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/group/&lt;GROUP-ID&gt;/ HTTP/1.1</code></pre>
 <p>This will return the following JSON result:</p>
-
 <pre><code class="language-json">{
     "id": "1",
     "name": "The Does",
@@ -154,84 +134,64 @@
             "lastLogin": "2014-04-17 11:21:21"
         }
     ]
-}
-</code></pre>
-
+}</code></pre>
 <h2>Create group</h2>
-
 <p><strong>Notice:</strong> Updating, creating and deleting groups requires at least <code>WRITE</code> permission to the User API.</p>
-
 <p>Adding files to an existing group can be done with less permissions by going to the file you want to add and share it with the group.</p>
-
-<pre><code class="language-http">POST /api/group/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">POST /api/group/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>name</td>
-  <td>string</td>
-  <td>The group's name</td>
+<td>name</td>
+<td>string</td>
+<td>The group's name</td>
 </tr>
 </tbody>
 </table>
-
 <p>This will return, when all went right, the following JSON:</p>
-
 <pre><code class="language-json">{
     "success": true,
     "groupId": 2
-}
-</code></pre>
-
+}</code></pre>
 <h2>Update group</h2>
-
 <p>Changing information about the group can be done by using the following API function:</p>
-
-<pre><code class="language-http">PUT /api/group/&lt;GROUP-ID&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">PUT /api/group/&lt;GROUP-ID&gt;/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>name</td>
-  <td>string</td>
-  <td>The group's name</td>
+<td>name</td>
+<td>string</td>
+<td>The group's name</td>
 </tr>
 <tr>
-  <td>files</td>
-  <td>array</td>
-  <td>[Optional] List with file IDs or file objects</td>
+<td>files</td>
+<td>array</td>
+<td>[Optional] List with file IDs or file objects</td>
 </tr>
 <tr>
-  <td>users</td>
-  <td>array</td>
-  <td>[Optional] List with user IDs or User objects</td>
+<td>users</td>
+<td>array</td>
+<td>[Optional] List with user IDs or User objects</td>
 </tr>
 </tbody>
 </table>
-
 <h2>Delete group</h2>
-
 <p>Removing a group can cause users to lose access to certain files. Please be careful with this.</p>
-
-<pre><code class="language-http">DELETE /api/group/&lt;GROUP-ID&gt;/ HTTP/1.1
-</code></pre>
-                                                    </article>
+<pre><code class="language-http">DELETE /api/group/&lt;GROUP-ID&gt;/ HTTP/1.1</code></pre>                                                    </article>
                     </div>
                 </div>
             </div>

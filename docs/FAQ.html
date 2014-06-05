@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Font -->
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
 
     <!-- LESS -->
             <style type="text/less">
@@ -70,66 +70,42 @@
                                             11:29 AM                                        </span>
                                 </div>
                                                         <p>In this section you will find Frequently Asked Questions (FAQ). The questions and other common issues are grouped in categories. For example questions related to user management are all placed under the section Users. If the answer to your question or issue is not listed here, please take a look at the <a href="CMS/CMS.html">CMS documentation</a> .</p>
-
 <h2>Users</h2>
-
 <p>The following questions/solutions are related to user management.</p>
-
 <h3>How can I gain access to the CMS?</h3>
-
 <p>To access the CMS an existing user with <code>WRITE</code> permissions to the User API needs to create an account for you. When this is done correctly you will receive an e-mail</p>
-
 <p>If you have just installed the CMS, be sure to import the <code>users.sql</code> file as well into the database. After doing so, you can login with the credentials below. Be sure to at least change the password after logging in.</p>
-
 <table>
 <thead>
 <tr>
-  <th>Username</th>
-  <th>Password</th>
+<th>Username</th>
+<th>Password</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>admin</td>
-  <td>password</td>
+<td>admin</td>
+<td>password</td>
 </tr>
 </tbody>
 </table>
-
 <h3>My username and password are correct but I cannot login.</h3>
-
 <p>In some cases using saved usernames and passwords which are automatically entered by your browser can result in displaying login failure messages. Preferably enter your username and password manually.</p>
-
 <p>If logging in still fails, contact the system administrator and let him check your user account's permissions.</p>
-
 <h3>How can I change my username?</h3>
-
 <p>You can not change your username. The only way this could be done is by letting the system administrator change your username in the <code>users</code> table in the MySQL database.</p>
-
 <h3>I can see my permissions when looking at my user profile, but they are not visible when editing the user</h3>
-
 <p>This probably means that you do not have <code>WRITE</code> permissions on the User API. Changing permissions is only allowed by certain users. If you think your permissions are not sufficient, please contact the system administrator.</p>
-
 <h3>How can I become a group member?</h3>
-
 <p>You can only add members to a group if you have <code>WRITE</code> permission for the User API. You can however, always leave the group. So if you want to become a member of a group, contact a user with <code>WRITE</code> permissions on the User API. For example the system administrator.</p>
-
 <h2>Files, Documents and Presentations</h2>
-
 <p>The following questions and solutions are related to files, documents and presentations.</p>
-
 <h3>The document I've added to a meeting is visible in the meeting details but other participants can not access the document</h3>
-
 <p>Only users with <code>ALL</code> permission for the Files API can access documents of all users. If you want others to access your documents, create a group with those users and share the document with the group.</p>
-
 <h2>Assets in OpenSim</h2>
-
 <p>General questions about the use of the OpenSim assets.</p>
-
 <h3>The presenter can connect to the API, but cannot access the images</h3>
-
-<p>It could be the case that the <code>serverUrl</code> is incorrect. When the server is connected to the Internet and on the same machine as the API, you should use the remote IP of the server instead of <code>localhost</code> or <code>127.0.0.1</code>. Especially <code>presenterScreen.lsl</code> is quite sensitive for this.</p>
-                                                    </article>
+<p>It could be the case that the <code>serverUrl</code> is incorrect. When the server is connected to the Internet and on the same machine as the API, you should use the remote IP of the server instead of <code>localhost</code> or <code>127.0.0.1</code>. Especially <code>presenterScreen.lsl</code> is quite sensitive for this.</p>                                                    </article>
                     </div>
                 </div>
             </div>

@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Font -->
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
 
     <!-- LESS -->
             <style type="text/less">
@@ -70,12 +70,8 @@
                                             11:23 AM                                        </span>
                                 </div>
                                                         <p>The <code>meetingLogger.lsl</code> script has the ability to log the chat during a meeting. These minutes can be retrieved by using the following API functionality:</p>
-
-<pre><code class="language-http">GET /api/meeting/&lt;MEETING-ID&gt;/minutes/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/meeting/&lt;MEETING-ID&gt;/minutes/ HTTP/1.1</code></pre>
 <p>Just like the chat this can return a really long response. The response includes some basic information about the meeting which can be used to parse the minutes with more details.</p>
-
 <pre><code class="language-json">{
     "id": "43",
     "name": "Next day meeting",
@@ -124,53 +120,46 @@
         },
         (...)
     ]
-}
-</code></pre>
-
+}</code></pre>
 <h2>Add minutes to meeting</h2>
-
 <p>Can be a single element or an array of elements</p>
-
-<pre><code class="language-http">POST /api/meeting/&lt;MEETING-ID&gt;/minutes/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">POST /api/meeting/&lt;MEETING-ID&gt;/minutes/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>timestamp</td>
-  <td>string</td>
-  <td>Timestamp (format: YYYY-MM-DD HH:mm:ss) or Unix timestamp in seconds</td>
+<td>timestamp</td>
+<td>string</td>
+<td>Timestamp (format: YYYY-MM-DD HH:mm:ss) or Unix timestamp in seconds</td>
 </tr>
 <tr>
-  <td>uuid</td>
-  <td>string</td>
-  <td>UUID of the avatar that wrote the message</td>
+<td>uuid</td>
+<td>string</td>
+<td>UUID of the avatar that wrote the message</td>
 </tr>
 <tr>
-  <td>name</td>
-  <td>string</td>
-  <td>Name of the avatar or object that wrote the message</td>
+<td>name</td>
+<td>string</td>
+<td>Name of the avatar or object that wrote the message</td>
 </tr>
 <tr>
-  <td>agendaId</td>
-  <td>integer</td>
-  <td>Integer that corresponds to the current agenda ID of the meeting</td>
+<td>agendaId</td>
+<td>integer</td>
+<td>Integer that corresponds to the current agenda ID of the meeting</td>
 </tr>
 <tr>
-  <td>message</td>
-  <td>string</td>
-  <td>The actual message to be stored</td>
+<td>message</td>
+<td>string</td>
+<td>The actual message to be stored</td>
 </tr>
 </tbody>
-</table>
-                                                    </article>
+</table>                                                    </article>
                     </div>
                 </div>
             </div>

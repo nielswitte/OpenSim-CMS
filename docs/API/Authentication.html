@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Font -->
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
 
     <!-- LESS -->
             <style type="text/less">
@@ -70,133 +70,107 @@
                                             8:24 AM                                        </span>
                                 </div>
                                                         <p><strong>Notice:</strong> All authentication functions require at least <code>READ</code> permissions to the Auth API.</p>
-
 <p>Passwords are encrypted and salted before being stored in the database.</p>
-
 <p>Before the API can be used, an user needs to authorize himself. This can be done by using the following API:</p>
-
-<pre><code class="language-http">POST /api/auth/user/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">POST /api/auth/user/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>user</td>
-  <td>String</td>
-  <td>The username or e-mail address of the user in the CMS</td>
+<td>user</td>
+<td>String</td>
+<td>The username or e-mail address of the user in the CMS</td>
 </tr>
 <tr>
-  <td>password</td>
-  <td>String</td>
-  <td>The corresponding password of the user in the CMS</td>
+<td>password</td>
+<td>String</td>
+<td>The corresponding password of the user in the CMS</td>
 </tr>
 <tr>
-  <td>ip</td>
-  <td>String</td>
-  <td>[Optional] The IP address to assign this token to</td>
+<td>ip</td>
+<td>String</td>
+<td>[Optional] The IP address to assign this token to</td>
 </tr>
 </tbody>
 </table>
-
 <h2>Only e-mail</h2>
-
 <p>If you only want to authenticate with the user's e-mail address use:</p>
-
-<pre><code class="language-http">POST /api/auth/email/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">POST /api/auth/email/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>email</td>
-  <td>String</td>
-  <td>The e-mail address of the user in the CMS</td>
+<td>email</td>
+<td>String</td>
+<td>The e-mail address of the user in the CMS</td>
 </tr>
 <tr>
-  <td>password</td>
-  <td>String</td>
-  <td>The corresponding password of the user in the CMS</td>
+<td>password</td>
+<td>String</td>
+<td>The corresponding password of the user in the CMS</td>
 </tr>
 <tr>
-  <td>ip</td>
-  <td>String</td>
-  <td>[Optional] The IP address to assign this token to</td>
+<td>ip</td>
+<td>String</td>
+<td>[Optional] The IP address to assign this token to</td>
 </tr>
 </tbody>
 </table>
-
 <h2>Only username</h2>
-
 <p>Only allow usernames by using:</p>
-
-<pre><code class="language-http">POST /api/auth/username/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">POST /api/auth/username/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>username</td>
-  <td>String</td>
-  <td>The username of the user in the CMS</td>
+<td>username</td>
+<td>String</td>
+<td>The username of the user in the CMS</td>
 </tr>
 <tr>
-  <td>password</td>
-  <td>String</td>
-  <td>The corresponding password of the user in the CMS</td>
+<td>password</td>
+<td>String</td>
+<td>The corresponding password of the user in the CMS</td>
 </tr>
 <tr>
-  <td>ip</td>
-  <td>String</td>
-  <td>[Optional] The IP address to assign this token to</td>
+<td>ip</td>
+<td>String</td>
+<td>[Optional] The IP address to assign this token to</td>
 </tr>
 </tbody>
 </table>
-
 <p>The optional parameter <code>ip</code>, can be used to assign a token to a machine that can not perform the auth request by itself, for example if you have a server side CMS which is running on <code>localhost</code> and the token is for the user of the CMS, not the CMS itself.</p>
-
 <h2>Token</h2>
-
 <p>This authentication request will return, on success the following JSON:</p>
-
 <pre><code class="language-json">{
     "token": "otwk9ERPQS9ietocskWTS5qTG4ow1qrqTXK2CBStt1LHv9UY",
     "ip": "192.168.1.102",
     "expires": "2014-02-19 12:19:55",
     "userId": 1,
     "lastLogin": "2014-02-16 15:32:14"
-}
-</code></pre>
-
+}</code></pre>
 <p>The validity of the token depends on the config settings and is extended every time the token is used. The user OpenSim with user ID <code>1</code> can only accessed from the IP/Hostname which is used by OpenSim according to the grid list. In addition the <code>X-SecondLife-Shard</code> header needs to be set to access this user, this is done by default for OpenSim.</p>
-
 <h3>Using the token</h3>
-
 <p>The token needs to be used as a final parameter to the API URL and used as <code>?token=&lt;API-TOKEN&gt;</code>. For example the <a href="Users.html">Users</a> API is protected and requires at least <code>READ</code> permission and thus a valid token. To retrieve information about the user which is known in the database as ID <code>1</code> the following API URL can be used:</p>
-
-<pre><code class="language-http">GET /api/user/1/?token=otwk9ERPQS9ietocskWTS5qTG4ow1qrqTXK2CBStt1LHv9UY HTTP/1.1
-</code></pre>
-                                                    </article>
+<pre><code class="language-http">GET /api/user/1/?token=otwk9ERPQS9ietocskWTS5qTG4ow1qrqTXK2CBStt1LHv9UY HTTP/1.1</code></pre>                                                    </article>
                     </div>
                 </div>
             </div>

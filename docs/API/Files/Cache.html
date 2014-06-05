@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Font -->
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
 
     <!-- LESS -->
             <style type="text/less">
@@ -70,9 +70,7 @@
                                             11:12 AM                                        </span>
                                 </div>
                                                         <p>The cache section of images, document pages and presentation slides is used to prevent the OpenSim server from downloading and converting the same image over and over again. When OpenSim has successfully converted a slide or a page, it can provide the CMS with feedback to speed up future access of the same slide or page on the Grid.</p>
-
 <p>The cache section will look something like this:</p>
-
 <pre><code class="language-json">    "cache": {
         "1": {
             "uuid": "45e1c4bb-31cd-4b9b-b0a2-720f3f013a6d",
@@ -84,22 +82,13 @@
             "expires": "2014-04-10 06:23:18",
             "isExpired": 1
         }
-    }
-</code></pre>
-
+    }</code></pre>
 <p>The number in front of the cache details, in this example <code>1</code> and <code>3</code> indicates the Grid ID of the cached asset. So, on the grid which is known in the CMS with ID 3, the image, page or slide is known under the <code>uuid: ef2e0867-9429-4c1b-ad32-66a8ffe71b4d</code>. However, as you can see the cache has already expired on that grid so the server has probably removed the UUID from its temporary assets. The <code>presenterScreen.lsl</code> asset implemented the cache function and checks to see if the image can be loaded from the assets cache or needs to be loaded through the CMS API.</p>
-
 <h2>Update UUID</h2>
-
 <p>These functions depend on the type of document. For pages the update UUID function can be found in the <a href="02_Documents.html">Documents API</a> and for slides in the <a href="03_Presentations.html">Presentation API</a>. Images are single files so cache settings are listed under <a href="01_Files.html">Files API</a>.</p>
-
 <h2>Clear the cache</h2>
-
 <p>Removes all expired items from the cache. The functions returns the number of removed cache items.</p>
-
-<pre><code class="language-http">DELETE /api/files/cache/ HTTP/1.1
-</code></pre>
-                                                    </article>
+<pre><code class="language-http">DELETE /api/files/cache/ HTTP/1.1</code></pre>                                                    </article>
                     </div>
                 </div>
             </div>
