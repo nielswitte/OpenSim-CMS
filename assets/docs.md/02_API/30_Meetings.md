@@ -34,7 +34,8 @@ All above API functions return a similar result, as displayed below:
             "email": "john@doe.com",
             "picture": false
         },
-        "roomId": 4,
+        "roomId": 3,
+        "roomName": "Test room",
         "url": "http://localhost:80/OpenSim-CMS/api/meeting/42/"
     },
     {
@@ -52,6 +53,7 @@ All above API functions return a similar result, as displayed below:
             "lastLogin": "2014-04-15 16:00:01"
         },
         "roomId": 4,
+        "roomName": "New room",
         "url": "http://localhost:80/OpenSim-CMS/api/meeting/43/"
     },
     (...)
