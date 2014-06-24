@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Font -->
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
 
     <!-- LESS -->
             <style type="text/less">
@@ -70,52 +70,31 @@
                                             3:10 PM                                        </span>
                                 </div>
                                                         <p>To retrieve information about a region the following API can be used.</p>
-
-<pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/region/&lt;REGION-UUID&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/region/&lt;REGION-UUID&gt;/ HTTP/1.1</code></pre>
 <p>This will return some basic information about the region, such as the name and a thumbnail. Most of the information is only available if OpenSim and the webserver run on the same device or if the MySQL database of OpenSim accepts remote connections.</p>
-
 <pre><code class="language-json">{
     "uuid": "72efcc78-2b1a-4571-8704-fea352998c0c",
     "name": "The Grid",
     "image": "http://localhost:80/OpenSim-CMS/api/grid/1/region/72efcc78-2b1a-4571-8704-fea352998c0c/image/",
     "serverStatus": 1
-}
-</code></pre>
-
+}</code></pre>
 <p>When the grid is configured to use MySQL or when Remote Admin is available, the following additional information is shown:</p>
-
 <pre><code class="language-json">{
     "totalUsers": 2,
     "activeUsers": 1
-}
-</code></pre>
-
+}</code></pre>
 <h2>Automatically retrieve region information</h2>
-
 <p>When the grid is online, uses MySQL and configured correctly, you can retrieve the regions automatically by using the following URL:</p>
-
-<pre><code class="language-http">POST /api/grid/&lt;GRID-ID&gt;/regions/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">POST /api/grid/&lt;GRID-ID&gt;/regions/ HTTP/1.1</code></pre>
 <p>This will return the number of updated regions and a boolean indicating if the update succeeded. However, this only adds and updates regions, it does not remove regions that are listed in the CMS but do not exist anymore.</p>
-
 <pre><code class="language-json">{
     "success": true,
     "regionsUpdated": 3
-}
-</code></pre>
-
+}</code></pre>
 <h2>Region image</h2>
-
 <p>A small map preview can be opened by using the following API request</p>
-
-<pre><code class="language-http">GET /api/region/&lt;REGION-UUID&gt;/image/ HTTP/1.1
-</code></pre>
-
-<p>This will return a 256x256 JPEG preview of the region map.</p>
-                                                    </article>
+<pre><code class="language-http">GET /api/region/&lt;REGION-UUID&gt;/image/ HTTP/1.1</code></pre>
+<p>This will return a 256x256 JPEG preview of the region map.</p>                                                    </article>
                     </div>
                 </div>
             </div>

@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Font -->
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
 
     <!-- LESS -->
             <style type="text/less">
@@ -69,43 +69,27 @@
                                         <span style="float: right; font-size: 10px; color: gray;">
                                             8:55 AM                                        </span>
                                 </div>
-                                                        <p>The documents section contains an overview of the files in the system. This overview will show you all files with one or more of the following conditions:<br />
+                                                        <p>The documents section contains an overview of the files in the system. This overview will show you all files with one or more of the following conditions:</p>
 <ul>
 <li>Owned by you</li>
 <li>Shared with a group you are in</li>
 <li>You have <code>ALL</code> permissions on the Files API</li>
-</ul></p>
-
-<p><img src="../img/documents.png" alt="Documents overview" title="Documents overview in the CMS" /></p>
-
+</ul>
+<p><img alt="Documents overview" src="../img/documents.png" title="Documents overview in the CMS" /></p>
 <p>Each document is one of three types, <code>image</code>, <code>document</code> or <code>presentation</code>. Comments can be placed for the whole document or for a specific page/slide. Each document you can see can be shared, well at least if you have <code>EXECUTE</code> permissions on the Files API. Which is also required to add new documents.</p>
-
 <p>Each image, page or slide is resized to a square image within the height (<code>IMAGE_HEIGHT</code>) and width (<code>IMAGE_WIDTH</code>) settings from the configuration, and saved as the configured file type (<code>IMAGE_TYPE</code>). See the <a href="../Installation/Installation.html">Installation</a> section for details about these settings.</p>
-
 <h2>Images</h2>
-
 <p>Images can be recognized by a red icon in front of the title. Each image consists of only one entry. In contrast to documents and presentations which can contain multiple pages and slides.</p>
-
 <p>Images are added as <code>JPG</code>, <code>JPEG</code>, <code>GIF</code> or <code>PNG</code>. Be sure to select the type <code>image</code> in the list when adding a new file. The image will be processed to a square image within the limits set in the API configuration and to the configured file type.</p>
-
 <p>At the image details page you can download the original image, see the resized image. The resized image can be loaded in OpenSim by using the <code>presenterScreen.lsl</code> script.</p>
-
 <h2>Documents</h2>
-
 <p>Documents have a light blue icon in front of the title. When adding a new document be sure to select file type <code>document</code> and use  a <code>PDF</code> file. The file will be processed to a single image for each page by the API. When viewing the document details you will see thumbnails of each page. By clicking the thumbnail you will see a larger preview. In the top left corner of each thumbnail is the comment icon. When the background of this icon is white, there are no comments for this page, if the icon is green there are comments for that page. By clicking the icon you will see the page as an image with the comments below.</p>
-
 <h2>Presentations</h2>
-
 <p>Quite similar to documents, presentations also need to be supplied as a <code>PDF</code> file. When adding the file select <code>presentation</code> as type. The file will be processed and resized to single images for each slide. Again the details page will provide an overview of all slide thumbnails, with a comment icon in the top left corner.</p>
-
 <h2>Clear expired cache</h2>
-
 <p>The clear expired cache option is only visible for users with <code>EXECUTE</code> permissions on the File API. This will remove all cached results from the API database that have passed the expiration time set on the grid. This does not clear the cache from the grid, it will only clear the API database. The API provides the OpenSim server with the expiration date and a flag which states if an entry is expired. See the <a href="../API/Files/Cache.html">Cache section</a> in the <a href="../API/Files/Files.html">Files API</a> documentation for more information.</p>
-
 <p>The provided data will be used to determine if the server's cache should be used or if the file should be retrieved through the API. For example the script <code>presenterScreen.lsl</code> will check if the cache is expired and update the UUID of the cached item with a new UUID when required.</p>
-
-<p>So besides some simple clean up this function does not have a lot of effect.</p>
-                                                    </article>
+<p>So besides some simple clean up this function does not have a lot of effect.</p>                                                    </article>
                     </div>
                 </div>
             </div>

@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Font -->
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
 
     <!-- LESS -->
             <style type="text/less">
@@ -70,118 +70,109 @@
                                             10:02 AM                                        </span>
                                 </div>
                                                         <p>For each API there are permissions for the user account. The user requires a specific level for accessing certain functions. The levels are represented by integers that represent a binary permission.</p>
-
 <table>
 <thead>
 <tr>
-  <th>Level</th>
-  <th>Binary</th>
-  <th>Integer</th>
+<th>Level</th>
+<th>Binary</th>
+<th>Integer</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>NONE</td>
-  <td>000</td>
-  <td>0</td>
+<td>NONE</td>
+<td>000</td>
+<td>0</td>
 </tr>
 <tr>
-  <td>READ</td>
-  <td>100</td>
-  <td>4</td>
+<td>READ</td>
+<td>100</td>
+<td>4</td>
 </tr>
 <tr>
-  <td>EXECUTE</td>
-  <td>101</td>
-  <td>5</td>
+<td>EXECUTE</td>
+<td>101</td>
+<td>5</td>
 </tr>
 <tr>
-  <td>WRITE</td>
-  <td>110</td>
-  <td>6</td>
+<td>WRITE</td>
+<td>110</td>
+<td>6</td>
 </tr>
 <tr>
-  <td>ALL</td>
-  <td>111</td>
-  <td>7</td>
+<td>ALL</td>
+<td>111</td>
+<td>7</td>
 </tr>
 </tbody>
 </table>
-
 <p>These numbers can be used for the following parameters:</p>
-
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>auth</td>
-  <td>Integer</td>
-  <td>Permission level regarding Authorization API</td>
+<td>auth</td>
+<td>Integer</td>
+<td>Permission level regarding Authorization API</td>
 </tr>
 <tr>
-  <td>chat</td>
-  <td>Integer</td>
-  <td>Permission level regarding Chats API</td>
+<td>chat</td>
+<td>Integer</td>
+<td>Permission level regarding Chats API</td>
 </tr>
 <tr>
-  <td>comment</td>
-  <td>Integer</td>
-  <td>Permission level regarding Comments API</td>
+<td>comment</td>
+<td>Integer</td>
+<td>Permission level regarding Comments API</td>
 </tr>
 <tr>
-  <td>document</td>
-  <td>Integer</td>
-  <td>Permission level regarding Documents API</td>
+<td>document</td>
+<td>Integer</td>
+<td>Permission level regarding Documents API</td>
 </tr>
 <tr>
-  <td>file</td>
-  <td>Integer</td>
-  <td>Permission level regarding Files API</td>
+<td>file</td>
+<td>Integer</td>
+<td>Permission level regarding Files API</td>
 </tr>
 <tr>
-  <td>grid</td>
-  <td>Integer</td>
-  <td>Permission level regarding Grids API</td>
+<td>grid</td>
+<td>Integer</td>
+<td>Permission level regarding Grids API</td>
 </tr>
 <tr>
-  <td>meeting</td>
-  <td>Integer</td>
-  <td>Permission level regarding Meetings API</td>
+<td>meeting</td>
+<td>Integer</td>
+<td>Permission level regarding Meetings API</td>
 </tr>
 <tr>
-  <td>meetingroom</td>
-  <td>Integer</td>
-  <td>Permission level regarding Meeting rooms API</td>
+<td>meetingroom</td>
+<td>Integer</td>
+<td>Permission level regarding Meeting rooms API</td>
 </tr>
 <tr>
-  <td>presentation</td>
-  <td>Integer</td>
-  <td>Permission level regarding Presentations API</td>
+<td>presentation</td>
+<td>Integer</td>
+<td>Permission level regarding Presentations API</td>
 </tr>
 <tr>
-  <td>user</td>
-  <td>Integer</td>
-  <td>Permission level regarding Users API</td>
+<td>user</td>
+<td>Integer</td>
+<td>Permission level regarding Users API</td>
 </tr>
 </tbody>
 </table>
-
 <p>Most <code>GET</code> requests only require <code>READ</code> permissions. To make changes to your own items <code>READ</code> is also often enough. To add new files, meetings and avatars <code>EXECUTE</code> permissions are required to the corresponding API. To make changes to items of other users you require <code>WRITE</code> permissions. However, <code>WRITE</code> permissions do not give you access to other user's documents. Besides, you can only give someone the <code>ALL</code> permissions when you have the <code>ALL</code> permissions on the User API.</p>
-
 <h2>Explanation</h2>
-
 <p>When you have <code>READ</code> permission you can access most basic functions but you cannot make any changes, except to Files or Users you own. With <code>EXECUTE</code> permissions you can perform actions, such as schedule a meeting, upload a file, clear the cache, etc. <code>WRITE</code> permissions give you the possibility to make changes to content owned by other users. However, you can still only see your own files and files that are shared with groups where you're in. <code>ALL</code> is gives you access to everything, you can see all files even those that are not shared with a group, you can edit everything, remove everything, basically do everything the API can facilitate.</p>
-
 <p>For example your user account has <code>EXECUTE</code> permission for the File API. In this case the method <code>GET /api/files/</code> will return all files you own and all files that are shared with you through the group(s) you're in. You can only make changes to your own files. However, if your permissions get upgraded to <code>WRITE</code> you still see the same files, but now you can make changes to files shared with you through groups.</p>
-
-<p><strong>NOTICE:</strong> Please mind that if your permissions are lower than <code>ALL</code> and someone adds a file to a meeting where you are a participant, you can see the file in the meeting details. However, if the file is not shared to a group you are a member of, you can not access the file's contents.</p>
-                                                    </article>
+<p><strong>NOTICE:</strong> Please mind that if your permissions are lower than <code>ALL</code> and someone adds a file to a meeting where you are a participant, you can see the file in the meeting details. However, if the file is not shared to a group you are a member of, you can not access the file's contents.</p>                                                    </article>
                     </div>
                 </div>
             </div>

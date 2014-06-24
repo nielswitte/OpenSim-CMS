@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Font -->
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
 
     <!-- LESS -->
             <style type="text/less">
@@ -70,17 +70,10 @@
                                             10:45 AM                                        </span>
                                 </div>
                                                         <p>Through the CMS it is possible to chat with users on the Grid. The following line will return the latest 50 chat messages on the given grid.</p>
-
-<pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/chats/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/chats/ HTTP/1.1</code></pre>
 <p>Or get all messages since a given unix timestamp in seconds</p>
-
-<pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/chats/&lt;UNIX-TIMESTAMP&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/chats/&lt;UNIX-TIMESTAMP&gt;/ HTTP/1.1</code></pre>
 <p>This will return a list with chat messages and their sender. The <code>fromCMS</code> value is used to indicate if the message was sent from the chat in the CMS (<code>1</code>) or was captured in the OpenSim environment (<code>0</code>).</p>
-
 <pre><code class="language-json">[
     {
         "id": 1,
@@ -113,50 +106,42 @@
         "fromCMS": 1
     },
     (...)
-]
-</code></pre>
-
+]</code></pre>
 <h2>Add chat</h2>
-
 <p>To add a line to the chat you require <code>WRITE</code> permissions for the chat section. For OpenSim to add a line to the chat, the server first needs to match the Avatar to a user. Or when no match can be found, the server could use <code>0</code> as ID, and append the message with the Avatar's name.</p>
-
 <p>The chats can be in an array or a just sent as a single element.</p>
-
-<pre><code class="language-http">POST /api/grid/&lt;GRID-ID/chats/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">POST /api/grid/&lt;GRID-ID/chats/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>userId</td>
-  <td>integer</td>
-  <td>The CMS user ID</td>
+<td>userId</td>
+<td>integer</td>
+<td>The CMS user ID</td>
 </tr>
 <tr>
-  <td>message</td>
-  <td>string</td>
-  <td>The message to be saved</td>
+<td>message</td>
+<td>string</td>
+<td>The message to be saved</td>
 </tr>
 <tr>
-  <td>timestamp</td>
-  <td>string</td>
-  <td>The timestamp of the message in the format YYYY-MM-DD HH:mm:ss</td>
+<td>timestamp</td>
+<td>string</td>
+<td>The timestamp of the message in the format YYYY-MM-DD HH:mm:ss</td>
 </tr>
 <tr>
-  <td>fromCMS</td>
-  <td>integer</td>
-  <td><code>1</code> (True) if the message is from the CMS, <code>0</code> (false) if from OpenSim Server</td>
+<td>fromCMS</td>
+<td>integer</td>
+<td><code>1</code> (True) if the message is from the CMS, <code>0</code> (false) if from OpenSim Server</td>
 </tr>
 </tbody>
-</table>
-                                                    </article>
+</table>                                                    </article>
                     </div>
                 </div>
             </div>

@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Font -->
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
 
     <!-- LESS -->
             <style type="text/less">
@@ -70,55 +70,41 @@
                                             11:20 AM                                        </span>
                                 </div>
                                                         <p>On almost everything users can leave comments (when the user has sufficient permissions). The comments can be saved, retrieved and removed through the API by using the following functions:</p>
-
 <h2>Get comments</h2>
-
 <p>Getting the latest comments by using this URL. The comments are returned as a threaded array.</p>
-
-<pre><code class="language-http">GET /api/comments/&lt;TYPE&gt;/&lt;ID&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/comments/&lt;TYPE&gt;/&lt;ID&gt;/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Types</th>
-  <th>Description</th>
+<th>Types</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>document</td>
-  <td>Get comments for the document with id = <code>&lt;ID&gt;</code>.</td>
+<td>document</td>
+<td>Get comments for the document with id = <code>&lt;ID&gt;</code>.</td>
 </tr>
 <tr>
-  <td>meeting</td>
-  <td>Get comments on the meeting with the id = <code>&lt;ID&gt;</code>.</td>
+<td>meeting</td>
+<td>Get comments on the meeting with the id = <code>&lt;ID&gt;</code>.</td>
 </tr>
 <tr>
-  <td>page</td>
-  <td>Get comments for the page with id = <code>&lt;ID&gt;</code>.</td>
+<td>page</td>
+<td>Get comments for the page with id = <code>&lt;ID&gt;</code>.</td>
 </tr>
 <tr>
-  <td>slide</td>
-  <td>Get comments for the slide with id = <code>&lt;ID&gt;</code>.</td>
+<td>slide</td>
+<td>Get comments for the slide with id = <code>&lt;ID&gt;</code>.</td>
 </tr>
 </tbody>
 </table>
-
 <h2>Get comments after given timestamp</h2>
-
 <p>Returns a flat list with 50 comments.</p>
-
-<pre><code class="language-http">GET /api/comments/&lt;UNIX-TIMESTAMP&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/comments/&lt;UNIX-TIMESTAMP&gt;/ HTTP/1.1</code></pre>
 <p>Or with an offset:</p>
-
-<pre><code class="language-http">GET /api/comments/&lt;UNIX-TIMESTAMP&gt;/&lt;OFFSET&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/comments/&lt;UNIX-TIMESTAMP&gt;/&lt;OFFSET&gt;/ HTTP/1.1</code></pre>
 <p>All the above functions will return a JSON response similar to the following example:</p>
-
 <pre><code class="language-json">{
     "comments": [
         {
@@ -159,77 +145,62 @@
         }
     ],
     "commentCount": 2
-}
-</code></pre>
-
+}</code></pre>
 <h2>Post a comment</h2>
-
-<pre><code class="language-http">POST /api/comment/&lt;TYPE&gt;/&lt;ID&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">POST /api/comment/&lt;TYPE&gt;/&lt;ID&gt;/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>user</td>
-  <td>array or integer</td>
-  <td>An user object containing atleast the user ID, or only the userID as integer</td>
+<td>user</td>
+<td>array or integer</td>
+<td>An user object containing atleast the user ID, or only the userID as integer</td>
 </tr>
 <tr>
-  <td>parentId</td>
-  <td>integer</td>
-  <td>The ID of the comment for which this is a reply, 0 when no reply</td>
+<td>parentId</td>
+<td>integer</td>
+<td>The ID of the comment for which this is a reply, 0 when no reply</td>
 </tr>
 <tr>
-  <td>message</td>
-  <td>string</td>
-  <td>The message (the CMS uses Markdown)</td>
+<td>message</td>
+<td>string</td>
+<td>The message (the CMS uses Markdown)</td>
 </tr>
 <tr>
-  <td>timestamp</td>
-  <td>string</td>
-  <td>[Optional] The timestamp when the message is posted (format: YYYY-MM-DD HH:mm:ss)</td>
+<td>timestamp</td>
+<td>string</td>
+<td>[Optional] The timestamp when the message is posted (format: YYYY-MM-DD HH:mm:ss)</td>
 </tr>
 </tbody>
 </table>
-
 <h2>Update a comment</h2>
-
 <p>The only thing that can be updated of a comment is the message. The poster, parentId, type, itemId and the original posted timestamp remain the same.</p>
-
 <p>The editTimestamp will be automatically set by the server.</p>
-
-<pre><code class="language-http">PUT /api/comment/&lt;COMMENT-ID&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">PUT /api/comment/&lt;COMMENT-ID&gt;/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>message</td>
-  <td>string</td>
-  <td>The message (the CMS uses Markdown)</td>
+<td>message</td>
+<td>string</td>
+<td>The message (the CMS uses Markdown)</td>
 </tr>
 </tbody>
 </table>
-
 <h2>Remove comment</h2>
-
-<pre><code class="language-http">DELETE /api/comment/&lt;COMMENT-ID&gt;/ HTTP/1.1
-</code></pre>
-                                                    </article>
+<pre><code class="language-http">DELETE /api/comment/&lt;COMMENT-ID&gt;/ HTTP/1.1</code></pre>                                                    </article>
                     </div>
                 </div>
             </div>

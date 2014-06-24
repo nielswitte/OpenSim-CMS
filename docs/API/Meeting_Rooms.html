@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Font -->
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
 
     <!-- LESS -->
             <style type="text/less">
@@ -70,12 +70,8 @@
                                             11:15 AM                                        </span>
                                 </div>
                                                         <p>To retrieve a list with rooms available on a specific grid use the following API function:</p>
-
-<pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/rooms/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/rooms/ HTTP/1.1</code></pre>
 <p>This will return an array with rooms.</p>
-
 <pre><code class="language-json">[
     {
         "id": 1,
@@ -122,25 +118,14 @@
             "z": 11
         }
     }
-]
-</code></pre>
-
+]</code></pre>
 <h2>Get rooms by region</h2>
-
 <p>This will return a similar list to the above function only filtered by a region UUID.</p>
-
-<pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/region/&lt;REGION-UUID&gt;/rooms/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/region/&lt;REGION-UUID&gt;/rooms/ HTTP/1.1</code></pre>
 <h2>Get a specific room</h2>
-
 <p>For retrieving the full information about a specific room the following function can be used:</p>
-
-<pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/room/&lt;ROOM-ID/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/room/&lt;ROOM-ID/ HTTP/1.1</code></pre>
 <p>This will also return the grid information.</p>
-
 <pre><code class="language-json">{
     "id": 1,
     "name": "Board Room",
@@ -163,9 +148,7 @@
         "y": 27,
         "z": 23
     }
-}
-</code></pre>
-                                                    </article>
+}</code></pre>                                                    </article>
                     </div>
                 </div>
             </div>

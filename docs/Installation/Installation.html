@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Font -->
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
 
     <!-- LESS -->
             <style type="text/less">
@@ -70,8 +70,7 @@
                                             1:23 PM                                        </span>
                                 </div>
                                                         <p>Before you start, you require a web server with <a href="https://httpd.apache.org/">Apache</a>, <a href="http://www.php.net">PHP 5.5+</a> and <a href="http://www.mysql.com">MySQL 5.6+</a>. On windows you can use for example <a href="https://www.apachefriends.org/index.html">XAMPP</a>. On Linux the software can be installed by your package manager.</p>
-
-<p>PHP requires the following extensions to be enabled:<br />
+<p>PHP requires the following extensions to be enabled:</p>
 <ul>
 <li>php5-curl</li>
 <li>php5-gd</li>
@@ -79,318 +78,285 @@
 <li>php5-mysqli</li>
 <li>php5-xmlrpc</li>
 <li>php5-xsl</li>
-</ul></p>
-
-<p>Apache requires the following modules:<br />
+</ul>
+<p>Apache requires the following modules:</p>
 <ul>
 <li>mod_rewrite</li>
 <li>mod_expires</li>
-</ul></p>
-
+</ul>
 <h2>Source code</h2>
-
 <p>Clone this repository in your <code>www</code> directory. For example: <code>/var/www/</code>.</p>
-
-<pre><code class="language-cmd">git clone https://github.com/nielswitte/OpenSim-CMS.git
-</code></pre>
-
+<pre><code class="language-cmd">git clone https://github.com/nielswitte/OpenSim-CMS.git</code></pre>
 <p>Go to the <code>OpenSim-CMS</code> directory.</p>
-
 <p>Copy <code>config.php.example</code> and rename it to <code>config.php</code> in <code>OpenSim-CMS/api</code> and <code>OpenSim-CMS/cms</code> directories . Change the values in <code>config.php</code> to the values for your installation and create a new MySQL database and importing the structure from the <code>database.sql</code> file in the <code>assets</code> directory. And add default users to enable access to the API by importing <code>users.sql</code> into the newly created database. The webserver requires write access to your storage, temp and optionally logs directories.</p>
-
 <p>If you plan to use the debugging options, you need to create the directory <code>OpenSim-CMS/api/logs</code>.</p>
-
 <h3>Configuration</h3>
-
 <p>The API configuration contains the following settings:</p>
-
 <h4>General settings</h4>
-
 <table>
 <thead>
 <tr>
-  <th>Setting</th>
-  <th>Possible values</th>
-  <th>Description</th>
+<th>Setting</th>
+<th>Possible values</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>EXEC</td>
-  <td><code>1</code></td>
-  <td>This value is used to check if the configuration file is loaded correctly before executing any script</td>
+<td>EXEC</td>
+<td><code>1</code></td>
+<td>This value is used to check if the configuration file is loaded correctly before executing any script</td>
 </tr>
 <tr>
-  <td>CMS_ADMIN_EMAIL</td>
-  <td>e-mail address</td>
-  <td>The sender's address of the e-mail messages the API sends</td>
+<td>CMS_ADMIN_EMAIL</td>
+<td>e-mail address</td>
+<td>The sender's address of the e-mail messages the API sends</td>
 </tr>
 <tr>
-  <td>CMS_ADMIN_NAME</td>
-  <td>name</td>
-  <td>The sender's name corresponding to the e-mail messages the API sends</td>
+<td>CMS_ADMIN_NAME</td>
+<td>name</td>
+<td>The sender's name corresponding to the e-mail messages the API sends</td>
 </tr>
 </tbody>
 </table>
-
 <h4>Server settings</h4>
-
 <table>
 <thead>
 <tr>
-  <th>Setting</th>
-  <th>Possible values</th>
-  <th>Description</th>
+<th>Setting</th>
+<th>Possible values</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>SERVER_DEBUG</td>
-  <td><code>TRUE</code> or <code>FALSE</code></td>
-  <td>Show debugging output when an API request gone wrong</td>
+<td>SERVER_DEBUG</td>
+<td><code>TRUE</code> or <code>FALSE</code></td>
+<td>Show debugging output when an API request gone wrong</td>
 </tr>
 <tr>
-  <td>SERVER_PHP_ERRORS</td>
-  <td><code>TRUE</code> or <code>FALSE</code></td>
-  <td>Lets the API show PHP errors, on production servers this should be <code>FALSE</code></td>
+<td>SERVER_PHP_ERRORS</td>
+<td><code>TRUE</code> or <code>FALSE</code></td>
+<td>Lets the API show PHP errors, on production servers this should be <code>FALSE</code></td>
 </tr>
 <tr>
-  <td>SERVER_TIMEOUT</td>
-  <td>seconds</td>
-  <td>Time in seconds before a script times out</td>
+<td>SERVER_TIMEOUT</td>
+<td>seconds</td>
+<td>Time in seconds before a script times out</td>
 </tr>
 <tr>
-  <td>SERVER_PROTOCOL</td>
-  <td><code>http</code> or <code>https</code></td>
-  <td>The protocol used to access the API. Please note that <code>https</code> has not been tested yet</td>
+<td>SERVER_PROTOCOL</td>
+<td><code>http</code> or <code>https</code></td>
+<td>The protocol used to access the API. Please note that <code>https</code> has not been tested yet</td>
 </tr>
 <tr>
-  <td>SERVER_ADDRESS</td>
-  <td>URL</td>
-  <td>The URL to the API. Can be an IP address but also web address</td>
+<td>SERVER_ADDRESS</td>
+<td>URL</td>
+<td>The URL to the API. Can be an IP address but also web address</td>
 </tr>
 <tr>
-  <td>SERVER_PORT</td>
-  <td>Port number</td>
-  <td>The port used by the webserver. Default for <code>http</code> is <code>80</code> and <code>https</code> uses <code>443</code></td>
+<td>SERVER_PORT</td>
+<td>Port number</td>
+<td>The port used by the webserver. Default for <code>http</code> is <code>80</code> and <code>https</code> uses <code>443</code></td>
 </tr>
 <tr>
-  <td>SERVER_ROOT</td>
-  <td>location</td>
-  <td>The path from the root of the webserver to the API. Default is <code>/OpenSim-CMS</code></td>
+<td>SERVER_ROOT</td>
+<td>location</td>
+<td>The path from the root of the webserver to the API. Default is <code>/OpenSim-CMS</code></td>
 </tr>
 <tr>
-  <td>SERVER_API_TOKEN_EXPIRES</td>
-  <td>time description</td>
-  <td>In English the time a normal API token is valid since its last use. The string needs to be valid for <a href="http://www.php.net/strtotime">strtotime</a></td>
+<td>SERVER_API_TOKEN_EXPIRES</td>
+<td>time description</td>
+<td>In English the time a normal API token is valid since its last use. The string needs to be valid for <a href="http://www.php.net/strtotime">strtotime</a></td>
 </tr>
 <tr>
-  <td>SERVER_API_TOKEN_EXPIRES2</td>
-  <td>time description</td>
-  <td>In English the time an API token is valid since its last use for an OpenSim Grid. The string needs to be valid for <a href="http://www.php.net/strtotime">strtotime</a></td>
+<td>SERVER_API_TOKEN_EXPIRES2</td>
+<td>time description</td>
+<td>In English the time an API token is valid since its last use for an OpenSim Grid. The string needs to be valid for <a href="http://www.php.net/strtotime">strtotime</a></td>
 </tr>
 <tr>
-  <td>SERVER_MIN_USERNAME_LENGTH</td>
-  <td>number</td>
-  <td>The minimal length of an username</td>
+<td>SERVER_MIN_USERNAME_LENGTH</td>
+<td>number</td>
+<td>The minimal length of an username</td>
 </tr>
 <tr>
-  <td>SERVER_MIN_PASSWORD_LENGTH</td>
-  <td>number</td>
-  <td>The minimal length of a password</td>
+<td>SERVER_MIN_PASSWORD_LENGTH</td>
+<td>number</td>
+<td>The minimal length of a password</td>
 </tr>
 </tbody>
 </table>
-
 <h4>Mail settings</h4>
-
 <table>
 <thead>
 <tr>
-  <th>Setting</th>
-  <th>Possible values</th>
-  <th>Description</th>
+<th>Setting</th>
+<th>Possible values</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>SERVER_SMTP</td>
-  <td><code>TRUE</code> or <code>FALSE</code></td>
-  <td>Whether or not to use SMTP. When this is set to <code>FALSE</code> the script will use PHP mail</td>
+<td>SERVER_SMTP</td>
+<td><code>TRUE</code> or <code>FALSE</code></td>
+<td>Whether or not to use SMTP. When this is set to <code>FALSE</code> the script will use PHP mail</td>
 </tr>
 <tr>
-  <td>SERVER_SMTP_HOST</td>
-  <td>SMTP server</td>
-  <td>A list with SMTP servers, separated by a semi column <code>;</code> when the SMTP server uses a port different than <code>25</code> add the port number to the host name. For example <code>smtp.gmail.com:587</code></td>
+<td>SERVER_SMTP_HOST</td>
+<td>SMTP server</td>
+<td>A list with SMTP servers, separated by a semi column <code>;</code> when the SMTP server uses a port different than <code>25</code> add the port number to the host name. For example <code>smtp.gmail.com:587</code></td>
 </tr>
 <tr>
-  <td>SERVER_SMTP_ENCRYPTION</td>
-  <td>empty or <code>tls</code> or <code>ssl</code></td>
-  <td>Type of encryption used by the server; empty for none, <code>tls</code> or <code>ssl</code></td>
+<td>SERVER_SMTP_ENCRYPTION</td>
+<td>empty or <code>tls</code> or <code>ssl</code></td>
+<td>Type of encryption used by the server; empty for none, <code>tls</code> or <code>ssl</code></td>
 </tr>
 <tr>
-  <td>SERVER_SMTP_AUTH</td>
-  <td><code>TRUE</code> or <code>FALSE</code></td>
-  <td>Does the SMTP server require authentication?</td>
+<td>SERVER_SMTP_AUTH</td>
+<td><code>TRUE</code> or <code>FALSE</code></td>
+<td>Does the SMTP server require authentication?</td>
 </tr>
 <tr>
-  <td>SERVER_SMTP_AUTH_USERNAME</td>
-  <td>username</td>
-  <td>The username required to authenticate to the SMTP server</td>
+<td>SERVER_SMTP_AUTH_USERNAME</td>
+<td>username</td>
+<td>The username required to authenticate to the SMTP server</td>
 </tr>
 <tr>
-  <td>SERVER_SMTP_AUTH_PASSWORD</td>
-  <td>password</td>
-  <td>The password required to authenticate to the SMTP server</td>
+<td>SERVER_SMTP_AUTH_PASSWORD</td>
+<td>password</td>
+<td>The password required to authenticate to the SMTP server</td>
 </tr>
 </tbody>
 </table>
-
 <h4>Database settings</h4>
-
 <table>
 <thead>
 <tr>
-  <th>Setting</th>
-  <th>Possible values</th>
-  <th>Description</th>
+<th>Setting</th>
+<th>Possible values</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>$DB_USERNAME</td>
-  <td>MySQL username</td>
-  <td>The username to access the MySQL database used by the API.</td>
+<td>$DB_USERNAME</td>
+<td>MySQL username</td>
+<td>The username to access the MySQL database used by the API.</td>
 </tr>
 <tr>
-  <td>$DB_PASSWORD</td>
-  <td>MySQL password</td>
-  <td>The password corresponding to the user to access the API MySQL database</td>
+<td>$DB_PASSWORD</td>
+<td>MySQL password</td>
+<td>The password corresponding to the user to access the API MySQL database</td>
 </tr>
 <tr>
-  <td>$DB_NAME</td>
-  <td>MySQL database name</td>
-  <td>The name of the database where the API data is stored</td>
+<td>$DB_NAME</td>
+<td>MySQL database name</td>
+<td>The name of the database where the API data is stored</td>
 </tr>
 <tr>
-  <td>$DB_ADDRESS</td>
-  <td>MySQL address</td>
-  <td>The address to access the MySQL database on. If the MySQL database is on the same machine as the API, the address is most likely <code>localhost</code></td>
+<td>$DB_ADDRESS</td>
+<td>MySQL address</td>
+<td>The address to access the MySQL database on. If the MySQL database is on the same machine as the API, the address is most likely <code>localhost</code></td>
 </tr>
 <tr>
-  <td>$DB_PORT</td>
-  <td>MySQL port</td>
-  <td>The port used by MySQL to access the database. Default is <code>3306</code></td>
+<td>$DB_PORT</td>
+<td>MySQL port</td>
+<td>The port used by MySQL to access the database. Default is <code>3306</code></td>
 </tr>
 </tbody>
 </table>
-
 <h4>File settings</h4>
-
 <p><strong>WARNING:</strong> Changing these values while the API is already in use can corrupt existing files.</p>
-
 <table>
 <thead>
 <tr>
-  <th>Setting</th>
-  <th>Possible values</th>
-  <th>Description</th>
+<th>Setting</th>
+<th>Possible values</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>post_max_size</td>
-  <td>File size in bytes</td>
-  <td>Maximum amount of data that can be sent to the server in a POST request</td>
+<td>post_max_size</td>
+<td>File size in bytes</td>
+<td>Maximum amount of data that can be sent to the server in a POST request</td>
 </tr>
 <tr>
-  <td>upload_max_filesize</td>
-  <td>File size in bytes</td>
-  <td>Maximum file size that can be uploaded to the server</td>
+<td>upload_max_filesize</td>
+<td>File size in bytes</td>
+<td>Maximum file size that can be uploaded to the server</td>
 </tr>
 <tr>
-  <td>IMAGE_THUMBNAIL_WIDTH</td>
-  <td>Pixels</td>
-  <td>The width in pixels of thumbnails generated by the server</td>
+<td>IMAGE_THUMBNAIL_WIDTH</td>
+<td>Pixels</td>
+<td>The width in pixels of thumbnails generated by the server</td>
 </tr>
 <tr>
-  <td>IMAGE_THUMBNAIL_HEIGHT</td>
-  <td>Pixels</td>
-  <td>The height in pixels of thumbnails generated by the server</td>
+<td>IMAGE_THUMBNAIL_HEIGHT</td>
+<td>Pixels</td>
+<td>The height in pixels of thumbnails generated by the server</td>
 </tr>
 <tr>
-  <td>IMAGE_WIDTH</td>
-  <td>Pixels</td>
-  <td>The width in pixels of images (including documents and presentations) which will be used by the API to output to OpenSim</td>
+<td>IMAGE_WIDTH</td>
+<td>Pixels</td>
+<td>The width in pixels of images (including documents and presentations) which will be used by the API to output to OpenSim</td>
 </tr>
 <tr>
-  <td>IMAGE_HEIGHT</td>
-  <td>Pixels</td>
-  <td>The height in pixels of images (including documents and presentations) which will be used by the API to output to OpenSim</td>
+<td>IMAGE_HEIGHT</td>
+<td>Pixels</td>
+<td>The height in pixels of images (including documents and presentations) which will be used by the API to output to OpenSim</td>
 </tr>
 <tr>
-  <td>IMAGE_TYPE</td>
-  <td><code>jpg</code>, <code>png</code>, <code>gif</code></td>
-  <td>The file type to save images in. Use one of the three options. OpenSim works best with <code>jpg</code>, which is the system's default and recommend option</td>
+<td>IMAGE_TYPE</td>
+<td><code>jpg</code>, <code>png</code>, <code>gif</code></td>
+<td>The file type to save images in. Use one of the three options. OpenSim works best with <code>jpg</code>, which is the system's default and recommend option</td>
 </tr>
 </tbody>
 </table>
-
 <h4>Additional settings</h4>
-
 <table>
 <thead>
 <tr>
-  <th>Setting</th>
-  <th>Possible values</th>
-  <th>Description</th>
+<th>Setting</th>
+<th>Possible values</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>date_default_timezone_set</td>
-  <td>time zone</td>
-  <td>The time zone used to display dates in. See <a href="http://www.php.net/manual/en/timezones.php">http://www.php.net/manual/en/timezones.php</a> for a list with available time zones.</td>
+<td>date_default_timezone_set</td>
+<td>time zone</td>
+<td>The time zone used to display dates in. See <a href="http://www.php.net/manual/en/timezones.php"><a href="http://www.php.net/manual/en/timezones.php">http://www.php.net/manual/en/timezones.php</a></a> for a list with available time zones.</td>
 </tr>
 </tbody>
 </table>
-
 <h2>Users</h2>
-
-<p>The default users which are added by importing <code>assets/users.sql</code> are listed in the table below.<br />
+<p>The default users which are added by importing <code>assets/users.sql</code> are listed in the table below.
 You can login into the CMS with the <code>admin</code> user. The passwords are lower case.</p>
-
 <table>
 <thead>
 <tr>
-  <th>Username</th>
-  <th>Password</th>
+<th>Username</th>
+<th>Password</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>OpenSim</td>
-  <td>opensim</td>
+<td>OpenSim</td>
+<td>opensim</td>
 </tr>
 <tr>
-  <td>admin</td>
-  <td>password</td>
+<td>admin</td>
+<td>password</td>
 </tr>
 </tbody>
 </table>
-
 <p><strong>WARNING:</strong> Both users have maximum permissions for every part of the API and therefore it is highly recommended to change the passwords as quick as possible.</p>
-
 <h1>Linux</h1>
-
 <p>Some of the functions for the processing of documents and presentations rely on <code>pdftocairo</code>. This program, located in <code>poppler-utils</code>, needs to be installed on your Linux server for conversion of PDF to images to work.</p>
-
 <p>On Ubuntu this can be done by using: <code>apt-get install poppler-utils</code>.</p>
-
 <h1>Apache</h1>
-
-<p>Apache requires <code>mod_rewrite</code> and optionally <code>mod_expires</code>. In addition PHP 5.5 or higher is required with cURL, JSON, GD and XML support.</p>
-                                                    </article>
+<p>Apache requires <code>mod_rewrite</code> and optionally <code>mod_expires</code>. In addition PHP 5.5 or higher is required with cURL, JSON, GD and XML support.</p>                                                    </article>
                     </div>
                 </div>
             </div>

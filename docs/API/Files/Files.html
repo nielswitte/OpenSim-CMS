@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Font -->
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
 
     <!-- LESS -->
             <style type="text/less">
@@ -69,46 +69,26 @@
                                         <span style="float: right; font-size: 10px; color: gray;">
                                             9:59 AM                                        </span>
                                 </div>
-                                                        <p><strong>NOTICE:</strong> You can only retrieve files if you meet at least one of the following requirements.<br />
+                                                        <p><strong>NOTICE:</strong> You can only retrieve files if you meet at least one of the following requirements.</p>
 <ul>
 <li>You have <code>ALL</code> permissions</li>
 <li>You created the file</li>
 <li>You are a member of a group to which the file is attached</li>
-</ul></p>
-
-<pre><code class="language-http">GET /api/files/ HTTP/1.1
-</code></pre>
-
-<pre><code class="language-http">GET /api/files/&lt;OFFSET&gt;/ HTTP/1.1
-</code></pre>
-
+</ul>
+<pre><code class="language-http">GET /api/files/ HTTP/1.1</code></pre>
+<pre><code class="language-http">GET /api/files/&lt;OFFSET&gt;/ HTTP/1.1</code></pre>
 <h2>Search</h2>
-
 <p>You can also search for files. This can be done based on Title, User or Avatar.</p>
-
 <h3>Title</h3>
-
 <p>Search for a files by title, at least 3 characters.</p>
-
-<pre><code class="language-http">GET /api/files/&lt;SEARCH&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/files/&lt;SEARCH&gt;/ HTTP/1.1</code></pre>
 <h3>User</h3>
-
 <p>It is possible to retrieve a list with documents owned by a specific user. This can be done by using the user's ID:</p>
-
-<pre><code class="language-http">GET /api/user/&lt;USER-ID&gt;/files/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/user/&lt;USER-ID&gt;/files/ HTTP/1.1</code></pre>
 <h3>Avatar</h3>
-
 <p>Or by using an UUID of an avatar linked to the user.</p>
-
-<pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/avatar/&lt;AVATAR-UUID&gt;/files/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/grid/&lt;GRID-ID&gt;/avatar/&lt;AVATAR-UUID&gt;/files/ HTTP/1.1</code></pre>
 <p>All the above functions will return a similar output, such as the example given below:</p>
-
 <pre><code class="language-json">[
     {
         "id": 134,
@@ -148,108 +128,75 @@
     },
     { (...) },
     (...)
-]
-</code></pre>
-
+]</code></pre>
 <h2>Get a specific file</h2>
-
 <p>When retrieving a specific file, the output depends on the file type.</p>
-
-<pre><code class="language-http">GET /api/file/&lt;FILE-ID/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/file/&lt;FILE-ID/ HTTP/1.1</code></pre>
 <p>For example if the type is a document it will return the same output as <code>/api/document/&lt;DOCUMENT-ID/</code>, where <code>&lt;FILE-ID&gt;</code> equals <code>&lt;DOCUMENT-ID&gt;</code>.</p>
-
 <h2>Add a new file</h2>
-
-<pre><code class="language-http">POST /api/file/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">POST /api/file/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>title</td>
-  <td>string</td>
-  <td>The title of the document</td>
+<td>title</td>
+<td>string</td>
+<td>The title of the document</td>
 </tr>
 <tr>
-  <td>type</td>
-  <td>string</td>
-  <td>The document type</td>
+<td>type</td>
+<td>string</td>
+<td>The document type</td>
 </tr>
 <tr>
-  <td>file</td>
-  <td>file</td>
-  <td>Base64 encoded file</td>
+<td>file</td>
+<td>file</td>
+<td>Base64 encoded file</td>
 </tr>
 </tbody>
 </table>
-
 <h2>Remove a file</h2>
-
-<pre><code class="language-http">DELETE /api/file/&lt;FILE-ID&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">DELETE /api/file/&lt;FILE-ID&gt;/ HTTP/1.1</code></pre>
 <h2>Images</h2>
-
 <p>The image of file with type <code>image</code> can be retrieved by using the following API function</p>
-
-<pre><code class="language-http">GET /api/file/&lt;FILE-ID&gt;/image/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/file/&lt;FILE-ID&gt;/image/ HTTP/1.1</code></pre>
 <h2>Source file</h2>
-
 <p>Retrieve the original file uploaded before being processed by the API.</p>
-
-<pre><code class="language-http">GET /api/file/&lt;FILE-ID&gt;/source/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/file/&lt;FILE-ID&gt;/source/ HTTP/1.1</code></pre>
 <p>Or for presentations this alias could be used:</p>
-
-<pre><code class="language-http">GET /api/presentation/&lt;PRESENTATION-ID&gt;/source/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/presentation/&lt;PRESENTATION-ID&gt;/source/ HTTP/1.1</code></pre>
 <p>Or a document</p>
-
-<pre><code class="language-http">GET /api/document/&lt;DOCUMENT-ID&gt;/source/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/document/&lt;DOCUMENT-ID&gt;/source/ HTTP/1.1</code></pre>
 <h2>Cache</h2>
-
 <p>When an image has been processed by OpenSim an UUID is generated for the texture, this UUID can be stored with the slide to speed up future use. The cache period (<code>FileCacheTimeout</code>) is set in the <code>FlotsamCache.ini</code>  configuration and needs to be matched by the configuration value for the grid in the CMS.</p>
-
-<pre><code class="language-http">PUT /api/file/&lt;ID&gt;/image/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">PUT /api/file/&lt;ID&gt;/image/ HTTP/1.1</code></pre>
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>uuid</td>
-  <td>string</td>
-  <td>UUID of the slide to be saved</td>
+<td>uuid</td>
+<td>string</td>
+<td>UUID of the slide to be saved</td>
 </tr>
 <tr>
-  <td>gridId</td>
-  <td>integer</td>
-  <td>The ID of the grid, as used in the CMS database</td>
+<td>gridId</td>
+<td>integer</td>
+<td>The ID of the grid, as used in the CMS database</td>
 </tr>
 </tbody>
-</table>
-                                                    </article>
+</table>                                                    </article>
                     </div>
                 </div>
             </div>

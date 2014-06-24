@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Font -->
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300,100' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700&subset=latin,cyrillic-ext,cyrillic' rel='stylesheet' type='text/css'>
 
     <!-- LESS -->
             <style type="text/less">
@@ -65,31 +65,19 @@
                                                             <div class="page-header sub-header clearfix">
                                     <h1>Meetings                                                                            </h1>
                                         <span style="float: left; font-size: 10px; color: gray;">
-                                            Tuesday, April 22, 2014                                        </span>
+                                            Thursday, June 5, 2014                                        </span>
                                         <span style="float: right; font-size: 10px; color: gray;">
-                                            9:59 AM                                        </span>
+                                            10:52 AM                                        </span>
                                 </div>
                                                         <p>The most important part of the CMS is the scheduling of meetings.</p>
-
 <h3>List with meetings</h3>
-
 <p>The retrieve a list with 50 meetings, use the following function. The meetings are ordered by date in descending order.</p>
-
-<pre><code class="language-http">GET /api/meetings/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/meetings/ HTTP/1.1</code></pre>
 <p>To get more than the first 50 meetings, an offset parameter needs to be added to the URL.</p>
-
-<pre><code class="language-http">GET /api/meetings/&lt;OFFSET&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/meetings/&lt;OFFSET&gt;/ HTTP/1.1</code></pre>
 <p>Or if you only want meetings after a specific date, you can add a date as parameter.</p>
-
-<pre><code class="language-http">GET /api/meetings/&lt;YYYY-MM-DD&gt;/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/meetings/&lt;YYYY-MM-DD&gt;/ HTTP/1.1</code></pre>
 <p>All above API functions return a similar result, as displayed below:</p>
-
 <pre><code class="language-json">[
     {
         "id": 41,
@@ -104,7 +92,8 @@
             "email": "john@doe.com",
             "picture": false
         },
-        "roomId": 4,
+        "roomId": 3,
+        "roomName": "Test room",
         "url": "http://localhost:80/OpenSim-CMS/api/meeting/42/"
     },
     {
@@ -122,21 +111,15 @@
             "lastLogin": "2014-04-15 16:00:01"
         },
         "roomId": 4,
+        "roomName": "New room",
         "url": "http://localhost:80/OpenSim-CMS/api/meeting/43/"
     },
     (...)
-]
-</code></pre>
-
+]</code></pre>
 <h2>Calendar format</h2>
-
 <p>The following will return the meetings past the provided date in the format used by <a href="https://github.com/Serhioromano/bootstrap-calendar">Bootstrap-calendar</a></p>
-
-<pre><code class="language-http">GET /api/meetings/&lt;YYYY-MM-DD&gt;/calendar/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/meetings/&lt;YYYY-MM-DD&gt;/calendar/ HTTP/1.1</code></pre>
 <p>The output will be as the example below. The <code>start</code> and <code>end</code> fields are an Unix timestamp in milliseconds.</p>
-
 <pre><code class="language-json">[
     {
         "id": 42,
@@ -157,25 +140,17 @@
         "description": "Reservation made by: janedoe"
     },
     (...)
-]
-</code></pre>
-
+]</code></pre>
 <h2>Get a specific meeting</h2>
-
 <p>When retrieving a specific meeting you get a lot more details. Information such as the participants, documents and the agenda are included.</p>
-
-<p><strong>NOTICE:</strong> You can only retrieve the meeting if you meet at least one of the following requirements.<br />
+<p><strong>NOTICE:</strong> You can only retrieve the meeting if you meet at least one of the following requirements.</p>
 <ul>
 <li>You have <code>ALL</code> permissions</li>
 <li>You created the meeting</li>
 <li>You are a participant of the meeting</li>
-</ul></p>
-
-<pre><code class="language-http">GET /api/meeting/&lt;MEETING-ID&gt;/ HTTP/1.1
-</code></pre>
-
+</ul>
+<pre><code class="language-http">GET /api/meeting/&lt;MEETING-ID&gt;/ HTTP/1.1</code></pre>
 <p>The output will be something like this:</p>
-
 <pre><code class="language-json">{
     "id": "43",
     "name": "Next day meeting",
@@ -256,100 +231,80 @@
         },
         (...)
     ]
-}
-</code></pre>
-
+}</code></pre>
 <h2>Create a meeting</h2>
-
 <p>For scheduling a new meeting a lot of parameters are required. Only the list with documents is optional. Please ensure you use the correct parameters or else you will be losing a lot of time debugging.</p>
-
 <table>
 <thead>
 <tr>
-  <th>Parameter</th>
-  <th>Type</th>
-  <th>Description</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-  <td>name</td>
-  <td>string</td>
-  <td>The title of the meeting</td>
+<td>name</td>
+<td>string</td>
+<td>The title of the meeting</td>
 </tr>
 <tr>
-  <td>startDate</td>
-  <td>string</td>
-  <td>The start date time of the meeting (format: YYYY-MM-DD HH:mm:ss)</td>
+<td>startDate</td>
+<td>string</td>
+<td>The start date time of the meeting (format: YYYY-MM-DD HH:mm:ss)</td>
 </tr>
 <tr>
-  <td>endDate</td>
-  <td>string</td>
-  <td>The end date time of the meeting (format: YYYY-MM-DD HH:mm:ss)</td>
+<td>endDate</td>
+<td>string</td>
+<td>The end date time of the meeting (format: YYYY-MM-DD HH:mm:ss)</td>
 </tr>
 <tr>
-  <td>room</td>
-  <td>integer or array</td>
-  <td>Room ID, can be submitted as an integer or as a json array <code>[{id: 1, name: (...), (...)}]</code></td>
+<td>room</td>
+<td>integer or array</td>
+<td>Room ID, can be submitted as an integer or as a json array <code>[{id: 1, name: (...), (...)}]</code></td>
 </tr>
 <tr>
-  <td>agenda</td>
-  <td>string</td>
-  <td>A string with each agenda item on a new line and starting with a number and separated by a space, the topic. For example <code>1. Opening\n2. Minutes\n2.1 Questions\n3. (...)</code></td>
+<td>agenda</td>
+<td>string</td>
+<td>A string with each agenda item on a new line and starting with a number and separated by a space, the topic. For example <code>1. Opening\n2. Minutes\n2.1 Questions\n3. (...)</code></td>
 </tr>
 <tr>
-  <td>participants</td>
-  <td>array</td>
-  <td>A array with user IDs. Can be an array <code>{1, 2, 3, 4, (...)}</code> or a json array with users that contain an id field  <code>[{id: 1, (...)}, {id: 2, (...)}, (...) }]</code></td>
+<td>participants</td>
+<td>array</td>
+<td>A array with user IDs. Can be an array <code>{1, 2, 3, 4, (...)}</code> or a json array with users that contain an id field  <code>[{id: 1, (...)}, {id: 2, (...)}, (...) }]</code></td>
 </tr>
 <tr>
-  <td>documents</td>
-  <td>array</td>
-  <td>[Optional] A array with document IDs. Can be an array <code>{1, 2, 3, 4, (...)}</code> or a json array with documents that contain an id field  <code>[{id: 1, (...)}, {id: 2, (...)}, (...) }]</code></td>
+<td>documents</td>
+<td>array</td>
+<td>[Optional] A array with document IDs. Can be an array <code>{1, 2, 3, 4, (...)}</code> or a json array with documents that contain an id field  <code>[{id: 1, (...)}, {id: 2, (...)}, (...) }]</code></td>
 </tr>
 </tbody>
 </table>
-
 <p>When everything went well, the following information is returned:</p>
-
 <pre><code class="language-json">{
     "success": true,
     "meetingId": &lt;MEETING-ID&gt;
-}
-</code></pre>
-
+}</code></pre>
 <h2>Update a meeting</h2>
-
 <p>For updating a meeting you can use the following <code>PUT</code> request.</p>
-
-<p><strong>NOTICE:</strong> You can only update the meeting if you meet at least one of the following requirements.<br />
+<p><strong>NOTICE:</strong> You can only update the meeting if you meet at least one of the following requirements.</p>
 <ul>
 <li>You have <code>ALL</code> permissions</li>
 <li>You created the meeting</li>
 <li>You are a participant of the meeting and have <code>WRITE</code> permissions</li>
-</ul></p>
-
-<pre><code class="language-http">PUT /api/meeting/&lt;MEETING-ID&gt;/ HTTP/1.1
-</code></pre>
-
+</ul>
+<pre><code class="language-http">PUT /api/meeting/&lt;MEETING-ID&gt;/ HTTP/1.1</code></pre>
 <p>The parameters are the same as for creating a meeting, see creating a meeting for more details.</p>
-
 <h2>Get the meeting agenda</h2>
-
 <p>To return only the agenda for a specific meeting, the following API can be used. This will return the agenda as a multi dimensional array instead of the flat string in the meeting details response.</p>
-
-<p><strong>NOTICE:</strong> You can only retrieve the meeting agenda if you meet at least one of the following requirements.<br />
+<p><strong>NOTICE:</strong> You can only retrieve the meeting agenda if you meet at least one of the following requirements.</p>
 <ul>
 <li>You have <code>ALL</code> permissions</li>
 <li>You created the meeting</li>
 <li>You are a participant of the meeting</li>
-</ul></p>
-
-<pre><code class="language-http">GET /api/meeting/&lt;MEETING-ID&gt;/agenda HTTP/1.1
-</code></pre>
-
+</ul>
+<pre><code class="language-http">GET /api/meeting/&lt;MEETING-ID&gt;/agenda HTTP/1.1</code></pre>
 <p>This will output something similar to:</p>
-
 <pre><code class="language-json">[
     {
         "id": 1,
@@ -391,28 +346,15 @@
         "sort": 3,
         "parentId": null
     }
-]
-</code></pre>
-
+]</code></pre>
 <h2>Get meetings by participant</h2>
-
 <p>This will return a list with 50 meetings where the given user is a participant for. The output is similar to the <code>/api/meetings/</code> request.</p>
-
-<pre><code class="language-http">GET /api/user/&lt;USER-ID&gt;/meetings/ HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/user/&lt;USER-ID&gt;/meetings/ HTTP/1.1</code></pre>
 <p>Get meetings after number 50 by using:</p>
-
-<pre><code class="language-http">GET /api/user/&lt;USER-ID&gt;/meetings/&lt;OFFSET&gt; HTTP/1.1
-</code></pre>
-
+<pre><code class="language-http">GET /api/user/&lt;USER-ID&gt;/meetings/&lt;OFFSET&gt; HTTP/1.1</code></pre>
 <h3>Calendar</h3>
-
 <p>The following URL will return all the meetings in calendar format, no limit.</p>
-
-<pre><code class="language-http">GET /api/user/&lt;USER-ID&gt;/meetings/calendar/ HTTP/1.1
-</code></pre>
-                                                    </article>
+<pre><code class="language-http">GET /api/user/&lt;USER-ID&gt;/meetings/calendar/ HTTP/1.1</code></pre>                                                    </article>
                     </div>
                 </div>
             </div>

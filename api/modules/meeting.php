@@ -11,9 +11,9 @@ require_once dirname(__FILE__) .'/../controllers/meetingController.php';
  * Implements the functions for meetings
  *
  * @author Niels Witte
- * @version 0.6
- * @date April 18th, 2014
- * @since February 25th, 2014
+ * @version 0.6a
+ * @date June 5, 2014
+ * @since February 25, 2014
  */
 class Meeting extends Module{
     private $api;
@@ -415,6 +415,7 @@ class Meeting extends Module{
         // Show minimal information
         } else {
             $data['roomId']     = $meeting->getRoom()->getId();
+            $data['roomName']   = $meeting->getRoom()->getName();
             // URL to full view
             $data['url']        = $meeting->getApiUrl();
         }
